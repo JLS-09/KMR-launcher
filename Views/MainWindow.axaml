@@ -1,0 +1,52 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:KMRLauncherMvvm.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="720"
+        Width="1280" Height="720"
+        x:Class="KMRLauncherMvvm.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/Images/logoSmall.png"
+        Title="KMR Launcher">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid Background="{DynamicResource SideBarBackground}" ColumnDefinitions="60, *">
+        <Border Padding="5" Background="{DynamicResource SideBarBackground}">
+            <Grid RowDefinitions="*, Auto">
+                <StackPanel Spacing="10">
+                    <Image Source="/Assets/Images/logoSmall.png"/>
+                    <Button Classes.Active="{Binding HomePageIsActive}" Height="50" Command="{Binding GoToHomeCommand}">
+                        <Label Classes="iconBold" Content="&#xe2c2;"/>
+                    </Button>
+                    <Button Classes.Active="{Binding DiscoverPageIsActive}" Height="50" Command="{Binding GoToDiscoverCommand}">
+                        <Label Classes="icon" Content="&#xE1C8;"/>
+                    </Button>
+                    <Button Classes.Active="{Binding InstancesPageIsActive}" Height="50" Command="{Binding GoToInstancesCommand}">
+                        <Label Classes="icon" Content="&#xE758;"/>
+                    </Button>
+                </StackPanel>
+                <Button Classes.Active="{Binding SettingsPageIsActive}" Grid.Row="1" Height="50" Command="{Binding GoToSettingsCommand}">
+                    <Label Classes="icon" Content="&#xE270;"/>
+                </Button>
+            </Grid>
+        </Border>
+        <Grid RowDefinitions="40, *" Column="1">
+            <Border Background="{DynamicResource SideBarBackground}" Padding="5">
+                <Grid ColumnDefinitions="Auto, *">
+                    <Label Content="KERBAL MOD REPOSITORY LAUNCHER" Classes="title" Grid.Column="0" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+            <Border Background="{DynamicResource PrimaryBackground}" 
+                    CornerRadius="15 0 0 0" 
+                    Grid.Row="1" 
+                    BoxShadow="0 0 5 0 black"
+                    Padding="10">
+                <ContentControl Content="{Binding CurrentPage}" ></ContentControl>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

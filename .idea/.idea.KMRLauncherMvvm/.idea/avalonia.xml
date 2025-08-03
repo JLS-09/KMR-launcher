@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="App.axaml" value="KMRLauncherMvvm.csproj" />
+        <entry key="Styles/AppDefaultStyles.axaml" value="KMRLauncherMvvm.csproj" />
+        <entry key="Views/DiscoverPageView.axaml" value="KMRLauncherMvvm.csproj" />
+        <entry key="Views/HomePageView.axaml" value="KMRLauncherMvvm.csproj" />
+        <entry key="Views/InstancesPageView.axaml" value="KMRLauncherMvvm.csproj" />
+        <entry key="Views/MainView.axaml" value="KMRLauncherMvvm.csproj" />
+        <entry key="Views/MainWindow.axaml" value="KMRLauncherMvvm.csproj" />
+      </map>
+    </option>
+  </component>
+</project>

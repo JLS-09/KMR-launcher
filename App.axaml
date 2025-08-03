@@ -1,0 +1,32 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="KMRLauncherMvvm.App"
+             xmlns:local="using:KMRLauncherMvvm"
+             RequestedThemeVariant="Default">
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="Styles/AppDefaultStyles.axaml"></StyleInclude>
+    </Application.Styles>
+
+    <Application.Resources>
+        <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryBackground">#141414</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryButtonBackground">#323434</SolidColorBrush>
+        <SolidColorBrush x:Key="HoverButtonBackground">#282A29</SolidColorBrush>
+        <SolidColorBrush x:Key="ActiveButtonBackground">#A50104</SolidColorBrush>
+        <SolidColorBrush x:Key="SideBarBackground">#323434</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryHoverText">White</SolidColorBrush>
+
+        <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
+        <FontFamily x:Key="PhosphorBold">/Assets/Fonts/Phosphor-Bold.ttf#Phosphor-Bold</FontFamily>
+        <FontFamily x:Key="PhosphorFill">/Assets/Fonts/Phosphor-Fill.ttf#Phosphor-Fill</FontFamily>
+        <FontFamily x:Key="Nasalization">/Assets/Fonts/nasalization-rg.ttf#Nasalization Rg</FontFamily>
+
+    </Application.Resources>
+</Application>

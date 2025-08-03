@@ -1,0 +1,54 @@
+﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using KMRLauncherMvvm.Data;
+using KMRLauncherMvvm.Factories;
+
+namespace KMRLauncherMvvm.ViewModels;
+
+public partial class MainWindowViewModel : ViewModelBase
+{
+    private PageFactory _pageFactory;
+    
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HomePageIsActive))]
+    [NotifyPropertyChangedFor(nameof(DiscoverPageIsActive))]
+    [NotifyPropertyChangedFor(nameof(InstancesPageIsActive))]
+    [NotifyPropertyChangedFor(nameof(SettingsPageIsActive))]
+    private PageViewModel _currentPage;
+
+    public bool HomePageIsActive => CurrentPage.PageName == ApplicationPageNames.Home;
+    public bool DiscoverPageIsActive => CurrentPage.PageName == ApplicationPageNames.Discover;
+    public bool InstancesPageIsActive => CurrentPage.PageName == ApplicationPageNames.Instances;
+    public bool SettingsPageIsActive => CurrentPage.PageName == ApplicationPageNames.Settings;
+
+    public MainWindowViewModel(PageFactory pageFactory)
+    {
+        _pageFactory = pageFactory;
+        GoToHome();
+    }
+
+    [RelayCommand]
+    private void GoToHome()
+    {
+        CurrentPage = _pageFactory.GetPageViewModel(ApplicationPageNames.Home);
+    }
+    
+    [RelayCommand]
+    private void GoToDiscover()
+    {
+        CurrentPage = _pageFactory.GetPageViewModel(ApplicationPageNames.Discover);
+    }
+    
+    [RelayCommand]
+    private void GoToInstances()
+    {
+        CurrentPage = _pageFactory.GetPageViewModel(ApplicationPageNames.Instances);
+    }
+    
+    [RelayCommand]
+    private void GoToSettings()
+    {
+        CurrentPage = _pageFactory.GetPageViewModel(ApplicationPageNames.Settings);
+    }
+}
