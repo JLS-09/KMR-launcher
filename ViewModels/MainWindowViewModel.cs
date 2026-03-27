@@ -28,6 +28,10 @@ public partial class MainWindowViewModel : ViewModelBase
         GoToHome();
     }
 
+    public MainWindowViewModel()
+    {
+    }
+
     [RelayCommand]
     private void GoToHome()
     {

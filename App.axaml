@@ -16,17 +16,21 @@
 
     <Application.Resources>
         <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryBackground">#141414</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryBackground">#131314</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryButtonBackground">#323434</SolidColorBrush>
         <SolidColorBrush x:Key="HoverButtonBackground">#282A29</SolidColorBrush>
-        <SolidColorBrush x:Key="ActiveButtonBackground">#A50104</SolidColorBrush>
-        <SolidColorBrush x:Key="SideBarBackground">#323434</SolidColorBrush>
+        <SolidColorBrush x:Key="ActiveButtonBackground">#DF0105</SolidColorBrush>
+        <SolidColorBrush x:Key="SideBarBackground">#1B1B1C</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryHoverText">White</SolidColorBrush>
 
         <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
         <FontFamily x:Key="PhosphorBold">/Assets/Fonts/Phosphor-Bold.ttf#Phosphor-Bold</FontFamily>
         <FontFamily x:Key="PhosphorFill">/Assets/Fonts/Phosphor-Fill.ttf#Phosphor-Fill</FontFamily>
-        <FontFamily x:Key="Nasalization">/Assets/Fonts/nasalization-rg.ttf#Nasalization Rg</FontFamily>
+        <FontFamily x:Key="SpaceMonoRegular">/Assets/Fonts/Space_Mono/SpaceMono-Regular.ttf#Space Mono Regular</FontFamily>
+        <FontFamily x:Key="SpaceMonoBold">/Assets/Fonts/Space_Mono/SpaceMono-Bold.ttf#Space Mono Bold</FontFamily>
+        <FontFamily x:Key="SpaceMonoItalic">/Assets/Fonts/Space_Mono/SpaceMono-Italic.ttf#Space Mono Italic</FontFamily>
+        <FontFamily x:Key="SpaceMonoBoldItalic">/Assets/Fonts/Space_Mono/SpaceMono-BoldItalic.ttf#Space Mono BoldItalic</FontFamily>
+        <FontFamily x:Key="Inter">/Assets/Fonts/Inter/Inter-VariableFont_opsz,wght.ttf#Inter</FontFamily>
 
     </Application.Resources>
 </Application>

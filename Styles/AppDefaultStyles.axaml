@@ -51,8 +51,12 @@
         <Setter Property="Margin" Value="-1 2 0 0"></Setter>
     </Style>
     
+    <Style Selector="Label">
+        <Setter Property="FontFamily" Value="{DynamicResource Inter}"></Setter>
+    </Style>
+    
     <Style Selector="Label.title">
-        <Setter Property="FontFamily" Value="{DynamicResource Nasalization}"></Setter>
+        <Setter Property="FontFamily" Value="{DynamicResource SpaceMonoRegular}"></Setter>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}"></Setter>
         <Setter Property="FontSize" Value="20"></Setter>
     </Style>

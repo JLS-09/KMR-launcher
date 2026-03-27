@@ -1,0 +1,61 @@
+# Visual Studio / Rider temporary files, build results, and user-specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+
+# Build results
+bin/
+obj/
+out/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Rider / JetBrains IDEs
+.idea/
+*.sln.iml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Avalonia Designer files (if any temp files)
+*.Designer.cs
+
+# Resharper cache
+_ReSharper*/
+
+# Backup files
+*.bak
+*.tmp
+
+# SQLite database files during development (if any)
+*.db
+
+# ASP.NET / Web project-specific
+wwwroot/lib/
+
+# JetBrains Rider caches
+.idea/
+*.sln.iml
+
+# User-specific files
+*.user
+*.userprefs
+*.pidb
+*.svd
+*.pdb
+*.mdb
+*.opendb
+
+# Dotnet global tools cache
+.dotnet/
