@@ -7,13 +7,14 @@ using System.Linq;
 using Avalonia.Markup.Xaml;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;
+using KMRLauncherMvvm.Services.Api;
 using KMRLauncherMvvm.ViewModels;
 using KMRLauncherMvvm.Views;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KMRLauncherMvvm;
 
-public partial class App : Application
+public class App : Application
 {
     public override void Initialize()
     {
@@ -23,8 +24,9 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         var collection = new ServiceCollection();
-        collection.AddSingleton<MainWindowViewModel>();
+        collection.AddSingleton<IModApiService, ModApiService>();
         
+        collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<HomePageViewModel>();
         collection.AddTransient<DiscoverPageViewModel>();
         collection.AddTransient<InstancesPageViewModel>();
@@ -43,12 +45,13 @@ public partial class App : Application
         
         var services = collection.BuildServiceProvider();
         
+        var vm = services.GetRequiredService<MainWindowViewModel>();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = services.GetRequiredService<MainWindowViewModel>()
+                DataContext = vm
             };
         }
 

@@ -3,12 +3,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;
+using KMRLauncherMvvm.Services.Api;
 
 namespace KMRLauncherMvvm.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     private PageFactory _pageFactory;
+    private readonly IModApiService _api;
     
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HomePageIsActive))]
@@ -22,14 +24,11 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool InstancesPageIsActive => CurrentPage.PageName == ApplicationPageNames.Instances;
     public bool SettingsPageIsActive => CurrentPage.PageName == ApplicationPageNames.Settings;
 
-    public MainWindowViewModel(PageFactory pageFactory)
+    public MainWindowViewModel(PageFactory pageFactory, IModApiService api)
     {
+        _api = api;
         _pageFactory = pageFactory;
         GoToHome();
-    }
-
-    public MainWindowViewModel()
-    {
     }
 
     [RelayCommand]
@@ -42,6 +41,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private void GoToDiscover()
     {
         CurrentPage = _pageFactory.GetPageViewModel(ApplicationPageNames.Discover);
+        var mods = _api.GetAllModsAsync();
+        Console.WriteLine(mods);
     }
     
     [RelayCommand]
