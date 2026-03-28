@@ -16,6 +16,7 @@
 
     <Application.Resources>
         <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryTextTitle">#DF0105</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryBackground">#131314</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryButtonBackground">#323434</SolidColorBrush>
         <SolidColorBrush x:Key="HoverButtonBackground">#282A29</SolidColorBrush>

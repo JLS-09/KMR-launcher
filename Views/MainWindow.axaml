@@ -34,10 +34,10 @@
                 </Button>
             </Grid>
         </Border>
-        <Grid RowDefinitions="40, *" Column="1">
+        <Grid RowDefinitions="70, *" Column="1">
             <Border Background="{DynamicResource SideBarBackground}" Padding="5">
                 <Grid ColumnDefinitions="Auto, *">
-                    <Label Content="KERBAL MOD REPOSITORY LAUNCHER" Classes="title" Grid.Column="0" VerticalAlignment="Center"/>
+                    <Label Content="KMR LAUNCHER" Classes="title" Grid.Column="0" VerticalAlignment="Center"/>
                 </Grid>
             </Border>
             <Border Background="{DynamicResource PrimaryBackground}" 

@@ -56,8 +56,8 @@
     </Style>
     
     <Style Selector="Label.title">
-        <Setter Property="FontFamily" Value="{DynamicResource SpaceMonoRegular}"></Setter>
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryText}"></Setter>
-        <Setter Property="FontSize" Value="20"></Setter>
+        <Setter Property="FontFamily" Value="{DynamicResource SpaceMonoBold}"></Setter>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextTitle}"></Setter>
+        <Setter Property="FontSize" Value="35"></Setter>
     </Style>
 </Styles>
