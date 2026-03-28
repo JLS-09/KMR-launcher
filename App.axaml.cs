@@ -1,15 +1,16 @@
 using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using System.Net.Http;
 using Avalonia.Markup.Xaml;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;
 using KMRLauncherMvvm.Services.Api;
 using KMRLauncherMvvm.ViewModels;
 using KMRLauncherMvvm.Views;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KMRLauncherMvvm;
@@ -25,6 +26,15 @@ public class App : Application
     {
         var collection = new ServiceCollection();
         collection.AddSingleton<IModApiService, ModApiService>();
+        
+        var config = new ConfigurationBuilder()
+            .AddUserSecrets<App>()
+            .Build();
+        
+        collection.AddSingleton(new HttpClient
+        {
+            BaseAddress = new Uri(config["ApiBaseAddress"] ?? "http://localhost:3000/")
+        });
         
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<HomePageViewModel>();

@@ -1,11 +1,17 @@
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace KMRLauncherMvvm.Services.Api;
 
-public class ModApiService : IModApiService
+public class ModApiService(HttpClient http) : IModApiService
 {
-    public Task<string> GetAllModsAsync()
+    public async Task<string> GetAllModsAsync()
     {
-        return Task.FromResult("Getting all mods");
+        var response = await http.GetAsync("api/mods");
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+
+        return json;
     }
 }

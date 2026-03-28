@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
@@ -38,10 +39,10 @@ public partial class MainWindowViewModel : ViewModelBase
     }
     
     [RelayCommand]
-    private void GoToDiscover()
+    private async Task GoToDiscover()
     {
         CurrentPage = _pageFactory.GetPageViewModel(ApplicationPageNames.Discover);
-        var mods = _api.GetAllModsAsync();
+        var mods = await _api.GetAllModsAsync();
         Console.WriteLine(mods);
     }
     
