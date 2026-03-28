@@ -1,10 +1,8 @@
-# Visual Studio / Rider temporary files, build results, and user-specific files
+# Visual Studio / Rider temporary files, build results
 .vs/
-*.user
 *.suo
 *.userosscache
 *.sln.docstates
-.idea/
 
 # Build results
 bin/
@@ -43,10 +41,6 @@ _ReSharper*/
 
 # ASP.NET / Web project-specific
 wwwroot/lib/
-
-# JetBrains Rider caches
-.idea/
-*.sln.iml
 
 # User-specific files
 *.user
