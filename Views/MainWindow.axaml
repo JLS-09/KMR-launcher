@@ -14,36 +14,60 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid Background="{DynamicResource SideBarBackground}" ColumnDefinitions="200, *">
-        <Border Padding="5" Background="{DynamicResource SideBarBackground}">
+    <Grid Background="{DynamicResource SideBarBackground}" ColumnDefinitions="256, *">
+        <Border Background="{DynamicResource SideBarBackground}">
             <Grid RowDefinitions="*, Auto">
                 <StackPanel Spacing="10">
-                    <Image Source="/Assets/Images/logo-dark.png"/>
-                    <Button Classes.Active="{Binding HomePageIsActive}" Height="50" Command="{Binding GoToHomeCommand}">
-                        <Label Classes="iconBold" Content="&#xe2c2;"/>
+                    <Image Source="/Assets/Images/logo-dark.png" Margin="20 10"/>
+                    <Button Classes="SideBarButton" Command="{Binding GoToHomeCommand}">
+                        <Border Classes.Active="{Binding HomePageIsActive}" Classes="SideBarBorder">
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <Label Classes.Active="{Binding HomePageIsActive}" Classes="iconBold SideBarIcon" FontSize="24" Content="&#xE464;" />
+                                <TextBlock Classes.Active="{Binding HomePageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Dashboard" />
+                            </StackPanel>
+                        </Border>
                     </Button>
-                    <Button Classes.Active="{Binding DiscoverPageIsActive}" Height="50" Command="{Binding GoToDiscoverCommand}">
-                        <Label Classes="icon" Content="&#xE1C8;"/>
+                    <Button Classes="SideBarButton" Command="{Binding GoToDiscoverCommand}">
+                        <Border Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarBorder">
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <Label Classes.Active="{Binding DiscoverPageIsActive}" Classes="iconBold SideBarIcon" FontSize="24" Content="&#xE1C8;"/>
+                                <TextBlock Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Discover" />
+                            </StackPanel>
+                        </Border>
                     </Button>
-                    <Button Classes.Active="{Binding InstancesPageIsActive}" Height="50" Command="{Binding GoToInstancesCommand}">
-                        <Label Classes="icon" Content="&#xE758;"/>
+                    <Button Classes="SideBarButton" Command="{Binding GoToInstancesCommand}">
+                        <Border Classes.Active="{Binding InstancesPageIsActive}" Classes="SideBarBorder">
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <Label Classes.Active="{Binding InstancesPageIsActive}" Classes="icon SideBarIcon" FontSize="24" Content="&#xE758;"/>
+                                <TextBlock Classes.Active="{Binding InstancesPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Instances" />
+                            </StackPanel>
+                        </Border>
                     </Button>
                 </StackPanel>
-                <Button Classes.Active="{Binding SettingsPageIsActive}" Grid.Row="1" Height="50" Command="{Binding GoToSettingsCommand}">
-                    <Label Classes="icon" Content="&#xE270;"/>
+                <Button Grid.Row="1" Classes="SideBarButton" Command="{Binding GoToSettingsCommand}">
+                    <Border Classes.Active="{Binding SettingsPageIsActive}" Classes="SideBarBorder">
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <Label Classes.Active="{Binding SettingsPageIsActive}" Classes="iconBold SideBarIcon" FontSize="24" Content="&#xE270;"/>
+                            <TextBlock Classes.Active="{Binding SettingsPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Settings" />
+                        </StackPanel>
+                    </Border>
                 </Button>
             </Grid>
         </Border>
         <Grid RowDefinitions="70, *" Column="1">
-            <Border Background="{DynamicResource SideBarBackground}" Padding="5">
+            <Border Background="{DynamicResource SideBarBackground}" Padding="32 0">
                 <Grid ColumnDefinitions="Auto, *">
-                    <Label Content="KMR LAUNCHER" Classes="title" Grid.Column="0" VerticalAlignment="Center"/>
+                    <TextBlock Text="KMR LAUNCHER" Classes="title" Grid.Column="0" VerticalAlignment="Center"/>
+                    <Button Classes="Primary" Grid.Column="1" HorizontalAlignment="Right" Padding="24 4">
+                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                            <Label Classes="icon" Content="&#xE3D0;" FontSize="28"/>
+                            <TextBlock Text="Launch Last Instance" LetterSpacing="2" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
-            <Border Background="{DynamicResource PrimaryBackground}" 
-                    CornerRadius="15 0 0 0" 
-                    Grid.Row="1" 
-                    BoxShadow="0 0 5 0 black"
+            <Border Background="{DynamicResource PrimaryBackground}"
+                    Grid.Row="1"
                     Padding="10">
                 <ContentControl Content="{Binding CurrentPage}" ></ContentControl>
             </Border>

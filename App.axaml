@@ -15,14 +15,13 @@
     </Application.Styles>
 
     <Application.Resources>
+        <SolidColorBrush x:Key="PrimaryRed">#DF0105</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryTextTitle">#DF0105</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryBackground">#131314</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryButtonBackground">#323434</SolidColorBrush>
+        <SolidColorBrush x:Key="SidebarButtonInactiveText">#71717A</SolidColorBrush>
+        <SolidColorBrush x:Key="SideBarButtonActiveBackground">#2A2A2B</SolidColorBrush>
         <SolidColorBrush x:Key="HoverButtonBackground">#282A29</SolidColorBrush>
-        <SolidColorBrush x:Key="ActiveButtonBackground">#DF0105</SolidColorBrush>
         <SolidColorBrush x:Key="SideBarBackground">#1B1B1C</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryHoverText">White</SolidColorBrush>
 
         <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
         <FontFamily x:Key="PhosphorBold">/Assets/Fonts/Phosphor-Bold.ttf#Phosphor-Bold</FontFamily>
@@ -32,6 +31,7 @@
         <FontFamily x:Key="SpaceMonoItalic">/Assets/Fonts/Space_Mono/SpaceMono-Italic.ttf#Space Mono Italic</FontFamily>
         <FontFamily x:Key="SpaceMonoBoldItalic">/Assets/Fonts/Space_Mono/SpaceMono-BoldItalic.ttf#Space Mono BoldItalic</FontFamily>
         <FontFamily x:Key="Inter">/Assets/Fonts/Inter/Inter-VariableFont_opsz,wght.ttf#Inter</FontFamily>
+        <FontFamily x:Key="SpaceGrotesk">/Assets/Fonts/Space_Grotesk/SpaceGrotesk-VariableFont_wght.ttf#Space Grotesk</FontFamily>
 
     </Application.Resources>
 </Application>

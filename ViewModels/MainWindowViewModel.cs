@@ -46,7 +46,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task GoToDiscover()
     {
         CurrentPage = _pageFactory.GetPageViewModel(ApplicationPageNames.Discover);
-        var mods = await _api.GetAllModsAsync();
+        var mods = await _api.GetModsAsync(1, 20);
         Console.WriteLine(mods);
     }
     

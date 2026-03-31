@@ -10,30 +10,78 @@
     </Design.PreviewWith>
 
     <!-- Add Styles Here -->
-    <Style Selector="Button">
+    <Style Selector="Button.Primary">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" ></Setter>
-        <Setter Property="Background" Value="{DynamicResource PrimaryButtonBackground}"></Setter>
-        <Setter Property="CornerRadius" Value="15"></Setter>
+        <Setter Property="Background" Value="{DynamicResource PrimaryRed}"></Setter>
+        <Setter Property="CornerRadius" Value="10"></Setter>
+        <Setter Property="FontWeight" Value="Bold"></Setter>
+        <Setter Property="FontFamily" Value="{DynamicResource SpaceGrotesk}"></Setter>
+        <Setter Property="FontSize" Value="16"></Setter>
     </Style>
     
-    <Style Selector="Button:pointerover /template/ ContentPresenter">
+    <Style Selector="Button.Primary:pointerover /template/ ContentPresenter">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" ></Setter>
         <Setter Property="Background" Value="{DynamicResource HoverButtonBackground}"></Setter>
-        <Setter Property="CornerRadius" Value="15"></Setter>
     </Style>
     
-    <Style Selector="Button /template/ ContentPresenter">
+    <Style Selector="Button.SideBarButton">
+        <Setter Property="Background" Value="Transparent"></Setter>
+        <Setter Property="Padding" Value="0"></Setter>
+        <Setter Property="BorderThickness" Value="0"></Setter>
+        <Setter Property="Height" Value="50"></Setter>
+        <Setter Property="Foreground" Value="{DynamicResource SidebarButtonInactiveText}"></Setter>
+        <Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
+    </Style>
+    
+    <Style Selector="Button.SideBarButton:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent"></Setter>
+        <Setter Property="Padding" Value="0"></Setter>
+        <Setter Property="BorderThickness" Value="0"></Setter>
+        <Setter Property="Height" Value="50"></Setter>
+        <Setter Property="Foreground" Value="{DynamicResource SidebarButtonInactiveText}"></Setter>
+        <Setter Property="HorizontalAlignment" Value="Stretch"></Setter>
+    </Style>
+    
+    <Style Selector="Border.SideBarBorder">
+        <Setter Property="Height" Value="50"></Setter>
+        <Setter Property="BorderThickness" Value="2 0 0 0"></Setter>
+        <Setter Property="BorderBrush" Value="{DynamicResource SideBarBackground}"></Setter>
+        <Setter Property="Padding" Value="15 0 0 0"></Setter>
+        <Setter Property="Background" Value="{DynamicResource SideBarBackground}"></Setter>
         <Setter Property="Transitions">
             <Transitions>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.1"/>
                 <BrushTransition Property="Background" Duration="0:0:0.1" />
+            </Transitions>
+        </Setter>
+    </Style>
+    
+    <Style Selector="Border.SideBarBorder.Active">
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryRed}"></Setter>
+        <Setter Property="Background" Value="{DynamicResource SideBarButtonActiveBackground}"></Setter>
+    </Style>
+    
+    <Style Selector="Label.SideBarIcon.Active">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryRed}"></Setter>
+    </Style>
+    
+    <Style Selector="TextBlock.SideBarText.Active">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryRed}"></Setter>
+    </Style>
+    
+    <Style Selector="TextBlock.SideBarText">
+        <Setter Property="FontFamily" Value="{DynamicResource SpaceGrotesk}"></Setter>
+        <Setter Property="FontWeight" Value="SemiBold"></Setter>
+        <Setter Property="VerticalAlignment" Value="Center"></Setter>
+        <Setter Property="Margin" Value="0 2 0 0"></Setter>
+        <Setter Property="FontSize" Value="18"></Setter>
+        <Setter Property="Transitions">
+            <Transitions>
                 <BrushTransition Property="Foreground" Duration="0:0:0.1" />
             </Transitions>
         </Setter>
     </Style>
     
-    <Style Selector="Button.Active /template/ ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource ActiveButtonBackground}"></Setter>
-    </Style>
     
     <Style Selector="Label.iconBold">
         <Setter Property="FontFamily" Value="{DynamicResource PhosphorBold}"></Setter>
@@ -45,19 +93,32 @@
     
     <Style Selector="Label.icon">
         <Setter Property="FontFamily" Value="{DynamicResource Phosphor}"></Setter>
-        <Setter Property="FontSize" Value="28"></Setter>
         <Setter Property="HorizontalAlignment" Value="Center"></Setter>
         <Setter Property="VerticalAlignment" Value="Center"></Setter>
-        <Setter Property="Margin" Value="-1 2 0 0"></Setter>
     </Style>
     
     <Style Selector="Label">
         <Setter Property="FontFamily" Value="{DynamicResource Inter}"></Setter>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Foreground" Duration="0:0:0.1" />
+            </Transitions>
+        </Setter>
     </Style>
     
-    <Style Selector="Label.title">
+    <Style Selector="TextBlock.title">
         <Setter Property="FontFamily" Value="{DynamicResource SpaceMonoBold}"></Setter>
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextTitle}"></Setter>
-        <Setter Property="FontSize" Value="35"></Setter>
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryRed}"></Setter>
+        <Setter Property="FontSize" Value="28"></Setter>
+        <Setter Property="LetterSpacing" Value="6"></Setter>
+    </Style>
+    
+    <Style Selector="Button /template/ ContentPresenter">
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.1" />
+                <BrushTransition Property="Foreground" Duration="0:0:0.1" />
+            </Transitions>
+        </Setter>
     </Style>
 </Styles>

@@ -4,5 +4,5 @@ namespace KMRLauncherMvvm.Services.Api;
 
 public interface IModApiService
 {
-    Task<string> GetAllModsAsync();
+    Task<string> GetModsAsync(int page, int pageSize);
 }
