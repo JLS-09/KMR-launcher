@@ -13,8 +13,8 @@
         <vm:DiscoverPageViewModel/>
     </Design.DataContext>
     
-    <StackPanel Spacing="24" Orientation="Vertical" Margin="32 16">
-        <Grid ColumnDefinitions="*, auto" RowDefinitions="*, auto" >
+    <Grid RowDefinitions="Auto, *" Margin="32 16">
+        <Grid Grid.Row="0" ColumnDefinitions="*, auto" RowDefinitions="*, auto" >
             <TextBlock Grid.Column="0" Grid.Row="0" 
                        Text="{Binding ConnectionStatus}" 
                        FontFamily="{DynamicResource SpaceGrotesk}"
@@ -39,27 +39,33 @@
                        LetterSpacing="1.4"
                        Foreground="{DynamicResource PrimaryGreen}"/>
         </Grid>
-        <StackPanel Orientation="Vertical">
-            <Grid ColumnDefinitions="*, *, *, *" >
-                <TextBlock Grid.Column="0" HorizontalAlignment="Stretch" Text="MOD NAME"/>
-                <TextBlock Grid.Column="1" HorizontalAlignment="Stretch" Text="AUTHOR"/>
-                <TextBlock Grid.Column="2" HorizontalAlignment="Stretch" Text="VERSION"/>
-                <TextBlock Grid.Column="3" HorizontalAlignment="Stretch" Text="LAST UPDATED"/>
+        <Border Grid.Row="1" Background="{DynamicResource SideBarBackground}" CornerRadius="8" Margin="0 24 0 0">
+            <Grid RowDefinitions="Auto, *">
+                <Border Grid.Row="0" BorderThickness="0 0 0 1" BorderBrush="{DynamicResource PrimaryRed}">
+                    <Grid ColumnDefinitions="4*, 2*, *, *" Margin="24 16">
+                        <TextBlock Grid.Column="0" Classes="ModlistHeaderText" Text="MOD NAME"/>
+                        <TextBlock Grid.Column="1" Classes="ModlistHeaderText" Text="AUTHOR"/>
+                        <TextBlock Grid.Column="2" Classes="ModlistHeaderText" Text="VERSION"/>
+                        <TextBlock Grid.Column="3" Classes="ModlistHeaderText" Text="LAST UPDATED"/>
+                    </Grid>
+                </Border>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Mods}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="5">
+                                    <Grid ColumnDefinitions="4*, 2*, *, *" Margin="24 16">
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding AuthorsDisplay}"/>
+                                        <TextBlock Grid.Column="2" Text="V1.2.3" Foreground="Gray"/>
+                                        <TextBlock Grid.Column="3" Text="12 Hours ago" Foreground="Gray"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </Grid>
-            <ItemsControl ItemsSource="{Binding Mods}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Padding="5">
-                            <Grid ColumnDefinitions="*, *, *, *" >
-                                <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold"/>
-                                <TextBlock Grid.Column="1" Text="{Binding Author}"/>
-                                <TextBlock Grid.Column="2" Text="V1.2.3" Foreground="Gray"/>
-                                <TextBlock Grid.Column="3" Text="12 Hours ago" Foreground="Gray"/>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
-    </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>

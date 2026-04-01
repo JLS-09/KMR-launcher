@@ -28,4 +28,6 @@ public class Mod
     
     [JsonPropertyName("resources")]
     public Resources Resources { get; set; }
+    
+    public string AuthorsDisplay => string.Join(", ", Author);
 }

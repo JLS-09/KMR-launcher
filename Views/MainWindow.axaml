@@ -14,7 +14,7 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid Background="{DynamicResource SideBarBackground}" ColumnDefinitions="256, *">
+    <Grid Background="{DynamicResource SideBarBackground}" ColumnDefinitions="228, *">
         <Border Background="{DynamicResource SideBarBackground}">
             <Grid RowDefinitions="*, Auto">
                 <StackPanel Spacing="10">
@@ -31,7 +31,7 @@
                         <Border Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarBorder">
                             <StackPanel Orientation="Horizontal" Spacing="16">
                                 <Label Classes.Active="{Binding DiscoverPageIsActive}" Classes="iconBold SideBarIcon" FontSize="24" Content="&#xE1C8;"/>
-                                <TextBlock Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Browse All Mods" />
+                                <TextBlock Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Browse Mods" />
                             </StackPanel>
                         </Border>
                     </Button>
@@ -55,7 +55,7 @@
             </Grid>
         </Border>
         <Grid RowDefinitions="70, *" Column="1">
-            <Border Background="{DynamicResource SideBarBackground}" Padding="32 0">
+            <Border Background="{DynamicResource PrimaryBackground}" Padding="32 0">
                 <Grid ColumnDefinitions="Auto, *">
                     <TextBlock Text="KMR LAUNCHER" Classes="title" Grid.Column="0" VerticalAlignment="Center"/>
                     <Button Classes="Primary" Grid.Column="1" HorizontalAlignment="Right" Padding="24 4">
@@ -66,7 +66,7 @@
                     </Button>
                 </Grid>
             </Border>
-            <Border Background="{DynamicResource PrimaryBackground}"
+            <Border Background="{DynamicResource PrimaryBackground}" CornerRadius="0 0 0 0"
                     Grid.Row="1">
                 <ContentControl Content="{Binding CurrentPage}" ></ContentControl>
             </Border>
