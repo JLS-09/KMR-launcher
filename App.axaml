@@ -16,7 +16,10 @@
 
     <Application.Resources>
         <SolidColorBrush x:Key="PrimaryRed">#DF0105</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryGreen">#22C55E</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryOrange">#F97316</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
+        <SolidColorBrush x:Key="SecondaryText">#6B7280</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryBackground">#131314</SolidColorBrush>
         <SolidColorBrush x:Key="SidebarButtonInactiveText">#71717A</SolidColorBrush>
         <SolidColorBrush x:Key="SideBarButtonActiveBackground">#2A2A2B</SolidColorBrush>

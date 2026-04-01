@@ -21,6 +21,6 @@ public class ModApiService(HttpClient http) : IModApiService
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
         
-        return JsonSerializer.Deserialize<List<Mod>>(json, options);
+        return JsonSerializer.Deserialize<List<Mod>>(json, options)!;
     }
 }

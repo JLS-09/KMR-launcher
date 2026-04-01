@@ -31,7 +31,7 @@
                         <Border Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarBorder">
                             <StackPanel Orientation="Horizontal" Spacing="16">
                                 <Label Classes.Active="{Binding DiscoverPageIsActive}" Classes="iconBold SideBarIcon" FontSize="24" Content="&#xE1C8;"/>
-                                <TextBlock Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Discover" />
+                                <TextBlock Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Browse All Mods" />
                             </StackPanel>
                         </Border>
                     </Button>
@@ -67,8 +67,7 @@
                 </Grid>
             </Border>
             <Border Background="{DynamicResource PrimaryBackground}"
-                    Grid.Row="1"
-                    Padding="10">
+                    Grid.Row="1">
                 <ContentControl Content="{Binding CurrentPage}" ></ContentControl>
             </Border>
         </Grid>

@@ -13,5 +13,53 @@
         <vm:DiscoverPageViewModel/>
     </Design.DataContext>
     
-    <Label Content="{Binding Mods}"></Label>
+    <StackPanel Spacing="24" Orientation="Vertical" Margin="32 16">
+        <Grid ColumnDefinitions="*, auto" RowDefinitions="*, auto" >
+            <TextBlock Grid.Column="0" Grid.Row="0" 
+                       Text="{Binding ConnectionStatus}" 
+                       FontFamily="{DynamicResource SpaceGrotesk}"
+                       FontWeight="Regular"
+                       FontSize="16"
+                       LetterSpacing="1.4"
+                       Foreground="{DynamicResource SecondaryText}"/>
+            <TextBlock Grid.Column="1" Grid.Row="0"
+                       VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Text="NETWORK STATUS" 
+                       FontFamily="{DynamicResource SpaceGrotesk}"
+                       FontWeight="Regular"
+                       FontSize="14"
+                       LetterSpacing="1.4"
+                       Foreground="{DynamicResource SecondaryText}"/>
+            <TextBlock Grid.Column="1" Grid.Row="1"
+                       VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Text="NETWORK_SYNCHRONIZED" 
+                       FontFamily="{DynamicResource SpaceGrotesk}"
+                       FontWeight="Bold"
+                       FontSize="16"
+                       LetterSpacing="1.4"
+                       Foreground="{DynamicResource PrimaryGreen}"/>
+        </Grid>
+        <StackPanel Orientation="Vertical">
+            <Grid ColumnDefinitions="*, *, *, *" >
+                <TextBlock Grid.Column="0" HorizontalAlignment="Stretch" Text="MOD NAME"/>
+                <TextBlock Grid.Column="1" HorizontalAlignment="Stretch" Text="AUTHOR"/>
+                <TextBlock Grid.Column="2" HorizontalAlignment="Stretch" Text="VERSION"/>
+                <TextBlock Grid.Column="3" HorizontalAlignment="Stretch" Text="LAST UPDATED"/>
+            </Grid>
+            <ItemsControl ItemsSource="{Binding Mods}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="5">
+                            <Grid ColumnDefinitions="*, *, *, *" >
+                                <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Author}"/>
+                                <TextBlock Grid.Column="2" Text="V1.2.3" Foreground="Gray"/>
+                                <TextBlock Grid.Column="3" Text="12 Hours ago" Foreground="Gray"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
 </UserControl>

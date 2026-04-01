@@ -61,6 +61,11 @@
         <Setter Property="Background" Value="{DynamicResource SideBarButtonActiveBackground}"></Setter>
     </Style>
     
+    <Style Selector="Border.SideBarBorder:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryRed}"></Setter>
+        <Setter Property="Background" Value="{DynamicResource SideBarButtonActiveBackground}"></Setter>
+    </Style>
+    
     <Style Selector="Label.SideBarIcon.Active">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryRed}"></Setter>
     </Style>
