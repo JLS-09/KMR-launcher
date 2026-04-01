@@ -11,7 +11,6 @@ namespace KMRLauncherMvvm.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private PageFactory _pageFactory;
-    private readonly IModApiService _api;
     
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HomePageIsActive))]
@@ -25,9 +24,8 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool InstancesPageIsActive => CurrentPage.PageName == ApplicationPageNames.Instances;
     public bool SettingsPageIsActive => CurrentPage.PageName == ApplicationPageNames.Settings;
 
-    public MainWindowViewModel(PageFactory pageFactory, IModApiService api)
+    public MainWindowViewModel(PageFactory pageFactory)
     {
-        _api = api;
         _pageFactory = pageFactory;
         GoToHome();
     }
@@ -46,8 +44,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task GoToDiscover()
     {
         CurrentPage = _pageFactory.GetPageViewModel(ApplicationPageNames.Discover);
-        var mods = await _api.GetModsAsync(1, 20);
-        Console.WriteLine(mods);
     }
     
     [RelayCommand]
