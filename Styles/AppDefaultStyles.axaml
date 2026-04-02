@@ -134,4 +134,11 @@
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="FontSize" Value="12"/>
     </Style>
+    
+    <Style Selector="Button.Primary.ModList">
+        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="FontFamily" Value="{DynamicResource SpaceMonoRegular}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+    </Style>
 </Styles>

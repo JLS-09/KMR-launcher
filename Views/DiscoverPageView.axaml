@@ -42,11 +42,12 @@
         <Border Grid.Row="1" Background="{DynamicResource SideBarBackground}" CornerRadius="8" Margin="0 24 0 0">
             <Grid RowDefinitions="Auto, *">
                 <Border Grid.Row="0" BorderThickness="0 0 0 1" BorderBrush="{DynamicResource PrimaryRed}">
-                    <Grid ColumnDefinitions="4*, 2*, *, *" Margin="24 16">
+                    <Grid ColumnDefinitions="4*, 2*, *, *, 120" Margin="24 16">
                         <TextBlock Grid.Column="0" Classes="ModlistHeaderText" Text="MOD NAME"/>
                         <TextBlock Grid.Column="1" Classes="ModlistHeaderText" Text="AUTHOR"/>
                         <TextBlock Grid.Column="2" Classes="ModlistHeaderText" Text="VERSION"/>
                         <TextBlock Grid.Column="3" Classes="ModlistHeaderText" Text="LAST UPDATED"/>
+                        <TextBlock Grid.Column="4" Classes="ModlistHeaderText" Text="INSTALL" HorizontalAlignment="Right"/>
                     </Grid>
                 </Border>
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -54,11 +55,15 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="5">
-                                    <Grid ColumnDefinitions="4*, 2*, *, *" Margin="24 16">
-                                        <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="Bold"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding AuthorsDisplay}"/>
-                                        <TextBlock Grid.Column="2" Text="V1.2.3" Foreground="Gray"/>
-                                        <TextBlock Grid.Column="3" Text="12 Hours ago" Foreground="Gray"/>
+                                    <Grid ColumnDefinitions="4*, 2*, *, *, 120" Margin="24 16">
+                                        <TextBlock Grid.Column="0" FontFamily="{DynamicResource Inter}" Text="{Binding Name}" FontWeight="Regular" FontSize="15"/>
+                                        <TextBlock Grid.Column="1" FontFamily="{DynamicResource Inter}" FontWeight="Regular" FontSize="15" Text="{Binding AuthorsDisplay}"/>
+                                        <TextBlock Grid.Column="2" FontFamily="{DynamicResource Inter}" FontWeight="Regular" FontSize="15" Text="V1.2.3" Foreground="{DynamicResource SecondaryText}"/>
+                                        <TextBlock Grid.Column="3" FontFamily="{DynamicResource Inter}" FontWeight="Regular" FontSize="15" Text="12 Hours ago" Foreground="{DynamicResource SecondaryText}"/>
+                                        <Button Classes="Primary ModList" Grid.Column="4" 
+                                                Command="{Binding $parent[UserControl].((vm:DiscoverPageViewModel)DataContext).InstallModCommand}"
+                                                CommandParameter="{Binding}"
+                                                >INSTALL</Button>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

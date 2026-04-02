@@ -1,4 +1,6 @@
+using System;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services.Api;
@@ -39,5 +41,11 @@ public partial class DiscoverPageViewModel : PageViewModel
         var modList = await _api.GetModsAsync(1, 20);
         Mods = new ObservableCollection<Mod>(modList);
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
+    }
+    
+    [RelayCommand]
+    private void InstallMod(Mod mod)
+    {
+        Console.WriteLine("Installed mod: " + mod.Id);
     }
 }
