@@ -12,22 +12,22 @@ public class Mod
     public required string Name { get; set; }
     
     [JsonPropertyName("abstract")]
-    public string Abstract { get; set; }
+    public required string Abstract { get; set; }
     
     [JsonPropertyName("author")]
-    public List<string> Author { get; set; }
+    public required List<string> Author { get; set; }
     
     [JsonPropertyName("description")]
-    public string Description { get; set; }
-    
+    public string? Description { get; set; }
+
     [JsonPropertyName("release_status")]
-    public ReleaseStatus ReleaseStatus { get; set; }
+    public ReleaseStatus ReleaseStatus { get; set; } = ReleaseStatus.Stable;
     
     [JsonPropertyName("tags")]
-    public List<string> Tags { get; set; }
+    public List<string>? Tags { get; set; }
     
     [JsonPropertyName("resources")]
-    public Resources Resources { get; set; }
+    public Resources? Resources { get; set; }
     
     public string AuthorsDisplay => string.Join(", ", Author);
 }

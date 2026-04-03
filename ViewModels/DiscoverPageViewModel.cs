@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Text.Json;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Models;
@@ -44,8 +46,12 @@ public partial class DiscoverPageViewModel : PageViewModel
     }
     
     [RelayCommand]
-    private void InstallMod(Mod mod)
+    private async Task InstallMod(Mod mod)
     {
-        Console.WriteLine("Installed mod: " + mod.Id);
+        var versionList = await _api.GetVersionsByModIdAsync(mod.Id);
+        Console.WriteLine(JsonSerializer.Serialize(versionList, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        }));
     }
 }

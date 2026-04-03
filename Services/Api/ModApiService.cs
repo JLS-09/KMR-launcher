@@ -23,4 +23,19 @@ public class ModApiService(HttpClient http) : IModApiService
         
         return JsonSerializer.Deserialize<List<Mod>>(json, options)!;
     }
+
+    public async Task<List<ModVersion>> GetVersionsByModIdAsync(string modId)
+    {
+        var response = await http.GetAsync($"api/mods/{modId}/versions");
+        response.EnsureSuccessStatusCode();
+        var json = await response.Content.ReadAsStringAsync();
+        
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+        
+        return JsonSerializer.Deserialize<List<ModVersion>>(json, options)!;
+    }
 }

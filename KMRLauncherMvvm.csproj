@@ -27,5 +27,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+        <PackageReference Include="System.IO.Compression" Version="4.3.0" />
+        <PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
     </ItemGroup>
 </Project>

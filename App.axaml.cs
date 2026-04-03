@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
@@ -7,6 +8,8 @@ using System.Net.Http;
 using Avalonia.Markup.Xaml;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;
+using KMRLauncherMvvm.Models;
+using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.Services.Api;
 using KMRLauncherMvvm.ViewModels;
 using KMRLauncherMvvm.Views;
@@ -17,6 +20,9 @@ namespace KMRLauncherMvvm;
 
 public class App : Application
 {
+    
+    public static AppSettings Settings { get; private set; }
+    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -24,6 +30,8 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        InitializeSettings();
+        
         var collection = new ServiceCollection();
         collection.AddSingleton<IModApiService, ModApiService>();
         
@@ -66,6 +74,21 @@ public class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void InitializeSettings()
+    {
+        var basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var appFolder = Path.Combine(basePath, "kmrLauncher");
+
+        Directory.CreateDirectory(appFolder);
+
+        var settingsFile = Path.Combine(appFolder, "settings.json");
+        
+        if (!File.Exists(settingsFile))
+            SettingsService.Save(settingsFile, new AppSettings());
+        
+        Settings = SettingsService.Load(settingsFile);
     }
 
     private void DisableAvaloniaDataAnnotationValidation()

@@ -141,4 +141,10 @@
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
     </Style>
+    
+    <Style Selector="TextBlock.ModListEntry">
+        <Setter Property="FontFamily" Value="{DynamicResource Inter}"/>
+        <Setter Property="FontWeight" Value="Regular"/>
+        <Setter Property="FontSize" Value="15"/>
+    </Style>
 </Styles>
