@@ -12,20 +12,18 @@ namespace KMRLauncherMvvm.ViewModels;
 public partial class DiscoverPageViewModel : PageViewModel
 {
     private readonly IModApiService _api;
-    private ObservableCollection<Mod> _mods;
-    private string _connectionStatus = "ARCHIVE // CONNECTING TO CKAN...";
 
     public ObservableCollection<Mod> Mods
     {
-        get => _mods;
-        set { if (_mods != value) { _mods = value; OnPropertyChanged(); } }
+        get;
+        set { if (field != value) { field = value; OnPropertyChanged(); }}
     }
-    
+
     public string ConnectionStatus
     {
-        get => _connectionStatus;
-        set { if (_connectionStatus != value) { _connectionStatus = value; OnPropertyChanged(); } }
-    }
+        get;
+        set { if (field != value) { field = value; OnPropertyChanged(); }}
+    } = "ARCHIVE // CONNECTING TO CKAN...";
 
     public DiscoverPageViewModel(IModApiService api)
     {
@@ -38,7 +36,7 @@ public partial class DiscoverPageViewModel : PageViewModel
     {
     }
 
-    private async void PopulateMods()
+    private async Task PopulateMods()
     {
         var modList = await _api.GetModsAsync(1, 20);
         Mods = new ObservableCollection<Mod>(modList);

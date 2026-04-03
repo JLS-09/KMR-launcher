@@ -5,11 +5,13 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
              x:DataType="vm:InstancesPageViewModel"
-             x:Class="KMRLauncherMvvm.Views.InstancesPageView">
+             x:Class="KMRLauncherMvvm.Views.InstancesPageView"
+             Background="{DynamicResource PrimaryBackground}"
+             Foreground="{DynamicResource PrimaryText}">
     
     <Design.DataContext>
         <vm:InstancesPageViewModel/>
     </Design.DataContext>
     
-    <Label Content="{Binding Test}"></Label>
+    <Button Classes="Primary">ADD NEW INSTANCE</Button>
 </UserControl>

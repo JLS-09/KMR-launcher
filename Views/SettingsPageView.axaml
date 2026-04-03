@@ -11,6 +11,13 @@
         <vm:SettingsPageViewModel/>
     </Design.DataContext>
     
-    <Label Content="{Binding Test}"></Label>
+    <StackPanel>
+        <TextBox AcceptsReturn="True" 
+                 AcceptsTab="True"
+                 Text="{Binding SelectedFolderPath}"/>
+        <Button Classes="Primary"
+                Command="{Binding BrowseFolderCommand}"
+                CommandParameter="{Binding $parent[UserControl]}">Open File</Button>
+    </StackPanel>
     
 </UserControl>
