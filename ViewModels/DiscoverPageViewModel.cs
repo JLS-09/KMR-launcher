@@ -45,7 +45,7 @@ public partial class DiscoverPageViewModel : PageViewModel
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
     }
     
-    [RelayCommand]
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task InstallMod(Mod mod)
     {
         var versionList = await _api.GetVersionsByModIdAsync(mod.Id);

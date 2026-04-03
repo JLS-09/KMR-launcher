@@ -52,24 +52,34 @@
                     </Grid>
                 </Border>
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding Mods}">
-                        <ItemsControl.ItemTemplate>
+                    <ListBox ItemsSource="{Binding Mods}"
+                             SelectionMode="Single"
+                             Background="Transparent">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        
+                        <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Border Padding="5">
                                     <Grid ColumnDefinitions="4*, 2*, *, *, 120" Margin="24 16">
                                         <TextBlock Grid.Column="0" Classes="ModListEntry" Text="{Binding Name}"/>
                                         <TextBlock Grid.Column="1" Classes="ModListEntry" Text="{Binding AuthorsDisplay}"/>
-                                        <TextBlock Grid.Column="2" Classes="ModListEntry" Text="V1.2.3" Foreground="{DynamicResource SecondaryText}"/>
-                                        <TextBlock Grid.Column="3" Classes="ModListEntry" Text="12 Hours ago" Foreground="{DynamicResource SecondaryText}"/>
-                                        <Button Classes="Primary ModList" Grid.Column="4" 
+                                        <TextBlock Grid.Column="2" Classes="ModListEntry" Text="V1.2.3"
+                                                   Foreground="{DynamicResource SecondaryText}"/>
+                                        <TextBlock Grid.Column="3" Classes="ModListEntry" Text="12 Hours ago"
+                                                   Foreground="{DynamicResource SecondaryText}"/>
+                                        <Button Classes="Primary ModList"
+                                                Grid.Column="4"
                                                 Command="{Binding $parent[UserControl].((vm:DiscoverPageViewModel)DataContext).InstallModCommand}"
-                                                CommandParameter="{Binding}"
-                                                >INSTALL</Button>
+                                                CommandParameter="{Binding}">INSTALL</Button>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </ScrollViewer>
             </Grid>
         </Border>
