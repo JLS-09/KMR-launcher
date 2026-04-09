@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text.Json;
 using KMRLauncherMvvm.Models;
@@ -11,20 +12,26 @@ public static class SettingsService
         WriteIndented = true
     };
 
-    public static void Save(string path, AppSettings settings)
+    public static void Save(AppSettings settings)
     {
+        var basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var appFolder = Path.Combine(basePath, "kmrLauncher/settings.json");
+        
         var json = JsonSerializer.Serialize(settings, Options);
-        File.WriteAllText(path, json);
+        File.WriteAllText(appFolder, json);
     }
 
-    public static AppSettings Load(string path)
+    public static AppSettings Load()
     {
-        if (!File.Exists(path))
+        var basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var appFolder = Path.Combine(basePath, "kmrLauncher/settings.json");
+        
+        if (!File.Exists(appFolder))
             return new AppSettings();
 
         try
         {
-            var json = File.ReadAllText(path);
+            var json = File.ReadAllText(appFolder);
             return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
         }
         catch

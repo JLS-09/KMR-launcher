@@ -5,6 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using Avalonia.Markup.Xaml;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;
@@ -78,17 +79,18 @@ public class App : Application
 
     private void InitializeSettings()
     {
-        var basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var basePath = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") 
+                       ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
         var appFolder = Path.Combine(basePath, "kmrLauncher");
 
         Directory.CreateDirectory(appFolder);
-
+        
         var settingsFile = Path.Combine(appFolder, "settings.json");
         
         if (!File.Exists(settingsFile))
-            SettingsService.Save(settingsFile, new AppSettings());
+            SettingsService.Save(new AppSettings());
         
-        Settings = SettingsService.Load(settingsFile);
+        Settings = SettingsService.Load();
     }
 
     private void DisableAvaloniaDataAnnotationValidation()

@@ -21,7 +21,7 @@
         <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
         <SolidColorBrush x:Key="SecondaryText">#71717A</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryBackground">#131314</SolidColorBrush>
-        <SolidColorBrush x:Key="SidebarButtonInactiveText">#71717A</SolidColorBrush>
+        <SolidColorBrush x:Key="ButtonInactiveText">#71717A</SolidColorBrush>
         <SolidColorBrush x:Key="SideBarButtonActiveBackground">#2A2A2B</SolidColorBrush>
         <SolidColorBrush x:Key="HoverButtonBackground">#282A29</SolidColorBrush>
         <SolidColorBrush x:Key="SideBarBackground">#1B1B1C</SolidColorBrush>

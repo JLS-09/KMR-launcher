@@ -5,19 +5,58 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
              x:DataType="vm:SettingsPageViewModel"
-             x:Class="KMRLauncherMvvm.Views.SettingsPageView">
+             x:Class="KMRLauncherMvvm.Views.SettingsPageView"
+             Background="{DynamicResource PrimaryBackground}"
+             Foreground="{DynamicResource PrimaryText}">
     
     <Design.DataContext>
         <vm:SettingsPageViewModel/>
     </Design.DataContext>
     
-    <StackPanel>
-        <TextBox AcceptsReturn="True" 
-                 AcceptsTab="True"
-                 Text="{Binding SelectedFolderPath}"/>
-        <Button Classes="Primary"
-                Command="{Binding BrowseFolderCommand}"
-                CommandParameter="{Binding $parent[UserControl]}">Open File</Button>
+    <StackPanel Margin="32 16" Spacing="32">
+        <TextBlock Text="GLOBAL SETTINGS" 
+                   FontFamily="{DynamicResource SpaceGrotesk}"
+                   FontWeight="Bold"
+                   FontSize="48"
+                   LetterSpacing="1"
+                   Foreground="{DynamicResource PrimaryText}"/>
+        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="32">
+            <StackPanel Grid.Column="0" Spacing="10">
+                <Button Classes="SettingsNav Active">
+                    <TextBlock Text="GENERAL" Classes="SettingsNav Active" />
+                </Button>
+                <Button Classes="SettingsNav">
+                    <TextBlock Text="DOWNLOADS" Classes="SettingsNav" />
+                </Button>
+                <Button Classes="SettingsNav">
+                    <TextBlock Text="ADVANCED" Classes="SettingsNav" />
+                </Button>
+            </StackPanel>
+            <StackPanel Grid.Column="1">
+                <TextBox AcceptsReturn="False" MaxLines="1" Text="{Binding KspZipPath}"/>
+                <Button Classes="Primary"
+                        Command="{Binding BrowseFolderCommand}"
+                        CommandParameter="{Binding $parent[UserControl]}">Open File</Button>
+                <TextBox AcceptsReturn="False" MaxLines="1" Text="{Binding KspZipVersion}" />
+                <Button Classes="Primary" Command="{Binding AddKspZipCommand}">Add KSP Zip</Button>
+                <ListBox ItemsSource="{Binding AppSettings.KspZips}">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="4*, *" Margin="24 16">
+                                <TextBlock Grid.Column="0" Text="{Binding Path}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding Version}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </Grid>
     </StackPanel>
     
 </UserControl>
