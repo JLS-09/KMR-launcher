@@ -166,7 +166,7 @@
     <Style Selector="Button.SettingsNav">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Padding" Value="12 8"/>
-        <Setter Property="Width" Value="150"/>
+        <Setter Property="Width" Value="200"/>
         <Setter Property="CornerRadius" Value="8"/>
     </Style>
     

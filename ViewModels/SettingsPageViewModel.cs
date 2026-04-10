@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
@@ -10,6 +11,8 @@ namespace KMRLauncherMvvm.ViewModels;
 
 public partial class SettingsPageViewModel : PageViewModel
 {
+    public IReadOnlyList<string> AllKspVersions { get; } = KspVersions.All;
+    
     public string KspZipPath
     {
         get;
@@ -63,5 +66,12 @@ public partial class SettingsPageViewModel : PageViewModel
         
         KspZipPath = string.Empty;
         KspZipVersion = string.Empty;
+    }
+
+    [RelayCommand]
+    private void RemoveKspZip(KspZip kspZip)
+    {
+        AppSettings.KspZips.Remove(kspZip);
+        SettingsService.Save(AppSettings);
     }
 }
