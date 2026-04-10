@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
@@ -61,6 +59,10 @@ public partial class SettingsPageViewModel : PageViewModel
         PageName = ApplicationPageNames.Settings;
         AppSettings = App.Settings;
         ZipService = zipService;
+    }
+
+    public SettingsPageViewModel()
+    {
     }
 
     [RelayCommand]
