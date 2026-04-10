@@ -35,6 +35,7 @@ public class App : Application
         
         var collection = new ServiceCollection();
         collection.AddSingleton<IModApiService, ModApiService>();
+        collection.AddSingleton<ZipService>();
         
         var config = new ConfigurationBuilder()
             .AddUserSecrets<App>()

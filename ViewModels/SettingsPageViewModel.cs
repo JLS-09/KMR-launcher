@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
@@ -11,32 +13,56 @@ namespace KMRLauncherMvvm.ViewModels;
 
 public partial class SettingsPageViewModel : PageViewModel
 {
-    public IReadOnlyList<string> AllKspVersions { get; } = KspVersions.All;
-    
-    public string KspZipPath
-    {
-        get;
-        set { if (field != value) { field = value; OnPropertyChanged(); }}
-    }
-    
-    public string KspZipVersion
-    {
-        get;
-        set { if (field != value) { field = value; OnPropertyChanged(); } }
-    }
-    
+    public IReadOnlyList<string> AllKspVersions => KspVersions.All;
+    private ZipService ZipService { get; set; }
+    private string ZipRelativeRootPath { get; set; }
+
     public AppSettings AppSettings
     {
         get;
-        set { if (field != value) { field = value; OnPropertyChanged(); } }
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
-    public SettingsPageViewModel()
+    public string ZipPath
+    {
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string ZipVersion
+    {
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public SettingsPageViewModel(ZipService zipService)
     {
         PageName = ApplicationPageNames.Settings;
         AppSettings = App.Settings;
+        ZipService = zipService;
     }
-    
+
     [RelayCommand]
     private async Task BrowseFolder(UserControl view)
     {
@@ -52,20 +78,25 @@ public partial class SettingsPageViewModel : PageViewModel
 
         if (files.Count > 0)
         {
-            KspZipPath = files[0].Path.LocalPath;
+            var kspZip = ZipService.GetVersionFromKspZip(files[0].Path.LocalPath);
+            ZipPath = kspZip.Path;
+            ZipRelativeRootPath = kspZip.RelativeRootPath;
+            ZipVersion = kspZip.Version;
         }
     }
 
     [RelayCommand]
     private void AddKspZip()
     {
-        if (string.IsNullOrWhiteSpace(KspZipPath) || string.IsNullOrWhiteSpace(KspZipVersion)) return;
-        
-        AppSettings.KspZips.Add(new KspZip(KspZipPath, KspZipVersion));
+        if (string.IsNullOrWhiteSpace(ZipPath) ||
+            string.IsNullOrWhiteSpace(ZipRelativeRootPath) ||
+            string.IsNullOrWhiteSpace(ZipVersion)) return;
+
+        AppSettings.KspZips.Add(new KspZip(ZipPath, ZipRelativeRootPath, ZipVersion));
         SettingsService.Save(AppSettings);
-        
-        KspZipPath = string.Empty;
-        KspZipVersion = string.Empty;
+
+        ZipPath = string.Empty;
+        ZipVersion = string.Empty;
     }
 
     [RelayCommand]

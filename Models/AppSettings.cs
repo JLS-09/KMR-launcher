@@ -12,11 +12,13 @@ public class AppSettings
 public class KspZip
 {
     public string Path { get; set; }
+    public string RelativeRootPath { get; set; }
     public string Version { get; set; }
 
-    public KspZip(string path, string version)
+    public KspZip(string path, string relativeRootPath, string version)
     {
         Path = path;
+        RelativeRootPath = relativeRootPath;
         Version = version;
     }
 }
