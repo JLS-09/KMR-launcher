@@ -13,5 +13,5 @@
         <vm:InstancesPageViewModel/>
     </Design.DataContext>
     
-    <Button Classes="Primary">ADD NEW INSTANCE</Button>
+    <Button Classes="Primary" Command="{Binding OpenNewInstanceWindowCommand}">ADD NEW INSTANCE</Button>
 </UserControl>

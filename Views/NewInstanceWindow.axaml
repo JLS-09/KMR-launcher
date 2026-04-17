@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:KMRLauncherMvvm.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+        x:Class="KMRLauncherMvvm.Views.NewInstanceWindow"
+        x:DataType="viewModels:NewInstanceViewModel"
+        Background="{DynamicResource PrimaryBackground}"
+        Foreground="{DynamicResource PrimaryText}"
+        Width="500" Height="400"
+        Title="Create new Instance">
+    
+    <Design.DataContext>
+        <viewModels:NewInstanceViewModel/>
+    </Design.DataContext>
+    
+    <StackPanel>
+        <ListBox ItemsSource="{Binding AppSettings.KspZips}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+                                
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Version}" VerticalAlignment="Center"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </StackPanel>
+    
+        
+</Window>
