@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
+using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.Views;
 
 namespace KMRLauncherMvvm.ViewModels;
@@ -7,10 +8,17 @@ namespace KMRLauncherMvvm.ViewModels;
 public partial class InstancesPageViewModel : PageViewModel
 {
     public string Test { get; set; } = "Instances";
+    private ZipService ZipService { get; set; }
+
+    public InstancesPageViewModel(ZipService zipService)
+    {
+        PageName = ApplicationPageNames.Instances;
+        ZipService = zipService;
+    }
 
     public InstancesPageViewModel()
     {
-        PageName = ApplicationPageNames.Instances;
+        
     }
 
     [RelayCommand]
@@ -18,7 +26,7 @@ public partial class InstancesPageViewModel : PageViewModel
     {
         var window = new NewInstanceWindow
         {
-            DataContext = new NewInstanceViewModel()
+            DataContext = new NewInstanceViewModel(ZipService)
         };
         window.Show();
     }

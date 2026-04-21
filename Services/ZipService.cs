@@ -1,7 +1,9 @@
 using System;
+using System.Data;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.Services;
@@ -45,6 +47,42 @@ public class ZipService
         {
             Console.WriteLine(e);
             return new KspZip("", "", "");
+        }
+    }
+    
+    public async Task ExtractFolderFromZip(string zipPath, string folderInZip, string destinationPath)
+    {
+        try
+        {
+            folderInZip = folderInZip.Replace("\\", "/").TrimEnd('/') + "/";
+
+            await using var archive = await ZipFile.OpenReadAsync(zipPath);
+            
+            foreach (var entry in archive.Entries)
+            {
+                if (!entry.FullName.StartsWith(folderInZip, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var relativePath = entry.FullName.Substring(folderInZip.Length);
+
+                if (string.IsNullOrEmpty(relativePath))
+                    continue;
+
+                var destinationFilePath = Path.Combine(destinationPath, relativePath);
+
+                if (entry.FullName.EndsWith("/"))
+                {
+                    Directory.CreateDirectory(destinationFilePath);
+                    continue;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(destinationFilePath)!);
+                await entry.ExtractToFileAsync(destinationFilePath, overwrite: true);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Failed to extract folder from zip", e);
         }
     }
 }
