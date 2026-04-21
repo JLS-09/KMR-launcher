@@ -13,7 +13,7 @@
     <Style Selector="Button.Primary /template/ ContentPresenter">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" ></Setter>
         <Setter Property="Background" Value="{DynamicResource PrimaryRed}"></Setter>
-        <Setter Property="CornerRadius" Value="5"></Setter>
+        <Setter Property="CornerRadius" Value="4"></Setter>
         <Setter Property="FontWeight" Value="Bold"></Setter>
         <Setter Property="FontFamily" Value="{DynamicResource SpaceGrotesk}"></Setter>
         <Setter Property="FontSize" Value="16"></Setter>
@@ -28,6 +28,42 @@
     <Style Selector="Button.Primary:pointerover /template/ ContentPresenter">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" ></Setter>
         <Setter Property="Background" Value="{DynamicResource HoverButtonBackground}"></Setter>
+    </Style>
+    
+    <Style Selector="Button.Secondary /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" ></Setter>
+        <Setter Property="Background" Value="{DynamicResource SecondaryButtonBackgrorund}"></Setter>
+        <Setter Property="CornerRadius" Value="4"></Setter>
+        <Setter Property="FontFamily" Value="{DynamicResource SpaceGrotesk}"></Setter>
+        <Setter Property="FontSize" Value="16"></Setter>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.1" />
+                <BrushTransition Property="Foreground" Duration="0:0:0.1" />
+            </Transitions>
+        </Setter>
+    </Style>
+    
+    <Style Selector="Button.Secondary:pointerover /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" ></Setter>
+        <Setter Property="Background" Value="{DynamicResource HoverButtonBackground}"></Setter>
+    </Style>
+    
+    <Style Selector="Button.Tertiary /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" ></Setter>
+        <Setter Property="Background" Value="Transparent"></Setter>
+        <Setter Property="CornerRadius" Value="4"></Setter>
+        <Setter Property="FontFamily" Value="{DynamicResource SpaceGrotesk}"></Setter>
+        <Setter Property="FontSize" Value="16"></Setter>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Foreground" Duration="0:0:0.1" />
+            </Transitions>
+        </Setter>
+    </Style>
+    
+    <Style Selector="Button.Tertiary:pointerover /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryRed}" ></Setter>
     </Style>
     
     <Style Selector="Button.SideBarButton">
@@ -187,5 +223,13 @@
     
     <Style Selector="Button.SettingsNav:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource SideBarButtonActiveBackground}"/>
+    </Style>
+    
+    <Style Selector="Button.NewInstance:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    
+    <Style Selector="Button.NewInstance:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
     </Style>
 </Styles>

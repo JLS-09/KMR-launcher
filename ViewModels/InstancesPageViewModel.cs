@@ -66,6 +66,19 @@ public partial class InstancesPageViewModel : PageViewModel
             }
         }
     } = "Never";
+    
+    public bool HasOneInstance
+    {
+        get;
+        set
+        {
+            if (field != value)
+            {
+                field = value;
+                OnPropertyChanged();
+            }
+        }
+    } = false;
 
     private AppSettings AppSettings
     {
@@ -108,6 +121,12 @@ public partial class InstancesPageViewModel : PageViewModel
                 .Replace(" minute", "m")
                 .Replace(" second", "s");
         }
+        HasOneInstance = AppSettings.Instances.Count == 1;
+    }
+
+    public InstancesPageViewModel()
+    {
+        
     }
 
     [RelayCommand]
