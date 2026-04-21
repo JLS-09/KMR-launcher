@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="1144" d:DesignHeight="720"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
              x:DataType="vm:InstancesPageViewModel"
              x:Class="KMRLauncherMvvm.Views.InstancesPageView"
@@ -13,5 +13,84 @@
         <vm:InstancesPageViewModel/>
     </Design.DataContext>
     
-    <Button Classes="Primary" Command="{Binding OpenNewInstanceWindowCommand}">ADD NEW INSTANCE</Button>
+    <StackPanel Margin="32" Spacing="32">
+        <Grid ColumnDefinitions="* Auto">
+            <TextBlock Grid.Column="0" Text="INSTANCES" FontFamily="{DynamicResource SpaceMonoBold}" FontSize="48" LetterSpacing="4" />
+            <Button Classes="Primary" Grid.Column="1" HorizontalAlignment="Right" Padding="24 8"
+                    Command="{Binding OpenNewInstanceWindowCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Label Classes="icon" FontWeight="Regular" Content="&#xE3D6;" FontSize="28"/>
+                    <TextBlock Text="CREATE NEW INSTANCE" LetterSpacing="2" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+        <Grid ColumnDefinitions="2* *" ColumnSpacing="24">
+            <Border Grid.Column="0" Padding="32" Background="{DynamicResource SideBarBackground}" 
+                    CornerRadius="12" IsVisible="{Binding PrimaryInstance,
+                            Converter={x:Static ObjectConverters.IsNotNull}}">
+                <StackPanel Spacing="48">
+                    <Grid ColumnDefinitions="* Auto">
+                        <StackPanel Grid.Column="0" Spacing="16">
+                            <Border Background="#321C1D" Padding="12 4" HorizontalAlignment="Left" CornerRadius="4">
+                                <TextBlock Text="PRIMARY_DEPLOYMENT" Foreground="{DynamicResource PrimaryRed}"
+                                           LetterSpacing="1" FontFamily="{DynamicResource SpaceMonoBold}"/>
+                            </Border>
+                            <TextBlock Text="{Binding PrimaryInstance.Name}" FontSize="40"
+                                       FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" LetterSpacing="1.5"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="STABLE_RELEASE" Foreground="{DynamicResource SecondaryText}"
+                                       FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="12" LetterSpacing="0.7"/>
+                            <TextBlock Text="{Binding PrimaryInstance.Version, StringFormat='v{0}'}"
+                                       HorizontalAlignment="Right" FontFamily="{DynamicResource SpaceGrotesk}"
+                                       FontWeight="Bold" FontSize="24" LetterSpacing="4"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid ColumnSpacing="32" ColumnDefinitions="* * * *">
+                        <Border Grid.Column="0" Background="#0E0E0F" Padding="16" CornerRadius="8">
+                            <StackPanel>
+                                    <TextBlock Text="TOTAL_MODS" Foreground="{DynamicResource SecondaryText}"
+                                               FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="10"
+                                               LetterSpacing="1"/>
+                                    <TextBlock Text="{Binding PrimaryInstance.Mods.Count}" Foreground="{DynamicResource PrimaryText}"
+                                               FontFamily="" FontSize="24" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Background="#0E0E0F" Padding="16" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="LAST_PLAYED" Foreground="{DynamicResource SecondaryText}"
+                                           FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="10"
+                                           LetterSpacing="1"/>
+                                <TextBlock Text="{Binding PrimaryLastPlayed}" Foreground="{DynamicResource PrimaryText}"
+                                           FontFamily="" FontSize="24" FontWeight="Bold" TextWrapping="Wrap"
+                                           ToolTip.Tip="{Binding PrimaryInstance.LastPlayed}"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Background="#0E0E0F" Padding="16" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="TOTAL_PLAYTIME" Foreground="{DynamicResource SecondaryText}"
+                                           FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="10"
+                                           LetterSpacing="1"/>
+                                <TextBlock Text="{Binding PrimaryReadablePlayTime}" Foreground="{DynamicResource PrimaryText}"
+                                           FontFamily="" FontSize="24" FontWeight="Bold" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="3" Background="#0E0E0F" Padding="16" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="DISK_SPACE" Foreground="{DynamicResource SecondaryText}"
+                                           FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="10"
+                                           LetterSpacing="1"/>
+                                <TextBlock Text="{Binding PrimaryInstallSize}" Foreground="{DynamicResource PrimaryText}"
+                                           FontFamily="" FontSize="24" FontWeight="Bold" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Background="#1B1B1C" CornerRadius="12">
+                
+            </Border>
+        </Grid>
+    </StackPanel>
+    
 </UserControl>

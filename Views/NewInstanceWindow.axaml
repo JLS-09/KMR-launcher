@@ -3,12 +3,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:KMRLauncherMvvm.ViewModels"
-        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
         x:Class="KMRLauncherMvvm.Views.NewInstanceWindow"
         x:DataType="viewModels:NewInstanceViewModel"
         Background="{DynamicResource PrimaryBackground}"
         Foreground="{DynamicResource PrimaryText}"
-        Width="500" Height="400"
+        Width="500" Height="450"
         Title="Create new Instance">
     
     <Design.DataContext>
@@ -55,7 +55,19 @@
                 </ScrollViewer>
             </Grid>
         </StackPanel>
-        <Button Classes="Primary" Command="{Binding AddNewInstanceCommand}">Add new instance</Button>
+        <Button Classes="Primary" Command="{Binding AddNewInstanceCommand}"
+                CommandParameter="{Binding $parent[Window]}">Add new instance</Button>
+        <StackPanel Spacing="8">
+            <ProgressBar 
+                Minimum="0" 
+                Maximum="1"
+                Value="{Binding ExtractionProgress}"
+                IsVisible="{Binding IsExtracting}" />
+
+            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Stretch"
+                Text="{Binding CurrentFile}"
+                IsVisible="{Binding IsExtracting}"/>
+        </StackPanel>
     </StackPanel>
     
         

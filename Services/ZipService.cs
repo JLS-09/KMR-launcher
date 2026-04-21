@@ -50,13 +50,20 @@ public class ZipService
         }
     }
     
-    public async Task ExtractFolderFromZip(string zipPath, string folderInZip, string destinationPath)
+    public async Task ExtractFolderFromZip(string zipPath, string folderInZip, string destinationPath, IProgress<ExtractionProgress>? progress = null)
     {
         try
         {
             folderInZip = folderInZip.Replace("\\", "/").TrimEnd('/') + "/";
 
             await using var archive = await ZipFile.OpenReadAsync(zipPath);
+            
+            var entries = archive.Entries
+                .Where(e => e.FullName.StartsWith(folderInZip, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            
+            var total = entries.Count;
+            var current = 0;
             
             foreach (var entry in archive.Entries)
             {
@@ -73,12 +80,28 @@ public class ZipService
                 if (entry.FullName.EndsWith("/"))
                 {
                     Directory.CreateDirectory(destinationFilePath);
-                    continue;
                 }
-
-                Directory.CreateDirectory(Path.GetDirectoryName(destinationFilePath)!);
-                await entry.ExtractToFileAsync(destinationFilePath, overwrite: true);
+                else
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(destinationFilePath)!);
+                    
+                    progress?.Report(new ExtractionProgress
+                    {
+                        Percentage = (double)current / total,
+                        CurrentFile = relativePath
+                    });
+                    
+                    await entry.ExtractToFileAsync(destinationFilePath, overwrite: false);
+                }
+                
+                current++;
             }
+            
+            progress?.Report(new ExtractionProgress
+            {
+                Percentage = 1,
+                CurrentFile = "Done"
+            });
         }
         catch (Exception e)
         {

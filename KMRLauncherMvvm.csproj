@@ -24,6 +24,7 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+        <PackageReference Include="Humanizer" Version="3.0.10" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />

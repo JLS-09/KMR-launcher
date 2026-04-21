@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
@@ -13,6 +14,15 @@ namespace KMRLauncherMvvm.ViewModels;
 public partial class NewInstanceViewModel : PageViewModel
 {
     private ZipService ZipService { get; set; }
+    
+    [ObservableProperty]
+    private double extractionProgress;
+
+    [ObservableProperty]
+    private bool isExtracting;
+    
+    [ObservableProperty]
+    private string? currentFile;
     
     public AppSettings AppSettings
     {
@@ -85,7 +95,7 @@ public partial class NewInstanceViewModel : PageViewModel
 
         var files = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "Select KSP zip",
+            Title = "Select Folder",
             AllowMultiple = false
         });
 
@@ -96,10 +106,18 @@ public partial class NewInstanceViewModel : PageViewModel
     }
 
     [RelayCommand]
-    private async Task AddNewInstance()
+    private async Task AddNewInstance(Window window)
     {
         try
         {
+            IsExtracting = true;
+            ExtractionProgress = 0;
+
+            var progress = new Progress<ExtractionProgress>(p =>
+            {
+                ExtractionProgress = p.Percentage;
+                CurrentFile = $"Extracting: {p.CurrentFile}";
+            });
             
             var fullInstancePath = Path.Combine(InstancePath, Name);
             if (AppSettings.Instances.Any(i => i.Name == Name && i.RootPath == fullInstancePath))
@@ -108,13 +126,18 @@ public partial class NewInstanceViewModel : PageViewModel
             }
             
             Directory.CreateDirectory(fullInstancePath);
-            await ZipService.ExtractFolderFromZip(SelectedZip.Path, SelectedZip.RelativeRootPath, fullInstancePath);
-            AppSettings.Instances.Add(new Instance(Name, fullInstancePath));
+            await ZipService.ExtractFolderFromZip(SelectedZip.Path, SelectedZip.RelativeRootPath, fullInstancePath, progress);
+            AppSettings.Instances.Add(new Instance(Name, fullInstancePath, SelectedZip.Version));
             SettingsService.Save(AppSettings);
+            window.Close();
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
+        }
+        finally
+        {
+            IsExtracting = false;
         }
     }
 }
