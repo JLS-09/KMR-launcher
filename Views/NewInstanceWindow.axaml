@@ -58,10 +58,8 @@
         <Button Classes="Primary" Command="{Binding AddNewInstanceCommand}"
                 CommandParameter="{Binding $parent[Window]}">Add new instance</Button>
         <StackPanel Spacing="8">
-            <ProgressBar 
-                Minimum="0" 
-                Maximum="1"
-                Value="{Binding ExtractionProgress}"
+            <ProgressBar Minimum="0" Maximum="1" ShowProgressText="True" Foreground="{DynamicResource PrimaryRed}"
+                Value="{Binding ExtractionProgress}" 
                 IsVisible="{Binding IsExtracting}" />
 
             <TextBlock TextWrapping="Wrap" HorizontalAlignment="Stretch"

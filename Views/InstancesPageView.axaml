@@ -93,9 +93,59 @@
                     </Grid>
                 </StackPanel>
             </Border>
-            <Button Classes="NewInstance" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+            <Border Grid.Column="1" IsVisible="{Binding !HasZeroOrOneInstance}"
+                    Background="{DynamicResource SideBarBackground}" CornerRadius="12" Padding="32">
+                <Grid RowSpacing="16" RowDefinitions="Auto *">
+                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch">
+                        <Border Grid.Column="0" Padding="12" Background="{DynamicResource SecondaryButtonBackgrorund}"
+                                CornerRadius="8" HorizontalAlignment="Left">
+                            <Label Classes="icon" FontWeight="Regular" Content="&#xE3FE;" FontSize="32" Foreground="#A1A1AA"/>
+                        </Border>
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Right" Text="INSTANCE_02" FontFamily="{DynamicResource SpaceMonoRegular}"
+                                   VerticalAlignment="Top" FontSize="12" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"/>
+                    </Grid>
+                    <Grid Grid.Row="1" RowDefinitions="Auto Auto * *">
+                        <TextBlock Grid.Row="0" Text="{Binding SecondInstance.Name}" FontSize="20"
+                                   FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" LetterSpacing="1.5"/>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal">
+                            <TextBlock Text="{Binding SecondInstance.Version, StringFormat='KSP v{0} • '}"
+                                       FontSize="13" FontFamily="{DynamicResource SpaceMonoRegular}" Foreground="{DynamicResource SecondaryText}"/>
+                            <TextBlock Text="{Binding SecondInstance.Mods.Count, StringFormat='{}{0} Mods'}"
+                                       FontSize="13" FontFamily="{DynamicResource SpaceMonoRegular}" Foreground="{DynamicResource SecondaryText}"/>
+                        </StackPanel>
+                        <Grid Grid.Row="2" VerticalAlignment="Stretch" ColumnDefinitions="* *" Margin="0 24 0 24">
+                            <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="5">
+                                <TextBlock Text="PLAY_TIME" Foreground="{DynamicResource PrimaryRed}"
+                                           FontSize="14"
+                                           FontFamily="{DynamicResource SpaceMonoBold}"/>
+                                <TextBlock Text="213H" Foreground="{DynamicResource PrimaryText}"
+                                           FontSize="15" FontFamily="{DynamicResource Inter}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Vertical" Spacing="5">
+                                <TextBlock Text="LAST_PLAYED" Foreground="{DynamicResource PrimaryRed}" 
+                                           FontSize="14" FontFamily="{DynamicResource SpaceMonoBold}"/>
+                                <TextBlock Text="Yesterday" Foreground="{DynamicResource PrimaryText}"
+                                           FontSize="15" FontFamily="{DynamicResource Inter}"/>
+                            </StackPanel>
+                        </Grid>
+                        <Grid Grid.Row="3" VerticalAlignment="Bottom" ColumnDefinitions="4.5* * Auto" ColumnSpacing="8">
+                            <Button Grid.Column="0" Classes="Secondary" Padding="0 14"
+                                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">LAUNCH</Button>
+                            <Button Grid.Column="1" Classes="Secondary" Padding="6 6">
+                                <Label Classes="icon" FontWeight="Regular" Content="&#xE270;" FontSize="24" 
+                                       Foreground="#A1A1AA"/>
+                            </Button>
+                            <Button Grid.Column="2" Classes="Tertiary" Padding="0 4">
+                                <Label Classes="icon" FontWeight="Regular" Content="&#xE4A6;" FontSize="24"/>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+            <Button Classes="NewInstance" Grid.Column="{Binding InstancesCount}"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     Background="Transparent" Command="{Binding OpenNewInstanceWindowCommand}"
-                    IsVisible="{Binding HasOneInstance}">
+                    IsVisible="{Binding HasZeroOrOneInstance}" MinHeight="300">
                 <Grid Background="Transparent">
                     <Rectangle StrokeDashArray="1.5, 1" Stroke="#1F1F20" StrokeThickness="4" 
                                RadiusX="12" RadiusY="12"  Fill="Transparent"/>
