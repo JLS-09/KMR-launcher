@@ -38,9 +38,9 @@ public class Instance(string name, string rootPath, string version) : InstanceTi
     
     public string InstallSize => Helpers.BytesToString(Helpers.GetDirectorySize(RootPath));
 
-    public void DeleteInstance()
+    public async Task DeleteInstance()
     {
-        Directory.Delete(RootPath, true);
+        await Task.Factory.StartNew(path => Directory.Delete((string)path, true), RootPath);
         App.Settings.Instances.Remove(this);
         SettingsService.Save(App.Settings);
     }
