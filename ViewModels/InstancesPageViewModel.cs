@@ -2,7 +2,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.Input;
-using Humanizer;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
@@ -24,39 +23,6 @@ public partial class InstancesPageViewModel : PageViewModel
             OnPropertyChanged();
         }
     }
-    
-    public string? PrimaryInstallSize
-    {
-        get;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string? PrimaryReadablePlayTime
-    {
-        get;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            OnPropertyChanged();
-        }
-    } = "0s";
-
-    public string PrimaryLastPlayed
-    {
-        get;
-        set
-        {
-            if (field == value) return;
-            field = value;
-            OnPropertyChanged();
-        }
-    } = "Never";
     
     public bool HasZeroOrOneInstance
     {
@@ -128,32 +94,12 @@ public partial class InstancesPageViewModel : PageViewModel
         
         InstancesWithoutFirstRow =  new ObservableCollection<Instance>(AppSettings.Instances.Where(i => i.RootPath != PrimaryInstance.RootPath));
 
-        if (InstancesWithoutFirstRow.Count > 0)
-        {
-            SecondInstance = InstancesWithoutFirstRow.First();
-            InstancesWithoutFirstRow.RemoveAt(0);
-        }
+        if (InstancesWithoutFirstRow.Count <= 0) return;
         
-        PrimaryInstallSize = Helpers.BytesToString(Helpers.GetDirectorySize(PrimaryInstance.RootPath));
-
-        if (PrimaryInstance.PlayTime <= 0) return;
+        SecondInstance = InstancesWithoutFirstRow.First();
+        InstancesWithoutFirstRow.RemoveAt(0);
         
-        PrimaryLastPlayed = PrimaryInstance.LastPlayed.Humanize()
-            .Replace("year", "yr")
-            .Replace("month", "mon")
-            .Replace("day", "d")
-            .Replace("hour", "hr")
-            .Replace("minute", "min")
-            .Replace("second", "sec");
-        
-        PrimaryReadablePlayTime = new TimeSpan(0, 0, PrimaryInstance.PlayTime)
-            .Humanize(precision: 2, maxUnit: TimeUnit.Hour)
-            .Replace(" hours", "h")
-            .Replace(" minutes", "m")
-            .Replace(" seconds", "s")
-            .Replace(" hour", "h")
-            .Replace(" minute", "m")
-            .Replace(" second", "s");
+        Console.WriteLine(InstancesWithoutFirstRow.Count);
     }
 
     public InstancesPageViewModel()
