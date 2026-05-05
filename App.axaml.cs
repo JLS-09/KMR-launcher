@@ -22,7 +22,7 @@ namespace KMRLauncherMvvm;
 public class App : Application
 {
     
-    public static AppSettings Settings { get; private set; }
+    public static AppSettings Settings { get; set; }
     
     public override void Initialize()
     {
@@ -77,7 +77,7 @@ public class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void InitializeSettings()
+    public static void InitializeSettings()
     {
         var basePath = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") 
                        ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");

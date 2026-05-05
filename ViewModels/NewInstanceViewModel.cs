@@ -16,13 +16,13 @@ public partial class NewInstanceViewModel : PageViewModel
     private ZipService ZipService { get; set; }
     
     [ObservableProperty]
-    private double extractionProgress;
+    private double _extractionProgress;
 
     [ObservableProperty]
-    private bool isExtracting;
+    private bool _isExtracting;
     
     [ObservableProperty]
-    private string? currentFile;
+    private string? _currentFile;
     
     public AppSettings AppSettings
     {

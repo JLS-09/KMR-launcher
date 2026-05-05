@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1144" d:DesignHeight="720"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
+             xmlns:models="clr-namespace:KMRLauncherMvvm.Models"
              x:DataType="vm:InstancesPageViewModel"
              x:Class="KMRLauncherMvvm.Views.InstancesPageView"
              Background="{DynamicResource PrimaryBackground}"
@@ -16,7 +17,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="32" Spacing="32">
             <TextBlock Text="INSTANCES" FontFamily="{DynamicResource SpaceMonoBold}" FontSize="48" LetterSpacing="4" />
-            <StackPanel>
+            <StackPanel Spacing="24">
                 <Grid ColumnDefinitions="2* *" ColumnSpacing="24">
                     <Border Grid.Column="0" Padding="32" Background="#1F1F20"
                             CornerRadius="12"
@@ -100,7 +101,7 @@
                                         HorizontalAlignment="Stretch">
                                     MANAGE
                                 </Button>
-                                <Button Grid.Column="2" Classes="Tertiary">
+                                <Button Grid.Column="2" Classes="Tertiary" Command="{Binding PrimaryInstance.DeleteInstance}">
                                     <Label Classes="icon" FontWeight="Regular" Content="&#xE4A6;" FontSize="28" />
                                 </Button>
                             </Grid>
@@ -160,7 +161,7 @@
                                         <Label Classes="icon" FontWeight="Regular" Content="&#xE270;" FontSize="24"
                                                Foreground="#A1A1AA" />
                                     </Button>
-                                    <Button Grid.Column="2" Classes="Tertiary" Padding="0 4">
+                                    <Button Grid.Column="2" Classes="Tertiary" Padding="0 4" Command="{Binding SecondInstance.DeleteInstance}">
                                         <Label Classes="icon" FontWeight="Regular" Content="&#xE4A6;" FontSize="24" />
                                     </Button>
                                 </Grid>
@@ -188,11 +189,16 @@
                         </Grid>
                     </Button>
                 </Grid>
-                <UniformGrid Columns="3">
-                    <ItemsRepeater ItemsSource="{Binding InstancesWithoutFirstRow}">
-                        <ItemsRepeater.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="{DynamicResource SideBarBackground}" 
+                <ItemsControl ItemsSource="{Binding InstancesWithoutFirstRow}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="3" ColumnSpacing="24" RowSpacing="24"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.DataTemplates>
+                        <DataTemplate DataType="{x:Type models:Instance}">
+                            <Border Background="{DynamicResource SideBarBackground}" 
                                         CornerRadius="12" Padding="32">
                                     <Grid RowSpacing="16" RowDefinitions="Auto *">
                                         <Grid Grid.Row="0" ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch">
@@ -248,38 +254,40 @@
                                                     <Label Classes="icon" FontWeight="Regular" Content="&#xE270;" FontSize="24"
                                                            Foreground="#A1A1AA" />
                                                 </Button>
-                                                <Button Grid.Column="2" Classes="Tertiary" Padding="0 4">
+                                                <Button Grid.Column="2" Classes="Tertiary" Padding="0 4" Command="{Binding DeleteInstance}">
                                                     <Label Classes="icon" FontWeight="Regular" Content="&#xE4A6;" FontSize="24" />
                                                 </Button>
                                             </Grid>
                                         </Grid>
                                     </Grid>
                                 </Border>
-                            </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
-                    
-                    <Button Classes="NewInstance"
-                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                            Background="Transparent" Command="{Binding OpenNewInstanceWindowCommand}"
-                            MinHeight="300">
-                        <Grid Background="Transparent">
-                            <Rectangle StrokeDashArray="1.5, 1" Stroke="#1F1F20" StrokeThickness="4"
-                                       RadiusX="12" RadiusY="12" Fill="Transparent" />
-                            <StackPanel Spacing="16" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Border Background="{DynamicResource SideBarBackground}" VerticalAlignment="Center"
-                                        HorizontalAlignment="Center" Padding="16" CornerRadius="109">
-                                    <Label Classes="iconBold" FontWeight="Regular" Content="&#xE3D4;" FontSize="18"
-                                           Foreground="{DynamicResource SecondaryText}" />
-                                </Border>
-                                <TextBlock Text="NEW_INSTANCE" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           FontSize="16"
-                                           FontFamily="{DynamicResource SpaceMonoRegular}" LetterSpacing="1"
-                                           Foreground="{DynamicResource SecondaryText}" />
-                            </StackPanel>
-                        </Grid>
-                    </Button>
-                </UniformGrid>
+                        </DataTemplate>
+
+                        <DataTemplate DataType="{x:Type models:NewInstancePlaceholder}">
+                            <Button Classes="NewInstance"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).OpenNewInstanceWindowCommand}"
+                                    Background="Transparent" MinHeight="300">
+                                <Grid Background="Transparent">
+                                    <Rectangle StrokeDashArray="1.5, 1" Stroke="#1F1F20" StrokeThickness="4"
+                                               RadiusX="12" RadiusY="12" Fill="Transparent" />
+                                    <StackPanel Spacing="16" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Border Background="{DynamicResource SideBarBackground}" VerticalAlignment="Center"
+                                                HorizontalAlignment="Center" Padding="16" CornerRadius="109">
+                                            <Label Classes="iconBold" FontWeight="Regular" Content="&#xE3D4;" FontSize="18"
+                                                   Foreground="{DynamicResource SecondaryText}" />
+                                        </Border>
+                                        <TextBlock Text="NEW_INSTANCE" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   FontSize="16"
+                                                   FontFamily="{DynamicResource SpaceMonoRegular}" LetterSpacing="1"
+                                                   Foreground="{DynamicResource SecondaryText}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+
+                    </ItemsControl.DataTemplates>
+                </ItemsControl>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using Humanizer;
 using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.Models;
 
-public class Instance(string name, string rootPath, string version)
+public abstract class InstanceTile;
+
+public class Instance(string name, string rootPath, string version) : InstanceTile
 {
     public string Name { get; set; } = name;
     public string RootPath { get; set; } = rootPath;
@@ -33,4 +37,11 @@ public class Instance(string name, string rootPath, string version)
         .Replace("second", "sec");
     
     public string InstallSize => Helpers.BytesToString(Helpers.GetDirectorySize(RootPath));
+
+    public void DeleteInstance()
+    {
+        Directory.Delete(RootPath, true);
+        App.Settings.Instances.Remove(this);
+        SettingsService.Save(App.Settings);
+    }
 }

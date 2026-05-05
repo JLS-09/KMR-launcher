@@ -12,6 +12,8 @@ public static class SettingsService
         WriteIndented = true
     };
 
+    public static event EventHandler<AppSettings>? SettingsChanged;
+    
     public static void Save(AppSettings settings)
     {
         var basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -19,6 +21,10 @@ public static class SettingsService
         
         var json = JsonSerializer.Serialize(settings, Options);
         File.WriteAllText(appFolder, json);
+        
+        App.Settings = settings;
+        
+        SettingsChanged?.Invoke(null, settings);
     }
 
     public static AppSettings Load()
@@ -38,5 +44,13 @@ public static class SettingsService
         {
             return new AppSettings();
         }
+    }
+    
+    public static AppSettings Reload()
+    {
+        var settings = Load();
+        App.Settings = settings;
+        SettingsChanged?.Invoke(null, settings);
+        return settings;
     }
 }
