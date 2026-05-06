@@ -3,69 +3,145 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:KMRLauncherMvvm.ViewModels"
-        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="575"
         x:Class="KMRLauncherMvvm.Views.NewInstanceWindow"
         x:DataType="viewModels:NewInstanceViewModel"
-        Background="{DynamicResource PrimaryBackground}"
+        Background="#1F1F20"
         Foreground="{DynamicResource PrimaryText}"
-        Width="500" Height="450"
+        Width="700" Height="575"
         Title="Create new Instance">
     
     <Design.DataContext>
         <viewModels:NewInstanceViewModel/>
     </Design.DataContext>
     
-    <StackPanel Margin="32 16" Spacing="20">
-        <TextBlock Text="Create a new instance" FontSize="30" FontFamily="{DynamicResource SpaceGrotesk}" 
-                   FontWeight="Bold" LetterSpacing="1.4" HorizontalAlignment="Center"/>
-        <StackPanel Spacing="8">
-            <TextBlock Text="Name" LetterSpacing="0.7" Foreground="{DynamicResource SecondaryText}"
-                       FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="14"/>
-            <TextBox Text="{Binding Name}" AcceptsReturn="False" MaxLines="1" MaxLength="50"/>
+    <Window.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Background" Value="Black"/>
+        </Style>
+        
+        <Style Selector="ComboBox">
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+        
+        <Style Selector="TextBox:pointerover /template/ Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryRed}" />
+        </Style>
+        
+        <Style Selector="TextBox:focus /template/ Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryRed}"/>
+        </Style>
+        
+        <Style Selector="ComboBox:pointerover /template/ Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryRed}" />
+            <Setter Property="Background" Value="Black" />
+        </Style>
+        
+        <Style Selector="ComboBox:focus /template/ Border">
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="Black" />
+        </Style>
+        
+        <Style Selector="ComboBox:pressed /template/ Border">
+            <Setter Property="Background" Value="Black" />
+        </Style>
+    </Window.Styles>
+    
+    <StackPanel Margin="32 32" Spacing="32">
+        <StackPanel Spacing="4">
+            <TextBlock Text="CREATE NEW INSTANCE" FontSize="30" FontFamily="{DynamicResource SpaceMonoBold}" 
+                       LetterSpacing="1.5" HorizontalAlignment="Left"/>
+            <Rectangle Height="4" Fill="{DynamicResource PrimaryRed}" Width="80" HorizontalAlignment="Left"/>
         </StackPanel>
         <StackPanel Spacing="8">
-            <TextBlock Text="Version" Foreground="{DynamicResource SecondaryText}"
-                       FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="14"/>
-            <ComboBox ItemsSource="{Binding AppSettings.KspZips}"
-                      SelectedValue="{Binding SelectedZip}"
-                      Background="{DynamicResource SideBarBackground}"
-                      Width="100" BorderBrush="{DynamicResource PrimaryRed}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Version}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+            <TextBlock Text="IDENTIFIER / NAME" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+                       FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12"/>
+            <TextBox Text="{Binding Name}" AcceptsReturn="False" MaxLines="1" MaxLength="50"
+                     Height="48" Padding="16 0" FontSize="16" VerticalContentAlignment="Center" FontWeight="Regular"
+                     PlaceholderText="Instance Name" FontFamily="{DynamicResource Inter}"/>
         </StackPanel>
-        <StackPanel Spacing="8">
-            <TextBlock Text="Instance location" LetterSpacing="0.7" Foreground="{DynamicResource SecondaryText}"
-                       FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="14"/>
-            <Grid ColumnDefinitions="Auto, *">
-                <Button Grid.Column="0" Classes="Primary" HorizontalAlignment="Right"
-                        Command="{Binding BrowseFolderCommand}"
-                        CommandParameter="{Binding $parent[Window]}">Choose Folder</Button>
-                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Disabled" 
-                              HorizontalScrollBarVisibility="Auto" Padding="15 0">
-                    <TextBlock FontFamily="{DynamicResource SpaceMonoRegular}"
-                               Foreground="{DynamicResource SecondaryText}"
-                               VerticalAlignment="Center"
-                               TextWrapping="NoWrap"
-                               FontSize="15"
-                               Text="{Binding InstancePath}"/>
-                </ScrollViewer>
-            </Grid>
-        </StackPanel>
-        <Button Classes="Primary" Command="{Binding AddNewInstanceCommand}"
-                CommandParameter="{Binding $parent[Window]}">Add new instance</Button>
-        <StackPanel Spacing="8">
-            <ProgressBar Minimum="0" Maximum="1" ShowProgressText="True" Foreground="{DynamicResource PrimaryRed}"
-                Value="{Binding ExtractionProgress}" 
-                IsVisible="{Binding IsExtracting}" />
-
-            <TextBlock TextWrapping="Wrap" HorizontalAlignment="Stretch"
-                Text="{Binding CurrentFile}"
-                IsVisible="{Binding IsExtracting}"/>
-        </StackPanel>
+        <Grid ColumnDefinitions="* *" ColumnSpacing="24">
+            <StackPanel Grid.Column="0" Spacing="8">
+                <TextBlock Text="KSP VERSION" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+                           FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12"/>
+                <ComboBox ItemsSource="{Binding AppSettings.KspZips}"
+                          SelectedValue="{Binding SelectedZip}"
+                          Background="Black" HorizontalAlignment="Stretch" Height="48">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Version}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Spacing="8">
+                <TextBlock Text="FS PATH" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+                           FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12"/>
+                <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Disabled" Height="48" HorizontalAlignment="Stretch"
+                                  HorizontalScrollBarVisibility="Auto" Background="Black">
+                        <TextBlock FontFamily="{DynamicResource Inter}"
+                                   Foreground="{DynamicResource SecondaryText}"
+                                   VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                                   TextWrapping="NoWrap" FontSize="16" Height="48" Padding="16 12"
+                                   Text="{Binding InstancePath}"/>
+                    </ScrollViewer>
+                    <Button Grid.Column="1" Classes="Secondary" HorizontalAlignment="Right"
+                            Command="{Binding BrowseFolderCommand}"
+                            CommandParameter="{Binding $parent[Window]}">
+                        <Label Classes="icon" FontWeight="Regular" Content="&#xE256;" FontSize="24"
+                               Foreground="#A1A1AA" />
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Grid>
+        <Border Height="100" Background="#1B1B1C" BorderBrush="{DynamicResource PrimaryRed}"
+                BorderThickness="2 0 0 0" Padding="24">
+            <StackPanel Spacing="16">
+                <Grid ColumnDefinitions="* Auto" ColumnSpacing="8">
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Text="TASK STATUS" Foreground="{DynamicResource SecondaryText}"
+                                   FontFamily="{DynamicResource SpaceMonoBold}" LetterSpacing="2"
+                                   FontSize="13"/>
+                        <TextBlock Text="IDLE" FontFamily="{DynamicResource Inter}" FontSize="16"
+                                   LetterSpacing="1.5" IsVisible="{Binding !IsExtracting}"/>
+                        <DockPanel IsVisible="{Binding IsExtracting}">
+                            <TextBlock Text="Extracting: " FontFamily="{DynamicResource Inter}" FontSize="16"
+                                       LetterSpacing="1.5"/>
+                            <TextBlock TextTrimming="CharacterEllipsis" FontFamily="{DynamicResource Inter}" FontSize="14" 
+                                       LetterSpacing="1.5" Foreground="{DynamicResource SecondaryText}" VerticalAlignment="Center"
+                                       Text="{Binding CurrentFile}"/>
+                        </DockPanel>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="{Binding ExtractionProgressHumanized}"
+                               VerticalAlignment="Bottom" Foreground="{DynamicResource PrimaryRed}" FontSize="24" 
+                               FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" LetterSpacing="2"/>
+                </Grid>
+                <ProgressBar Minimum="0" Maximum="1" Foreground="{DynamicResource PrimaryRed}" Height="4"
+                             Value="{Binding ExtractionProgress}" 
+                             IsVisible="{Binding IsExtracting}" />
+            </StackPanel>
+        </Border>
+        <DockPanel>
+            <Button Classes="Secondary" Padding="32 16" IsCancel="True"
+                    Command="{Binding CloseWindowCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                <TextBlock Text="CANCEL" FontFamily="{DynamicResource SpaceGrotesk}"
+                           FontWeight="Bold" LetterSpacing="1.5" FontSize="18"/>
+            </Button>
+            <Button Classes="Primary" Command="{Binding AddNewInstanceCommand}"
+                    CommandParameter="{Binding $parent[Window]}" Padding="31 16" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Label Classes="icon" FontWeight="Regular" Content="&#xE3D6;" FontSize="24"/>
+                    <TextBlock Text="ADD NEW INSTANCE" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
+                               FontSize="18" FontWeight="Bold" LetterSpacing="1"/>
+                </StackPanel>
+            </Button>
+        </DockPanel>
     </StackPanel>
     
         

@@ -17,6 +17,9 @@ public partial class NewInstanceViewModel : PageViewModel
     
     [ObservableProperty]
     private double _extractionProgress;
+    
+    [ObservableProperty]
+    private string _extractionProgressHumanized;
 
     [ObservableProperty]
     private bool _isExtracting;
@@ -106,6 +109,12 @@ public partial class NewInstanceViewModel : PageViewModel
     }
 
     [RelayCommand]
+    private void CloseWindow(Window window)
+    {
+        window.Close();
+    }
+    
+    [RelayCommand]
     private async Task AddNewInstance(Window window)
     {
         try
@@ -116,7 +125,8 @@ public partial class NewInstanceViewModel : PageViewModel
             var progress = new Progress<ExtractionProgress>(p =>
             {
                 ExtractionProgress = p.Percentage;
-                CurrentFile = $"Extracting: {p.CurrentFile}";
+                ExtractionProgressHumanized = $"{Math.Round(p.Percentage * 100, 1)}%";
+                CurrentFile = p.CurrentFile;
             });
             
             var fullInstancePath = Path.Combine(InstancePath, Name);
@@ -129,7 +139,7 @@ public partial class NewInstanceViewModel : PageViewModel
             await ZipService.ExtractFolderFromZip(SelectedZip.Path, SelectedZip.RelativeRootPath, fullInstancePath, progress);
             AppSettings.Instances.Add(new Instance(Name, fullInstancePath, SelectedZip.Version));
             SettingsService.Save(AppSettings);
-            window.Close();
+            CloseWindow(window);
         }
         catch (Exception e)
         {

@@ -70,14 +70,14 @@ public class ZipService
                 if (!entry.FullName.StartsWith(folderInZip, StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                var relativePath = entry.FullName.Substring(folderInZip.Length);
+                var relativePath = entry.FullName[folderInZip.Length..];
 
                 if (string.IsNullOrEmpty(relativePath))
                     continue;
 
                 var destinationFilePath = Path.Combine(destinationPath, relativePath);
 
-                if (entry.FullName.EndsWith("/"))
+                if (entry.FullName.EndsWith('/'))
                 {
                     Directory.CreateDirectory(destinationFilePath);
                 }
