@@ -103,11 +103,13 @@ public partial class InstancesPageViewModel : PageViewModel
         
         InstancesWithoutFirstRow =  new ObservableCollection<InstanceTile>(AppSettings.Instances.Where(i => i.RootPath != PrimaryInstance.RootPath));
 
-        if (InstancesWithoutFirstRow.Count > 0)
+        if (InstancesWithoutFirstRow.Count == 0)
         {
-            SecondInstance = (Instance) InstancesWithoutFirstRow.First();
-            InstancesWithoutFirstRow.RemoveAt(0);
+            return;
         }
+        
+        SecondInstance = (Instance) InstancesWithoutFirstRow.First();
+        InstancesWithoutFirstRow.RemoveAt(0);
         
         InstancesWithoutFirstRow.Add(NewInstancePlaceholder.Instance);
     }

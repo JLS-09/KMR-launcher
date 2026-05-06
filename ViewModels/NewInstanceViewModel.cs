@@ -125,7 +125,7 @@ public partial class NewInstanceViewModel : PageViewModel
             var progress = new Progress<ExtractionProgress>(p =>
             {
                 ExtractionProgress = p.Percentage;
-                ExtractionProgressHumanized = $"{Math.Round(p.Percentage * 100, 1)}%";
+                ExtractionProgressHumanized = $"{Math.Round(p.Percentage * 100, 0)}%";
                 CurrentFile = p.CurrentFile;
             });
             

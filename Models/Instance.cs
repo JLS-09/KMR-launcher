@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Humanizer;
@@ -46,8 +45,33 @@ public class Instance(string name, string rootPath, string version) : InstanceTi
         SettingsService.Save(App.Settings);
     }
 
-    public Process LaunchInstanceWithProton()
+    public async Task LaunchInstanceWithProton()
     {
-        return ProtonLauncher.Launch(Name, Path.Combine(RootPath, "KSP_x64.exe"));
+        var kspProcess = ProtonLauncher.Launch(Name, Path.Combine(RootPath, "KSP_x64.exe"));
+        var startTime = kspProcess.StartTime;
+        
+        kspProcess.OutputDataReceived += (_, e) => 
+        {
+            if (e.Data != null) Console.WriteLine(e.Data);
+        };
+        kspProcess.ErrorDataReceived += (_, e) => 
+        {
+            if (e.Data != null) Console.Error.WriteLine(e.Data);
+        };
+        kspProcess.BeginOutputReadLine();
+        kspProcess.BeginErrorReadLine();
+        
+        await kspProcess.WaitForExitAsync();
+        
+        var endTime = kspProcess.ExitTime;
+        var playedSeconds = (endTime - startTime).TotalSeconds;
+
+        PlayTime += (int) playedSeconds;
+        
+        LastPlayed = kspProcess.ExitTime;
+        
+        SettingsService.Save(App.Settings);
+
+        SettingsService.Reload();
     }
 }
