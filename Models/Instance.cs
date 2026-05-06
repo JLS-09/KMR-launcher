@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Humanizer;
@@ -43,5 +44,10 @@ public class Instance(string name, string rootPath, string version) : InstanceTi
         await Task.Factory.StartNew(path => Directory.Delete((string)path, true), RootPath);
         App.Settings.Instances.Remove(this);
         SettingsService.Save(App.Settings);
+    }
+
+    public Process LaunchInstanceWithProton()
+    {
+        return ProtonLauncher.Launch(Name, Path.Combine(RootPath, "KSP_x64.exe"));
     }
 }

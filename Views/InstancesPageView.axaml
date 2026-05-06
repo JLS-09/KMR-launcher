@@ -88,12 +88,12 @@
                             </Grid>
                             <Grid ColumnDefinitions="7* 2* *" ColumnSpacing="16">
                                 <Button Classes="Primary" Grid.Column="0" HorizontalAlignment="Stretch" CornerRadius="4"
-                                        Padding="0 16">
+                                        Padding="0 16" Command="{Binding PrimaryInstance.LaunchInstanceWithProton}">
                                     <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"
                                                 HorizontalAlignment="Center">
                                         <Label Classes="icon" FontWeight="Regular" Content="&#xE3D0;" FontSize="28" />
                                         <TextBlock Text="LAUNCH" LetterSpacing="2" VerticalAlignment="Center" FontSize="24"
-                                                   FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
+                                                   FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"/>
                                     </StackPanel>
                                 </Button>
                                 <Button Grid.Column="1" Classes="Secondary" Padding="16"
@@ -154,7 +154,8 @@
                                 <Grid Grid.Row="3" VerticalAlignment="Bottom" ColumnDefinitions="4.5* * Auto"
                                       ColumnSpacing="8">
                                     <Button Grid.Column="0" Classes="Secondary" Padding="0 14"
-                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                            Command="{Binding SecondInstance.LaunchInstanceWithProton}">
                                         LAUNCH
                                     </Button>
                                     <Button Grid.Column="1" Classes="Secondary" Padding="6 6">
@@ -247,7 +248,8 @@
                                             <Grid Grid.Row="3" VerticalAlignment="Bottom" ColumnDefinitions="4.5* * Auto"
                                                   ColumnSpacing="8">
                                                 <Button Grid.Column="0" Classes="Secondary" Padding="0 14"
-                                                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                                                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                                        Command="{Binding LaunchInstanceWithProton}">
                                                     LAUNCH
                                                 </Button>
                                                 <Button Grid.Column="1" Classes="Secondary" Padding="6 6">
