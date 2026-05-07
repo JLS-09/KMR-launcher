@@ -45,9 +45,9 @@ public class Instance(string name, string rootPath, string version) : InstanceTi
         SettingsService.Save(App.Settings);
     }
 
-    public async Task LaunchInstanceWithProton()
+    public async Task LaunchInstanceWithWine()
     {
-        var kspProcess = ProtonLauncher.Launch(Name, Path.Combine(RootPath, "KSP_x64.exe"));
+        var kspProcess = WineLauncher.Launch(Name, Path.Combine(RootPath, "KSP_x64.exe"));
         var startTime = kspProcess.StartTime;
         
         kspProcess.OutputDataReceived += (_, e) => 
