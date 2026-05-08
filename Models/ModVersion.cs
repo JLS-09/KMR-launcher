@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Humanizer;
 
 namespace KMRLauncherMvvm.Models;
 
@@ -52,7 +53,7 @@ public class ModVersion
     [JsonPropertyName("conflicts")]  public List<Relationship>? Conflicts { get; set; }
     [JsonPropertyName("replaced_by")] public JsonElement? ReplacedBy { get; set; }
     
-    
+    public string LastUpdatedHumanized => ReleaseDate is null ? "" : ReleaseDate.Humanize();
 }
 
 public class DownloadHash
@@ -80,11 +81,12 @@ public class InstallDirective
     public List<string>? FilterRegexp { get; set; }
 
     [JsonPropertyName("include_only")] public List<string>? IncludeOnly { get; set; }
+    [JsonPropertyName("comment")]     public string? Comment { get; set; }
 }
 
 public class Relationship
 {
-    [JsonPropertyName("name")]        public required string Name { get; set; }
+    [JsonPropertyName("name")]        public string? Name { get; set; }
     [JsonPropertyName("version")]     public string? Version { get; set; }
     [JsonPropertyName("min_version")] public string? MinVersion { get; set; }
     [JsonPropertyName("max_version")] public string? MaxVersion { get; set; }

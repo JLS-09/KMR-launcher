@@ -29,5 +29,8 @@ public class Mod
     [JsonPropertyName("resources")]
     public Resources? Resources { get; set; }
     
+    [JsonPropertyName("latest_version")]
+    public ModVersion? LatestVersion { get; set; }
+    
     public string AuthorsDisplay => string.Join(", ", Author);
 }

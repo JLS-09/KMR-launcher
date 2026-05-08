@@ -136,10 +136,15 @@
                                                    FontFamily="{DynamicResource SpaceGrotesk}"/>
                                     </ToolTip.Tip>
                                 </TextBlock>
-                                <TextBlock Grid.Column="2" Classes="ModListEntry" Text="V1.2.3" VerticalAlignment="Center"
+                                <TextBlock Grid.Column="2" Classes="ModListEntry" Text="{Binding LatestVersion.Version}" VerticalAlignment="Center"
                                            Foreground="{DynamicResource SecondaryText}" />
-                                <TextBlock Grid.Column="3" Classes="ModListEntry" Text="12 Hours ago" VerticalAlignment="Center"
-                                           Foreground="{DynamicResource SecondaryText}" />
+                                <TextBlock Grid.Column="3" Classes="ModListEntry" Text="{Binding LatestVersion.LastUpdatedHumanized}" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SecondaryText}">
+                                    <ToolTip.Tip>
+                                        <TextBlock Text="{Binding LatestVersion.ReleaseDate}" FontSize="14"
+                                                   FontFamily="{DynamicResource Inter}"/>
+                                    </ToolTip.Tip>
+                                </TextBlock>
                                 <Button Classes="Primary ModList"
                                         Grid.Column="4" VerticalAlignment="Center"
                                         Command="{Binding $parent[UserControl].((vm:DiscoverPageViewModel)DataContext).InstallModCommand}"

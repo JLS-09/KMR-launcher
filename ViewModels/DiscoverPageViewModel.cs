@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -102,6 +101,8 @@ public partial class DiscoverPageViewModel : PageViewModel
 
         try
         {
+            _isFetching = true;
+            ConnectionStatus = "ARCHIVE // FETCHING FROM CKAN...";
             var response = await _api.GetModsAsync(10, NextCursor, ModFilter, AuthorFilter);
             foreach (var mod in response.Data)
             {
@@ -113,10 +114,9 @@ public partial class DiscoverPageViewModel : PageViewModel
         finally
         {
             _isFetching = false;
+            ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
         }
     }
-    
-    
     
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task InstallMod(Mod mod)
