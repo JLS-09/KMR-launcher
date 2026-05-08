@@ -9,79 +9,148 @@
              x:Class="KMRLauncherMvvm.Views.DiscoverPageView"
              Background="{DynamicResource PrimaryBackground}"
              Foreground="{DynamicResource PrimaryText}">
-    
+
     <Design.DataContext>
-        <vm:DiscoverPageViewModel/>
+        <vm:DiscoverPageViewModel />
     </Design.DataContext>
     
-    <Grid RowDefinitions="Auto, *" Margin="32 16">
-        <Grid Grid.Row="0" ColumnDefinitions="*, auto" RowDefinitions="*, auto" >
-            <TextBlock Grid.Column="0" Grid.Row="0" 
-                       Text="{Binding ConnectionStatus}" 
+    <UserControl.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Background" Value="#1F1F20"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+        
+        <Style Selector="TextBox:pointerover /template/ Border">
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Background" Value="#1F1F20"/>
+        </Style>
+        
+        <Style Selector="TextBox:focus /template/ Border">
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Background" Value="#1F1F20"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto Auto Auto *" Margin="32 16" RowSpacing="24">
+        <Grid Grid.Row="0" ColumnDefinitions="*, auto" RowDefinitions="*, auto">
+            <TextBlock Grid.Column="0" Grid.Row="0"
+                       Text="{Binding ConnectionStatus}"
                        FontFamily="{DynamicResource SpaceGrotesk}"
                        FontWeight="Regular"
                        FontSize="16"
                        LetterSpacing="1.4"
-                       Foreground="{DynamicResource SecondaryText}"/>
+                       Foreground="{DynamicResource SecondaryText}" />
             <TextBlock Grid.Column="1" Grid.Row="0"
                        VerticalAlignment="Center" HorizontalAlignment="Right"
-                       Text="NETWORK STATUS" 
+                       Text="NETWORK STATUS"
                        FontFamily="{DynamicResource SpaceGrotesk}"
                        FontWeight="Regular"
                        FontSize="14"
                        LetterSpacing="1.4"
-                       Foreground="{DynamicResource SecondaryText}"/>
+                       Foreground="{DynamicResource SecondaryText}" />
             <TextBlock Grid.Column="1" Grid.Row="1"
                        VerticalAlignment="Center" HorizontalAlignment="Right"
-                       Text="NETWORK_SYNCHRONIZED" 
+                       Text="NETWORK_SYNCHRONIZED"
                        FontFamily="{DynamicResource SpaceGrotesk}"
                        FontWeight="Bold"
                        FontSize="16"
                        LetterSpacing="1.4"
-                       Foreground="{DynamicResource PrimaryGreen}"/>
+                       Foreground="{DynamicResource PrimaryGreen}" />
         </Grid>
-        <Border Grid.Row="1" Background="{DynamicResource SideBarBackground}" CornerRadius="8" Margin="0 24 0 0">
-            <Grid RowDefinitions="Auto, *">
-                <Border Grid.Row="0" BorderThickness="0 0 0 1" BorderBrush="{DynamicResource PrimaryRed}">
-                    <Grid ColumnDefinitions="4*, 2*, *, *, 120" Margin="24 16">
-                        <TextBlock Grid.Column="0" Classes="ModlistHeaderText" Text="MOD NAME"/>
-                        <TextBlock Grid.Column="1" Classes="ModlistHeaderText" Text="AUTHOR"/>
-                        <TextBlock Grid.Column="2" Classes="ModlistHeaderText" Text="VERSION"/>
-                        <TextBlock Grid.Column="3" Classes="ModlistHeaderText" Text="LAST UPDATED"/>
-                        <TextBlock Grid.Column="4" Classes="ModlistHeaderText" Text="INSTALL" HorizontalAlignment="Right"/>
-                    </Grid>
-                </Border>
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ListBox ItemsSource="{Binding Mods}"
-                             SelectionMode="Single"
-                             Background="Transparent">
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel/>
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                        
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="5">
-                                    <Grid ColumnDefinitions="4*, 2*, *, *, 120" Margin="24 16">
-                                        <TextBlock Grid.Column="0" Classes="ModListEntry" Text="{Binding Name}"/>
-                                        <TextBlock Grid.Column="1" Classes="ModListEntry" Text="{Binding AuthorsDisplay}"/>
-                                        <TextBlock Grid.Column="2" Classes="ModListEntry" Text="V1.2.3"
-                                                   Foreground="{DynamicResource SecondaryText}"/>
-                                        <TextBlock Grid.Column="3" Classes="ModListEntry" Text="12 Hours ago"
-                                                   Foreground="{DynamicResource SecondaryText}"/>
-                                        <Button Classes="Primary ModList"
-                                                Grid.Column="4"
-                                                Command="{Binding $parent[UserControl].((vm:DiscoverPageViewModel)DataContext).InstallModCommand}"
-                                                CommandParameter="{Binding}">INSTALL</Button>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </ScrollViewer>
-            </Grid>
-        </Border>
+        <Grid Grid.Row="1" ColumnDefinitions="* * * *" ColumnSpacing="4">
+            <TextBox Grid.Column="0" PlaceholderText="MOD NAME..." FontFamily="{DynamicResource SpaceGrotesk}"
+                     Text="{Binding ModFilter}">
+                <TextBox.InnerLeftContent>
+                    <Label Classes="iconBold" FontWeight="Regular" Content="&#xE30C;" FontSize="18" 
+                           Foreground="{DynamicResource SecondaryText}" Padding="16 0 0 0"/>
+                </TextBox.InnerLeftContent>
+            </TextBox>
+            <TextBox Grid.Column="1" PlaceholderText="AUTHOR..." FontFamily="{DynamicResource SpaceGrotesk}"
+                     Text="{Binding AuthorFilter}">
+                <TextBox.InnerLeftContent>
+                    <Label Classes="iconBold" FontWeight="Regular" Content="&#xE4C2;" FontSize="20" 
+                           Foreground="{DynamicResource SecondaryText}" Padding="16 0 0 0"/>
+                </TextBox.InnerLeftContent>
+            </TextBox>
+            <TextBox Grid.Column="2" />
+            <Button Grid.Column="3" Classes="Secondary" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="0"
+                    Command="{Binding FetchModsCommand}" IsDefault="True">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="APPLY FILTERS"/>
+                    <Label Classes="icon" FontWeight="Regular" Content="&#xE266;" FontSize="20" Padding="16 0 0 0"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+        <Grid Grid.Row="2" ColumnDefinitions="4*, 1.5*, 0.75*, *, 60" Margin="0 16 24 16" ColumnSpacing="8">
+            <TextBlock Grid.Column="0" Text="MOD_NAME" Foreground="{DynamicResource SecondaryText}"
+                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"/>
+            <TextBlock Grid.Column="1" Text="AUTHOR(S)" Foreground="{DynamicResource SecondaryText}"
+                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"/>
+            <TextBlock Grid.Column="2" Text="VERSION" Foreground="{DynamicResource SecondaryText}"
+                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"/>
+            <TextBlock Grid.Column="3" Text="LAST_UPDATE" Foreground="{DynamicResource SecondaryText}"
+                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"/>
+            <TextBlock Grid.Column="4" Text="" Foreground="{DynamicResource SecondaryText}"
+                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"/>
+        </Grid>
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      x:Name="ModsScrollViewer" ScrollChanged="OnScrollChanged">
+            <ItemsControl ItemsSource="{Binding ModList}"
+                     Background="Transparent">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{DynamicResource SideBarBackground}" Padding="24">
+                            <Grid ColumnDefinitions="4*, 1.5*, 0.75*, *, 60" Margin="0 0 24 0" ColumnSpacing="8">
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Classes="ModListEntry" Text="{Binding Name}" FontSize="18"
+                                               TextTrimming="CharacterEllipsis" FontWeight="Bold"
+                                               FontFamily="{DynamicResource SpaceGrotesk}">
+                                        <ToolTip.Tip>
+                                            <TextBlock Text="{Binding Name}" FontSize="14"
+                                                       FontFamily="{DynamicResource SpaceGrotesk}"/>
+                                        </ToolTip.Tip>
+                                    </TextBlock>
+                                    <TextBlock Classes="ModListEntry" Text="{Binding Abstract}" FontSize="12"
+                                               TextTrimming="CharacterEllipsis" FontWeight="Regular" Foreground="{DynamicResource SecondaryText}"
+                                               FontFamily="{DynamicResource Inter}">
+                                        <ToolTip.Tip>
+                                            <TextBlock Text="{Binding Abstract}" FontSize="14"
+                                                       FontFamily="{DynamicResource Inter}"/>
+                                        </ToolTip.Tip>
+                                    </TextBlock>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Classes="ModListEntry" Text="{Binding AuthorsDisplay}"
+                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                           FontFamily="{DynamicResource SpaceGrotesk}">
+                                    <ToolTip.Tip>
+                                        <TextBlock Text="{Binding AuthorsDisplay}" FontSize="14"
+                                                   FontFamily="{DynamicResource SpaceGrotesk}"/>
+                                    </ToolTip.Tip>
+                                </TextBlock>
+                                <TextBlock Grid.Column="2" Classes="ModListEntry" Text="V1.2.3" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SecondaryText}" />
+                                <TextBlock Grid.Column="3" Classes="ModListEntry" Text="12 Hours ago" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SecondaryText}" />
+                                <Button Classes="Primary ModList"
+                                        Grid.Column="4" VerticalAlignment="Center"
+                                        Command="{Binding $parent[UserControl].((vm:DiscoverPageViewModel)DataContext).InstallModCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Label Classes="icon" FontWeight="Regular" Content="&#xE20A;" FontSize="20"/>
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </UserControl>

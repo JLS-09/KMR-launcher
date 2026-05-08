@@ -160,14 +160,6 @@
         <Setter Property="LetterSpacing" Value="6"></Setter>
     </Style>
     
-    <Style Selector="TextBlock.ModlistHeaderText">
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-        <Setter Property="LetterSpacing" Value="1"/>
-        <Setter Property="Foreground" Value="{DynamicResource SecondaryText}"/>
-        <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="FontSize" Value="12"/>
-    </Style>
-    
     <Style Selector="Button.Primary.ModList">
         <Setter Property="CornerRadius" Value="2"/>
         <Setter Property="FontFamily" Value="{DynamicResource SpaceMonoRegular}"/>

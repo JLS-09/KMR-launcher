@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -12,36 +13,110 @@ namespace KMRLauncherMvvm.ViewModels;
 public partial class DiscoverPageViewModel : PageViewModel
 {
     private readonly IModApiService _api;
+    private bool _isFetching;
 
-    public ObservableCollection<Mod> Mods
+    public ObservableCollection<Mod> ModList
     {
         get;
-        set { if (field != value) { field = value; OnPropertyChanged(); }}
+        set
+        {
+            if (field == value) return;
+            field = value; OnPropertyChanged();
+        }
+    }
+
+    private string? NextCursor
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value; OnPropertyChanged();
+        }
+    }
+
+    private bool HasNext
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value; OnPropertyChanged();
+        }
+    }
+
+    public string ModFilter
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value; OnPropertyChanged();
+        }
+    }
+
+    public string AuthorFilter
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+            field = value; OnPropertyChanged();
+        }
     }
 
     public string ConnectionStatus
     {
         get;
-        set { if (field != value) { field = value; OnPropertyChanged(); }}
+        set
+        {
+            if (field == value) return;
+            field = value; OnPropertyChanged();
+        }
     } = "ARCHIVE // CONNECTING TO CKAN...";
 
     public DiscoverPageViewModel(IModApiService api)
     {
         _api = api;
         PageName = ApplicationPageNames.Discover;
-        PopulateMods();
+        _ = FetchMods();
     }
 
     public DiscoverPageViewModel()
     {
     }
 
-    private async Task PopulateMods()
+    [RelayCommand]
+    private async Task FetchMods()
     {
-        var modList = await _api.GetModsAsync(1, 20);
-        Mods = new ObservableCollection<Mod>(modList);
+        var response = await _api.GetModsAsync(10, null, ModFilter, AuthorFilter);
+        ModList = new ObservableCollection<Mod>(response.Data);
+        NextCursor = response.Pagination.NextCursor;
+        HasNext = response.Pagination.HasNextPage;
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
     }
+
+    public async Task FetchMoreMods()
+    {
+        if (_isFetching || !HasNext) return;
+
+        try
+        {
+            var response = await _api.GetModsAsync(10, NextCursor, ModFilter, AuthorFilter);
+            foreach (var mod in response.Data)
+            {
+                ModList.Add(mod);
+            }
+            NextCursor = response.Pagination.NextCursor;
+            HasNext = response.Pagination.HasNextPage;
+        }
+        finally
+        {
+            _isFetching = false;
+        }
+    }
+    
+    
     
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task InstallMod(Mod mod)
