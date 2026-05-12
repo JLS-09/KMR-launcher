@@ -6,6 +6,8 @@ using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services.Api;
+using KMRLauncherMvvm.ViewModels.InstallMods;
+using KMRLauncherMvvm.Views.InstallMods;
 
 namespace KMRLauncherMvvm.ViewModels;
 
@@ -126,5 +128,11 @@ public partial class DiscoverPageViewModel : PageViewModel
         {
             WriteIndented = true
         }));
+        
+        var window = new InstallModsWindow
+        {
+            DataContext = new InstallModsViewModel()
+        };
+        window.Show();
     }
 }

@@ -1,0 +1,41 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
+        xmlns:views="clr-namespace:KMRLauncherMvvm.Views.InstallMods"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="600"
+        x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsWindow"
+        x:DataType="viewModels:InstallModsViewModel"
+        Background="#1F1F20"
+        Foreground="{DynamicResource PrimaryText}"
+        Width="700" Height="600"
+        Title="Install Mod">
+    
+    <Window.DataTemplates>
+        <DataTemplate DataType="viewModels:InstallModsViewModel">
+            <views:InstallModsSelectVersionStep/>
+        </DataTemplate>
+    </Window.DataTemplates>
+    
+    <Design.DataContext>
+        <viewModels:InstallModsViewModel/>
+    </Design.DataContext>
+    
+    <StackPanel Margin="32 32" Spacing="32">
+        <ContentControl Content="{Binding CurrentStep}"/>
+        <DockPanel>
+            <Button Classes="Secondary" Padding="32 16" IsCancel="True" Command="{Binding CancelCommand}">
+                <TextBlock Text="CANCEL" FontFamily="{DynamicResource SpaceGrotesk}"
+                           FontWeight="Bold" LetterSpacing="1.5" FontSize="18"/>
+            </Button>
+            <Button Classes="Primary" Padding="31 16" HorizontalAlignment="Right" Command="{Binding NextCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="NEXT" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
+                               FontSize="18" FontWeight="Bold" LetterSpacing="1"/>
+                    <Label Classes="icon" FontWeight="Regular" Content="&#xE06C;" FontSize="24"/>
+                </StackPanel>
+            </Button>
+        </DockPanel>
+    </StackPanel>
+</Window>

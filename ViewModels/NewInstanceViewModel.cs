@@ -11,7 +11,7 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels;
 
-public partial class NewInstanceViewModel : PageViewModel
+public partial class NewInstanceViewModel : ViewModelBase
 {
     private ZipService ZipService { get; set; }
     

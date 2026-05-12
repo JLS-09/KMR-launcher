@@ -34,7 +34,7 @@ public partial class InstancesPageViewModel : PageViewModel
         }
     } = false;
     
-    public string InstancesCount
+    public string? InstancesCount
     {
         get;
         set
@@ -45,7 +45,7 @@ public partial class InstancesPageViewModel : PageViewModel
         }
     }
 
-    public ObservableCollection<InstanceTile> InstancesWithoutFirstRow
+    public ObservableCollection<InstanceTile>? InstancesWithoutFirstRow
     {
         get;
         set
@@ -56,10 +56,10 @@ public partial class InstancesPageViewModel : PageViewModel
         }
     }
     
-    public Instance SecondInstance
+    public Instance? SecondInstance
     {
         get;
-        set
+        private set
         {
             if (field == value) return;
             field = value;
@@ -67,7 +67,7 @@ public partial class InstancesPageViewModel : PageViewModel
         }
     }
 
-    private AppSettings AppSettings
+    private AppSettings? AppSettings
     {
         get;
         set

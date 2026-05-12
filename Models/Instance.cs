@@ -29,12 +29,12 @@ public class Instance(string name, string rootPath, string version) : InstanceTi
         .Replace(" second", "s");
     
     public string LastPlayedHumanized => PlayTime <= 0 ? "Never" : LastPlayed.Humanize()
-        .Replace("year", "yr")
-        .Replace("month", "mon")
-        .Replace("day", "d")
-        .Replace("hour", "hr")
-        .Replace("minute", "min")
-        .Replace("second", "sec");
+        .Replace(" year", " yr")
+        .Replace(" month", " mon")
+        .Replace(" day", " d")
+        .Replace(" hour", " hr")
+        .Replace(" minute", " min")
+        .Replace(" second", " sec");
     
     public string InstallSize => Helpers.BytesToString(Helpers.GetDirectorySize(RootPath));
 
