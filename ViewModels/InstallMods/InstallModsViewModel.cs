@@ -26,11 +26,16 @@ public partial class InstallModsViewModel : ViewModelBase
     
     public InstallModsViewModel(List<ModVersion> versions)
     {
-        _steps = [new InstallModsSelectVersionStepViewModel(InstallModsData)];
-        SetStep(0, fromIndex: -1);
+        versions.Sort((x, y) =>
+            DateTime.Compare(x.ReleaseDate ?? DateTime.MinValue, y.ReleaseDate ?? DateTime.MinValue));
+        
+        versions.Reverse();
         
         foreach (var version in versions)
             InstallModsData.AvailableVersions.Add(version);
+     
+        _steps = [new InstallModsSelectVersionStepViewModel(InstallModsData)];
+        SetStep(0, fromIndex: -1);
     }
     
     partial void OnCurrentStepChanged(InstallModsStepViewModel? oldValue, InstallModsStepViewModel newValue)

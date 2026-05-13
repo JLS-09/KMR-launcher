@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KMRLauncherMvvm.Models;
 
@@ -17,6 +18,9 @@ public partial class InstallModsSelectVersionStepViewModel : InstallModsStepView
         };
 
         _instances = App.Settings.Instances;
+
+        InstallModsData.SelectedInstance = Instances.FirstOrDefault();
+        InstallModsData.RequestedVersion = InstallModsData.AvailableVersions.FirstOrDefault();
     }
     
     public override string Title => "Choose instance and version";
