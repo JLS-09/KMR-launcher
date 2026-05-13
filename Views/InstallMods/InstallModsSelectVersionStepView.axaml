@@ -2,11 +2,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="600"
+             xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
+             x:DataType="vm:InstallModsSelectVersionStepViewModel"
+             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
              Background="#1F1F20"
              Foreground="{DynamicResource PrimaryText}"
-             Width="700" Height="600"
-             x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsSelectVersionStep">
+             x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsSelectVersionStepView">
     
     <UserControl.Styles>
         <Style Selector="ComboBox">
@@ -30,7 +31,7 @@
         </Style>
     </UserControl.Styles>
     
-    <StackPanel Spacing="32">
+    <StackPanel Margin="32 32" Spacing="32">
         <StackPanel Spacing="4">
             <TextBlock Text="INSTALL MODS" FontSize="30" FontFamily="{DynamicResource SpaceMonoBold}" 
                        LetterSpacing="1.5" HorizontalAlignment="Left"/>
@@ -44,10 +45,12 @@
         <StackPanel Spacing="8">
             <TextBlock Text="TARGET INSTANCE" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
                        FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12"/>
-            <ComboBox Background="Black" HorizontalAlignment="Stretch" Height="48">
+            <ComboBox Background="Black" HorizontalAlignment="Stretch" Height="48"
+                      ItemsSource="{Binding Instances}"
+                      SelectedItem="{Binding InstallModsData.SelectedInstance}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="Test" />
+                        <TextBlock Text="{Binding Name}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
@@ -55,10 +58,12 @@
         <StackPanel Spacing="8">
             <TextBlock Text="MOD VERSION" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
                        FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12"/>
-            <ComboBox Background="Black" HorizontalAlignment="Stretch" Height="48">
+            <ComboBox Background="Black" HorizontalAlignment="Stretch" Height="48"
+                      ItemsSource="{Binding InstallModsData.AvailableVersions}"
+                      SelectedItem="{Binding InstallModsData.RequestedVersion}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="Test" />
+                        <TextBlock Text="{Binding Version}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>

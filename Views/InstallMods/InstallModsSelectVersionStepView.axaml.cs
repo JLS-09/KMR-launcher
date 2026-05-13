@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace KMRLauncherMvvm.Views.InstallMods;
 
-public partial class InstallModsSelectVersionStep : UserControl
+public partial class InstallModsSelectVersionStepView : UserControl
 {
-    public InstallModsSelectVersionStep()
+    public InstallModsSelectVersionStepView()
     {
         InitializeComponent();
     }

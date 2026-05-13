@@ -14,7 +14,7 @@
     
     <Window.DataTemplates>
         <DataTemplate DataType="viewModels:InstallModsViewModel">
-            <views:InstallModsSelectVersionStep/>
+            <views:InstallModsSelectVersionStepView/>
         </DataTemplate>
     </Window.DataTemplates>
     
@@ -22,9 +22,9 @@
         <viewModels:InstallModsViewModel/>
     </Design.DataContext>
     
-    <StackPanel Margin="32 32" Spacing="32">
-        <ContentControl Content="{Binding CurrentStep}"/>
-        <DockPanel>
+    <Grid RowDefinitions="* Auto">
+        <ContentControl Grid.Row="0" Content="{Binding CurrentStep}" VerticalAlignment="Stretch"/>
+        <DockPanel Grid.Row="1" Margin="32" VerticalAlignment="Bottom">
             <Button Classes="Secondary" Padding="32 16" IsCancel="True" Command="{Binding CancelCommand}">
                 <TextBlock Text="CANCEL" FontFamily="{DynamicResource SpaceGrotesk}"
                            FontWeight="Bold" LetterSpacing="1.5" FontSize="18"/>
@@ -37,5 +37,5 @@
                 </StackPanel>
             </Button>
         </DockPanel>
-    </StackPanel>
+    </Grid>
 </Window>

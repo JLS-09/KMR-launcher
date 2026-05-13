@@ -1,17 +1,24 @@
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;
 
-public class InstallModsSelectVersionStepViewModel : InstallModsStepViewModel
+public partial class InstallModsSelectVersionStepViewModel : InstallModsStepViewModel
 {
+    [ObservableProperty] private ObservableCollection<Instance> _instances;
+    
     public InstallModsSelectVersionStepViewModel(InstallModsData installModsData) : base(installModsData)
-    {InstallModsData.PropertyChanged += (_, e) =>
+    {
+        InstallModsData.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(Models.InstallModsData.SelectedInstance))
                 OnPropertyChanged(nameof(CanGoNext));
         };
+
+        _instances = App.Settings.Instances;
     }
     
     public override string Title => "Choose instance and version";
-    public override bool CanGoNext => InstallModsData.SelectedInstance is not null && InstallModsData.RequestedVersions.Count > 0;
+    public override bool CanGoNext => InstallModsData.SelectedInstance is not null && InstallModsData.RequestedVersion is not null;
 }

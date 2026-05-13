@@ -4,6 +4,7 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Models;
+using KMRLauncherMvvm.Services.Api;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;
 
@@ -23,11 +24,13 @@ public partial class InstallModsViewModel : ViewModelBase
     public event Action<InstallModsData>? Finished;
     public event Action? Cancelled;
     
-    public InstallModsViewModel()
+    public InstallModsViewModel(List<ModVersion> versions)
     {
         _steps = [new InstallModsSelectVersionStepViewModel(InstallModsData)];
-
         SetStep(0, fromIndex: -1);
+        
+        foreach (var version in versions)
+            InstallModsData.AvailableVersions.Add(version);
     }
     
     partial void OnCurrentStepChanged(InstallModsStepViewModel? oldValue, InstallModsStepViewModel newValue)

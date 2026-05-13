@@ -124,14 +124,10 @@ public partial class DiscoverPageViewModel : PageViewModel
     private async Task InstallMod(Mod mod)
     {
         var versionList = await _api.GetVersionsByModIdAsync(mod.Id);
-        Console.WriteLine(JsonSerializer.Serialize(versionList, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        }));
         
         var window = new InstallModsWindow
         {
-            DataContext = new InstallModsViewModel()
+            DataContext = new InstallModsViewModel(versionList)
         };
         window.Show();
     }
