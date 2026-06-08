@@ -29,11 +29,11 @@
                 <TextBlock Text="CANCEL" FontFamily="{DynamicResource SpaceGrotesk}"
                            FontWeight="Bold" LetterSpacing="1.5" FontSize="18"/>
             </Button>
-            <Button Classes="Primary" Padding="31 16" HorizontalAlignment="Right" Command="{Binding NextCommand}">
+            <Button Classes="Primary" Padding="32 16" HorizontalAlignment="Right" Command="{Binding NextCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock Text="NEXT" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
                                FontSize="18" FontWeight="Bold" LetterSpacing="1"/>
-                    <Label Classes="icon" FontWeight="Regular" Content="&#xE06C;" FontSize="24"/>
+                    <Label Classes="icon" FontWeight="Regular" Content="&#xE06C;" FontSize="20"/>
                 </StackPanel>
             </Button>
         </DockPanel>

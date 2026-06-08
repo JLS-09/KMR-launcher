@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace KMRLauncherMvvm.Models;
@@ -29,8 +30,8 @@ public class Mod
     [JsonPropertyName("resources")]
     public Resources? Resources { get; set; }
     
-    [JsonPropertyName("latest_version")]
-    public ModVersion? LatestVersion { get; set; }
-    
+    [JsonPropertyName("versions")] public List<ModVersion> Versions { get; set; } = [];
+
+    public ModVersion? LatestVersion => Versions.FirstOrDefault();
     public string AuthorsDisplay => string.Join(", ", Author);
 }

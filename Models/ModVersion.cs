@@ -9,7 +9,6 @@ namespace KMRLauncherMvvm.Models;
 public class ModVersion
 {
     [JsonPropertyName("_id")]       public required string Id { get; set; }
-    [JsonPropertyName("__v")]       public int V { get; set; }
     [JsonPropertyName("identifier")] public required string Identifier { get; set; }
     [JsonPropertyName("version")]   public required string Version { get; set; }
     [JsonPropertyName("spec_version")]
@@ -27,7 +26,7 @@ public class ModVersion
 
     [JsonPropertyName("download")]
     [JsonConverter(typeof(StringOrArrayConverter))]
-    public required List<string> Download { get; set; }
+    public List<string>? Download { get; set; }
 
     [JsonPropertyName("download_hash")]         public DownloadHash? DownloadHash { get; set; }
     [JsonPropertyName("download_size")]         public int? DownloadSize { get; set; }

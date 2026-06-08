@@ -96,8 +96,7 @@
             <TextBlock Grid.Column="4" Text="" Foreground="{DynamicResource SecondaryText}"
                        FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"/>
         </Grid>
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                      x:Name="ModsScrollViewer" ScrollChanged="OnScrollChanged">
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding ModList}"
                      Background="Transparent">
                 <ItemsControl.ItemsPanel>

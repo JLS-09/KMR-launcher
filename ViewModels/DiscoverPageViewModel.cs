@@ -1,6 +1,4 @@
-using System;
 using System.Collections.ObjectModel;
-using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
@@ -90,40 +88,15 @@ public partial class DiscoverPageViewModel : PageViewModel
     [RelayCommand]
     private async Task FetchMods()
     {
-        var response = await _api.GetModsAsync(10, null, ModFilter, AuthorFilter);
-        ModList = new ObservableCollection<Mod>(response.Data);
-        NextCursor = response.Pagination.NextCursor;
-        HasNext = response.Pagination.HasNextPage;
+        var response = await _api.GetAllModsAsync();
+        ModList = new ObservableCollection<Mod>(response);
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
-    }
-
-    public async Task FetchMoreMods()
-    {
-        if (_isFetching || !HasNext) return;
-
-        try
-        {
-            _isFetching = true;
-            ConnectionStatus = "ARCHIVE // FETCHING FROM CKAN...";
-            var response = await _api.GetModsAsync(10, NextCursor, ModFilter, AuthorFilter);
-            foreach (var mod in response.Data)
-            {
-                ModList.Add(mod);
-            }
-            NextCursor = response.Pagination.NextCursor;
-            HasNext = response.Pagination.HasNextPage;
-        }
-        finally
-        {
-            _isFetching = false;
-            ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
-        }
     }
     
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task InstallMod(Mod mod)
     {
-        var versionList = await _api.GetVersionsByModIdAsync(mod.Id);
+        var versionList = mod.Versions;
         
         var window = new InstallModsWindow
         {

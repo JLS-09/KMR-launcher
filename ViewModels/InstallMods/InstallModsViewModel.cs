@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Models;
-using KMRLauncherMvvm.Services.Api;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;
 
@@ -26,16 +26,16 @@ public partial class InstallModsViewModel : ViewModelBase
     
     public InstallModsViewModel(List<ModVersion> versions)
     {
-        versions.Sort((x, y) =>
-            DateTime.Compare(x.ReleaseDate ?? DateTime.MinValue, y.ReleaseDate ?? DateTime.MinValue));
-        
-        versions.Reverse();
-        
         foreach (var version in versions)
             InstallModsData.AvailableVersions.Add(version);
      
         _steps = [new InstallModsSelectVersionStepViewModel(InstallModsData)];
         SetStep(0, fromIndex: -1);
+    }
+
+    public InstallModsViewModel()
+    {
+        
     }
     
     partial void OnCurrentStepChanged(InstallModsStepViewModel? oldValue, InstallModsStepViewModel newValue)
@@ -61,7 +61,10 @@ public partial class InstallModsViewModel : ViewModelBase
     private bool CanFinish() => CurrentStep.CanGoNext && IsLast;
     
     [RelayCommand(CanExecute = nameof(CanGoNext))]
-    private void Next() => SetStep(_index + 1, _index);
+    private void Next() {
+        Console.WriteLine(JsonSerializer.Serialize(InstallModsData));
+        SetStep(_index + 1, _index);
+    }
 
     [RelayCommand(CanExecute = nameof(CanGoBack))]
     private void Back() => SetStep(_index - 1, _index);
