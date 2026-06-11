@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -64,21 +65,14 @@ public partial class DiscoverPageViewModel : PageViewModel
     [RelayCommand]
     private void ApplyFilters()
     {
-        ModListFiltered = new ObservableCollection<Mod>(_modList.Where(mod =>
-        {
-            if (string.IsNullOrWhiteSpace(ModFilter) && string.IsNullOrEmpty(AuthorFilter))
-                return true;
-            
-            if (!string.IsNullOrWhiteSpace(ModFilter) && !string.IsNullOrEmpty(AuthorFilter))
-            {
-                return mod.Name.ToLower().Contains(ModFilter.ToLower()) && 
-                       mod.AuthorsDisplay.ToLower().Contains(AuthorFilter.ToLower());
-            }
+        var nameFilter = ModFilter.Trim();
+        var authorFilter = AuthorFilter.Trim();
 
-            return !string.IsNullOrWhiteSpace(ModFilter) ? 
-                mod.Name.ToLower().Contains(ModFilter.ToLower()) : 
-                mod.AuthorsDisplay.ToLower().Contains(AuthorFilter.ToLower());
-        }));
+        var filtered = _modList.Where(mod =>
+            (nameFilter.IsWhiteSpace() || mod.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase)) &&
+            (authorFilter.IsWhiteSpace() || mod.AuthorsDisplay.Contains(authorFilter, StringComparison.OrdinalIgnoreCase)));
+
+        ModListFiltered = new ObservableCollection<Mod>(filtered);
     }
     
     [RelayCommand(AllowConcurrentExecutions = true)]
