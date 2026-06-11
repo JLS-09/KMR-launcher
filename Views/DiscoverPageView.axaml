@@ -75,14 +75,7 @@
                 </TextBox.InnerLeftContent>
             </TextBox>
             <TextBox Grid.Column="2" />
-            <Button Grid.Column="3" Classes="Secondary" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="0"
-                    Command="{Binding FetchModsCommand}" IsDefault="True">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="APPLY FILTERS" />
-                    <Label Classes="icon" FontWeight="Regular" Content="&#xE266;" FontSize="20" Padding="16 0 0 0" />
-                </StackPanel>
-            </Button>
+            <TextBox Grid.Column="3" />
         </Grid>
         <Grid Grid.Row="2" ColumnDefinitions="4*, 1.5*, 0.75*, *, 60" Margin="0 16 24 16" ColumnSpacing="8">
             <TextBlock Grid.Column="0" Text="MOD_NAME" Foreground="{DynamicResource SecondaryText}"
@@ -96,7 +89,7 @@
             <TextBlock Grid.Column="4" Text="" Foreground="{DynamicResource SecondaryText}"
                        FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
         </Grid>
-        <ListBox ItemsSource="{Binding ModList}"
+        <ListBox ItemsSource="{Binding ModListFiltered}"
                  Background="Transparent" Grid.Row="3"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
