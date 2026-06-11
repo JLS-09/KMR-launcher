@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -37,20 +39,16 @@ public class ModApiService(HttpClient http) : IModApiService
 
     public async Task<List<Mod>> GetAllModsAsync()
     {
-        var response = await http.GetAsync("api/mods/all");
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-        
         var options = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-            
         };
+
+        await using var stream = await http.GetStreamAsync("api/mods/all");
         
         try {
-            var mods = JsonSerializer.Deserialize<List<Mod>>(json, options);
-            return mods;
+            return (await JsonSerializer.DeserializeAsync<List<Mod>>(stream, options))!;
         } catch (JsonException ex) {
             Console.WriteLine($"Path: {ex.Path}, LineNumber: {ex.LineNumber}");
             Console.WriteLine(ex.Message);

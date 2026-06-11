@@ -54,9 +54,9 @@ public partial class DiscoverPageViewModel : PageViewModel
     private async Task FetchMods()
     {
         _isLoading = true;
-        var response = await _api.GetAllModsAsync();
+        var mods = await Task.Run(() => _api.GetAllModsAsync());
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
-        _modList = ModListFiltered = new ObservableCollection<Mod>(response);
+        _modList = ModListFiltered = new ObservableCollection<Mod>(mods);
         _isLoading = false;
         ApplyFilters();
     }
