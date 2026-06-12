@@ -37,7 +37,7 @@ public class ModApiService(HttpClient http) : IModApiService
         return JsonSerializer.Deserialize<GetModsResponse>(json, options)!;
     }
 
-    public async Task<List<Mod>> GetAllModsAsync(IProgress<double>? progress = null)
+    public async Task<List<Mod>> GetAllModsAsync(IProgress<ModFetchProgress>? progress = null)
     {
         var options = new JsonSerializerOptions
         {
@@ -64,11 +64,10 @@ public class ModApiService(HttpClient http) : IModApiService
         {
             if (string.IsNullOrWhiteSpace(line)) continue;
 
+            Mod? mod;
             try
             {
-                var mod = JsonSerializer.Deserialize<Mod>(line, options);
-                if (mod != null)
-                    mods.Add(mod);
+                mod = JsonSerializer.Deserialize<Mod>(line, options);
             }
             catch (JsonException ex)
             {
@@ -76,11 +75,19 @@ public class ModApiService(HttpClient http) : IModApiService
                 Console.WriteLine(ex.Message);
                 throw;
             }
-
+            
+            if (mod != null) mods.Add(mod);
+            
             received++;
             if (total > 0)
             {
-                progress?.Report(((double)received / total) * 100);
+                Console.WriteLine(received);
+                progress?.Report(new ModFetchProgress
+                {
+                    TotalMods =  total,
+                    ModsReceived =  received,
+                    CurrentModName = mod?.Name
+                });
             }
         }
         return mods;

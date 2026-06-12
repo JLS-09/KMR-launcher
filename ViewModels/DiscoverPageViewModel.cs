@@ -18,7 +18,7 @@ public partial class DiscoverPageViewModel : PageViewModel
     private bool _isLoading;
     private ObservableCollection<Mod> _modList = [];
     
-    [ObservableProperty] private double _loadProgress;
+    [ObservableProperty] private ModFetchProgress _loadProgress;
     [ObservableProperty] private ObservableCollection<Mod> _modListFiltered = [];
     [ObservableProperty] private string _connectionStatus = "ARCHIVE // CONNECTING TO CKAN...";
     [ObservableProperty] private string _modFilter = "";
@@ -56,7 +56,7 @@ public partial class DiscoverPageViewModel : PageViewModel
     private async Task FetchMods()
     {
         _isLoading = true;
-        var progress = new Progress<double>(pct => LoadProgress = pct);
+        var progress = new Progress<ModFetchProgress>(pct => LoadProgress = pct);
         var mods = await Task.Run(() => _api.GetAllModsAsync(progress));
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
         _modList = ModListFiltered = new ObservableCollection<Mod>(mods);

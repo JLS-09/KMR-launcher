@@ -35,15 +35,24 @@
 
     <Grid RowDefinitions="Auto Auto Auto *" Margin="32 16" RowSpacing="24">
         <Grid Grid.Row="0" ColumnDefinitions="*, auto" RowDefinitions="*, auto" ColumnSpacing="32">
-            <ProgressBar Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" ShowProgressText="True" Height="24"
+            <ProgressBar Grid.Column="0" Grid.Row="0" ShowProgressText="True" Height="24"
                          Foreground="{DynamicResource PrimaryRed}" CornerRadius="0" 
-                         Value="{Binding LoadProgress}">
+                         Value="{Binding LoadProgress.ModsReceived}"
+                         Maximum="{Binding LoadProgress.TotalMods}">
                 <ProgressBar.Transitions>
                     <Transitions>
                         <DoubleTransition Property="Value" Duration="0:0:0.5" Easing="CubicEaseOut"/>
                     </Transitions>
                 </ProgressBar.Transitions>
             </ProgressBar>
+            <TextBlock Grid.Column="0" Grid.Row="1"
+                       VerticalAlignment="Center" HorizontalAlignment="Right"
+                       Text="{Binding LoadProgress.CurrentModName}"
+                       FontFamily="{DynamicResource SpaceGrotesk}"
+                       FontWeight="Regular"
+                       FontSize="14"
+                       LetterSpacing="1.4"
+                       Foreground="{DynamicResource SecondaryText}" />
             <TextBlock Grid.Column="1" Grid.Row="0"
                        VerticalAlignment="Center" HorizontalAlignment="Right"
                        Text="NETWORK STATUS"
