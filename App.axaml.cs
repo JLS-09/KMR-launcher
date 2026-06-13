@@ -33,9 +33,12 @@ public class App : Application
     {
         InitializeSettings();
         
+        var modListService = new ModListService();
+        
         var collection = new ServiceCollection();
         collection.AddSingleton<IModApiService, ModApiService>();
         collection.AddSingleton<ZipService>();
+        collection.AddSingleton(modListService);
         
         var config = new ConfigurationBuilder()
             .AddUserSecrets<App>()

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -7,52 +8,58 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using KMRLauncherMvvm.Models;
+using LibGit2Sharp;
 
 namespace KMRLauncherMvvm.Services.Api;
 
-public class ModApiService(HttpClient http) : IModApiService
+public class ModApiService(HttpClient http, ModListService modList) : IModApiService
 {
-    public async Task<GetModsResponse> GetModsAsync(
-        int pageSize, 
-        string? cursor = null, 
-        string? modFilter = null, 
-        string? authorFilter = null
-        )
+    public async Task GetAllModsAsync(IProgress<ModFetchProgress>? progress = null, bool isRefresh = false)
     {
-        var response = await http.GetAsync(
-            $"api/mods?page_size={pageSize}" +
-            $"{(cursor is not null ? $"&cursor={cursor}" : "")}" +
-            $"{(modFilter is not null ? $"&mod_filter={modFilter}" : "")}" +
-            $"{(authorFilter is not null ? $"&author_filter={authorFilter}" : "")}"
-            );
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-
         var options = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
         
-        return JsonSerializer.Deserialize<GetModsResponse>(json, options)!;
-    }
+        var refs = Repository.ListRemoteReferences("https://github.com/KSP-CKAN/CKAN-meta.git");
+        var latestCommitHash = refs.First(r => r.CanonicalName == "refs/heads/master").TargetIdentifier;
+        
+        var basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var appFolder = Path.Combine(basePath, "kmrLauncher/mods.json");
+        
+        Directory.CreateDirectory(Path.Combine(basePath, "kmrLauncher"));
 
-    public async Task<List<Mod>> GetAllModsAsync(IProgress<ModFetchProgress>? progress = null)
-    {
-        var options = new JsonSerializerOptions
+        if (File.Exists(appFolder) && !isRefresh)
         {
-            PropertyNameCaseInsensitive = true,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-        };
+            progress?.Report(new ModFetchProgress
+            {
+                TotalMods =  1,
+                ModsReceived =  1,
+                CurrentModName = "Loading cache",
+                IsCache = true
+            });
+            try
+            {
+                var json = await File.ReadAllTextAsync(appFolder);
+                var modsCache = JsonSerializer.Deserialize<ModsCache>(json, options);
+                if (modsCache is not null && modsCache.CurrentCommitHash == latestCommitHash ) 
+                    modList.Mods = new ObservableCollection<Mod>(modsCache.Mods);
+                return;
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Path: {ex.Path}, LineNumber: {ex.LineNumber}");
+                Console.WriteLine(ex.Message);
+            }
+        }
 
         using var response = await http.GetAsync("api/mods/all", HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
 
         var total = 0;
         if (response.Headers.TryGetValues("X-Total-Count", out var values))
-        {
             int.TryParse(values.First(), out total);
-        }
 
         var mods = new List<Mod>();
         var received = 0;
@@ -68,7 +75,6 @@ public class ModApiService(HttpClient http) : IModApiService
             try
             {
                 mod = JsonSerializer.Deserialize<Mod>(line, options);
-
             }
             catch (JsonException ex)
             {
@@ -94,30 +100,18 @@ public class ModApiService(HttpClient http) : IModApiService
             
             received++;
             if (total > 0)
-            {
                 progress?.Report(new ModFetchProgress
                 {
                     TotalMods =  total,
                     ModsReceived =  received,
                     CurrentModName = mod?.Name
                 });
-            }
         }
-        return mods;
-    }
+        
+        var cache = new ModsCache{Mods = mods, CurrentCommitHash = latestCommitHash};
+        var modlistJson = JsonSerializer.Serialize(cache, options);
+        await File.WriteAllTextAsync(appFolder, modlistJson);
 
-    public async Task<List<ModVersion>> GetVersionsByModIdAsync(string modId)
-    {
-        var response = await http.GetAsync($"api/mods/{modId}/versions");
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-        
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-        
-        return JsonSerializer.Deserialize<List<ModVersion>>(json, options)!;
+        modList.Mods = new ObservableCollection<Mod>(mods);
     }
 }
