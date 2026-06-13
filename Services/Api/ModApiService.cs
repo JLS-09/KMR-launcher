@@ -12,31 +12,6 @@ namespace KMRLauncherMvvm.Services.Api;
 
 public class ModApiService(HttpClient http) : IModApiService
 {
-    public async Task<GetModsResponse> GetModsAsync(
-        int pageSize, 
-        string? cursor = null, 
-        string? modFilter = null, 
-        string? authorFilter = null
-        )
-    {
-        var response = await http.GetAsync(
-            $"api/mods?page_size={pageSize}" +
-            $"{(cursor is not null ? $"&cursor={cursor}" : "")}" +
-            $"{(modFilter is not null ? $"&mod_filter={modFilter}" : "")}" +
-            $"{(authorFilter is not null ? $"&author_filter={authorFilter}" : "")}"
-            );
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-        };
-        
-        return JsonSerializer.Deserialize<GetModsResponse>(json, options)!;
-    }
-
     public async Task<List<Mod>> GetAllModsAsync(IProgress<ModFetchProgress>? progress = null)
     {
         var options = new JsonSerializerOptions
@@ -50,9 +25,7 @@ public class ModApiService(HttpClient http) : IModApiService
 
         var total = 0;
         if (response.Headers.TryGetValues("X-Total-Count", out var values))
-        {
             int.TryParse(values.First(), out total);
-        }
 
         var mods = new List<Mod>();
         var received = 0;
@@ -68,7 +41,6 @@ public class ModApiService(HttpClient http) : IModApiService
             try
             {
                 mod = JsonSerializer.Deserialize<Mod>(line, options);
-
             }
             catch (JsonException ex)
             {
@@ -94,30 +66,13 @@ public class ModApiService(HttpClient http) : IModApiService
             
             received++;
             if (total > 0)
-            {
                 progress?.Report(new ModFetchProgress
                 {
                     TotalMods =  total,
                     ModsReceived =  received,
                     CurrentModName = mod?.Name
                 });
-            }
         }
         return mods;
-    }
-
-    public async Task<List<ModVersion>> GetVersionsByModIdAsync(string modId)
-    {
-        var response = await http.GetAsync($"api/mods/{modId}/versions");
-        response.EnsureSuccessStatusCode();
-        var json = await response.Content.ReadAsStringAsync();
-        
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-        
-        return JsonSerializer.Deserialize<List<ModVersion>>(json, options)!;
     }
 }
