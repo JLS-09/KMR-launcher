@@ -16,7 +16,8 @@
 
     <Application.Resources>
         <SolidColorBrush x:Key="PrimaryRed">#DF0105</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryGreen">#22C55E</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryGreen">#0CCA4A</SolidColorBrush>
+        <SolidColorBrush x:Key="PrimaryBlue">#008CFF</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryOrange">#F97316</SolidColorBrush>
         <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
         <SolidColorBrush x:Key="SecondaryText">#71717A</SolidColorBrush>

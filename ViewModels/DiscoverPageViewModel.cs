@@ -14,6 +14,7 @@ namespace KMRLauncherMvvm.ViewModels;
 
 public partial class DiscoverPageViewModel : PageViewModel
 {
+    public bool IsEnabledFlag => true;
     private readonly IModApiService _api;
     
     [ObservableProperty] private ModListService _modListService;
@@ -62,11 +63,16 @@ public partial class DiscoverPageViewModel : PageViewModel
     }
 
     [RelayCommand]
-    private async Task FetchMods()
+    private async Task FetchMods(bool isRefresh = false)
     {
+        LoadProgress = new ModFetchProgress
+        {
+            ModsReceived = 0,
+            TotalMods = 1
+        };
         IsLoading = true;
         var progress = new Progress<ModFetchProgress>(pct => LoadProgress = pct);
-        await Task.Run(() => _api.GetAllModsAsync(progress));
+        await Task.Run(() => _api.GetAllModsAsync(progress, isRefresh));
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
         ModListFiltered = ModListService.Mods ?? [];
         IsLoading = false;

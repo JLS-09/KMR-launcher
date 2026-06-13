@@ -14,7 +14,7 @@ namespace KMRLauncherMvvm.Services.Api;
 
 public class ModApiService(HttpClient http, ModListService modList) : IModApiService
 {
-    public async Task GetAllModsAsync(IProgress<ModFetchProgress>? progress = null)
+    public async Task GetAllModsAsync(IProgress<ModFetchProgress>? progress = null, bool isRefresh = false)
     {
         var options = new JsonSerializerOptions
         {
@@ -30,7 +30,7 @@ public class ModApiService(HttpClient http, ModListService modList) : IModApiSer
         
         Directory.CreateDirectory(Path.Combine(basePath, "kmrLauncher"));
 
-        if (File.Exists(appFolder))
+        if (File.Exists(appFolder) && !isRefresh)
         {
             progress?.Report(new ModFetchProgress
             {
