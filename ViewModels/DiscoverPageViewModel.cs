@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,16 +15,17 @@ namespace KMRLauncherMvvm.ViewModels;
 public partial class DiscoverPageViewModel : PageViewModel
 {
     private readonly IModApiService _api;
-    private bool _isLoading;
     private ObservableCollection<Mod> _modList = [];
     
+    [ObservableProperty] private bool _isLoading;
+    [ObservableProperty] private ModFetchProgress _loadProgress;
     [ObservableProperty] private ObservableCollection<Mod> _modListFiltered = [];
     [ObservableProperty] private string _connectionStatus = "ARCHIVE // CONNECTING TO CKAN...";
     [ObservableProperty] private string _modFilter = "";
     
     partial void OnModFilterChanged(string value)
     {
-        if (!_isLoading)
+        if (!IsLoading)
         {
             ApplyFilters();
         }
@@ -33,7 +35,7 @@ public partial class DiscoverPageViewModel : PageViewModel
     
     partial void OnAuthorFilterChanged(string value)
     {
-        if (!_isLoading)
+        if (!IsLoading)
         {
             ApplyFilters();
         }
@@ -53,32 +55,26 @@ public partial class DiscoverPageViewModel : PageViewModel
     [RelayCommand]
     private async Task FetchMods()
     {
-        _isLoading = true;
-        var mods = await Task.Run(() => _api.GetAllModsAsync());
+        IsLoading = true;
+        var progress = new Progress<ModFetchProgress>(pct => LoadProgress = pct);
+        var mods = await Task.Run(() => _api.GetAllModsAsync(progress));
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
         _modList = ModListFiltered = new ObservableCollection<Mod>(mods);
-        _isLoading = false;
+        IsLoading = false;
         ApplyFilters();
     }
 
     [RelayCommand]
     private void ApplyFilters()
     {
-        ModListFiltered = new ObservableCollection<Mod>(_modList.Where(mod =>
-        {
-            if (string.IsNullOrWhiteSpace(ModFilter) && string.IsNullOrEmpty(AuthorFilter))
-                return true;
-            
-            if (!string.IsNullOrWhiteSpace(ModFilter) && !string.IsNullOrEmpty(AuthorFilter))
-            {
-                return mod.Name.ToLower().Contains(ModFilter.ToLower()) && 
-                       mod.AuthorsDisplay.ToLower().Contains(AuthorFilter.ToLower());
-            }
+        var nameFilter = ModFilter.Trim();
+        var authorFilter = AuthorFilter.Trim();
 
-            return !string.IsNullOrWhiteSpace(ModFilter) ? 
-                mod.Name.ToLower().Contains(ModFilter.ToLower()) : 
-                mod.AuthorsDisplay.ToLower().Contains(AuthorFilter.ToLower());
-        }));
+        var filtered = _modList.Where(mod =>
+            (nameFilter.IsWhiteSpace() || mod.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase)) &&
+            (authorFilter.IsWhiteSpace() || mod.AuthorsDisplay.Contains(authorFilter, StringComparison.OrdinalIgnoreCase)));
+
+        ModListFiltered = new ObservableCollection<Mod>(filtered);
     }
     
     [RelayCommand(AllowConcurrentExecutions = true)]
