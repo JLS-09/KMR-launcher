@@ -34,14 +34,23 @@
     </UserControl.Styles>
 
     <Grid RowDefinitions="Auto Auto Auto *" Margin="32 16" RowSpacing="24">
-        <Grid Grid.Row="0" ColumnDefinitions="*, auto" RowDefinitions="*, auto">
+        <Grid Grid.Row="0" ColumnDefinitions="*, auto" RowDefinitions="*, auto" ColumnSpacing="32">
+            <ProgressBar Grid.Column="0" Grid.Row="0" ShowProgressText="True" Height="21"
+                         Foreground="{DynamicResource PrimaryRed}" CornerRadius="0" 
+                         Value="{Binding LoadProgress.ModsReceived}"
+                         Maximum="{Binding LoadProgress.TotalMods}" 
+                         IsVisible="{Binding IsLoading}"/>
+            <TextBlock Grid.Column="0" Grid.Row="1"
+                       VerticalAlignment="Center" HorizontalAlignment="Left"
+                       Text="{Binding LoadProgress.CurrentModName}"
+                       FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Regular" FontSize="14"
+                       LetterSpacing="1.4" Foreground="{DynamicResource SecondaryText}"
+                       IsVisible="{Binding IsLoading}"/>
             <TextBlock Grid.Column="0" Grid.Row="0"
                        Text="{Binding ConnectionStatus}"
-                       FontFamily="{DynamicResource SpaceGrotesk}"
-                       FontWeight="Regular"
-                       FontSize="16"
-                       LetterSpacing="1.4"
-                       Foreground="{DynamicResource SecondaryText}" />
+                       FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Regular" FontSize="16"
+                       LetterSpacing="1.4" Foreground="{DynamicResource SecondaryText}"
+                       IsVisible="{Binding !IsLoading}"/>
             <TextBlock Grid.Column="1" Grid.Row="0"
                        VerticalAlignment="Center" HorizontalAlignment="Right"
                        Text="NETWORK STATUS"
