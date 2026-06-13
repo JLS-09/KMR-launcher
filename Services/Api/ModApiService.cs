@@ -43,9 +43,11 @@ public class ModApiService(HttpClient http, ModListService modList) : IModApiSer
             {
                 var json = await File.ReadAllTextAsync(appFolder);
                 var modsCache = JsonSerializer.Deserialize<ModsCache>(json, options);
-                if (modsCache is not null && modsCache.CurrentCommitHash == latestCommitHash ) 
+                if (modsCache is not null && modsCache.CurrentCommitHash == latestCommitHash )
+                {
                     modList.Mods = new ObservableCollection<Mod>(modsCache.Mods);
-                return;
+                    return;
+                }
             }
             catch (JsonException ex)
             {
