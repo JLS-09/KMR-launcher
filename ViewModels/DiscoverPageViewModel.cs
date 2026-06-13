@@ -15,9 +15,9 @@ namespace KMRLauncherMvvm.ViewModels;
 public partial class DiscoverPageViewModel : PageViewModel
 {
     private readonly IModApiService _api;
-    private bool _isLoading;
     private ObservableCollection<Mod> _modList = [];
     
+    [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private ModFetchProgress _loadProgress;
     [ObservableProperty] private ObservableCollection<Mod> _modListFiltered = [];
     [ObservableProperty] private string _connectionStatus = "ARCHIVE // CONNECTING TO CKAN...";
@@ -25,7 +25,7 @@ public partial class DiscoverPageViewModel : PageViewModel
     
     partial void OnModFilterChanged(string value)
     {
-        if (!_isLoading)
+        if (!IsLoading)
         {
             ApplyFilters();
         }
@@ -35,7 +35,7 @@ public partial class DiscoverPageViewModel : PageViewModel
     
     partial void OnAuthorFilterChanged(string value)
     {
-        if (!_isLoading)
+        if (!IsLoading)
         {
             ApplyFilters();
         }
@@ -55,12 +55,12 @@ public partial class DiscoverPageViewModel : PageViewModel
     [RelayCommand]
     private async Task FetchMods()
     {
-        _isLoading = true;
+        IsLoading = true;
         var progress = new Progress<ModFetchProgress>(pct => LoadProgress = pct);
         var mods = await Task.Run(() => _api.GetAllModsAsync(progress));
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
         _modList = ModListFiltered = new ObservableCollection<Mod>(mods);
-        _isLoading = false;
+        IsLoading = false;
         ApplyFilters();
     }
 

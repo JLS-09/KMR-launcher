@@ -68,6 +68,7 @@ public class ModApiService(HttpClient http) : IModApiService
             try
             {
                 mod = JsonSerializer.Deserialize<Mod>(line, options);
+
             }
             catch (JsonException ex)
             {
@@ -76,12 +77,24 @@ public class ModApiService(HttpClient http) : IModApiService
                 throw;
             }
             
-            if (mod != null) mods.Add(mod);
+            if (mod != null)
+            {
+                mod.Versions.Sort((x, y) =>
+                {
+                    if (x.ReleaseDate.HasValue && y.ReleaseDate.HasValue)
+                        return DateTime.Compare(y.ReleaseDate.Value, x.ReleaseDate.Value); // newest first
+
+                    if (x.ReleaseDate.HasValue) return -1;
+                    if (y.ReleaseDate.HasValue) return 1;
+
+                    return Helpers.CompareVersions(x.Version, y.Version); // newest version first
+                });
+                mods.Add(mod);
+            }
             
             received++;
             if (total > 0)
             {
-                Console.WriteLine(received);
                 progress?.Report(new ModFetchProgress
                 {
                     TotalMods =  total,
