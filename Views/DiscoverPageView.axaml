@@ -35,11 +35,13 @@
 
     <Grid RowDefinitions="Auto Auto Auto *" Margin="32 16" RowSpacing="24">
         <Grid Grid.Row="0" ColumnDefinitions="*, auto" RowDefinitions="*, auto" ColumnSpacing="32">
-            <ProgressBar Grid.Column="0" Grid.Row="0" ShowProgressText="True" Height="21"
+            <ProgressBar Grid.Column="0" Grid.Row="0" Height="21"
+                         ShowProgressText="{Binding !LoadProgress.IsCache}" 
                          Foreground="{DynamicResource PrimaryRed}" CornerRadius="0" 
                          Value="{Binding LoadProgress.ModsReceived}"
                          Maximum="{Binding LoadProgress.TotalMods}" 
-                         IsVisible="{Binding IsLoading}"/>
+                         IsVisible="{Binding IsLoading}"
+                         IsIndeterminate="{Binding LoadProgress.IsCache}"/>
             <TextBlock Grid.Column="0" Grid.Row="1"
                        VerticalAlignment="Center" HorizontalAlignment="Left"
                        Text="{Binding LoadProgress.CurrentModName}"

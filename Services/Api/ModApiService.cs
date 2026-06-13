@@ -27,9 +27,16 @@ public class ModApiService(HttpClient http) : IModApiService
 
         if (File.Exists(appFolder))
         {
+            progress?.Report(new ModFetchProgress
+            {
+                TotalMods =  1,
+                ModsReceived =  1,
+                CurrentModName = "Loading cache",
+                IsCache = true
+            });
             try
             {
-                var json = File.ReadAllText(appFolder);
+                var json = await File.ReadAllTextAsync(appFolder);
                 return JsonSerializer.Deserialize<List<Mod>>(json, options) ?? [];
             }
             catch (JsonException ex)
