@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using KMRLauncherMvvm.Models;
+using LibGit2Sharp;
 
 namespace KMRLauncherMvvm.Services.Api;
 
@@ -19,6 +22,9 @@ public class ModApiService(HttpClient http) : IModApiService
             PropertyNameCaseInsensitive = true,
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
+        
+        var refs = Repository.ListRemoteReferences("https://github.com/KSP-CKAN/CKAN-meta.git");
+        var latestCommitHash = refs.First(r => r.CanonicalName == "refs/heads/master").TargetIdentifier;
         
         var basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var appFolder = Path.Combine(basePath, "kmrLauncher/mods.json");
@@ -37,7 +43,8 @@ public class ModApiService(HttpClient http) : IModApiService
             try
             {
                 var json = await File.ReadAllTextAsync(appFolder);
-                return JsonSerializer.Deserialize<List<Mod>>(json, options) ?? [];
+                var modsCache = JsonSerializer.Deserialize<ModsCache>(json, options);
+                if (modsCache is not null && modsCache.CurrentCommitHash == latestCommitHash ) return modsCache.Mods;
             }
             catch (JsonException ex)
             {
@@ -100,7 +107,8 @@ public class ModApiService(HttpClient http) : IModApiService
                 });
         }
         
-        var modlistJson = JsonSerializer.Serialize(mods, options);
+        var cache = new ModsCache{Mods = mods, CurrentCommitHash = latestCommitHash};
+        var modlistJson = JsonSerializer.Serialize(cache, options);
         await File.WriteAllTextAsync(appFolder, modlistJson);
         
         return mods;
