@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -13,9 +12,9 @@ using LibGit2Sharp;
 
 namespace KMRLauncherMvvm.Services.Api;
 
-public class ModApiService(HttpClient http) : IModApiService
+public class ModApiService(HttpClient http, ModListService modList) : IModApiService
 {
-    public async Task<List<Mod>> GetAllModsAsync(IProgress<ModFetchProgress>? progress = null)
+    public async Task GetAllModsAsync(IProgress<ModFetchProgress>? progress = null)
     {
         var options = new JsonSerializerOptions
         {
@@ -44,7 +43,9 @@ public class ModApiService(HttpClient http) : IModApiService
             {
                 var json = await File.ReadAllTextAsync(appFolder);
                 var modsCache = JsonSerializer.Deserialize<ModsCache>(json, options);
-                if (modsCache is not null && modsCache.CurrentCommitHash == latestCommitHash ) return modsCache.Mods;
+                if (modsCache is not null && modsCache.CurrentCommitHash == latestCommitHash ) 
+                    modList.Mods = new ObservableCollection<Mod>(modsCache.Mods);
+                return;
             }
             catch (JsonException ex)
             {
@@ -110,7 +111,7 @@ public class ModApiService(HttpClient http) : IModApiService
         var cache = new ModsCache{Mods = mods, CurrentCommitHash = latestCommitHash};
         var modlistJson = JsonSerializer.Serialize(cache, options);
         await File.WriteAllTextAsync(appFolder, modlistJson);
-        
-        return mods;
+
+        modList.Mods = new ObservableCollection<Mod>(mods);
     }
 }

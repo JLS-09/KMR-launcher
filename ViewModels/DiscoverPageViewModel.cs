@@ -15,8 +15,8 @@ namespace KMRLauncherMvvm.ViewModels;
 public partial class DiscoverPageViewModel : PageViewModel
 {
     private readonly IModApiService _api;
-    private ObservableCollection<Mod> _modList = [];
     
+    [ObservableProperty] private ModListService _modListService;
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private ModFetchProgress _loadProgress;
     [ObservableProperty] private ObservableCollection<Mod> _modListFiltered = [];
@@ -41,11 +41,20 @@ public partial class DiscoverPageViewModel : PageViewModel
         }
     }
 
-    public DiscoverPageViewModel(IModApiService api)
+    public DiscoverPageViewModel(IModApiService api, ModListService modListService)
     {
         _api = api;
+        ModListService = modListService;
         PageName = ApplicationPageNames.Discover;
-        _ = FetchMods();
+        if (_modListService.Mods is null)
+        {
+            _ = FetchMods();
+        }
+        else
+        {
+            ModListFiltered = ModListService.Mods ?? [];
+            ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
+        }
     }
 
     public DiscoverPageViewModel()
@@ -57,9 +66,9 @@ public partial class DiscoverPageViewModel : PageViewModel
     {
         IsLoading = true;
         var progress = new Progress<ModFetchProgress>(pct => LoadProgress = pct);
-        var mods = await Task.Run(() => _api.GetAllModsAsync(progress));
+        await Task.Run(() => _api.GetAllModsAsync(progress));
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
-        _modList = ModListFiltered = new ObservableCollection<Mod>(mods);
+        ModListFiltered = ModListService.Mods ?? [];
         IsLoading = false;
         ApplyFilters();
     }
@@ -70,7 +79,7 @@ public partial class DiscoverPageViewModel : PageViewModel
         var nameFilter = ModFilter.Trim();
         var authorFilter = AuthorFilter.Trim();
 
-        var filtered = _modList.Where(mod =>
+        var filtered = (ModListService.Mods ?? []).Where(mod =>
             (nameFilter.IsWhiteSpace() || mod.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase)) &&
             (authorFilter.IsWhiteSpace() || mod.AuthorsDisplay.Contains(authorFilter, StringComparison.OrdinalIgnoreCase)));
 
