@@ -54,22 +54,8 @@
                 </Button>
             </Grid>
         </Border>
-        <Grid RowDefinitions="70, *" Column="1">
-            <Border Background="{DynamicResource PrimaryBackground}" Padding="32 0">
-                <Grid ColumnDefinitions="Auto, *">
-                    <TextBlock Text="KMR LAUNCHER" Classes="title" Grid.Column="0" VerticalAlignment="Center"/>
-                    <Button Classes="Primary" Grid.Column="1" HorizontalAlignment="Right" Padding="24 4">
-                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                            <Label Classes="icon" Content="&#xE3D0;" FontSize="28"/>
-                            <TextBlock Text="Launch Last Instance" LetterSpacing="2" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                </Grid>
-            </Border>
-            <Border Background="{DynamicResource PrimaryBackground}" CornerRadius="0 0 0 0"
-                    Grid.Row="1">
-                <ContentControl Content="{Binding CurrentPage}" ></ContentControl>
-            </Border>
-        </Grid>
+        <Border Grid.Column="1" Background="{DynamicResource PrimaryBackground}" CornerRadius="0 0 0 0">
+            <ContentControl Content="{Binding CurrentPage}" ></ContentControl>
+        </Border>
     </Grid>
 </Window>
