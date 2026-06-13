@@ -19,6 +19,25 @@ public class ModApiService(HttpClient http) : IModApiService
             PropertyNameCaseInsensitive = true,
             Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
         };
+        
+        var basePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var appFolder = Path.Combine(basePath, "kmrLauncher/mods.json");
+        
+        Directory.CreateDirectory(Path.Combine(basePath, "kmrLauncher"));
+
+        if (File.Exists(appFolder))
+        {
+            try
+            {
+                var json = File.ReadAllText(appFolder);
+                return JsonSerializer.Deserialize<List<Mod>>(json, options) ?? [];
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Path: {ex.Path}, LineNumber: {ex.LineNumber}");
+                Console.WriteLine(ex.Message);
+            }
+        }
 
         using var response = await http.GetAsync("api/mods/all", HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
@@ -73,6 +92,10 @@ public class ModApiService(HttpClient http) : IModApiService
                     CurrentModName = mod?.Name
                 });
         }
+        
+        var modlistJson = JsonSerializer.Serialize(mods, options);
+        await File.WriteAllTextAsync(appFolder, modlistJson);
+        
         return mods;
     }
 }
