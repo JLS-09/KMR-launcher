@@ -82,12 +82,12 @@ public class ModApiService(HttpClient http) : IModApiService
                 mod.Versions.Sort((x, y) =>
                 {
                     if (x.ReleaseDate.HasValue && y.ReleaseDate.HasValue)
-                        return DateTime.Compare(y.ReleaseDate.Value, x.ReleaseDate.Value); // newest first
+                        return DateTime.Compare(y.ReleaseDate.Value, x.ReleaseDate.Value);
 
                     if (x.ReleaseDate.HasValue) return -1;
                     if (y.ReleaseDate.HasValue) return 1;
 
-                    return Helpers.CompareVersions(x.Version, y.Version); // newest version first
+                    return Helpers.CompareVersions(x.Version, y.Version);
                 });
                 mods.Add(mod);
             }
