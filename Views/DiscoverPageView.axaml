@@ -138,7 +138,7 @@
                 </StackPanel>
             </Button>
         </Grid>
-        <Grid Grid.Row="2" ColumnDefinitions="4*, 1.5*, 0.75*, *, 60" Margin="0 16 24 16" ColumnSpacing="8">
+        <Grid Grid.Row="2" ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 16 24 16" ColumnSpacing="8">
             <TextBlock Grid.Column="0" Text="MOD_NAME" Foreground="{DynamicResource SecondaryText}"
                        FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
             <TextBlock Grid.Column="1" Text="AUTHOR(S)" Foreground="{DynamicResource SecondaryText}"
@@ -146,8 +146,6 @@
             <TextBlock Grid.Column="2" Text="VERSION" Foreground="{DynamicResource SecondaryText}"
                        FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
             <TextBlock Grid.Column="3" Text="LAST_UPDATE" Foreground="{DynamicResource SecondaryText}"
-                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
-            <TextBlock Grid.Column="4" Text="" Foreground="{DynamicResource SecondaryText}"
                        FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
         </Grid>
         <ListBox ItemsSource="{Binding ModListFiltered}"
@@ -184,7 +182,7 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Border Background="{DynamicResource SideBarBackground}" Padding="24">
-                        <Grid ColumnDefinitions="4*, 1.5*, 0.75*, *, 60" Margin="0 0 24 0" ColumnSpacing="8">
+                        <Grid ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 0 24 0" ColumnSpacing="8">
                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                 <TextBlock Classes="ModListEntry" Text="{Binding Name}" FontSize="18"
                                            TextTrimming="CharacterEllipsis" FontWeight="Bold"
@@ -212,9 +210,14 @@
                                                FontFamily="{DynamicResource SpaceGrotesk}" />
                                 </ToolTip.Tip>
                             </TextBlock>
-                            <TextBlock Grid.Column="2" Classes="ModListEntry" Text="{Binding LatestVersion.Version}"
-                                       VerticalAlignment="Center"
-                                       Foreground="{DynamicResource SecondaryText}" />
+                            <ComboBox Grid.Column="2" ItemsSource="{Binding Versions}" VerticalAlignment="Center"
+                                      CornerRadius="0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Version}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                             <TextBlock Grid.Column="3" Classes="ModListEntry"
                                        Text="{Binding LatestVersion.LastUpdatedHumanized}" VerticalAlignment="Center"
                                        Foreground="{DynamicResource SecondaryText}">
@@ -223,12 +226,6 @@
                                                FontFamily="{DynamicResource Inter}" />
                                 </ToolTip.Tip>
                             </TextBlock>
-                            <Button Classes="Primary ModList"
-                                    Grid.Column="4" VerticalAlignment="Center"
-                                    Command="{Binding $parent[UserControl].((vm:DiscoverPageViewModel)DataContext).InstallModCommand}"
-                                    CommandParameter="{Binding}">
-                                <Label Classes="icon" FontWeight="Regular" Content="&#xE20A;" FontSize="20" />
-                            </Button>
                         </Grid>
                     </Border>
                 </DataTemplate>
