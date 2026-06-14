@@ -17,24 +17,24 @@ public partial class DiscoverPageViewModel : PageViewModel
 {
     public bool IsEnabledFlag => true;
     private readonly IModApiService _api;
-    
+
     [ObservableProperty] private ModListService _modListService;
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private ModFetchProgress _loadProgress;
     [ObservableProperty] private ObservableCollection<ModListItemViewModel> _modListFiltered = [];
     [ObservableProperty] private string _connectionStatus = "ARCHIVE // CONNECTING TO CKAN...";
     [ObservableProperty] private string _modFilter = "";
-    
+
     public ObservableCollection<ModListItemViewModel> SelectedMods { get; } = [];
     public bool HasSelectedMods => SelectedMods.Count > 0;
-    
+
     partial void OnModFilterChanged(string value)
     {
         if (!IsLoading) ApplyFilters();
     }
-    
+
     [ObservableProperty] private string _authorFilter = "";
-    
+
     partial void OnAuthorFilterChanged(string value)
     {
         if (!IsLoading) ApplyFilters();
@@ -77,10 +77,11 @@ public partial class DiscoverPageViewModel : PageViewModel
 
         var filtered = (ModListService.Mods ?? []).Where(mod =>
             (nameFilter.IsWhiteSpace() || mod.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase)) &&
-            (authorFilter.IsWhiteSpace() || mod.AuthorsDisplay.Contains(authorFilter, StringComparison.OrdinalIgnoreCase)));
+            (authorFilter.IsWhiteSpace() ||
+             mod.AuthorsDisplay.Contains(authorFilter, StringComparison.OrdinalIgnoreCase)));
 
         var previousSelections = SelectedMods.ToDictionary(m => m.Mod.Id);
-        
+
         ModListFiltered = new ObservableCollection<ModListItemViewModel>(
             filtered.Select(mod =>
             {
@@ -90,7 +91,7 @@ public partial class DiscoverPageViewModel : PageViewModel
                 return new ModListItemViewModel(mod);
             }));
     }
-    
+
     [RelayCommand]
     private void ToggleModSelection(ModListItemViewModel item)
     {
@@ -101,22 +102,22 @@ public partial class DiscoverPageViewModel : PageViewModel
         else
             SelectedMods.Remove(item);
     }
-    
+
     private static ObservableCollection<ModListItemViewModel> ToItemViewModels(ObservableCollection<Mod> mods) =>
         new(mods.Select(m => new ModListItemViewModel(m)));
-    
+
     [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task InstallMod(Mod mod)
     {
         var versionList = mod.Versions;
-        
+
         var window = new InstallModsWindow
         {
             DataContext = new InstallModsViewModel(versionList)
         };
         window.Show();
     }
-    
+
     [RelayCommand]
     private async Task ApplyChanges()
     {
