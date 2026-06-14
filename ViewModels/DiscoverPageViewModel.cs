@@ -49,7 +49,7 @@ public partial class DiscoverPageViewModel : PageViewModel
         if (_modListService.Mods is null) _ = FetchMods();
         else
         {
-            ModListFiltered = ToItemViewModels(ModListService.Mods ?? []);
+            ModListFiltered = ToModListItemViewModels(ModListService.Mods ?? []);
             ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
         }
     }
@@ -64,7 +64,7 @@ public partial class DiscoverPageViewModel : PageViewModel
         var progress = new Progress<ModFetchProgress>(pct => LoadProgress = pct);
         await Task.Run(() => _api.GetAllModsAsync(progress, isRefresh));
         ConnectionStatus = "ARCHIVE // ACQUIRED CKAN DATA FEED";
-        ModListFiltered = ToItemViewModels(ModListService.Mods ?? []);
+        ModListFiltered = ToModListItemViewModels(ModListService.Mods ?? []);
         IsLoading = false;
         ApplyFilters();
     }
@@ -103,7 +103,7 @@ public partial class DiscoverPageViewModel : PageViewModel
             SelectedMods.Remove(item);
     }
 
-    private static ObservableCollection<ModListItemViewModel> ToItemViewModels(ObservableCollection<Mod> mods) =>
+    private static ObservableCollection<ModListItemViewModel> ToModListItemViewModels(ObservableCollection<Mod> mods) =>
         new(mods.Select(m => new ModListItemViewModel(m)));
 
     [RelayCommand(AllowConcurrentExecutions = true)]
