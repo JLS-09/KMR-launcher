@@ -31,58 +31,58 @@
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Background" Value="#1F1F20" />
         </Style>
-        
+
         <Style Selector="Button:pointerover /template/ ContentPresenter">
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
         </Style>
-        
+
         <Style Selector="Button:focus /template/ ContentPresenter">
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
         </Style>
-        
+
         <Style Selector="Button.ButtonRefresh:pointerover /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlue}"/>
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryBlue}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlue}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBlue}" />
         </Style>
-        
+
         <Style Selector="Button.ButtonRefresh:focus /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlue}"/>
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryBlue}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlue}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBlue}" />
         </Style>
-        
+
         <Style Selector="Button.ButtonApply:pointerover /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}"/>
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}" />
         </Style>
-        
+
         <Style Selector="Button.ButtonApply:focus /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}"/>
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}" />
         </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto Auto Auto *" Margin="32 16" RowSpacing="24">
+    <Grid RowDefinitions="Auto Auto Auto *" Margin="32 16" RowSpacing="16">
         <Grid Grid.Row="0" ColumnDefinitions="*, auto" RowDefinitions="*, auto" ColumnSpacing="32">
             <ProgressBar Grid.Column="0" Grid.Row="0" Height="21"
-                         ShowProgressText="{Binding !LoadProgress.IsCache}" 
-                         Foreground="{DynamicResource PrimaryRed}" CornerRadius="0" 
+                         ShowProgressText="{Binding !LoadProgress.IsCache}"
+                         Foreground="{DynamicResource PrimaryRed}" CornerRadius="0"
                          Value="{Binding LoadProgress.ModsReceived}"
-                         Maximum="{Binding LoadProgress.TotalMods}" 
+                         Maximum="{Binding LoadProgress.TotalMods}"
                          IsVisible="{Binding IsLoading}"
-                         IsIndeterminate="{Binding LoadProgress.IsCache}"/>
+                         IsIndeterminate="{Binding LoadProgress.IsCache}" />
             <TextBlock Grid.Column="0" Grid.Row="1"
                        VerticalAlignment="Center" HorizontalAlignment="Left"
                        Text="{Binding LoadProgress.CurrentModName}"
                        FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Regular" FontSize="14"
                        LetterSpacing="1.4" Foreground="{DynamicResource SecondaryText}"
-                       IsVisible="{Binding IsLoading}"/>
+                       IsVisible="{Binding IsLoading}" />
             <TextBlock Grid.Column="0" Grid.Row="0"
                        Text="{Binding ConnectionStatus}"
                        FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Regular" FontSize="16"
                        LetterSpacing="1.4" Foreground="{DynamicResource SecondaryText}"
-                       IsVisible="{Binding !IsLoading}"/>
+                       IsVisible="{Binding !IsLoading}" />
             <TextBlock Grid.Column="1" Grid.Row="0"
                        VerticalAlignment="Center" HorizontalAlignment="Right"
                        Text="NETWORK STATUS"
@@ -116,29 +116,32 @@
                 </TextBox.InnerLeftContent>
             </TextBox>
             <TextBox Grid.Column="2" />
-            <Button Grid.Column="3" Classes="ButtonRefresh" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" CornerRadius="0"
-                    BorderThickness="1" BorderBrush="{DynamicResource PrimaryBlue}" 
+            <Button Grid.Column="3" Classes="ButtonRefresh" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    CornerRadius="0"
+                    BorderThickness="1" BorderBrush="{DynamicResource PrimaryBlue}"
                     Foreground="{DynamicResource PrimaryBlue}" Background="#002D52"
                     FontSize="20" FontFamily="{DynamicResource SpaceGrotesk}" HorizontalContentAlignment="Center"
                     VerticalContentAlignment="Center" Command="{Binding FetchModsCommand}"
                     CommandParameter="{Binding IsEnabledFlag}">
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Label Classes="icon" FontWeight="Regular" Content="&#xE094;" FontSize="24" />
-                    <TextBlock Text="Refresh" VerticalAlignment="Center"/>
+                    <TextBlock Text="Refresh" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
-            <Button Grid.Column="4" Classes="ButtonApply" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" CornerRadius="0"
+            <Button Grid.Column="4" Classes="ButtonApply" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    CornerRadius="0"
                     BorderThickness="1" BorderBrush="{DynamicResource PrimaryGreen}"
                     Foreground="{DynamicResource PrimaryGreen}" Background="#033A16"
                     FontSize="20" FontFamily="{DynamicResource SpaceGrotesk}" HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center">
+                    VerticalContentAlignment="Center" Command="{Binding ApplyChangesCommand}"
+                    IsEnabled="{Binding HasSelectedMods}">
                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Label Classes="icon" FontWeight="Regular" Content="&#xE53A;" FontSize="24" />
-                    <TextBlock Text="Apply" VerticalAlignment="Center"/>
+                    <TextBlock Text="Apply" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
         </Grid>
-        <Grid Grid.Row="2" ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 16 24 16" ColumnSpacing="8">
+        <Grid Grid.Row="2" ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 16 24 0" ColumnSpacing="8">
             <TextBlock Grid.Column="0" Text="MOD_NAME" Foreground="{DynamicResource SecondaryText}"
                        FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
             <TextBlock Grid.Column="1" Text="AUTHOR(S)" Foreground="{DynamicResource SecondaryText}"
@@ -173,61 +176,95 @@
                 </Style>
                 <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
                     <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Margin" Value="0" />
                 </Style>
                 <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Margin" Value="0 0 0 -2" />
+                </Style>
+                <Style Selector="Button.mod-row">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Cursor" Value="Hand" />
+                </Style>
+                <Style Selector="Button.mod-row:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="Transparent" />
+                </Style>
+                <Style Selector="Button.mod-row:pressed /template/ ContentPresenter">
                     <Setter Property="Background" Value="Transparent" />
                 </Style>
             </ListBox.Styles>
 
             <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Background="{DynamicResource SideBarBackground}" Padding="24">
-                        <Grid ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 0 24 0" ColumnSpacing="8">
-                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                <TextBlock Classes="ModListEntry" Text="{Binding Name}" FontSize="18"
-                                           TextTrimming="CharacterEllipsis" FontWeight="Bold"
+                <DataTemplate DataType="vm:ModListItemViewModel">
+                    <Button Classes="mod-row"
+                            Command="{Binding $parent[ListBox].((vm:DiscoverPageViewModel)DataContext).ToggleModSelectionCommand}"
+                            CommandParameter="{Binding}">
+                        <Border Padding="32 16" BorderThickness="3 0 0 0"
+                                Classes.selected="{Binding IsSelected}">
+                            <Border.Styles>
+                                <Style Selector="Border">
+                                    <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                </Style>
+                                <Style Selector="Border.selected">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource SideBarButtonActiveBackground}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
+                                </Style>
+                            </Border.Styles>
+                            <Grid ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 0 24 0" ColumnSpacing="12">
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Classes="ModListEntry" Text="{Binding Mod.Name}" FontSize="16"
+                                               TextTrimming="CharacterEllipsis" FontWeight="Bold"
+                                               FontFamily="{DynamicResource SpaceGrotesk}">
+                                        <ToolTip.Tip>
+                                            <TextBlock Text="{Binding Mod.Name}" FontSize="14"
+                                                       FontFamily="{DynamicResource SpaceGrotesk}" />
+                                        </ToolTip.Tip>
+                                    </TextBlock>
+                                    <TextBlock Classes="ModListEntry" Text="{Binding Mod.Abstract}" FontSize="11"
+                                               TextTrimming="CharacterEllipsis" FontWeight="Regular"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               FontFamily="{DynamicResource Inter}">
+                                        <ToolTip.Tip>
+                                            <TextBlock Text="{Binding Mod.Abstract}" FontSize="12"
+                                                       FontFamily="{DynamicResource Inter}" />
+                                        </ToolTip.Tip>
+                                    </TextBlock>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Classes="ModListEntry" Text="{Binding Mod.AuthorsDisplay}"
+                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" FontSize="13"
                                            FontFamily="{DynamicResource SpaceGrotesk}">
                                     <ToolTip.Tip>
-                                        <TextBlock Text="{Binding Name}" FontSize="14"
+                                        <TextBlock Text="{Binding Mod.AuthorsDisplay}" FontSize="12"
                                                    FontFamily="{DynamicResource SpaceGrotesk}" />
                                     </ToolTip.Tip>
                                 </TextBlock>
-                                <TextBlock Classes="ModListEntry" Text="{Binding Abstract}" FontSize="12"
-                                           TextTrimming="CharacterEllipsis" FontWeight="Regular"
-                                           Foreground="{DynamicResource SecondaryText}"
-                                           FontFamily="{DynamicResource Inter}">
+                                <ComboBox Grid.Column="2" ItemsSource="{Binding Mod.Versions}"
+                                          SelectedItem="{Binding SelectedVersion}" VerticalAlignment="Center"
+                                          CornerRadius="0" FontSize="13">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Version}" FontSize="13" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBlock Grid.Column="3" Classes="ModListEntry" FontSize="13"
+                                           Text="{Binding Mod.LatestVersion.LastUpdatedHumanized}"
+                                           VerticalAlignment="Center"
+                                           Foreground="{DynamicResource SecondaryText}">
                                     <ToolTip.Tip>
-                                        <TextBlock Text="{Binding Abstract}" FontSize="14"
+                                        <TextBlock Text="{Binding Mod.LatestVersion.ReleaseDate}" FontSize="14"
                                                    FontFamily="{DynamicResource Inter}" />
                                     </ToolTip.Tip>
                                 </TextBlock>
-                            </StackPanel>
-                            <TextBlock Grid.Column="1" Classes="ModListEntry" Text="{Binding AuthorsDisplay}"
-                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
-                                       FontFamily="{DynamicResource SpaceGrotesk}">
-                                <ToolTip.Tip>
-                                    <TextBlock Text="{Binding AuthorsDisplay}" FontSize="14"
-                                               FontFamily="{DynamicResource SpaceGrotesk}" />
-                                </ToolTip.Tip>
-                            </TextBlock>
-                            <ComboBox Grid.Column="2" ItemsSource="{Binding Versions}" VerticalAlignment="Center"
-                                      CornerRadius="0">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Version}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                            <TextBlock Grid.Column="3" Classes="ModListEntry"
-                                       Text="{Binding LatestVersion.LastUpdatedHumanized}" VerticalAlignment="Center"
-                                       Foreground="{DynamicResource SecondaryText}">
-                                <ToolTip.Tip>
-                                    <TextBlock Text="{Binding LatestVersion.ReleaseDate}" FontSize="14"
-                                               FontFamily="{DynamicResource Inter}" />
-                                </ToolTip.Tip>
-                            </TextBlock>
-                        </Grid>
-                    </Border>
+                            </Grid>
+                        </Border>
+                    </Button>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ListBox>

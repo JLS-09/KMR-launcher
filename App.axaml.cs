@@ -2,10 +2,7 @@ using System;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
 using Avalonia.Markup.Xaml;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;
@@ -27,6 +24,8 @@ public class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        
+        this.AttachDeveloperTools();
     }
 
     public override void OnFrameworkInitializationCompleted()
