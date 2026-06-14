@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -24,10 +25,9 @@ public partial class InstallModsViewModel : ViewModelBase
     public event Action<InstallModsData>? Finished;
     public event Action? Cancelled;
     
-    public InstallModsViewModel(List<ModVersion> versions)
+    public InstallModsViewModel(List<ModVersion> mods)
     {
-        foreach (var version in versions)
-            InstallModsData.AvailableVersions.Add(version);
+        InstallModsData.RequestedModVersions = new ObservableCollection<ModVersion>(mods);
      
         _steps = [new InstallModsSelectVersionStepViewModel(InstallModsData)];
         SetStep(0, fromIndex: -1);

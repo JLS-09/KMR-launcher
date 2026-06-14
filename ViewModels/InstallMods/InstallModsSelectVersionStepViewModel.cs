@@ -20,9 +20,9 @@ public partial class InstallModsSelectVersionStepViewModel : InstallModsStepView
         _instances = App.Settings.Instances;
 
         InstallModsData.SelectedInstance = Instances.FirstOrDefault();
-        InstallModsData.RequestedVersion = InstallModsData.AvailableVersions.FirstOrDefault();
+        InstallModsData.RequestedModVersions = installModsData.RequestedModVersions;
     }
     
     public override string Title => "Choose instance and version";
-    public override bool CanGoNext => InstallModsData.SelectedInstance is not null && InstallModsData.RequestedVersion is not null;
+    public override bool CanGoNext => InstallModsData.SelectedInstance is not null;
 }

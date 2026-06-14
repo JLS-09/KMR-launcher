@@ -86,13 +86,7 @@ public partial class DiscoverPageViewModel : PageViewModel
         var previousSelections = SelectedMods.ToDictionary(m => m.Mod.Id);
 
         ModListFiltered = new ObservableCollection<ModListItemViewModel>(
-            filtered.Select(mod =>
-            {
-                if (previousSelections.TryGetValue(mod.Id, out var existing))
-                    return existing;
-
-                return new ModListItemViewModel(mod);
-            }));
+            filtered.Select(mod => previousSelections.TryGetValue(mod.Id, out var existing) ? existing : new ModListItemViewModel(mod)));
     }
 
     [RelayCommand]
@@ -109,22 +103,13 @@ public partial class DiscoverPageViewModel : PageViewModel
     private static ObservableCollection<ModListItemViewModel> ToModListItemViewModels(ObservableCollection<Mod> mods) =>
         new(mods.Select(m => new ModListItemViewModel(m)));
 
-    [RelayCommand(AllowConcurrentExecutions = true)]
-    private async Task InstallMod(Mod mod)
-    {
-        var versionList = mod.Versions;
-
-        var window = new InstallModsWindow
-        {
-            DataContext = new InstallModsViewModel(versionList)
-        };
-        window.Show();
-    }
-
     [RelayCommand]
     private async Task ApplyChanges()
     {
-        var json = JsonSerializer.Serialize(SelectedMods);
-        Console.WriteLine(json);
+        var window = new InstallModsWindow
+        {
+            DataContext = new InstallModsViewModel(SelectedMods.Select(m => m.SelectedVersion).ToList())
+        };
+        window.Show();
     }
 }

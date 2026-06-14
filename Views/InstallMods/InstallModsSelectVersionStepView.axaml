@@ -59,8 +59,7 @@
             <TextBlock Text="MOD VERSION" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
                        FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12"/>
             <ComboBox Background="Black" HorizontalAlignment="Stretch" Height="48"
-                      ItemsSource="{Binding InstallModsData.AvailableVersions}"
-                      SelectedItem="{Binding InstallModsData.RequestedVersion}">
+                      ItemsSource="{Binding InstallModsData.RequestedModVersions}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Version}"/>
