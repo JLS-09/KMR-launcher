@@ -5,11 +5,11 @@ using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;
 
-public partial class InstallModsSelectVersionStepViewModel : InstallModsStepViewModel
+public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepViewModel
 {
     [ObservableProperty] private ObservableCollection<Instance> _instances;
     
-    public InstallModsSelectVersionStepViewModel(InstallModsData installModsData) : base(installModsData)
+    public InstallModsSelectInstanceStepViewModel(InstallModsData installModsData) : base(installModsData)
     {
         InstallModsData.PropertyChanged += (_, e) =>
         {

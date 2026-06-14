@@ -29,7 +29,7 @@ public partial class InstallModsViewModel : ViewModelBase
     {
         InstallModsData.RequestedModVersions = new ObservableCollection<ModVersion>(mods);
      
-        _steps = [new InstallModsSelectVersionStepViewModel(InstallModsData)];
+        _steps = [new InstallModsSelectInstanceStepViewModel(InstallModsData)];
         SetStep(0, fromIndex: -1);
     }
 
