@@ -54,7 +54,9 @@ public partial class DiscoverPageViewModel : PageViewModel
         }
     }
 
-    public DiscoverPageViewModel() { }
+    public DiscoverPageViewModel()
+    {
+    }
 
     [RelayCommand]
     private async Task FetchMods(bool isRefresh = false)
@@ -76,7 +78,8 @@ public partial class DiscoverPageViewModel : PageViewModel
         var authorFilter = AuthorFilter.Trim();
 
         var filtered = (ModListService.Mods ?? []).Where(mod =>
-            (nameFilter.IsWhiteSpace() || mod.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase)) &&
+            (nameFilter.IsWhiteSpace() || mod.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase) ||
+             mod.Id.Contains(nameFilter, StringComparison.OrdinalIgnoreCase)) &&
             (authorFilter.IsWhiteSpace() ||
              mod.AuthorsDisplay.Contains(authorFilter, StringComparison.OrdinalIgnoreCase)));
 
