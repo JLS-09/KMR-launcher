@@ -61,16 +61,6 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
             {
                 if (!_modListService.Mods.ToList().Exists(m => m.Id == dependency.Name)) continue;
 
-                if (InstallModsData.SelectedInstance.Mods.Exists(m => m.Identifier == dependency.Name))
-                    continue;
-
-                if (InstallModsData.RequestedModVersions.ToList().Exists(v => v.Identifier == dependency.Name))
-                {
-                    InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name).ModsForReason
-                        .Add(version.Id);
-                    continue;
-                }
-
                 if (dependency.MinVersion is not null)
                 {
                     continue;
@@ -88,6 +78,16 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
                 if (dependency.Version is not null)
                 {
+                    continue;
+                }
+                
+                if (InstallModsData.SelectedInstance.Mods.Exists(m => m.Identifier == dependency.Name))
+                    continue;
+
+                if (InstallModsData.RequestedModVersions.ToList().Exists(v => v.Identifier == dependency.Name))
+                {
+                    InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name).ModsForReason
+                        .Add(version.Id);
                     continue;
                 }
 
