@@ -108,7 +108,7 @@ public partial class DiscoverPageViewModel : PageViewModel
     {
         var window = new InstallModsWindow
         {
-            DataContext = new InstallModsViewModel(SelectedMods.Select(m => m.SelectedVersion).ToList())
+            DataContext = new InstallModsViewModel(SelectedMods.Select(m => m.SelectedVersion).ToList(), ModListService)
         };
         window.Show();
     }

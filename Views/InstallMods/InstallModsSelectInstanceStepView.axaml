@@ -56,16 +56,27 @@
             </ComboBox>
         </StackPanel>
         <Grid Grid.Row="2" RowDefinitions="Auto *" RowSpacing="8">
-            <TextBlock Grid.Row="0" Text="SELECTED MODS" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
-                       FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid Grid.Row="0" ColumnDefinitions="50 *" ColumnSpacing="24">
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="CHANGE" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+                           FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
+                <TextBlock Grid.Column="1" Text="SELECTED MODS" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+                           FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
+            </Grid>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <ItemsRepeater ItemsSource="{Binding InstallModsData.RequestedModVersions}">
                     <ItemsRepeater.Layout>
                         <StackLayout Spacing="8" Orientation="Vertical" />
                     </ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Id}" />
+                            <Grid ColumnDefinitions="50 *" ColumnSpacing="24">
+                                <TextBlock Grid.Column="0" Text="Install" />
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock Text="{Binding Id}" />
+                                    <TextBlock Text="{Binding ReasonForAction}" FontSize="12" 
+                                               Foreground="{DynamicResource SecondaryText}"/>
+                                </StackPanel>
+                            </Grid>
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>

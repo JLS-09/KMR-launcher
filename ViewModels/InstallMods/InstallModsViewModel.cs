@@ -25,13 +25,13 @@ public partial class InstallModsViewModel : ViewModelBase
     public event Action<InstallModsData>? Finished;
     public event Action? Cancelled;
 
-    public InstallModsViewModel(List<ModVersion> mods)
+    public InstallModsViewModel(List<ModVersion> mods, ModListService modListService)
     {
         InstallModsData.RequestedModVersions = new ObservableCollection<ModVersion>(mods);
 
         _steps =
         [
-            new InstallModsSelectInstanceStepViewModel(InstallModsData),
+            new InstallModsSelectInstanceStepViewModel(InstallModsData, modListService),
             new InstallModsRecommendsStepViewModel(InstallModsData)
         ];
         SetStep(0, fromIndex: -1);
