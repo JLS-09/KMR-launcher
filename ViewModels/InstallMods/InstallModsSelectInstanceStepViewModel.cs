@@ -8,7 +8,7 @@ namespace KMRLauncherMvvm.ViewModels.InstallMods;
 public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepViewModel
 {
     [ObservableProperty] private ObservableCollection<Instance> _instances;
-    
+
     public InstallModsSelectInstanceStepViewModel(InstallModsData installModsData) : base(installModsData)
     {
         InstallModsData.PropertyChanged += (_, e) =>
@@ -22,7 +22,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         InstallModsData.SelectedInstance = Instances.FirstOrDefault();
         InstallModsData.RequestedModVersions = installModsData.RequestedModVersions;
     }
-    
-    public override string Title => "Choose instance and version";
+
+    public override string Title => "Choose instance";
     public override bool CanGoNext => InstallModsData.SelectedInstance is not null;
 }

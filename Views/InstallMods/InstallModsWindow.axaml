@@ -11,31 +11,45 @@
         Foreground="{DynamicResource PrimaryText}"
         Width="700" Height="600"
         Title="Install Mod">
-    
+
     <Window.DataTemplates>
-        <DataTemplate DataType="viewModels:InstallModsViewModel">
-            <views:InstallModsSelectInstanceStepView/>
+        <DataTemplate DataType="viewModels:InstallModsSelectInstanceStepViewModel">
+            <views:InstallModsSelectInstanceStepView />
+        </DataTemplate>
+        <DataTemplate DataType="viewModels:InstallModsRecommendsStepViewModel">
+            <views:InstallModsRecommendsStepView />
         </DataTemplate>
     </Window.DataTemplates>
-    
+
     <Design.DataContext>
-        <viewModels:InstallModsViewModel/>
+        <viewModels:InstallModsViewModel />
     </Design.DataContext>
-    
+
     <Grid RowDefinitions="* Auto">
-        <ContentControl Grid.Row="0" Content="{Binding CurrentStep}" VerticalAlignment="Stretch"/>
+        <ContentControl Grid.Row="0" Content="{Binding CurrentStep}" VerticalAlignment="Stretch" />
         <DockPanel Grid.Row="1" Margin="32" VerticalAlignment="Bottom">
             <Button Classes="Secondary" Padding="24 12" IsCancel="True" VerticalAlignment="Center"
-                    Command="{Binding CancelCommand}">
+                    Command="{Binding CancelCommand}"
+                    IsVisible="{Binding IsFirstStep}">
                 <TextBlock Text="CANCEL" FontFamily="{DynamicResource SpaceGrotesk}"
-                           FontWeight="Bold" LetterSpacing="1.5" FontSize="16"/>
+                           FontWeight="Bold" LetterSpacing="1.5" FontSize="16" />
+            </Button>
+
+            <Button Classes="Secondary" Padding="24 12" VerticalAlignment="Center"
+                    Command="{Binding BackCommand}"
+                    IsVisible="{Binding !IsFirstStep}">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Label Classes="icon" FontWeight="Regular" Content="&#xE06B;" FontSize="22" />
+                    <TextBlock Text="BACK" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
+                               FontSize="16" FontWeight="Bold" LetterSpacing="1" />
+                </StackPanel>
             </Button>
             <Button Classes="Primary" Padding="24 12" HorizontalAlignment="Right" VerticalAlignment="Center"
                     Command="{Binding NextCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock Text="NEXT" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
-                               FontSize="16" FontWeight="Bold" LetterSpacing="1"/>
-                    <Label Classes="icon" FontWeight="Regular" Content="&#xE06C;" FontSize="22"/>
+                               FontSize="16" FontWeight="Bold" LetterSpacing="1" />
+                    <Label Classes="icon" FontWeight="Regular" Content="&#xE06C;" FontSize="22" />
                 </StackPanel>
             </Button>
         </DockPanel>
