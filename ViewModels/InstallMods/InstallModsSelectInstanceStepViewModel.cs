@@ -61,11 +61,11 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
             foreach (var dependency in version.Depends)
             {
+                if (!_modListService.Mods.ToList().Exists(m => m.Id == dependency.Name)) continue;
+
                 if (InstallModsData.SelectedInstance.Mods.Exists(m => m.Identifier == dependency.Name))
-                {
                     continue;
-                }
-                
+
                 if (InstallModsData.RequestedModVersions.ToList().Exists(v => v.Identifier == dependency.Name))
                 {
                     InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name).ModsForReason
@@ -93,17 +93,14 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                     continue;
                 }
 
-                if (_modListService.Mods.ToList().Exists(m => m.Id == dependency.Name))
-                {
-                    var versionToAdd = _modListService.Mods.First(m => m.Id == dependency.Name)
-                        .Versions.First();
-                    versionToAdd.ModsForReason = [version.Id];
-                    InstallModsData.RequestedModVersions.Add(versionToAdd);
-                }
+                var versionToAdd = _modListService.Mods.First(m => m.Id == dependency.Name)
+                    .Versions.First();
+                versionToAdd.ModsForReason = [version.Id];
+                InstallModsData.RequestedModVersions.Add(versionToAdd);
             }
+
             i++;
         }
-        Console.WriteLine(InstallModsData.RequestedModVersions.Count);
     }
 
     public override string Title => "Choose instance";
