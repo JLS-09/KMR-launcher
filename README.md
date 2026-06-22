@@ -24,7 +24,8 @@ This project is under heavy development, a lot of the features are not yet imple
 - Apply changes button on mod list
 - Entire mod installation pipeline
 - Currently playing instance card above settings
-- Manage instances (with installing mods per instance)
+- Manage instances (with installing, removing and updating mods per instance)
 - Export/import instances
 - Integrated back-up and restore system
 - Ability to add other repos
+- Internal ckan meta fetching module to remove dependency on api
