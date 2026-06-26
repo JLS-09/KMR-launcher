@@ -35,7 +35,7 @@ public class App : Application
         var modListService = new ModListService();
         
         var collection = new ServiceCollection();
-        collection.AddSingleton<IModApiService, ModApiService>();
+        collection.AddSingleton<IModApiService, ModGitService>();
         collection.AddSingleton<ZipService>();
         collection.AddSingleton(modListService);
         
