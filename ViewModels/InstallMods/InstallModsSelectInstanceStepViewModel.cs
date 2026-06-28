@@ -1,5 +1,7 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KMRLauncherMvvm.Models;
 
@@ -66,23 +68,43 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                 // TODO implement MinVersion + MaxVersion
                 if (dependency.MinVersion is not null)
                 {
-                    var depVersionIndex = dependencyMod.Versions.IndexOf(
-                        dependencyMod.Versions.First(v => v.Id == $"{dependency.Name}-{dependency.MinVersion}"));
+                    var depVersion =
+                        dependencyMod.Versions.FirstOrDefault(v =>
+                            v.Id == $"{dependency.Name}-{dependency.MinVersion}");
+
+                    var depVersionIndex = 0;
+
+                    if (depVersion is not null)
+                        depVersionIndex = dependencyMod.Versions.IndexOf(depVersion);
 
                     if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == dependency.Name))
                     {
-                        var installedVersionIndex = dependencyMod.Versions.IndexOf(
-                            InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name));
-                        if (installedVersionIndex <= depVersionIndex)
-                            continue;
+                        var versionInInstance =
+                            InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name);
+                        
+                        var installedVersionIndex = dependencyMod.Versions.IndexOf(versionInInstance);
+                        
+                        if (installedVersionIndex <= depVersionIndex) continue;
 
-                        InstallModsData.RequestedRemoveModVersions.Add(
-                            InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name));
+                        InstallModsData.RequestedRemoveModVersions.Add(versionInInstance);
+                    }
+                    else if (InstallModsData.RequestedModVersions.ToList()
+                             .Exists(v => v.Identifier == dependency.Name))
+                    {
+                        var addedDepVersionIndex = dependencyMod.Versions.IndexOf(
+                            InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name));
+
+                        if (addedDepVersionIndex <= depVersionIndex)
+                        {
+                            InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name).ModsForReason
+                                .Add(version.Id);
+                            continue;
+                        }
+
+                        InstallModsData.RequestedModVersions.Remove(dependencyMod.Versions[addedDepVersionIndex]);
                     }
 
                     InstallModsData.RequestedModVersions.Add(dependencyMod.Versions.First());
-                    
-                    continue;
                 }
 
                 if (dependency.MaxVersion is not null)
@@ -102,7 +124,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
                     InstallModsData.RequestedModVersions.Add(dependencyMod.Versions
                         .First(v => v.Id == $"{dependency.Name}-{dependency.MaxVersion}"));
-                    
+
                     continue;
                 }
 
@@ -118,7 +140,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                             v.Id == $"{dependency.Name}-{dependency.Version}"))
                         continue;
                 }
-                
+
                 // TODO take a look at this mess
                 if (dependency.MinVersion is null && dependency.MaxVersion is null && dependency.AnyOf is null &&
                     dependency.Version is null)
