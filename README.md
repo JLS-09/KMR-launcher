@@ -6,23 +6,23 @@ This project is under heavy development, a lot of the features are not yet imple
 
 ## Implemented features
 
-- Adding zips of ksp to the program for automatic instance creation (with version detection)
+- Adding zips of ksp to the launcher for automatic instance creation (with version detection)
 - Creating new instances
 - Deleting instances
 - Playing instance (only on Linux through wine)
 - Instance stats tracking (mod count, playtime, last played and instance size)
 - Browsing mods
 - searching mods on name and authors
-- Caching of mod list
+- Caching of mod list (partial)
 - Refreshing mod list on demand
 - Multi mod select in mod list
 - Direct version selection in mod list
 
 ## Planned features (In no particular order)
 
+- Full caching of mod list
 - Sorting mod list
 - Apply changes button on mod list
-- Multi instance selection for installing mods
 - Entire mod installation pipeline
 - Currently playing instance card above settings
 - Manage instances (with installing mods per instance)
