@@ -13,14 +13,13 @@ This project is under heavy development, a lot of the features are not yet imple
 - Instance stats tracking (mod count, playtime, last played and instance size)
 - Browsing mods
 - searching mods on name and authors
-- Caching of mod list (partial)
+- Full caching of mod list
 - Refreshing mod list on demand
 - Multi mod select in mod list
 - Direct version selection in mod list
 
 ## Planned features (In no particular order)
 
-- Full caching of mod list
 - Sorting mod list
 - Apply changes button on mod list
 - Entire mod installation pipeline
