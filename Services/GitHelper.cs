@@ -101,15 +101,18 @@ public class GitHelper(ModListService modList)
 
         Commands.Pull(repo, signature, options);
     }
-    
-    public async Task PopulateMods(string gitCacheFolder)
+
+    public async Task PopulateMods(string gitCacheFolder, IProgress<ModFetchProgress>? progress)
     {
         modList.Mods = [];
-        
+
+        var totalCount = Directory.EnumerateFiles(gitCacheFolder, "*.ckan", SearchOption.AllDirectories).ToList().Count;
+        var counter = 0;
+
         foreach (var modDir in Directory.EnumerateDirectories(gitCacheFolder))
         {
             var dirName = Path.GetFileName(modDir);
-            
+
             if (dirName.StartsWith('.'))
                 continue;
 
@@ -122,10 +125,17 @@ public class GitHelper(ModListService modList)
 
             foreach (var ckanFile in ckanFiles)
             {
+                counter++;
                 var json = await File.ReadAllTextAsync(ckanFile);
                 var version = JsonHelper.ParseVersion(ckanFile, json);
                 if (version is null) continue;
                 modVersions.Add(version);
+                progress?.Report(new ModFetchProgress
+                {
+                    TotalMods = totalCount,
+                    ModsReceived = counter,
+                    CurrentModName = "Converting CKAN meta into something useful..."
+                });
             }
 
             if (modVersions.Count == 0)

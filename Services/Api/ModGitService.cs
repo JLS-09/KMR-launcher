@@ -13,14 +13,10 @@ public class ModGitService(GitHelper gitHelper) : IModApiService
         var gitCacheFolder = Path.Combine(applicationBasePath, "kmrLauncher/cache/ckan-meta");
 
         if (!Directory.Exists(gitCacheFolder))
-        {
             GitHelper.CloneCkanMetaRepo(gitCacheFolder, progress);
-        }
         else
-        {
             GitHelper.PullCkanMetaRepo(gitCacheFolder, progress);
-        }
 
-        await gitHelper.PopulateMods(gitCacheFolder);
+        await gitHelper.PopulateMods(gitCacheFolder, progress);
     }
 }
