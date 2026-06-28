@@ -8,7 +8,7 @@ namespace KMRLauncherMvvm.Models;
 
 public class ModVersion
 {
-    [JsonPropertyName("_id")]       public required string Id { get; set; }
+    public string? Id { get; set; }
     [JsonPropertyName("identifier")] public required string Identifier { get; set; }
     [JsonPropertyName("version")]   public required string Version { get; set; }
     [JsonPropertyName("spec_version")]
