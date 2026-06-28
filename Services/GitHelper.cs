@@ -106,7 +106,7 @@ public class GitHelper(ModListService modList)
     {
         modList.Mods = [];
 
-        var totalCount = Directory.EnumerateFiles(gitCacheFolder, "*.ckan", SearchOption.AllDirectories).ToList().Count;
+        var totalCount = Directory.EnumerateFiles(gitCacheFolder, "*.ckan", SearchOption.AllDirectories).Count();
         var counter = 0;
 
         foreach (var modDir in Directory.EnumerateDirectories(gitCacheFolder))
