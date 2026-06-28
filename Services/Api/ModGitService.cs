@@ -25,17 +25,16 @@ public class ModGitService(GitHelper gitHelper, ModListService modList) : IModAp
 
         var latestCommitHash = Repository.ListRemoteReferences("https://github.com/KSP-CKAN/CKAN-meta.git")
             .First(r => r.CanonicalName == "refs/heads/master").TargetIdentifier;
-        
-        var modsCacheFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "kmrLauncher/mods.json");
+
+        var modsCacheFile = Path.Combine(applicationBasePath, "kmrLauncher/mods.json");
 
         if (!Directory.Exists(gitCacheFolder))
             GitHelper.CloneCkanMetaRepo(gitCacheFolder, progress);
         else
         {
             var repo = new Repository(gitCacheFolder);
-
             var currentCommitHash = repo.Refs.First(r => r.CanonicalName == "refs/heads/master").TargetIdentifier;
+            
             if (currentCommitHash == latestCommitHash && !isRefresh)
             {
                 progress?.Report(new ModFetchProgress
