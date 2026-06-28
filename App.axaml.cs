@@ -33,11 +33,13 @@ public class App : Application
         InitializeSettings();
         
         var modListService = new ModListService();
+        var jsonHelper = new GitHelper(modListService);
         
         var collection = new ServiceCollection();
-        collection.AddSingleton<IModApiService, ModApiService>();
+        collection.AddSingleton<IModApiService, ModGitService>();
         collection.AddSingleton<ZipService>();
         collection.AddSingleton(modListService);
+        collection.AddSingleton(jsonHelper);
         
         var config = new ConfigurationBuilder()
             .AddUserSecrets<App>()
