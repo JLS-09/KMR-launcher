@@ -53,6 +53,11 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         {
             var version = InstallModsData.RequestedModVersions[i];
 
+            if (version.Id is null)
+            {
+                return;
+            }
+
             if (version.Depends is null || version.Depends.Count == 0)
             {
                 i++;
@@ -64,6 +69,26 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                 if (!_modListService.Mods.ToList().Exists(m => m.Id == dependency.Name)) continue;
 
                 var dependencyMod = _modListService.Mods.First(m => m.Id == dependency.Name);
+
+                if (dependency.AnyOf is null && dependency.MaxVersion is null && dependency.MinVersion is null &&
+                    dependency.Version is null)
+                {
+                    if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == dependency.Name))
+                        continue;
+
+                    if (InstallModsData.RequestedModVersions.ToList().Exists(v => v.Identifier == dependency.Name))
+                    {
+                        InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name).ModsForReason
+                            .Add(version.Id);
+                        continue;
+                    }
+
+                    var versionToAdd = dependencyMod.Versions.First();
+                    versionToAdd.ModsForReason = [version.Id];
+                    InstallModsData.RequestedModVersions.Add(versionToAdd);
+                    
+                    continue;
+                }
 
                 // TODO implement MinVersion + MaxVersion
                 if (dependency.MinVersion is not null)
@@ -81,9 +106,9 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                     {
                         var versionInInstance =
                             InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name);
-                        
+
                         var installedVersionIndex = dependencyMod.Versions.IndexOf(versionInInstance);
-                        
+
                         if (installedVersionIndex <= depVersionIndex) continue;
 
                         InstallModsData.RequestedRemoveModVersions.Add(versionInInstance);
@@ -96,7 +121,8 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
                         if (addedDepVersionIndex <= depVersionIndex)
                         {
-                            InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name).ModsForReason
+                            InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name)
+                                .ModsForReason
                                 .Add(version.Id);
                             continue;
                         }
@@ -105,6 +131,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                     }
 
                     InstallModsData.RequestedModVersions.Add(dependencyMod.Versions.First());
+                    continue;
                 }
 
                 if (dependency.MaxVersion is not null)
@@ -140,26 +167,6 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                             v.Id == $"{dependency.Name}-{dependency.Version}"))
                         continue;
                 }
-
-                // TODO take a look at this mess
-                if (dependency.MinVersion is null && dependency.MaxVersion is null && dependency.AnyOf is null &&
-                    dependency.Version is null)
-                {
-                    if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == dependency.Name))
-                        continue;
-                }
-
-                if (InstallModsData.RequestedModVersions.ToList().Exists(v => v.Identifier == dependency.Name))
-                {
-                    InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name).ModsForReason
-                        .Add(version.Id);
-                    continue;
-                }
-
-                var versionToAdd = _modListService.Mods.First(m => m.Id == dependency.Name)
-                    .Versions.First();
-                versionToAdd.ModsForReason = [version.Id];
-                InstallModsData.RequestedModVersions.Add(versionToAdd);
             }
 
             i++;
