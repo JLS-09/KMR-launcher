@@ -1,7 +1,5 @@
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KMRLauncherMvvm.Models;
 
@@ -86,44 +84,44 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                     var versionToAdd = dependencyMod.Versions.First();
                     versionToAdd.ModsForReason = [version.Id];
                     InstallModsData.RequestedModVersions.Add(versionToAdd);
-                    
+
                     continue;
                 }
 
-                // TODO implement MinVersion + MaxVersion
                 if (dependency.MinVersion is not null && dependency.MaxVersion is not null)
                 {
                     var minDepVersion =
                         dependencyMod.Versions.FirstOrDefault(v =>
                             v.Id == $"{dependency.Name}-{dependency.MinVersion}");
-                    
+
                     var maxDepVersion =
                         dependencyMod.Versions.FirstOrDefault(v =>
                             v.Id == $"{dependency.Name}-{dependency.MinVersion}");
-                    
+
                     int maxDepVersionIndex;
                     var minDepVersionIndex = maxDepVersionIndex = 0;
-                    
+
                     if (minDepVersion is not null)
                         minDepVersionIndex = dependencyMod.Versions.IndexOf(minDepVersion);
-                    
+
                     if (maxDepVersion is not null)
                         maxDepVersionIndex = dependencyMod.Versions.IndexOf(maxDepVersion);
-                    
+
                     if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == dependency.Name))
                     {
                         var versionInInstance =
                             InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name);
-                        
+
                         var installedVersionIndex = dependencyMod.Versions.IndexOf(versionInInstance);
-                        
-                        if (installedVersionIndex <= minDepVersionIndex && installedVersionIndex >= maxDepVersionIndex) continue;
-                        
+
+                        if (installedVersionIndex <= minDepVersionIndex &&
+                            installedVersionIndex >= maxDepVersionIndex) continue;
+
                         InstallModsData.RequestedRemoveModVersions.Add(versionInInstance);
 
                         var versionToAdd = dependencyMod.Versions
                             .First(v => v.Id == $"{dependency.Name}-{dependency.MaxVersion}");
-                        
+
                         versionToAdd.ModsForReason = versionInInstance.ModsForReason;
                         versionToAdd.ModsForReason.Add(version.Id);
                         InstallModsData.RequestedModVersions.Add(versionToAdd);
@@ -145,11 +143,11 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
                         var versionToAdd = dependencyMod.Versions
                             .First(v => v.Id == $"{dependency.Name}-{dependency.MaxVersion}");
-                        
+
                         versionToAdd.ModsForReason = dependencyMod.Versions[addedDepVersionIndex].ModsForReason;
                         versionToAdd.ModsForReason.Add(version.Id);
                         InstallModsData.RequestedModVersions.Add(versionToAdd);
-                        
+
                         InstallModsData.RequestedModVersions.Remove(dependencyMod.Versions[addedDepVersionIndex]);
                     }
                     else
@@ -159,9 +157,10 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                         versionToAdd.ModsForReason.Add(version.Id);
                         InstallModsData.RequestedModVersions.Add(versionToAdd);
                     }
+
                     continue;
                 }
-                
+
                 if (dependency.MinVersion is not null)
                 {
                     var minDepVersion =
@@ -188,12 +187,12 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                         versionToAdd.ModsForReason = versionInInstance.ModsForReason;
                         versionToAdd.ModsForReason.Add(version.Id);
                         InstallModsData.RequestedModVersions.Add(versionToAdd);
-                        
+
                         continue;
                     }
-                    
+
                     if (InstallModsData.RequestedModVersions.ToList()
-                             .Exists(v => v.Identifier == dependency.Name))
+                        .Exists(v => v.Identifier == dependency.Name))
                     {
                         var addedDepVersionIndex = dependencyMod.Versions.IndexOf(
                             InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name));
@@ -210,7 +209,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                         versionToAdd.ModsForReason = dependencyMod.Versions[addedDepVersionIndex].ModsForReason;
                         versionToAdd.ModsForReason.Add(version.Id);
                         InstallModsData.RequestedModVersions.Add(versionToAdd);
-                        
+
                         InstallModsData.RequestedModVersions.Remove(dependencyMod.Versions[addedDepVersionIndex]);
                     }
                     else
@@ -219,26 +218,73 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                         versionToAdd.ModsForReason.Add(version.Id);
                         InstallModsData.RequestedModVersions.Add(versionToAdd);
                     }
+
                     continue;
                 }
 
                 if (dependency.MaxVersion is not null)
                 {
-                    var depVersionIndex = dependencyMod.Versions.IndexOf(
-                        dependencyMod.Versions.First(v => v.Id == $"{dependency.Name}-{dependency.MaxVersion}"));
+                    var maxDepVersion =
+                        dependencyMod.Versions.FirstOrDefault(v =>
+                            v.Id == $"{dependency.Name}-{dependency.MinVersion}");
+
+                    var maxDepVersionIndex = 0;
+
+                    if (maxDepVersion is not null)
+                        maxDepVersionIndex = dependencyMod.Versions.IndexOf(maxDepVersion);
 
                     if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == dependency.Name))
                     {
-                        var installedVersionIndex = dependencyMod.Versions.IndexOf(
-                            InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name));
-                        if (installedVersionIndex >= depVersionIndex)
-                            continue;
+                        var versionInInstance =
+                            InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name);
 
-                        InstallModsData.RequestedModVersions.Add(dependencyMod.Versions.First());
+                        var installedVersionIndex = dependencyMod.Versions.IndexOf(versionInInstance);
+
+                        if (installedVersionIndex >= maxDepVersionIndex) continue;
+
+                        InstallModsData.RequestedRemoveModVersions.Add(versionInInstance);
+
+                        var versionToAdd = dependencyMod.Versions
+                            .First(v => v.Id == $"{dependency.Name}-{dependency.MaxVersion}");
+
+                        versionToAdd.ModsForReason = versionInInstance.ModsForReason;
+                        versionToAdd.ModsForReason.Add(version.Id);
+                        InstallModsData.RequestedModVersions.Add(versionToAdd);
+
+                        continue;
                     }
 
-                    InstallModsData.RequestedModVersions.Add(dependencyMod.Versions
-                        .First(v => v.Id == $"{dependency.Name}-{dependency.MaxVersion}"));
+                    if (InstallModsData.RequestedModVersions.ToList()
+                        .Exists(v => v.Identifier == dependency.Name))
+                    {
+                        var addedDepVersionIndex = dependencyMod.Versions.IndexOf(
+                            InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name));
+
+                        if (addedDepVersionIndex >= maxDepVersionIndex)
+                        {
+                            InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name)
+                                .ModsForReason
+                                .Add(version.Id);
+                            continue;
+                        }
+
+                        var versionToAdd = dependencyMod.Versions
+                            .First(v => v.Id == $"{dependency.Name}-{dependency.MaxVersion}");
+
+                        versionToAdd.ModsForReason = dependencyMod.Versions[addedDepVersionIndex].ModsForReason;
+                        versionToAdd.ModsForReason.Add(version.Id);
+                        InstallModsData.RequestedModVersions.Add(versionToAdd);
+
+                        InstallModsData.RequestedModVersions.Remove(dependencyMod.Versions[addedDepVersionIndex]);
+                    }
+                    else
+                    {
+                        var versionToAdd = dependencyMod.Versions
+                            .First(v => v.Id == $"{dependency.Name}-{dependency.MaxVersion}");
+
+                        versionToAdd.ModsForReason.Add(version.Id);
+                        InstallModsData.RequestedModVersions.Add(versionToAdd);
+                    }
 
                     continue;
                 }
@@ -251,9 +297,67 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
                 if (dependency.Version is not null)
                 {
-                    if (InstallModsData.SelectedInstance.Mods.Exists(v =>
-                            v.Id == $"{dependency.Name}-{dependency.Version}"))
+                    var depVersion =
+                        dependencyMod.Versions.FirstOrDefault(v =>
+                            v.Id == $"{dependency.Name}-{dependency.Version}");
+
+                    var depVersionIndex = 0;
+
+                    if (depVersion is not null)
+                        depVersionIndex = dependencyMod.Versions.IndexOf(depVersion);
+
+                    if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == dependency.Name))
+                    {
+                        var versionInInstance =
+                            InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name);
+
+                        var installedVersionIndex = dependencyMod.Versions.IndexOf(versionInInstance);
+
+                        if (installedVersionIndex == depVersionIndex) continue;
+
+                        var versionToAdd = dependencyMod.Versions
+                            .First(v => v.Id == $"{dependency.Name}-{dependency.Version}");
+
+                        versionToAdd.ModsForReason = versionInInstance.ModsForReason;
+                        versionToAdd.ModsForReason.Add(version.Id);
+                        InstallModsData.RequestedModVersions.Add(versionToAdd);
+
                         continue;
+                    }
+
+                    if (InstallModsData.RequestedModVersions.ToList()
+                        .Exists(v => v.Identifier == dependency.Name))
+                    {
+                        var addedDepVersionIndex = dependencyMod.Versions.IndexOf(
+                            InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name));
+
+                        if (addedDepVersionIndex == depVersionIndex)
+                        {
+                            InstallModsData.RequestedModVersions.First(v => v.Identifier == dependency.Name)
+                                .ModsForReason
+                                .Add(version.Id);
+                            continue;
+                        }
+
+                        var versionToAdd = dependencyMod.Versions
+                            .First(v => v.Id == $"{dependency.Name}-{dependency.Version}");
+
+                        versionToAdd.ModsForReason = dependencyMod.Versions[addedDepVersionIndex].ModsForReason;
+                        versionToAdd.ModsForReason.Add(version.Id);
+                        InstallModsData.RequestedModVersions.Add(versionToAdd);
+
+                        InstallModsData.RequestedModVersions.Remove(dependencyMod.Versions[addedDepVersionIndex]);
+                    }
+                    else
+                    {
+                        var versionToAdd = dependencyMod.Versions
+                            .First(v => v.Id == $"{dependency.Name}-{dependency.Version}");
+
+                        versionToAdd.ModsForReason.Add(version.Id);
+                        InstallModsData.RequestedModVersions.Add(versionToAdd);
+                    }
+
+                    continue;
                 }
             }
 
