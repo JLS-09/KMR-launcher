@@ -117,6 +117,9 @@ public class Relationship
 public class AnyOfEntry
 {
     [JsonPropertyName("name")] public required string Name { get; set; }
+    [JsonPropertyName("version")] public string? Version { get; set; }
+    [JsonPropertyName("min_version")] public string? MinVersion { get; set; }
+    [JsonPropertyName("max_version")] public string? MaxVersion { get; set; }
 }
 
 public class StringOrArrayConverter : JsonConverter<List<string>>
