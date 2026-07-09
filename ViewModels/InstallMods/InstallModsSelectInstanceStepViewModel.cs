@@ -65,32 +65,6 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
             foreach (var dependency in version.Depends)
             {
-                if (dependency.AnyOf is not null)
-                {
-                    var satisfied = false;
-
-                    foreach (var anyOfEntry in dependency.AnyOf)
-                    {
-                        if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == anyOfEntry.Name))
-                        {
-                            satisfied = true;
-                            break;
-                        }
-
-                        if (InstallModsData.RequestedModVersions.ToList().Exists(v => v.Identifier == anyOfEntry.Name))
-                        {
-                            InstallModsData.RequestedModVersions.First(v => v.Identifier == anyOfEntry.Name)
-                                .ModsForReason.Add(version.Id);
-                            satisfied = true;
-                            break;
-                        }
-                    }
-
-                    if (satisfied) continue;
-
-                    dependency.Name = dependency.AnyOf.First().Name;
-                }
-
                 if (!_modListService.Mods.ToList().Exists(m => m.Id == dependency.Name)) continue;
 
                 var dependencyMod = _modListService.Mods.First(m => m.Id == dependency.Name);
