@@ -68,7 +68,36 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
                 var dependencyMod = _modListService.Mods.First(m => m.Id == dependency.Name);
 
-                if (dependency.AnyOf is null && dependency.MaxVersion is null && dependency.MinVersion is null &&
+                if (dependency.AnyOf is not null)
+                {
+                    var instanceOrQueueHasOneOf = false;
+
+                    foreach (var anyOfEntry in dependency.AnyOf)
+                    {
+                        if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == anyOfEntry.Name))
+                        {
+                            dependency.Name = anyOfEntry.Name;
+                            instanceOrQueueHasOneOf = true;
+                            break;
+                        }
+                        
+                        if (InstallModsData.RequestedModVersions.ToList().Exists(v => v.Identifier == anyOfEntry.Name))
+                        {
+                            InstallModsData.RequestedModVersions.First(v => v.Identifier == anyOfEntry.Name).ModsForReason
+                                .Add(version.Id);
+                            dependency.Name = anyOfEntry.Name;
+                            instanceOrQueueHasOneOf = true;
+                            break;
+                        }
+                    }
+
+                    if (!instanceOrQueueHasOneOf)
+                    {
+                        dependency.Name = dependency.AnyOf.First().Name;
+                    }
+                }
+                
+                if (dependency.MaxVersion is null && dependency.MinVersion is null &&
                     dependency.Version is null)
                 {
                     if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == dependency.Name))
@@ -96,7 +125,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
                     var maxDepVersion =
                         dependencyMod.Versions.FirstOrDefault(v =>
-                            v.Id == $"{dependency.Name}-{dependency.MinVersion}");
+                            v.Id == $"{dependency.Name}-{dependency.MaxVersion}");
 
                     int maxDepVersionIndex;
                     var minDepVersionIndex = maxDepVersionIndex = 0;
@@ -125,6 +154,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                         versionToAdd.ModsForReason = versionInInstance.ModsForReason;
                         versionToAdd.ModsForReason.Add(version.Id);
                         InstallModsData.RequestedModVersions.Add(versionToAdd);
+                        continue;
                     }
 
                     if (InstallModsData.RequestedModVersions.ToList()
@@ -226,7 +256,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                 {
                     var maxDepVersion =
                         dependencyMod.Versions.FirstOrDefault(v =>
-                            v.Id == $"{dependency.Name}-{dependency.MinVersion}");
+                            v.Id == $"{dependency.Name}-{dependency.MaxVersion}");
 
                     var maxDepVersionIndex = 0;
 
@@ -286,12 +316,6 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                         InstallModsData.RequestedModVersions.Add(versionToAdd);
                     }
 
-                    continue;
-                }
-
-                // TODO implement anyOf
-                if (dependency.AnyOf is not null)
-                {
                     continue;
                 }
 
