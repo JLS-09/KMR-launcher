@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -32,19 +31,17 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
     private void ResolveDependencies()
     {
+        InstallModsData.ChoosableVersions.Clear();
         var tempList = InstallModsData.RequestedModVersions.ToList();
         tempList.RemoveAll(v => v.ModsForReason.Count > 0);
         InstallModsData.RequestedModVersions = new ObservableCollection<ModVersion>(tempList);
         if (_modListService.Mods is null || InstallModsData.SelectedInstance is null) return;
 
-        var tempModVersions = InstallModsData.RequestedModVersions;
+        var tempModVersions = InstallModsData.RequestedModVersions.ToList();
 
-        foreach (var version in tempModVersions)
+        foreach (var version in tempModVersions.Where(version => InstallModsData.SelectedInstance.Mods.Exists(m => m.Id == version.Identifier)))
         {
-            if (InstallModsData.SelectedInstance.Mods.Exists(m => m.Id == version.Identifier))
-            {
-                InstallModsData.RequestedModVersions.Remove(version);
-            }
+            InstallModsData.RequestedModVersions.Remove(version);
         }
 
         var i = 0;
@@ -65,7 +62,11 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
             foreach (var dependency in version.Depends)
             {
-                if (!_modListService.Mods.ToList().Exists(m => m.Id == dependency.Name)) continue;
+                if (!_modListService.Mods.ToList().Exists(m => m.Id == dependency.Name) || dependency.AnyOf is not null)
+                {
+                    InstallModsData.ChoosableVersions.Add(dependency);
+                    continue;
+                }
 
                 var dependencyMod = _modListService.Mods.First(m => m.Id == dependency.Name);
 
