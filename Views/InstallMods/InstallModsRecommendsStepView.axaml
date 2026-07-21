@@ -9,7 +9,7 @@
              Foreground="{DynamicResource PrimaryText}"
              x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsRecommendsStepView">
 
-    <Grid Margin="32 32 32 0" RowDefinitions="Auto Auto *" RowSpacing="32">
+    <Grid Margin="32 32 32 0" RowDefinitions="Auto * *" RowSpacing="32">
         <StackPanel Grid.Row="0" Spacing="4">
             <TextBlock Text="INSTALL MODS" FontSize="30" FontFamily="{DynamicResource SpaceMonoBold}"
                        LetterSpacing="1.5" HorizontalAlignment="Left" />
@@ -20,16 +20,39 @@
                 <Rectangle Grid.Column="3" Height="4" Fill="{DynamicResource PrimaryBackground}" />
             </Grid>
         </StackPanel>
-        <StackPanel Grid.Row="1" Spacing="8">
-            <TextBlock Text="RECOMMENDED MODS" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+        <Grid Grid.Row="1" RowDefinitions="Auto *" RowSpacing="8" IsVisible="{Binding ShowRecommendations}">
+            <TextBlock Grid.Row="0" Text="RECOMMENDED MODS" LetterSpacing="1"
+                       Foreground="{DynamicResource SecondaryText}"
                        FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-            
-        </StackPanel>
-        <StackPanel Grid.Row="2" Spacing="8">
-            <TextBlock Text="SUGGESTED MODS" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ItemsRepeater ItemsSource="{Binding Recommendations}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Spacing="8" Orientation="Vertical" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Identifier}" />
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
+        </Grid>
+        <Grid Grid.Row="2" RowDefinitions="Auto *" RowSpacing="8" IsVisible="{Binding ShowSuggestions}">
+            <TextBlock Grid.Row="0" Text="SUGGESTED MODS" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}" 
                        FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-            
-        </StackPanel>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ItemsRepeater ItemsSource="{Binding Suggestions}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Spacing="8" Orientation="Vertical" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Identifier}" />
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 
 </UserControl>

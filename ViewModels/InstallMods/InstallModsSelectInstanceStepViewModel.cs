@@ -367,4 +367,8 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
     public override string Title => "Choose instance";
     public override bool CanGoNext => InstallModsData.SelectedInstance is not null;
+    public override void PopulateRecommendations()
+    {
+        throw new System.NotImplementedException();
+    }
 }

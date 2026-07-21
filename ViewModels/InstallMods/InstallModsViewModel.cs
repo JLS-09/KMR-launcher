@@ -32,7 +32,7 @@ public partial class InstallModsViewModel : ViewModelBase
         _steps =
         [
             new InstallModsSelectInstanceStepViewModel(InstallModsData, modListService),
-            new InstallModsRecommendsStepViewModel(InstallModsData)
+            new InstallModsRecommendsStepViewModel(InstallModsData, modListService)
         ];
         SetStep(0, fromIndex: -1);
     }
@@ -67,6 +67,10 @@ public partial class InstallModsViewModel : ViewModelBase
     private void Next()
     {
         SetStep(_index + 1, _index);
+        if (CurrentStep.GetType() == typeof(InstallModsRecommendsStepViewModel))
+        {
+            CurrentStep.PopulateRecommendations();
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanGoBack))]
