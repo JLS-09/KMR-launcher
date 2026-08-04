@@ -29,6 +29,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         InstallModsData.RequestedModVersions = installModsData.RequestedModVersions;
     }
 
+    //TODO refactor this method
     private void ResolveDependencies()
     {
         InstallModsData.ChoosableVersions.Clear();
