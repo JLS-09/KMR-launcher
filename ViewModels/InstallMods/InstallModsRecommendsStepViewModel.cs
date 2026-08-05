@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KMRLauncherMvvm.Models;
@@ -8,9 +9,9 @@ namespace KMRLauncherMvvm.ViewModels.InstallMods;
 public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewModel
 {
     private ModListService _modListService;
-    [ObservableProperty] private List<ModVersion> _recommendations = [];
-    [ObservableProperty] private List<ModVersion> _suggestions = [];
-    [ObservableProperty] private List<ModVersion> _supported = [];
+    [ObservableProperty] private List<VersionListItemViewModel> _recommendations = [];
+    [ObservableProperty] private List<VersionListItemViewModel> _suggestions = [];
+    [ObservableProperty] private List<VersionListItemViewModel> _supported = [];
     [ObservableProperty] private bool _showRecommendations;
     [ObservableProperty] private bool _showSuggestions;
     [ObservableProperty] private bool _showSupported;
@@ -26,9 +27,9 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         Recommendations = [];
         Suggestions = [];
         Supported = [];
-        
+
         if (_modListService.Mods is null || !InstallModsData.RequestedModVersions.Any()) return;
-        
+
         foreach (var version in InstallModsData.RequestedModVersions)
         {
             if (version.Recommends is not null && version.Recommends.Count > 0)
@@ -37,21 +38,23 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
                 {
                     if (_modListService.Mods.FirstOrDefault(m => m.Id.Equals(recommendation.Name)) is null)
                         continue;
-                    
-                    Recommendations.Add(_modListService.Mods.First(m => m.Id.Equals(recommendation.Name)).Versions
-                        .First());
+
+                    Recommendations.Add(new VersionListItemViewModel(_modListService.Mods
+                        .First(m => m.Id.Equals(recommendation.Name)).Versions
+                        .First()));
                 }
             }
-            
+
             if (version.Suggests is not null && version.Suggests.Count > 0)
             {
                 foreach (var suggestion in version.Suggests)
                 {
                     if (_modListService.Mods.FirstOrDefault(m => m.Id.Equals(suggestion.Name)) is null)
                         continue;
-                    
-                    Suggestions.Add(_modListService.Mods.First(m => m.Id.Equals(suggestion.Name)).Versions
-                        .First());
+
+                    Suggestions.Add(new VersionListItemViewModel(_modListService.Mods
+                        .First(m => m.Id.Equals(suggestion.Name)).Versions
+                        .First()));
                 }
             }
         }

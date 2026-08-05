@@ -25,16 +25,48 @@
                        Foreground="{DynamicResource SecondaryText}"
                        FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                <ItemsRepeater ItemsSource="{Binding Recommendations}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Spacing="8" Orientation="Vertical" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
+                <ItemsControl ItemsSource="{Binding Recommendations}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="8" Orientation="Vertical" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    
+                    <ItemsControl.Styles>
+                        <Style Selector="Button.mod-row">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="HorizontalAlignment" Value="Stretch" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Cursor" Value="Hand" />
+                        </Style>
+                        <Style Selector="Button.mod-row:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Style>
+                        <Style Selector="Button.mod-row:pressed /template/ ContentPresenter">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Style>
+                    </ItemsControl.Styles>
+                    
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Identifier}" />
+                            <Button Classes="mod-row">
+                                <Button.Theme>
+                                    <ControlTheme TargetType="Button">
+                                        <Setter Property="Template">
+                                            <ControlTemplate>
+                                                <ContentPresenter Content="{TemplateBinding Content}"
+                                                                  ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                                            </ControlTemplate>
+                                        </Setter>
+                                    </ControlTheme>
+                                </Button.Theme>
+                                <TextBlock Text="{Binding Version.Identifier}" />
+                            </Button>
                         </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </ScrollViewer>
         </Grid>
         <Grid Grid.Row="2" RowDefinitions="Auto *" RowSpacing="8" IsVisible="{Binding ShowSuggestions}">
@@ -47,7 +79,7 @@
                     </ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Identifier}" />
+                            <TextBlock Text="{Binding Version.Identifier}" />
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
