@@ -1,7 +1,9 @@
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
+using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;
@@ -64,6 +66,26 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         ShowSupported = Supported.Count > 0;
     }
 
+    [RelayCommand]
+    private void ToggleRecommendation(VersionListItemViewModel item)
+    {
+        item.IsSelected = !item.IsSelected;
+    }
+
+    [RelayCommand]
+    private void SelectAll(List<VersionListItemViewModel> versions)
+    {
+        foreach (var version in versions)
+            version.IsSelected = true;
+    }
+    
+    [RelayCommand]
+    private void UnselectAll(List<VersionListItemViewModel> versions)
+    {
+        foreach (var version in versions)
+            version.IsSelected = false;
+    }
+    
     public override string Title => "Choose Recommendations";
     public override bool CanGoNext => true;
 }
