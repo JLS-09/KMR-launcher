@@ -32,34 +32,32 @@
             <Setter Property="Background" Value="#1F1F20" />
         </Style>
 
-        <Style Selector="Button:pointerover /template/ ContentPresenter">
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-
-        <Style Selector="Button:focus /template/ ContentPresenter">
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-
         <Style Selector="Button.ButtonRefresh:pointerover /template/ ContentPresenter">
             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlue}" />
             <Setter Property="Foreground" Value="{DynamicResource PrimaryBlue}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
         </Style>
 
         <Style Selector="Button.ButtonRefresh:focus /template/ ContentPresenter">
             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlue}" />
             <Setter Property="Foreground" Value="{DynamicResource PrimaryBlue}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
         </Style>
 
         <Style Selector="Button.ButtonApply:pointerover /template/ ContentPresenter">
             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
             <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
         </Style>
 
         <Style Selector="Button.ButtonApply:focus /template/ ContentPresenter">
             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
             <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
         </Style>
     </UserControl.Styles>
 
@@ -151,122 +149,100 @@
             <TextBlock Grid.Column="3" Text="LAST_UPDATE" Foreground="{DynamicResource SecondaryText}"
                        FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
         </Grid>
-        <ListBox ItemsSource="{Binding ModListFiltered}"
-                 Background="Transparent" Grid.Row="3"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsRepeater ItemsSource="{Binding ModListFiltered}"
+                     Background="Transparent">
+                <ItemsRepeater.Layout>
+                    <StackLayout Orientation="Vertical" Spacing="4"/>
+                </ItemsRepeater.Layout>
 
-            <ListBox.Styles>
-                <Style Selector="ListBoxItem">
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="Margin" Value="0 0 0 8" />
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="CornerRadius" Value="0" />
-                    <Setter Property="Template">
-                        <ControlTemplate>
-                            <ContentPresenter Content="{TemplateBinding Content}"
-                                              ContentTemplate="{TemplateBinding ContentTemplate}" />
-                        </ControlTemplate>
-                    </Setter>
-                </Style>
-                <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="Margin" Value="0" />
-                </Style>
-                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="Margin" Value="0 0 0 -2" />
-                </Style>
-                <Style Selector="Button.mod-row">
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="BorderThickness" Value="0" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="HorizontalAlignment" Value="Stretch" />
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="Cursor" Value="Hand" />
-                </Style>
-                <Style Selector="Button.mod-row:pointerover /template/ ContentPresenter">
-                    <Setter Property="Background" Value="Transparent" />
-                </Style>
-                <Style Selector="Button.mod-row:pressed /template/ ContentPresenter">
-                    <Setter Property="Background" Value="Transparent" />
-                </Style>
-            </ListBox.Styles>
+                <ItemsRepeater.Styles>
+                    <Style Selector="Button.mod-row">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Cursor" Value="Hand" />
+                    </Style>
+                    <Style Selector="Button.mod-row:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                    <Style Selector="Button.mod-row:pressed /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                </ItemsRepeater.Styles>
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="vm:ModListItemViewModel">
-                    <Button Classes="mod-row"
-                            Command="{Binding $parent[ListBox].((vm:DiscoverPageViewModel)DataContext).ToggleModSelectionCommand}"
-                            CommandParameter="{Binding}">
-                        <Border Padding="32 16" BorderThickness="3 0 0 0"
-                                Classes.selected="{Binding IsSelected}">
-                            <Border.Styles>
-                                <Style Selector="Border">
-                                    <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
-                                    <Setter Property="BorderBrush" Value="Transparent" />
-                                </Style>
-                                <Style Selector="Border.selected">
-                                    <Setter Property="Background"
-                                            Value="{DynamicResource SideBarButtonActiveBackground}" />
-                                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
-                                </Style>
-                            </Border.Styles>
-                            <Grid ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 0 24 0" ColumnSpacing="12">
-                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                    <TextBlock Classes="ModListEntry" Text="{Binding Mod.Name}" FontSize="16"
-                                               TextTrimming="CharacterEllipsis" FontWeight="Bold"
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate DataType="vm:ModListItemViewModel">
+                        <Button Classes="mod-row"
+                                Command="{Binding $parent[ItemsRepeater].((vm:DiscoverPageViewModel)DataContext).ToggleModSelectionCommand}"
+                                CommandParameter="{Binding}">
+                            <Border Padding="32 16" BorderThickness="3 0 0 0"
+                                    Classes.selected="{Binding IsSelected}">
+                                <Border.Styles>
+                                    <Style Selector="Border">
+                                        <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
+                                        <Setter Property="BorderBrush" Value="Transparent" />
+                                    </Style>
+                                    <Style Selector="Border.selected">
+                                        <Setter Property="Background"
+                                                Value="{DynamicResource SideBarButtonActiveBackground}" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
+                                    </Style>
+                                </Border.Styles>
+                                <Grid ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 0 24 0" ColumnSpacing="12">
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                        <TextBlock Classes="ModListEntry" Text="{Binding Mod.Name}" FontSize="16"
+                                                   TextTrimming="CharacterEllipsis" FontWeight="Bold"
+                                                   FontFamily="{DynamicResource SpaceGrotesk}">
+                                            <ToolTip.Tip>
+                                                <TextBlock Text="{Binding Mod.Name}" FontSize="14"
+                                                           FontFamily="{DynamicResource SpaceGrotesk}" />
+                                            </ToolTip.Tip>
+                                        </TextBlock>
+                                        <TextBlock Classes="ModListEntry" Text="{Binding Mod.Abstract}" FontSize="11"
+                                                   TextTrimming="CharacterEllipsis" FontWeight="Regular"
+                                                   Foreground="{DynamicResource SecondaryText}"
+                                                   FontFamily="{DynamicResource Inter}">
+                                            <ToolTip.Tip>
+                                                <TextBlock Text="{Binding Mod.Abstract}" FontSize="12"
+                                                           FontFamily="{DynamicResource Inter}" />
+                                            </ToolTip.Tip>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Classes="ModListEntry" Text="{Binding Mod.AuthorsDisplay}"
+                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" FontSize="13"
                                                FontFamily="{DynamicResource SpaceGrotesk}">
                                         <ToolTip.Tip>
-                                            <TextBlock Text="{Binding Mod.Name}" FontSize="14"
+                                            <TextBlock Text="{Binding Mod.AuthorsDisplay}" FontSize="12"
                                                        FontFamily="{DynamicResource SpaceGrotesk}" />
                                         </ToolTip.Tip>
                                     </TextBlock>
-                                    <TextBlock Classes="ModListEntry" Text="{Binding Mod.Abstract}" FontSize="11"
-                                               TextTrimming="CharacterEllipsis" FontWeight="Regular"
-                                               Foreground="{DynamicResource SecondaryText}"
-                                               FontFamily="{DynamicResource Inter}">
+                                    <ComboBox Grid.Column="2" ItemsSource="{Binding Mod.Versions}"
+                                              SelectedItem="{Binding SelectedVersion}" VerticalAlignment="Center"
+                                              CornerRadius="0" FontSize="13">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Version}" FontSize="13" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <TextBlock Grid.Column="3" Classes="ModListEntry" FontSize="13"
+                                               Text="{Binding Mod.LatestVersion.LastUpdatedHumanized}"
+                                               VerticalAlignment="Center"
+                                               Foreground="{DynamicResource SecondaryText}">
                                         <ToolTip.Tip>
-                                            <TextBlock Text="{Binding Mod.Abstract}" FontSize="12"
+                                            <TextBlock Text="{Binding Mod.LatestVersion.ReleaseDate}" FontSize="14"
                                                        FontFamily="{DynamicResource Inter}" />
                                         </ToolTip.Tip>
                                     </TextBlock>
-                                </StackPanel>
-                                <TextBlock Grid.Column="1" Classes="ModListEntry" Text="{Binding Mod.AuthorsDisplay}"
-                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" FontSize="13"
-                                           FontFamily="{DynamicResource SpaceGrotesk}">
-                                    <ToolTip.Tip>
-                                        <TextBlock Text="{Binding Mod.AuthorsDisplay}" FontSize="12"
-                                                   FontFamily="{DynamicResource SpaceGrotesk}" />
-                                    </ToolTip.Tip>
-                                </TextBlock>
-                                <ComboBox Grid.Column="2" ItemsSource="{Binding Mod.Versions}"
-                                          SelectedItem="{Binding SelectedVersion}" VerticalAlignment="Center"
-                                          CornerRadius="0" FontSize="13">
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Version}" FontSize="13" />
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
-                                <TextBlock Grid.Column="3" Classes="ModListEntry" FontSize="13"
-                                           Text="{Binding Mod.LatestVersion.LastUpdatedHumanized}"
-                                           VerticalAlignment="Center"
-                                           Foreground="{DynamicResource SecondaryText}">
-                                    <ToolTip.Tip>
-                                        <TextBlock Text="{Binding Mod.LatestVersion.ReleaseDate}" FontSize="14"
-                                                   FontFamily="{DynamicResource Inter}" />
-                                    </ToolTip.Tip>
-                                </TextBlock>
-                            </Grid>
-                        </Border>
-                    </Button>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ListBox>
+                                </Grid>
+                            </Border>
+                        </Button>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </ScrollViewer>
     </Grid>
 </UserControl>
