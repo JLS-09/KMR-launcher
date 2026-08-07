@@ -35,16 +35,16 @@
                            FontWeight="Bold" LetterSpacing="1.5" FontSize="16" />
             </Button>
 
-            <Button Classes="Secondary" Padding="24 12" VerticalAlignment="Center"
+            <Button Classes="Secondary" Padding="24 8" VerticalAlignment="Center"
                     Command="{Binding BackCommand}"
                     IsVisible="{Binding !IsFirstStep}">
                 <StackPanel Orientation="Horizontal" Spacing="12">
-                    <Label Classes="icon" FontWeight="Regular" Content="&#xE06B;" FontSize="22" />
+                    <Label Classes="icon" FontWeight="Regular" Content="&#xE058;" FontSize="22" />
                     <TextBlock Text="BACK" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
                                FontSize="16" FontWeight="Bold" LetterSpacing="1" />
                 </StackPanel>
             </Button>
-            <Button Classes="Primary" Padding="24 12" HorizontalAlignment="Right" VerticalAlignment="Center"
+            <Button Classes="Primary" Padding="24 7" HorizontalAlignment="Right" VerticalAlignment="Center"
                     Command="{Binding NextCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock Text="NEXT" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
