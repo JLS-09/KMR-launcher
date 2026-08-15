@@ -29,8 +29,7 @@ public class CompatibilityService(ModListService modListService)
                 dependencyMod.Versions.GetRange(minCompatibleVersionIndex,
                     minCompatibleVersionIndex - maxCompatibleVersionIndex + 1);
 
-            return compatibleVersions
-                .First(v => v.Id == $"{relationship.Name}-{relationship.MaxVersion}");
+            return compatibleVersions.First();
         }
 
         if (relationship.MinVersion is not null)
