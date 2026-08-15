@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using KMRLauncherMvvm.Exceptions;
 using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.Services;
@@ -8,34 +10,20 @@ public class CompatibilityService(ModListService modListService)
     public ModVersion GetCompatibleVersionFromRelation(Relationship relationship)
     {
         if (modListService.Mods is null || !modListService.Mods.ToList().Exists(m => m.Id == relationship.Name) ||
-            relationship.AnyOf is not null) return null;
+            relationship.AnyOf is not null) throw new NotSupportedException("Relationship should be handled in a different way.");
 
         var dependencyMod = modListService.Mods.First(m => m.Id == relationship.Name);
 
         if (relationship.Version is not null &&
-            (relationship.MinVersion is not null || relationship.MaxVersion is not null)) return null;
+            (relationship.MinVersion is not null || relationship.MaxVersion is not null)) throw new InvalidRelationshipException(relationship);
 
         if (relationship.MaxVersion is null && relationship.MinVersion is null &&
             relationship.Version is null) return dependencyMod.Versions.First();
 
         if (relationship.MinVersion is not null && relationship.MaxVersion is not null)
         {
-            var minCompatibleVersion =
-                dependencyMod.Versions.FirstOrDefault(v =>
-                    v.Id == $"{relationship.Name}-{relationship.MinVersion}");
-
-            var maxCompatibleVersion =
-                dependencyMod.Versions.FirstOrDefault(v =>
-                    v.Id == $"{relationship.Name}-{relationship.MaxVersion}");
-
-            int maxCompatibleVersionIndex;
-            var minCompatibleVersionIndex = maxCompatibleVersionIndex = 0;
-
-            if (minCompatibleVersion is not null && maxCompatibleVersion is not null)
-            {
-                minCompatibleVersionIndex = dependencyMod.Versions.IndexOf(minCompatibleVersion);
-                maxCompatibleVersionIndex = dependencyMod.Versions.IndexOf(maxCompatibleVersion);
-            }
+            var maxCompatibleVersionIndex = GetVersionIndex(dependencyMod, relationship.MaxVersion);
+            var minCompatibleVersionIndex = GetVersionIndex(dependencyMod, relationship.MinVersion);
 
             var compatibleVersions =
                 dependencyMod.Versions.GetRange(minCompatibleVersionIndex,
@@ -47,14 +35,7 @@ public class CompatibilityService(ModListService modListService)
 
         if (relationship.MinVersion is not null)
         {
-            var minCompatibleVersion =
-                dependencyMod.Versions.FirstOrDefault(v =>
-                    v.Id == $"{relationship.Name}-{relationship.MinVersion}");
-
-            var minCompatibleVersionIndex = 0;
-
-            if (minCompatibleVersion is not null)
-                minCompatibleVersionIndex = dependencyMod.Versions.IndexOf(minCompatibleVersion);
+            var minCompatibleVersionIndex = GetVersionIndex(dependencyMod, relationship.MinVersion);
 
             var compatibleVersions =
                 dependencyMod.Versions.GetRange(0, minCompatibleVersionIndex + 1);
@@ -64,14 +45,7 @@ public class CompatibilityService(ModListService modListService)
 
         if (relationship.MaxVersion is not null)
         {
-            var maxCompatibleVersion =
-                dependencyMod.Versions.FirstOrDefault(v =>
-                    v.Id == $"{relationship.Name}-{relationship.MaxVersion}");
-
-            var maxCompatibleVersionIndex = 0;
-
-            if (maxCompatibleVersion is not null)
-                maxCompatibleVersionIndex = dependencyMod.Versions.IndexOf(maxCompatibleVersion);
+            var maxCompatibleVersionIndex = GetVersionIndex(dependencyMod, relationship.MaxVersion);
 
             var compatibleVersions =
                 dependencyMod.Versions.GetRange(maxCompatibleVersionIndex,
@@ -90,7 +64,7 @@ public class CompatibilityService(ModListService modListService)
                 return compatibleVersion;
         }
 
-        return null;
+        throw new NoCompatibleVersionFoundException(relationship);
     }
 
     public bool IsVersionCompatibleWithRelation(ModVersion version, Relationship relationship)
