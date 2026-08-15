@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Models;
+using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.Services.Api;
 using KMRLauncherMvvm.ViewModels.InstallMods;
 using KMRLauncherMvvm.Views.InstallMods;
@@ -16,6 +17,7 @@ public partial class DiscoverPageViewModel : PageViewModel
 {
     public bool IsEnabledFlag => true;
     private readonly IModApiService _api;
+    private CompatibilityService _compatibilityService;
 
     [ObservableProperty] private ModListService _modListService;
     [ObservableProperty] private bool _isLoading;
@@ -39,9 +41,10 @@ public partial class DiscoverPageViewModel : PageViewModel
         if (!IsLoading) ApplyFilters();
     }
 
-    public DiscoverPageViewModel(IModApiService api, ModListService modListService)
+    public DiscoverPageViewModel(IModApiService api, ModListService modListService, CompatibilityService compatibilityService)
     {
         _api = api;
+        _compatibilityService = compatibilityService;
         ModListService = modListService;
         PageName = ApplicationPageNames.Discover;
         SelectedMods.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSelectedMods));
@@ -107,7 +110,7 @@ public partial class DiscoverPageViewModel : PageViewModel
     {
         var window = new InstallModsWindow
         {
-            DataContext = new InstallModsViewModel(SelectedMods.Select(m => m.SelectedVersion).ToList(), ModListService)
+            DataContext = new InstallModsViewModel(SelectedMods.Select(m => m.SelectedVersion).ToList(), ModListService, _compatibilityService)
         };
         window.Show();
     }

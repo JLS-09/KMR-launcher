@@ -3,9 +3,9 @@ using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.Services;
 
-public class VersionCompatibilityService(ModListService modListService)
+public class CompatibilityService(ModListService modListService)
 {
-    public ModVersion GetCompatibleVersion(Relationship relationship)
+    public ModVersion GetCompatibleVersionFromRelation(Relationship relationship)
     {
         if (modListService.Mods is null || !modListService.Mods.ToList().Exists(m => m.Id == relationship.Name) ||
             relationship.AnyOf is not null) return null;
@@ -93,7 +93,7 @@ public class VersionCompatibilityService(ModListService modListService)
         return null;
     }
 
-    public bool VersionIsCompatibleWithRelationship(ModVersion version, Relationship relationship)
+    public bool IsVersionCompatibleWithRelation(ModVersion version, Relationship relationship)
     {
         var parentMod = modListService.Mods?.FirstOrDefault(m => m.Id.Equals(version.Identifier));
 

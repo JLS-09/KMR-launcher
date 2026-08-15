@@ -34,21 +34,14 @@ public class App : Application
         
         var modListService = new ModListService();
         var jsonHelper = new GitHelper(modListService);
+        var compatibilityService = new CompatibilityService(modListService);
         
         var collection = new ServiceCollection();
         collection.AddSingleton<IModApiService, ModGitService>();
         collection.AddSingleton<ZipService>();
         collection.AddSingleton(modListService);
         collection.AddSingleton(jsonHelper);
-        
-        var config = new ConfigurationBuilder()
-            .AddUserSecrets<App>()
-            .Build();
-        
-        collection.AddSingleton(new HttpClient
-        {
-            BaseAddress = new Uri(config["ApiBaseAddress"] ?? "http://localhost:3000/")
-        });
+        collection.AddSingleton(compatibilityService);
         
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<HomePageViewModel>();
