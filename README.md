@@ -20,12 +20,12 @@ This project is under heavy development, a lot of the features are not yet imple
 
 ## Planned features (In no particular order)
 
+- No internet handling (git request step gets skipped and modlist straight from cache)
 - Sorting mod list
 - Apply changes button on mod list
 - Entire mod installation pipeline
 - Currently playing instance card above settings
 - Manage instances (with installing, removing and updating mods per instance)
-- Export/import instances
+- Export/import instances (with ckan support)
 - Integrated back-up and restore system
 - Ability to add other repos
-- Internal ckan meta fetching module to remove dependency on api
