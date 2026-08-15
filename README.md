@@ -29,3 +29,22 @@ This project is under heavy development, a lot of the features are not yet imple
 - Export/import instances (with ckan support)
 - Integrated back-up and restore system
 - Ability to add other repos
+
+## Personal notes
+
+- check exception catching in InstallModsSelectInstanceStepViewModel for the compatibilityService
+- ToString methods for models like AnyOf and Relationship (primarily for exception messages)
+- make SuppressRecommendations flag in Relationship actually do its thing
+
+
+- anyOf dependency gets handled like a provides module, not in the dependency resolution but after recommendations, suggestions,... Where the user is able to choose
+    - gets ignored when any one of the mods is installed
+    - gets skipped in first step when there is only one option
+- check compatibility between versions -> conflict checking
+- check for duplicates, already installed mods and already queued mods in the recommended/suggested/...
+- implement supports list
+- fix gap when there are no recommendations
+- handling of user wanting to install mods without instance
+- handling of user wanting to create an instance without version added
+- add already existing instance to instances + ckan support
+- no internet handling
