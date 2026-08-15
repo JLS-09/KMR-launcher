@@ -95,9 +95,7 @@ public class VersionCompatibilityService(ModListService modListService)
 
     public bool VersionIsCompatibleWithRelationship(ModVersion version, Relationship relationship)
     {
-        if (modListService.Mods is null) return false;
-
-        var parentMod = modListService.Mods.FirstOrDefault(m => m.Id.Equals(version.Identifier));
+        var parentMod = modListService.Mods?.FirstOrDefault(m => m.Id.Equals(version.Identifier));
 
         if (parentMod is null) return false;
 
@@ -111,9 +109,42 @@ public class VersionCompatibilityService(ModListService modListService)
 
         if (relationship.MinVersion is not null && relationship.MaxVersion is not null)
         {
+            var relationMinVersionIndex = GetVersionIndex(parentMod, relationship.MinVersion);
+            var relationMaxVersionIndex = GetVersionIndex(parentMod, relationship.MaxVersion);
             
+            return versionIndex >= relationMaxVersionIndex && versionIndex <= relationMinVersionIndex ;
+        }
+
+        if (relationship.MinVersion is not null)
+        {
+            var relationMinVersionIndex = GetVersionIndex(parentMod, relationship.MinVersion);
+            
+            return versionIndex <= relationMinVersionIndex;
         }
         
-        return true;
+        if (relationship.MinVersion is not null)
+        {
+            var relationMaxVersionIndex = GetVersionIndex(parentMod, relationship.MinVersion);
+            
+            return versionIndex >= relationMaxVersionIndex;
+        }
+
+        if (relationship.Version is not null)
+        {
+            var relationVersionIndex = GetVersionIndex(parentMod, relationship.Version);
+            
+            return versionIndex == relationVersionIndex;
+        }
+
+        return false;
+    }
+
+    private static int GetVersionIndex(Mod mod, string versionString)
+    {
+        var version =
+            mod.Versions.FirstOrDefault(v =>
+                v.Id == $"{mod.Name}-{versionString}");
+
+        return version is not null ? mod.Versions.IndexOf(version) : 0;
     }
 }
