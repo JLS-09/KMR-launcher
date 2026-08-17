@@ -71,6 +71,11 @@ public class DownloadHash
 {
     [JsonPropertyName("sha1")] public string? Sha1 { get; set; }
     [JsonPropertyName("sha256")] public string? Sha256 { get; set; }
+
+    public override string ToString()
+    {
+        return $"{{ Sha1: {Sha1}, Sha256:  {Sha256} }}";
+    }
 }
 
 public class InstallDirective
@@ -98,6 +103,15 @@ public class InstallDirective
 
     [JsonPropertyName("include_only")] public List<string>? IncludeOnly { get; set; }
     [JsonPropertyName("comment")] public string? Comment { get; set; }
+
+    public override string ToString()
+    {
+        return $"{{ InstallTo: {InstallTo}, File: {File}, Find: {Find}, FindRegexp: {FindRegexp}, " +
+               $"FindMatchesFile: {FindMatchesFile}, FindMatchesFiles: {FindMatchesFiles}, As: {As}, " +
+               $"Filter: {(Filter is not null ? $"[{string.Join(", ", Filter)}]" : "null")}, " +
+               $"FilterRegexp: {(FilterRegexp is not null ? $"[{string.Join(", ", FilterRegexp)}]" : "null")}, " +
+               $"IncludeOnly: {IncludeOnly}, Comment: {Comment} }}";
+    }
 }
 
 public class Relationship
@@ -112,6 +126,13 @@ public class Relationship
 
     [JsonPropertyName("any_of")] public List<AnyOfEntry>? AnyOf { get; set; }
     [JsonPropertyName("comment")] public string? Comment { get; set; }
+
+    public override string ToString()
+    {
+        return
+            $"{{ Name: {Name}, Version: {Version}, MinVersion: {MinVersion}, MaxVersion: {MaxVersion}, " +
+            $"SuppressRecommendations: {SuppressRecommendations}, Comment: {Comment}, AnyOf: {AnyOf} }}";
+    }
 }
 
 public class AnyOfEntry
@@ -120,6 +141,11 @@ public class AnyOfEntry
     [JsonPropertyName("version")] public string? Version { get; set; }
     [JsonPropertyName("min_version")] public string? MinVersion { get; set; }
     [JsonPropertyName("max_version")] public string? MaxVersion { get; set; }
+
+    public override string ToString()
+    {
+        return $"{{ Name: {Name}, Version: {Version},  MinVersion: {MinVersion}, MaxVersion: {MaxVersion} }}";
+    }
 }
 
 public class StringOrArrayConverter : JsonConverter<List<string>>
