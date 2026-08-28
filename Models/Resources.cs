@@ -5,50 +5,70 @@ namespace KMRLauncherMvvm.Models;
 public class Resources
 {
     [JsonPropertyName("homepage")]
-    public string Homepage { get; set; }
+    public string? Homepage { get; set; }
     
     [JsonPropertyName("bugtracker")]
-    public string Bugtracker { get; set; }
+    public string? Bugtracker { get; set; }
     
     [JsonPropertyName("discussions")]
-    public string Discussions { get; set; }
+    public string? Discussions { get; set; }
     
     [JsonPropertyName("license")]
-    public string License { get; set; }
+    public string? License { get; set; }
     
     [JsonPropertyName("repository")]
-    public string Repository { get; set; }
+    public string? Repository { get; set; }
     
     [JsonPropertyName("ci")]
-    public string Ci { get; set; }
+    public string? Ci { get; set; }
     
     [JsonPropertyName("spacedock")]
-    public string Spacedock { get; set; }
+    public string? Spacedock { get; set; }
     
     [JsonPropertyName("curse")]
-    public string Curse { get; set; }
+    public string? Curse { get; set; }
     
     [JsonPropertyName("manual")]
-    public string Manual { get; set; }
+    public string? Manual { get; set; }
     
     [JsonPropertyName("metanetkan")]
-    public string Metanetkan { get; set; }
+    public string? Metanetkan { get; set; }
     
     [JsonPropertyName("remote-avc")]
-    public string RemoteAvc { get; set; }
+    public string? RemoteAvc { get; set; }
     
     [JsonPropertyName("remote-swinfo")]
-    public string RemoteSwinfo { get; set; }
+    public string? RemoteSwinfo { get; set; }
     
     [JsonPropertyName("store")]
-    public string Store { get; set; }
+    public string? Store { get; set; }
     
     [JsonPropertyName("steamstore")]
-    public string Steamstore { get; set; }
+    public string? Steamstore { get; set; }
     
     [JsonPropertyName("gogstore")]
-    public string Gogstore { get; set; }
+    public string? Gogstore { get; set; }
     
     [JsonPropertyName("epicstore")]
-    public string Epicstore { get; set; }
+    public string? Epicstore { get; set; }
+
+    public override string ToString()
+    {
+        return $"{{ Homepage: {(Homepage is null ? $"\"{Homepage}\"" : "null" )}, " +
+               $"Bugtracker: {(Bugtracker is null ? $"\"{Bugtracker}\"" : "null" )}, " +
+               $"Discussions: {(Discussions is null ? $"\"{Discussions}\"" : "null" )}, " +
+               $"License: {(License is null ? $"\"{License}\"" : "null" )}, " +
+               $"Repository: {(Repository is null ? $"\"{Repository}\"" : "null" )}, " +
+               $"Ci: {(Ci is null ? $"\"{Ci}\"" : "null" )}, " +
+               $"Spacedock: {(Spacedock is null ? $"\"{Spacedock}\"" : "null" )}, " +
+               $"Curse: {(Curse is null ? $"\"{Curse}\"" : "null" )}, " +
+               $"Manual: {(Manual is null ? $"\"{Manual}\"" : "null" )}, " +
+               $"Metanetkan: {(Metanetkan is null ? $"\"{Metanetkan}\"" : "null" )}, " +
+               $"RemoteAvc: {(RemoteAvc is null ? $"\"{RemoteAvc}\"" : "null" )}, " +
+               $"RemoteSwinfo: {(RemoteSwinfo is null ? $"\"{RemoteSwinfo}\"" : "null" )}, " +
+               $"Store: {(Store is null ? $"\"{Store}\"" : "null" )}, " +
+               $"Steamstore: {(Steamstore is null ? $"\"{Steamstore}\"" : "null" )}, " +
+               $"Gogstore: {(Gogstore is null ? $"\"{Gogstore}\"" : "null" )}, " +
+               $"Epicstore: {(Epicstore is null ? $"\"{Epicstore}\"" : "null" )} }}";
+    }
 }

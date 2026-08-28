@@ -8,8 +8,11 @@ namespace KMRLauncherMvvm.Models;
 
 public class ModVersion
 {
+    // Identifier + Version
     public string? Id { get; set; }
+    // Same identifier as the mod it belongs to: (ModVersion) Identifier == Id (Mod)
     [JsonPropertyName("identifier")] public required string Identifier { get; set; }
+    // Version tag
     [JsonPropertyName("version")] public required string Version { get; set; }
 
     [JsonPropertyName("spec_version")]
@@ -65,12 +68,40 @@ public class ModVersion
         : $"Dependency of {string.Join(", ", ModsForReason)}";
 
     [JsonIgnore] public List<string> ModsForReason = [];
+
+    public override string ToString()
+    {
+        return $"{{ Id: \"{Id}\", Identifier: \"{Identifier}\", Version: \"{Version}\", SpecVersion: \"{SpecVersion}\", " +
+               $"KspVersion: {(KspVersion is not null ? $"\"{KspVersion}\"" : "null")}, " +
+               $"KspVersionMin: {(KspVersionMin is not null ? $"\"{KspVersionMin}\"" : "null")}, " +
+               $"KspVersionMax: {(KspVersionMax is not null ? $"\"{KspVersionMax}\"" : "null")}, KspVersionStrict: \"{KspVersionStrict}\", " +
+               $"License: [\"{string.Join("\", \"", License)}\"], Download: {(Download is not null ? $"[\"{string.Join("\", \"", Download)}\"]" : "null")}, " +
+               $"DownloadHash: {DownloadHash}, DownloadSize: {(DownloadSize is not null ? $"{DownloadSize}" : "null")}, " +
+               $"DownloadContentType: {(DownloadContentType is not null ? $"\"{DownloadContentType}\"" : "null")}, " +
+               $"InstallSize: {(InstallSize is not null ? $"{InstallSize}" : "null")}, " +
+               $"ReleaseDate: {(ReleaseDate is not null ? $"\"{ReleaseDate}\"" : "null")}, " +
+               $"Kind: {(Kind is not null ? $"\"{Kind}\"" : "null")}, " +
+               $"Localizations: {(Localizations is not null ? $"[\"{string.Join("\", \"", Localizations)}\"]" : "null")}, " +
+               $"Provides: {(Provides is not null ? $"[{string.Join(", ", Provides)}]" : "null")}, " +
+               $"Install: {(Install is not null ? $"[{string.Join(", ", Install)}]" : "null")}, " +
+               $"Depends: {(Depends is not null ? $"[{string.Join(", ", Depends)}]" : "null")}, " +
+               $"Recommends: {(Recommends is not null ? $"[{string.Join(", ", Recommends)}]" : "null")}, " +
+               $"Suggests: {(Suggests is not null ? $"[{string.Join(", ", Suggests)}]" : "null")}, " +
+               $"Conflicts: {(Conflicts is not null ? $"[{string.Join(", ", Conflicts)}]" : "null")}, " +
+               $"ReplacedBy: {(ReplacedBy is not null ? ReplacedBy : "null")} }}";
+    }
 }
 
 public class DownloadHash
 {
     [JsonPropertyName("sha1")] public string? Sha1 { get; set; }
     [JsonPropertyName("sha256")] public string? Sha256 { get; set; }
+
+    public override string ToString()
+    {
+        return $"{{ Sha1: {(Sha1 is not null ? $"\"{Sha1}\"" : "null")}, " +
+               $"Sha256: {(Sha256 is not null ? $"\"{Sha256}\"" : "null")} }}";
+    }
 }
 
 public class InstallDirective
@@ -98,6 +129,20 @@ public class InstallDirective
 
     [JsonPropertyName("include_only")] public List<string>? IncludeOnly { get; set; }
     [JsonPropertyName("comment")] public string? Comment { get; set; }
+
+    public override string ToString()
+    {
+        return $"{{ InstallTo: \"{InstallTo}\", File: {(File is not null ? $"\"{File}\"" : "null")}, " +
+               $"Find: {(Find is not null ? $"\"{Find}\"" : "null")}, " +
+               $"FindRegexp: {(FindRegexp is not null ? $"\"{FindRegexp}\"" : "null")}, " +
+               $"FindMatchesFile: {(FindMatchesFile is not null ? $"{FindMatchesFile}" : "null")}, " +
+               $"FindMatchesFiles: {(FindMatchesFiles is not null ? $"{FindMatchesFiles}" : "null")}, " +
+               $"As: {(As is not null ? $"\"{As}\"" : "null")}, " +
+               $"Filter: {(Filter is not null ? $"[\"{string.Join("\", \"", Filter)}\"]" : "null")}, " +
+               $"FilterRegexp: {(FilterRegexp is not null ? $"[\"{string.Join("\", \"", FilterRegexp)}\"]" : "null")}, " +
+               $"IncludeOnly: {(IncludeOnly is not null ? $"[\"{string.Join("\", \"", IncludeOnly)}\"]" : "null")}, " +
+               $"Comment: {(Comment is not null ? $"\"{Comment}\"" : "null")} }}";
+    }
 }
 
 public class Relationship
@@ -112,6 +157,17 @@ public class Relationship
 
     [JsonPropertyName("any_of")] public List<AnyOfEntry>? AnyOf { get; set; }
     [JsonPropertyName("comment")] public string? Comment { get; set; }
+
+    public override string ToString()
+    {
+        return
+            $"{{ Name: {(Name is not null ? $"\"{Name}\"" : "null")}, Version: {(Version is not null ? $"\"{Version}\"" : "null")}, " +
+            $"MinVersion: {(MinVersion is not null ? $"\"{(MinVersion is not null ? $"\"{MinVersion}\"" : "null")}\"" : "null")}, " +
+            $"MaxVersion: {(MaxVersion is not null ? $"\"{(MaxVersion is not null ? $"\"{MaxVersion}\"" : "null")}\"" : "null")}, " +
+            $"SuppressRecommendations: {(SuppressRecommendations is not null ? $"{SuppressRecommendations}" : "null")}, " +
+            $"Comment: {(Comment is not null ? $"\"{Comment}\"" : "null")}, " +
+            $"AnyOf: {(AnyOf is not null ? $"{AnyOf}" : "null")} }}";
+    }
 }
 
 public class AnyOfEntry
@@ -120,6 +176,13 @@ public class AnyOfEntry
     [JsonPropertyName("version")] public string? Version { get; set; }
     [JsonPropertyName("min_version")] public string? MinVersion { get; set; }
     [JsonPropertyName("max_version")] public string? MaxVersion { get; set; }
+
+    public override string ToString()
+    {
+        return $"{{ Name: \"{Name}\", Version: {(Version is not null ? $"\"{Version}\"" : "null")},  " +
+               $"MinVersion: {(MinVersion is not null ? $"\"{MinVersion}\"" : "null")}, " +
+               $"MaxVersion: {(MaxVersion is not null ? $"\"{MaxVersion}\"" : "null")} }}";
+    }
 }
 
 public class StringOrArrayConverter : JsonConverter<List<string>>
