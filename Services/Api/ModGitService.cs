@@ -45,6 +45,15 @@ public class ModGitService(GitHelper gitHelper, ModListService modList) : IModAp
                     IsCache = true
                 });
 
+                if (!File.Exists(modsCacheFile))
+                {
+                    await gitHelper.PopulateMods(gitCacheFolder, progress);
+                    var newCache = new ModsCache { Mods = [..modList.Mods!], CurrentCommitHash = latestCommitHash };
+                    var modListJs = JsonSerializer.Serialize(newCache, options);
+                    await File.WriteAllTextAsync(modsCacheFile, modListJs);
+                    return;
+                }
+                
                 var json = await File.ReadAllTextAsync(modsCacheFile);
                 var modsCache = JsonSerializer.Deserialize<ModsCache>(json, options);
                 if (modsCache is not null)

@@ -8,8 +8,11 @@ namespace KMRLauncherMvvm.Models;
 
 public class ModVersion
 {
+    // Identifier + Version
     public string? Id { get; set; }
+    // Same identifier as the mod it belongs to: (ModVersion) Identifier == Id (Mod)
     [JsonPropertyName("identifier")] public required string Identifier { get; set; }
+    // Version tag
     [JsonPropertyName("version")] public required string Version { get; set; }
 
     [JsonPropertyName("spec_version")]

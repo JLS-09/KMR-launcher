@@ -34,4 +34,12 @@ public class Mod
 
     public ModVersion? LatestVersion => Versions.FirstOrDefault();
     public string AuthorsDisplay => string.Join(", ", Author);
+
+    public override string ToString()
+    {
+        return $"{{ Id: \"{Id}\", Name: \"{Name}\", Abstract: \"{Abstract}\", Author: [\"{string.Join("\", \"", Author)}\"], " +
+               $"Description: {(Description is not null ? $"\"{Description}\"" : "null")}, ReleaseStatus: {ReleaseStatus}, " +
+               $"Tags: {(Tags is not null ? $"[\"{string.Join("\", \"", Tags)}\"]" : "null")}, " +
+               $"Resources: {(Resources is not null ? Resources : "null" )}, Versions: {string.Join(", ", Versions)} }}";
+    }
 }

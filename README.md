@@ -42,6 +42,7 @@ This project is under heavy development, a lot of the features are not yet imple
     - gets ignored when any one of the mods is installed
     - gets skipped in first step when there is only one option
 - check compatibility between versions -> conflict checking
+- also check compatibility with ksp version
 - check for duplicates, already installed mods and already queued mods in the recommended/suggested/...
 - implement supports list
 - fix gap when there are no recommendations
