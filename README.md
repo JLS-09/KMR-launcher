@@ -35,6 +35,7 @@ This project is under heavy development, a lot of the features are not yet imple
 - check exception catching in InstallModsSelectInstanceStepViewModel for the compatibilityService
 - ToString methods for models like AnyOf and Relationship (primarily for exception messages)
 - make SuppressRecommendations flag in Relationship actually do its thing
+- Create extra model around version to keep extra information like the mods that depend on it
 
 
 - anyOf dependency gets handled like a provides module, not in the dependency resolution but after recommendations, suggestions,... Where the user is able to choose
