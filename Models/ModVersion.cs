@@ -65,6 +65,28 @@ public class ModVersion
         : $"Dependency of {string.Join(", ", ModsForReason)}";
 
     [JsonIgnore] public List<string> ModsForReason = [];
+
+    public override string ToString()
+    {
+        return $"{{ Id: \"{Id}\", Identifier: \"{Identifier}\", Version: \"{Version}\", SpecVersion: \"{SpecVersion}\", " +
+               $"KspVersion: {(KspVersion is not null ? $"\"{KspVersion}\"" : "null")}, " +
+               $"KspVersionMin: {(KspVersionMin is not null ? $"\"{KspVersionMin}\"" : "null")}, " +
+               $"KspVersionMax: {(KspVersionMax is not null ? $"\"{KspVersionMax}\"" : "null")}, KspVersionStrict: \"{KspVersionStrict}\", " +
+               $"License: [\"{string.Join("\", \"", License)}\"], Download: {(Download is not null ? $"[\"{string.Join("\", \"", Download)}\"]" : "null")}, " +
+               $"DownloadHash: {DownloadHash}, DownloadSize: {(DownloadSize is not null ? $"{DownloadSize}" : "null")}, " +
+               $"DownloadContentType: {(DownloadContentType is not null ? $"\"{DownloadContentType}\"" : "null")}, " +
+               $"InstallSize: {(InstallSize is not null ? $"{InstallSize}" : "null")}, " +
+               $"ReleaseDate: {(ReleaseDate is not null ? $"\"{ReleaseDate}\"" : "null")}, " +
+               $"Kind: {(Kind is not null ? $"\"{Kind}\"" : "null")}, " +
+               $"Localizations: {(Localizations is not null ? $"[\"{string.Join("\", \"", Localizations)}\"]" : "null")}, " +
+               $"Provides: {(Provides is not null ? $"[{string.Join(", ", Provides)}]" : "null")}, " +
+               $"Install: {(Install is not null ? $"[{string.Join(", ", Install)}]" : "null")}, " +
+               $"Depends: {(Depends is not null ? $"[{string.Join(", ", Depends)}]" : "null")}, " +
+               $"Recommends: {(Recommends is not null ? $"[{string.Join(", ", Recommends)}]" : "null")}, " +
+               $"Suggests: {(Suggests is not null ? $"[{string.Join(", ", Suggests)}]" : "null")}, " +
+               $"Conflicts: {(Conflicts is not null ? $"[{string.Join(", ", Conflicts)}]" : "null")}, " +
+               $"ReplacedBy: {(ReplacedBy is not null ? ReplacedBy : "null")} }}";
+    }
 }
 
 public class DownloadHash
@@ -74,7 +96,8 @@ public class DownloadHash
 
     public override string ToString()
     {
-        return $"{{ Sha1: {Sha1}, Sha256:  {Sha256} }}";
+        return $"{{ Sha1: {(Sha1 is not null ? $"\"{Sha1}\"" : "null")}, " +
+               $"Sha256: {(Sha256 is not null ? $"\"{Sha256}\"" : "null")} }}";
     }
 }
 
@@ -106,11 +129,16 @@ public class InstallDirective
 
     public override string ToString()
     {
-        return $"{{ InstallTo: {InstallTo}, File: {File}, Find: {Find}, FindRegexp: {FindRegexp}, " +
-               $"FindMatchesFile: {FindMatchesFile}, FindMatchesFiles: {FindMatchesFiles}, As: {As}, " +
-               $"Filter: {(Filter is not null ? $"[{string.Join(", ", Filter)}]" : "null")}, " +
-               $"FilterRegexp: {(FilterRegexp is not null ? $"[{string.Join(", ", FilterRegexp)}]" : "null")}, " +
-               $"IncludeOnly: {IncludeOnly}, Comment: {Comment} }}";
+        return $"{{ InstallTo: \"{InstallTo}\", File: {(File is not null ? $"\"{File}\"" : "null")}, " +
+               $"Find: {(Find is not null ? $"\"{Find}\"" : "null")}, " +
+               $"FindRegexp: {(FindRegexp is not null ? $"\"{FindRegexp}\"" : "null")}, " +
+               $"FindMatchesFile: {(FindMatchesFile is not null ? $"{FindMatchesFile}" : "null")}, " +
+               $"FindMatchesFiles: {(FindMatchesFiles is not null ? $"{FindMatchesFiles}" : "null")}, " +
+               $"As: {(As is not null ? $"\"{As}\"" : "null")}, " +
+               $"Filter: {(Filter is not null ? $"[\"{string.Join("\", \"", Filter)}\"]" : "null")}, " +
+               $"FilterRegexp: {(FilterRegexp is not null ? $"[\"{string.Join("\", \"", FilterRegexp)}\"]" : "null")}, " +
+               $"IncludeOnly: {(IncludeOnly is not null ? $"[\"{string.Join("\", \"", IncludeOnly)}\"]" : "null")}, " +
+               $"Comment: {(Comment is not null ? $"\"{Comment}\"" : "null")} }}";
     }
 }
 
@@ -130,8 +158,12 @@ public class Relationship
     public override string ToString()
     {
         return
-            $"{{ Name: {Name}, Version: {Version}, MinVersion: {MinVersion}, MaxVersion: {MaxVersion}, " +
-            $"SuppressRecommendations: {SuppressRecommendations}, Comment: {Comment}, AnyOf: {AnyOf} }}";
+            $"{{ Name: {(Name is not null ? $"\"{Name}\"" : "null")}, Version: {(Version is not null ? $"\"{Version}\"" : "null")}, " +
+            $"MinVersion: {(MinVersion is not null ? $"\"{(MinVersion is not null ? $"\"{MinVersion}\"" : "null")}\"" : "null")}, " +
+            $"MaxVersion: {(MaxVersion is not null ? $"\"{(MaxVersion is not null ? $"\"{MaxVersion}\"" : "null")}\"" : "null")}, " +
+            $"SuppressRecommendations: {(SuppressRecommendations is not null ? $"{SuppressRecommendations}" : "null")}, " +
+            $"Comment: {(Comment is not null ? $"\"{Comment}\"" : "null")}, " +
+            $"AnyOf: {(AnyOf is not null ? $"{AnyOf}" : "null")} }}";
     }
 }
 
@@ -144,7 +176,9 @@ public class AnyOfEntry
 
     public override string ToString()
     {
-        return $"{{ Name: {Name}, Version: {Version},  MinVersion: {MinVersion}, MaxVersion: {MaxVersion} }}";
+        return $"{{ Name: \"{Name}\", Version: {(Version is not null ? $"\"{Version}\"" : "null")},  " +
+               $"MinVersion: {(MinVersion is not null ? $"\"{MinVersion}\"" : "null")}, " +
+               $"MaxVersion: {(MaxVersion is not null ? $"\"{MaxVersion}\"" : "null")} }}";
     }
 }
 
