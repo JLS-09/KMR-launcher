@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -36,7 +37,11 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             {
                 foreach (var recommendation in version.Recommends)
                 {
-                    if (_modListService.Mods.FirstOrDefault(m => m.Id.Equals(recommendation.Name)) is null)
+                    if (InstallModsData.RequestedModVersions.Any(v => v.Identifier.Equals(recommendation.Name)) ||
+                        Recommendations.Any(v => v.Version.Identifier.Equals(recommendation.Name)) ||
+                        (InstallModsData.SelectedInstance is not null &&
+                         InstallModsData.SelectedInstance.Mods.Any(v => v.Identifier.Equals(recommendation.Name))) ||
+                        _modListService.Mods.FirstOrDefault(m => m.Id.Equals(recommendation.Name)) is null)
                         continue;
 
                     Recommendations.Add(new VersionListItemViewModel(_modListService.Mods
@@ -49,7 +54,11 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             {
                 foreach (var suggestion in version.Suggests)
                 {
-                    if (_modListService.Mods.FirstOrDefault(m => m.Id.Equals(suggestion.Name)) is null)
+                    if (InstallModsData.RequestedModVersions.Any(v => v.Identifier.Equals(suggestion.Name)) ||
+                        Suggestions.Any(v => v.Version.Identifier.Equals(suggestion.Name)) ||
+                        (InstallModsData.SelectedInstance is not null &&
+                         InstallModsData.SelectedInstance.Mods.Any(v => v.Identifier.Equals(suggestion.Name))) ||
+                        _modListService.Mods.FirstOrDefault(m => m.Id.Equals(suggestion.Name)) is null)
                         continue;
 
                     Suggestions.Add(new VersionListItemViewModel(_modListService.Mods
