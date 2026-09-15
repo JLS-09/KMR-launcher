@@ -9,4 +9,5 @@ public partial class InstallModsData : ObservableObject
     [ObservableProperty] private ObservableCollection<ModVersion> _requestedModVersions;
     [ObservableProperty] private ObservableCollection<ModVersion> _requestedRemoveModVersions = [];
     [ObservableProperty] private ObservableCollection<Relationship> _choosableVersions = [];
+    [ObservableProperty] private ObservableCollection<string> _modsWithIgnoredRecommendations = [];
 }

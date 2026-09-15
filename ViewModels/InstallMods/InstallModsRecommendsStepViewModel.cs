@@ -33,6 +33,11 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
 
         foreach (var version in InstallModsData.RequestedModVersions)
         {
+            if (InstallModsData.ModsWithIgnoredRecommendations.Contains(version.Identifier))
+                continue;
+            
+            Console.WriteLine("slipped through: " + version.Identifier);
+            
             if (version.Recommends is not null && version.Recommends.Count > 0)
             {
                 foreach (var recommendation in version.Recommends)
