@@ -34,17 +34,15 @@ This project is under heavy development, a lot of the features are not yet imple
 
 - check exception catching in InstallModsSelectInstanceStepViewModel for the compatibilityService
 - make SuppressRecommendations flag in Relationship actually do its thing
-- Create extra model around version to keep extra information like the mods that depend on it
-
+- skip recommendations screen when there are no recommendations/suggestions/supported
+- implement supported by list (example: Eternal)
 
 - anyOf dependency gets handled like a provides module, not in the dependency resolution but after recommendations, suggestions,... Where the user is able to choose
     - gets ignored when any one of the mods is installed
     - gets skipped in first step when there is only one option
 - check compatibility between versions -> conflict checking
 - also check compatibility with ksp version
-- check for duplicates, already installed mods and already queued mods in the recommended/suggested/...
 - implement supports list
-- fix gap when there are no recommendations
 - handling of user wanting to install mods without instance
 - handling of user wanting to create an instance without version added
 - add already existing instance to instances + ckan support

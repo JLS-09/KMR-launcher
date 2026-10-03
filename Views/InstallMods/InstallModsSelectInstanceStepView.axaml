@@ -61,7 +61,7 @@
                            FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
             </Grid>
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                <ItemsRepeater ItemsSource="{Binding InstallModsData.RequestedModVersions}">
+                <ItemsRepeater ItemsSource="{Binding InstallModsData.FinalModList}">
                     <ItemsRepeater.Layout>
                         <StackLayout Spacing="8" Orientation="Vertical" />
                     </ItemsRepeater.Layout>
@@ -70,7 +70,7 @@
                             <Grid ColumnDefinitions="50 *" ColumnSpacing="24">
                                 <TextBlock Grid.Column="0" Text="Install" />
                                 <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="{Binding Id}" />
+                                    <TextBlock Text="{Binding Version.Id}" />
                                     <TextBlock Text="{Binding ReasonForAction}" FontSize="12" 
                                                Foreground="{DynamicResource SecondaryText}"/>
                                 </StackPanel>

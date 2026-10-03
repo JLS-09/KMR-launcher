@@ -64,7 +64,7 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid Margin="32 32 32 0" RowDefinitions="Auto * *" RowSpacing="32">
+    <Grid Margin="32 32 32 0" RowDefinitions="Auto Auto *">
         <StackPanel Grid.Row="0" Spacing="4">
             <Grid ColumnDefinitions="* * * *" ColumnSpacing="8">
                 <Rectangle Grid.Column="0" Height="4" Fill="{DynamicResource PrimaryRed}" />
@@ -73,7 +73,8 @@
                 <Rectangle Grid.Column="3" Height="4" Fill="{DynamicResource PrimaryBackground}" />
             </Grid>
         </StackPanel>
-        <Grid Grid.Row="1" RowDefinitions="Auto *" RowSpacing="8" IsVisible="{Binding ShowRecommendations}">
+        <Grid Grid.Row="1" Margin="0 32 0 0" RowDefinitions="Auto *" RowSpacing="8"
+              IsVisible="{Binding ShowRecommendations}">
             <Grid Grid.Row="0" ColumnDefinitions="Auto Auto" ColumnSpacing="16">
                 <TextBlock Grid.Column="0" Text="RECOMMENDED MODS" LetterSpacing="1"
                            Foreground="{DynamicResource SecondaryText}"
@@ -96,7 +97,7 @@
                     </Button>
                 </StackPanel>
             </Grid>
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Row="1" MaxHeight="200" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Recommendations}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -129,7 +130,7 @@
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
-        <Grid Grid.Row="2" RowDefinitions="Auto *" RowSpacing="8" IsVisible="{Binding ShowSuggestions}">
+        <Grid Grid.Row="2" RowDefinitions="Auto *"  Margin="0 32 0 0" RowSpacing="8" IsVisible="{Binding ShowSuggestions}">
             <Grid Grid.Row="0" ColumnDefinitions="Auto Auto" ColumnSpacing="16">
                 <TextBlock Grid.Column="0" Text="SUGGESTED MODS" LetterSpacing="1"
                            Foreground="{DynamicResource SecondaryText}"
