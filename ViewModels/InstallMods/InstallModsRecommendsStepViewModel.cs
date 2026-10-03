@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -33,14 +32,14 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
 
         foreach (var version in InstallModsData.FinalModList)
         {
-            if (InstallModsData.ModsWithIgnoredRecommendations.Contains(version.Identifier))
+            if (InstallModsData.ModsWithIgnoredRecommendations.Contains(version.Version.Identifier))
                 continue;
 
-            if (version.Recommends is not null && version.Recommends.Count > 0)
+            if (version.Version.Recommends is not null && version.Version.Recommends.Count > 0)
             {
-                foreach (var recommendation in version.Recommends)
+                foreach (var recommendation in version.Version.Recommends)
                 {
-                    if (InstallModsData.FinalModList.Any(v => v.Identifier.Equals(recommendation.Name)) ||
+                    if (InstallModsData.FinalModList.Any(v => v.Version.Identifier.Equals(recommendation.Name)) ||
                         Recommendations.Any(v => v.Version.Identifier.Equals(recommendation.Name)) ||
                         (InstallModsData.SelectedInstance is not null &&
                          InstallModsData.SelectedInstance.Mods.Any(v => v.Identifier.Equals(recommendation.Name))) ||
@@ -53,11 +52,11 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
                 }
             }
 
-            if (version.Suggests is not null && version.Suggests.Count > 0)
+            if (version.Version.Suggests is not null && version.Version.Suggests.Count > 0)
             {
-                foreach (var suggestion in version.Suggests)
+                foreach (var suggestion in version.Version.Suggests)
                 {
-                    if (InstallModsData.FinalModList.Any(v => v.Identifier.Equals(suggestion.Name)) ||
+                    if (InstallModsData.FinalModList.Any(v => v.Version.Identifier.Equals(suggestion.Name)) ||
                         Suggestions.Any(v => v.Version.Identifier.Equals(suggestion.Name)) ||
                         (InstallModsData.SelectedInstance is not null &&
                          InstallModsData.SelectedInstance.Mods.Any(v => v.Identifier.Equals(suggestion.Name))) ||

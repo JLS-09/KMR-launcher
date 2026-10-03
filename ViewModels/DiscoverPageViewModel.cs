@@ -41,7 +41,8 @@ public partial class DiscoverPageViewModel : PageViewModel
         if (!IsLoading) ApplyFilters();
     }
 
-    public DiscoverPageViewModel(IModApiService api, ModListService modListService, CompatibilityService compatibilityService)
+    public DiscoverPageViewModel(IModApiService api, ModListService modListService,
+        CompatibilityService compatibilityService)
     {
         _api = api;
         _compatibilityService = compatibilityService;
@@ -88,7 +89,8 @@ public partial class DiscoverPageViewModel : PageViewModel
         var previousSelections = SelectedMods.ToDictionary(m => m.Mod.Id);
 
         ModListFiltered = new ObservableCollection<ModListItemViewModel>(
-            filtered.Select(mod => previousSelections.TryGetValue(mod.Id, out var existing) ? existing : new ModListItemViewModel(mod)));
+            filtered.Select(mod =>
+                previousSelections.TryGetValue(mod.Id, out var existing) ? existing : new ModListItemViewModel(mod)));
     }
 
     [RelayCommand]
@@ -110,7 +112,13 @@ public partial class DiscoverPageViewModel : PageViewModel
     {
         var window = new InstallModsWindow
         {
-            DataContext = new InstallModsViewModel(SelectedMods.Select(m => m.SelectedVersion).ToList(), ModListService, _compatibilityService)
+            DataContext =
+                new InstallModsViewModel(
+                    [
+                        .. SelectedMods
+                            .Select(m => new ModVersionDurum { Version = m.SelectedVersion, IsUserRequested = true })
+                    ],
+                    ModListService, _compatibilityService)
         };
         window.Show();
     }

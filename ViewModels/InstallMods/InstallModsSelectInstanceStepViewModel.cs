@@ -43,7 +43,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         InstallModsData.FinalModList = [.. InstallModsData.RequestedModVersions];
 
         foreach (var version in InstallModsData.FinalModList.Where(version =>
-                     InstallModsData.SelectedInstance.Mods.Exists(m => m.Id == version.Identifier)))
+                     InstallModsData.SelectedInstance.Mods.Exists(m => m.Id == version.Version.Identifier)))
         {
             InstallModsData.FinalModList.Remove(version);
         }
@@ -53,18 +53,18 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         {
             var version = InstallModsData.FinalModList[i];
 
-            if (version.Id is null)
+            if (version.Version.Id is null)
             {
                 return;
             }
 
-            if (version.Depends is null || version.Depends.Count == 0)
+            if (version.Version.Depends is null || version.Version.Depends.Count == 0)
             {
                 i++;
                 continue;
             }
 
-            foreach (var dependency in version.Depends)
+            foreach (var dependency in version.Version.Depends)
             {
                 if (dependency.AnyOf is not null || !_modListService.Mods.ToList().Exists(m => m.Id == dependency.Name))
                 {
@@ -83,80 +83,78 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
                 if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == dependency.Name))
                 {
-                    var existingVersion =
-                        InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name);
+                    var existingVersion = new ModVersionDurum
+                        { Version = InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name) };
 
-                    if (_compatibilityService.IsVersionCompatibleWithRelation(existingVersion, dependency))
+                    if (_compatibilityService.IsVersionCompatibleWithRelation(existingVersion.Version, dependency))
                     {
-                        existingVersion.ModsForReason.Add(version.Id);
+                        existingVersion.ModsForReason.Add(version.Version.Id);
                         continue;
                     }
 
                     InstallModsData.RequestedRemoveModVersions.Add(existingVersion);
-                    var versionToAdd = _compatibilityService.GetCompatibleVersionFromRelation(dependency);
+                    var versionToAdd = new ModVersionDurum
+                        { Version = _compatibilityService.GetCompatibleVersionFromRelation(dependency) };
 
                     if (dependency is { Name: not null, SuppressRecommendations: not null } &&
-                        (bool)dependency.SuppressRecommendations && versionToAdd.Depends is not null)
+                        (bool)dependency.SuppressRecommendations && versionToAdd.Version.Depends is not null)
                     {
-                        foreach (var depend in versionToAdd.Depends)
+                        foreach (var depend in versionToAdd.Version.Depends)
                         {
                             if (depend.Name is not null)
                                 InstallModsData.ModsWithIgnoredRecommendations.Add(depend.Name);
                         }
                     }
 
-                    versionToAdd.ModsForReason = [.. existingVersion.ModsForReason, version.Id];
+                    versionToAdd.ModsForReason = [.. existingVersion.ModsForReason, version.Version.Id];
                     InstallModsData.FinalModList.Add(versionToAdd);
                     continue;
                 }
 
                 if (InstallModsData.FinalModList.ToList()
-                    .Exists(v => v.Identifier == dependency.Name))
+                    .Exists(v => v.Version.Identifier == dependency.Name))
                 {
                     var existingVersion = InstallModsData.FinalModList.ToList()
-                        .First(v => v.Identifier == dependency.Name);
+                        .First(v => v.Version.Identifier == dependency.Name);
 
-                    if (_compatibilityService.IsVersionCompatibleWithRelation(existingVersion, dependency))
+                    if (_compatibilityService.IsVersionCompatibleWithRelation(existingVersion.Version, dependency))
                     {
-                        if (InstallModsData.RequestedModVersions.Any(v => v.Identifier == existingVersion.Identifier))
-                        {
-                            continue;
-                        }
-
-                        existingVersion.ModsForReason.Add(version.Id);
+                        existingVersion.ModsForReason.Add(version.Version.Id);
                         continue;
                     }
 
                     InstallModsData.FinalModList.Remove(existingVersion);
-                    var versionToAdd = _compatibilityService.GetCompatibleVersionFromRelation(dependency);
+                    var versionToAdd = new ModVersionDurum
+                        { Version = _compatibilityService.GetCompatibleVersionFromRelation(dependency) };
 
                     if (dependency is { Name: not null, SuppressRecommendations: not null } &&
-                        (bool)dependency.SuppressRecommendations && versionToAdd.Depends is not null)
+                        (bool)dependency.SuppressRecommendations && versionToAdd.Version.Depends is not null)
                     {
-                        foreach (var depend in versionToAdd.Depends)
+                        foreach (var depend in versionToAdd.Version.Depends)
                         {
                             if (depend.Name is not null)
                                 InstallModsData.ModsWithIgnoredRecommendations.Add(depend.Name);
                         }
                     }
 
-                    versionToAdd.ModsForReason = [.. existingVersion.ModsForReason, version.Id];
+                    versionToAdd.ModsForReason = [.. existingVersion.ModsForReason, version.Version.Id];
                     InstallModsData.FinalModList.Add(versionToAdd);
                     continue;
                 }
 
-                var compatibleVersion = _compatibilityService.GetCompatibleVersionFromRelation(dependency);
+                var compatibleVersion = new ModVersionDurum
+                    { Version = _compatibilityService.GetCompatibleVersionFromRelation(dependency) };
 
                 if (dependency is { Name: not null, SuppressRecommendations: not null } &&
-                    (bool)dependency.SuppressRecommendations && compatibleVersion.Depends is not null)
+                    (bool)dependency.SuppressRecommendations && compatibleVersion.Version.Depends is not null)
                 {
-                    foreach (var depend in compatibleVersion.Depends)
+                    foreach (var depend in compatibleVersion.Version.Depends)
                     {
                         if (depend.Name is not null) InstallModsData.ModsWithIgnoredRecommendations.Add(depend.Name);
                     }
                 }
 
-                compatibleVersion.ModsForReason = [version.Id];
+                compatibleVersion.ModsForReason = [version.Version.Id];
                 InstallModsData.FinalModList.Add(compatibleVersion);
             }
 

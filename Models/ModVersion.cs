@@ -62,13 +62,6 @@ public class ModVersion
 
     [JsonIgnore] public string LastUpdatedHumanized => ReleaseDate is null ? "" : ReleaseDate.Humanize();
 
-    [JsonIgnore]
-    public string ReasonForAction => ModsForReason.Count == 0
-        ? "Requested by user"
-        : $"Dependency of {string.Join(", ", ModsForReason)}";
-
-    [JsonIgnore] public List<string> ModsForReason = [];
-
     public override string ToString()
     {
         return $"{{ Id: \"{Id}\", Identifier: \"{Identifier}\", Version: \"{Version}\", SpecVersion: \"{SpecVersion}\", " +

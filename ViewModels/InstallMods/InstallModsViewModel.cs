@@ -26,9 +26,9 @@ public partial class InstallModsViewModel : ViewModelBase
     public event Action<InstallModsData>? Finished;
     public event Action? Cancelled;
 
-    public InstallModsViewModel(List<ModVersion> mods, ModListService modListService, CompatibilityService compatibilityService)
+    public InstallModsViewModel(List<ModVersionDurum> mods, ModListService modListService, CompatibilityService compatibilityService)
     {
-        InstallModsData.RequestedModVersions = new ObservableCollection<ModVersion>(mods);
+        InstallModsData.RequestedModVersions = new ObservableCollection<ModVersionDurum>(mods);
 
         _steps =
         [
