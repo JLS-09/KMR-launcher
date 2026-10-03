@@ -41,7 +41,6 @@ This project is under heavy development, a lot of the features are not yet imple
 - check compatibility between versions -> conflict checking
 - also check compatibility with ksp version
 - implement supports list
-- fix gap when there are no recommendations
 - handling of user wanting to install mods without instance
 - handling of user wanting to create an instance without version added
 - add already existing instance to instances + ckan support
