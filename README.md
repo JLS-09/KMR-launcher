@@ -32,19 +32,14 @@ This project is under heavy development, a lot of the features are not yet imple
 
 ## Personal notes
 
-- Mods that have a circular dependency to themselves get a bug where they are wrongly deleted when clearing the requested versions list
-    - Maybe also add wrapper around modversion for in requested mods. This could help with the suppressrecommendations and identifying a mods as user requested.
 - check exception catching in InstallModsSelectInstanceStepViewModel for the compatibilityService
 - make SuppressRecommendations flag in Relationship actually do its thing
-- Create extra model around version to keep extra information like the mods that depend on it
-
 
 - anyOf dependency gets handled like a provides module, not in the dependency resolution but after recommendations, suggestions,... Where the user is able to choose
     - gets ignored when any one of the mods is installed
     - gets skipped in first step when there is only one option
 - check compatibility between versions -> conflict checking
 - also check compatibility with ksp version
-- check for duplicates, already installed mods and already queued mods in the recommended/suggested/...
 - implement supports list
 - fix gap when there are no recommendations
 - handling of user wanting to install mods without instance
