@@ -29,20 +29,18 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         Suggestions = [];
         Supported = [];
 
-        if (_modListService.Mods is null || !InstallModsData.RequestedModVersions.Any()) return;
+        if (_modListService.Mods is null || !InstallModsData.FinalModList.Any()) return;
 
-        foreach (var version in InstallModsData.RequestedModVersions)
+        foreach (var version in InstallModsData.FinalModList)
         {
             if (InstallModsData.ModsWithIgnoredRecommendations.Contains(version.Identifier))
                 continue;
-            
-            Console.WriteLine("slipped through: " + version.Identifier);
-            
+
             if (version.Recommends is not null && version.Recommends.Count > 0)
             {
                 foreach (var recommendation in version.Recommends)
                 {
-                    if (InstallModsData.RequestedModVersions.Any(v => v.Identifier.Equals(recommendation.Name)) ||
+                    if (InstallModsData.FinalModList.Any(v => v.Identifier.Equals(recommendation.Name)) ||
                         Recommendations.Any(v => v.Version.Identifier.Equals(recommendation.Name)) ||
                         (InstallModsData.SelectedInstance is not null &&
                          InstallModsData.SelectedInstance.Mods.Any(v => v.Identifier.Equals(recommendation.Name))) ||
@@ -59,7 +57,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             {
                 foreach (var suggestion in version.Suggests)
                 {
-                    if (InstallModsData.RequestedModVersions.Any(v => v.Identifier.Equals(suggestion.Name)) ||
+                    if (InstallModsData.FinalModList.Any(v => v.Identifier.Equals(suggestion.Name)) ||
                         Suggestions.Any(v => v.Version.Identifier.Equals(suggestion.Name)) ||
                         (InstallModsData.SelectedInstance is not null &&
                          InstallModsData.SelectedInstance.Mods.Any(v => v.Identifier.Equals(suggestion.Name))) ||

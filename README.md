@@ -33,7 +33,7 @@ This project is under heavy development, a lot of the features are not yet imple
 ## Personal notes
 
 - Mods that have a circular dependency to themselves get a bug where they are wrongly deleted when clearing the requested versions list
-    - split this into 2 lists and change how a mod is identified as a user requested mod. Maybe also add wrapper around modversion for in requested mods. This could also help with the suppressrecommendations.
+    - Maybe also add wrapper around modversion for in requested mods. This could help with the suppressrecommendations and identifying a mods as user requested.
 - check exception catching in InstallModsSelectInstanceStepViewModel for the compatibilityService
 - make SuppressRecommendations flag in Relationship actually do its thing
 - Create extra model around version to keep extra information like the mods that depend on it

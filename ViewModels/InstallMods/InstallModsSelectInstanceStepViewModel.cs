@@ -40,7 +40,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         InstallModsData.FinalModList.Clear();
         if (_modListService.Mods is null || InstallModsData.SelectedInstance is null) return;
 
-        InstallModsData.FinalModList = InstallModsData.RequestedModVersions;
+        InstallModsData.FinalModList = [.. InstallModsData.RequestedModVersions];
 
         foreach (var version in InstallModsData.FinalModList.Where(version =>
                      InstallModsData.SelectedInstance.Mods.Exists(m => m.Id == version.Identifier)))

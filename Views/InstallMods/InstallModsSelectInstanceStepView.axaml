@@ -61,7 +61,7 @@
                            FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
             </Grid>
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                <ItemsRepeater ItemsSource="{Binding InstallModsData.RequestedModVersions}">
+                <ItemsRepeater ItemsSource="{Binding InstallModsData.FinalModList}">
                     <ItemsRepeater.Layout>
                         <StackLayout Spacing="8" Orientation="Vertical" />
                     </ItemsRepeater.Layout>
