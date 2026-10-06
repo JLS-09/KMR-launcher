@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -68,6 +69,15 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
                         .First()));
                 }
             }
+
+            Supported.AddRange(_modListService.Mods
+                .SelectMany(mod => mod.Versions)
+                .Where(v => v.Supports?.Any(s =>
+                    string.Equals(s.Name, version.Version.Identifier, StringComparison.OrdinalIgnoreCase) ||
+                    (s.AnyOf?.Any(a =>
+                         string.Equals(a.Name, version.Version.Identifier, StringComparison.OrdinalIgnoreCase)) ??
+                     false)
+                ) ?? false).Select(v => new VersionListItemViewModel(v)));
         }
 
         ShowRecommendations = Recommendations.Count > 0;
