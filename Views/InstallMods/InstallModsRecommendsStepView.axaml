@@ -122,7 +122,7 @@
                                 </Button.Theme>
                                 <Border Padding="8 4" BorderThickness="2 0 0 0" Classes="mod-row-border"
                                         Classes.selected="{Binding IsSelected}">
-                                    <TextBlock Text="{Binding Version.Identifier}" />
+                                    <TextBlock Text="{Binding Version.Id}" />
                                 </Border>
                             </Button>
                         </DataTemplate>
@@ -178,7 +178,7 @@
                                 </Button.Theme>
                                 <Border Padding="8 4" BorderThickness="2 0 0 0" Classes="mod-row-border"
                                         Classes.selected="{Binding IsSelected}">
-                                    <TextBlock Text="{Binding Version.Identifier}" />
+                                    <TextBlock Text="{Binding Version.Id}" />
                                 </Border>
                             </Button>
                         </DataTemplate>
@@ -234,7 +234,7 @@
                                 </Button.Theme>
                                 <Border Padding="8 4" BorderThickness="2 0 0 0" Classes="mod-row-border"
                                         Classes.selected="{Binding IsSelected}">
-                                    <TextBlock Text="{Binding Version.Identifier}" />
+                                    <TextBlock Text="{Binding Version.Id}" />
                                 </Border>
                             </Button>
                         </DataTemplate>
