@@ -19,6 +19,9 @@
         <DataTemplate DataType="viewModels:InstallModsRecommendsStepViewModel">
             <views:InstallModsRecommendsStepView />
         </DataTemplate>
+        <DataTemplate DataType="viewModels:InstallModsModulesStepViewModel">
+            <views:InstallModsModulesStepView />
+        </DataTemplate>
     </Window.DataTemplates>
 
     <Design.DataContext>
