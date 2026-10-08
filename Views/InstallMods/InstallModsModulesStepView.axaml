@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
+             x:DataType="vm:InstallModsModulesStepViewModel"
+             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
+             Background="#1F1F20"
+             Foreground="{DynamicResource PrimaryText}"
+             x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsModulesStepView">
+
+    <Grid Margin="32 32 32 0" RowDefinitions="Auto Auto Auto *">
+        <StackPanel Grid.Row="0" Spacing="4">
+            <Grid ColumnDefinitions="* * * *" ColumnSpacing="8">
+                <Rectangle Grid.Column="0" Height="4" Fill="{DynamicResource PrimaryRed}" />
+                <Rectangle Grid.Column="1" Height="4" Fill="{DynamicResource PrimaryRed}" />
+                <Rectangle Grid.Column="2" Height="4" Fill="{DynamicResource PrimaryRed}" />
+                <Rectangle Grid.Column="3" Height="4" Fill="{DynamicResource PrimaryBackground}" />
+            </Grid>
+        </StackPanel>
+        
+    </Grid>
+
+</UserControl>

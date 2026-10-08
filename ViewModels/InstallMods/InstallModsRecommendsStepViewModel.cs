@@ -23,7 +23,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         _modListService = modListService;
     }
 
-    public override void PopulateRecommendations()
+    private void PopulateRecommendations()
     {
         Recommendations = [];
         Suggestions = [];
@@ -103,6 +103,12 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
     {
         foreach (var version in versions)
             version.IsSelected = false;
+    }
+
+    public override void OnEntering(InstallModsStepViewModel? previous)
+    {
+        PopulateRecommendations();
+        base.OnEntering(previous);
     }
 
     public override string Title => "Choose Recommendations";
