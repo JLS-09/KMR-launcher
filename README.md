@@ -35,7 +35,8 @@ This project is under heavy development, a lot of the features are not yet imple
 - check exception catching in InstallModsSelectInstanceStepViewModel for the compatibilityService
 - make SuppressRecommendations flag in Relationship actually do its thing
 - skip recommendations screen when there are no recommendations/suggestions/supported
-- implement supported by list (example: Eternal)
+- conflict and compatible version checking on everything!!!
+- Add version selection in recommendations
 
 - anyOf dependency gets handled like a provides module, not in the dependency resolution but after recommendations, suggestions,... Where the user is able to choose
     - gets ignored when any one of the mods is installed
