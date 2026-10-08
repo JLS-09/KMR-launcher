@@ -69,7 +69,6 @@ public partial class InstallModsViewModel : ViewModelBase
     private void Next()
     {
         SetStep(_index + 1, _index);
-        CurrentStep.OnEntering(_steps[_index]);
     }
 
     [RelayCommand(CanExecute = nameof(CanGoBack))]
