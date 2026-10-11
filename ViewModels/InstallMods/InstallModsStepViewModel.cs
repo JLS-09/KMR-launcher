@@ -15,6 +15,4 @@ public abstract class InstallModsStepViewModel : ViewModelBase
     
     public virtual void OnEntering(InstallModsStepViewModel? previous) { }
     public virtual void OnLeaving(InstallModsStepViewModel? next) { }
-
-    public abstract void PopulateRecommendations();
 }
