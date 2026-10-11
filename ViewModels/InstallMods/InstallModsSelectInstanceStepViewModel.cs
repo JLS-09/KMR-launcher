@@ -82,7 +82,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
                 if (InstallModsData.SelectedInstance.Mods.Exists(v => v.Identifier == dependency.Name))
                 {
-                    var existingVersion = new ModVersionDurum
+                    var existingVersion = new ModVersionWrapper
                         { Version = InstallModsData.SelectedInstance.Mods.First(v => v.Identifier == dependency.Name) };
 
                     if (_compatibilityService.IsVersionCompatibleWithRelation(existingVersion.Version, dependency))
@@ -92,7 +92,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                     }
 
                     InstallModsData.RequestedRemoveModVersions.Add(existingVersion);
-                    var versionToAdd = new ModVersionDurum
+                    var versionToAdd = new ModVersionWrapper
                         { Version = _compatibilityService.GetCompatibleVersionFromRelation(dependency) };
 
                     if (dependency is { Name: not null, SuppressRecommendations: not null } &&
@@ -123,7 +123,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                     }
 
                     InstallModsData.FinalModList.Remove(existingVersion);
-                    var versionToAdd = new ModVersionDurum
+                    var versionToAdd = new ModVersionWrapper
                         { Version = _compatibilityService.GetCompatibleVersionFromRelation(dependency) };
 
                     if (dependency is { Name: not null, SuppressRecommendations: not null } &&
@@ -141,7 +141,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                     continue;
                 }
 
-                var compatibleVersion = new ModVersionDurum
+                var compatibleVersion = new ModVersionWrapper
                     { Version = _compatibilityService.GetCompatibleVersionFromRelation(dependency) };
 
                 if (dependency is { Name: not null, SuppressRecommendations: not null } &&
