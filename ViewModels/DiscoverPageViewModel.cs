@@ -17,7 +17,7 @@ public partial class DiscoverPageViewModel : PageViewModel
 {
     public bool IsEnabledFlag => true;
     private readonly IModApiService _api;
-    private CompatibilityService _compatibilityService;
+    private DependencyService _dependencyService;
 
     [ObservableProperty] private ModListService _modListService;
     [ObservableProperty] private bool _isLoading;
@@ -42,10 +42,10 @@ public partial class DiscoverPageViewModel : PageViewModel
     }
 
     public DiscoverPageViewModel(IModApiService api, ModListService modListService,
-        CompatibilityService compatibilityService)
+        DependencyService dependencyService)
     {
         _api = api;
-        _compatibilityService = compatibilityService;
+        _dependencyService = dependencyService;
         ModListService = modListService;
         PageName = ApplicationPageNames.Discover;
         SelectedMods.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSelectedMods));
@@ -118,7 +118,7 @@ public partial class DiscoverPageViewModel : PageViewModel
                         .. SelectedMods
                             .Select(m => new ModVersionWrapper { Version = m.SelectedVersion, IsUserRequested = true })
                     ],
-                    ModListService, _compatibilityService)
+                    ModListService, _dependencyService)
         };
         window.Show();
     }
