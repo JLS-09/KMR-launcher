@@ -117,13 +117,11 @@ public class CompatibilityService(ModListService modListService)
 
     public List<ModVersion> GetVersionsFromModule(string module)
     {
-        List<ModVersion> versions = [];
-
-        var mods = modListService.Mods
+        var versions = modListService.Mods!
             .Where(m => m.Versions.Any(v => v.Provides is not null && v.Provides.Contains(module))).Select(m =>
                 m.Versions.First(v => v.Provides is not null && v.Provides.Contains(module))).ToHashSet();
 
-        return versions;
+        return [.. versions];
     }
 
     private static int GetVersionIndex(Mod mod, string versionString)
