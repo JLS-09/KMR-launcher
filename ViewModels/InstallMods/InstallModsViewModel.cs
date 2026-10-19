@@ -26,7 +26,8 @@ public partial class InstallModsViewModel : ViewModelBase
     public event Action<InstallModsData>? Finished;
     public event Action? Cancelled;
 
-    public InstallModsViewModel(List<ModVersionWrapper> mods, ModListService modListService, DependencyService dependencyService)
+    public InstallModsViewModel(List<ModVersionWrapper> mods, ModListService modListService,
+        DependencyService dependencyService, CompatibilityService compatibilityService)
     {
         InstallModsData.RequestedModVersions = new ObservableCollection<ModVersionWrapper>(mods);
 
@@ -34,7 +35,7 @@ public partial class InstallModsViewModel : ViewModelBase
         [
             new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService),
             new InstallModsRecommendsStepViewModel(InstallModsData, modListService),
-            new InstallModsModulesStepViewModel(InstallModsData, modListService)
+            new InstallModsModulesStepViewModel(InstallModsData, compatibilityService)
         ];
         SetStep(0, fromIndex: -1);
     }

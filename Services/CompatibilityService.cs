@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using KMRLauncherMvvm.Exceptions;
 using KMRLauncherMvvm.Models;
@@ -10,12 +11,14 @@ public class CompatibilityService(ModListService modListService)
     public ModVersion GetCompatibleVersionFromRelation(Relationship relationship)
     {
         if (modListService.Mods is null || !modListService.Mods.ToList().Exists(m => m.Id == relationship.Name) ||
-            relationship.AnyOf is not null) throw new NotSupportedException("Relationship should be handled in a different way.");
+            relationship.AnyOf is not null)
+            throw new NotSupportedException("Relationship should be handled in a different way.");
 
         var dependencyMod = modListService.Mods.First(m => m.Id == relationship.Name);
 
         if (relationship.Version is not null &&
-            (relationship.MinVersion is not null || relationship.MaxVersion is not null)) throw new InvalidRelationshipException(relationship);
+            (relationship.MinVersion is not null || relationship.MaxVersion is not null))
+            throw new InvalidRelationshipException(relationship);
 
         if (relationship.MaxVersion is null && relationship.MinVersion is null &&
             relationship.Version is null) return dependencyMod.Versions.First();
@@ -84,32 +87,43 @@ public class CompatibilityService(ModListService modListService)
         {
             var relationMinVersionIndex = GetVersionIndex(parentMod, relationship.MinVersion);
             var relationMaxVersionIndex = GetVersionIndex(parentMod, relationship.MaxVersion);
-            
-            return versionIndex >= relationMaxVersionIndex && versionIndex <= relationMinVersionIndex ;
+
+            return versionIndex >= relationMaxVersionIndex && versionIndex <= relationMinVersionIndex;
         }
 
         if (relationship.MinVersion is not null)
         {
             var relationMinVersionIndex = GetVersionIndex(parentMod, relationship.MinVersion);
-            
+
             return versionIndex <= relationMinVersionIndex;
         }
-        
+
         if (relationship.MinVersion is not null)
         {
             var relationMaxVersionIndex = GetVersionIndex(parentMod, relationship.MinVersion);
-            
+
             return versionIndex >= relationMaxVersionIndex;
         }
 
         if (relationship.Version is not null)
         {
             var relationVersionIndex = GetVersionIndex(parentMod, relationship.Version);
-            
+
             return versionIndex == relationVersionIndex;
         }
 
         return false;
+    }
+
+    public List<ModVersion> GetVersionsFromModule(string module)
+    {
+        List<ModVersion> versions = [];
+
+        var mods = modListService.Mods
+            .Where(m => m.Versions.Any(v => v.Provides is not null && v.Provides.Contains(module))).Select(m =>
+                m.Versions.First(v => v.Provides is not null && v.Provides.Contains(module))).ToHashSet();
+
+        return versions;
     }
 
     private static int GetVersionIndex(Mod mod, string versionString)

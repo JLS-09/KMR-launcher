@@ -162,7 +162,7 @@ public class Relationship : IEquatable<Relationship>
             $"MaxVersion: {(MaxVersion is not null ? $"\"{(MaxVersion is not null ? $"\"{MaxVersion}\"" : "null")}\"" : "null")}, " +
             $"SuppressRecommendations: {(SuppressRecommendations is not null ? $"{SuppressRecommendations}" : "null")}, " +
             $"Comment: {(Comment is not null ? $"\"{Comment}\"" : "null")}, " +
-            $"AnyOf: {(AnyOf is not null ? $"{AnyOf}" : "null")} }}";
+            $"AnyOf: {(AnyOf is not null ? $"[\"{string.Join("\", \"", AnyOf)}\"]" : "null")} }}";
     }
 
     public bool Equals(Relationship? other)
