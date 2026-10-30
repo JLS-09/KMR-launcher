@@ -125,7 +125,8 @@ public class DependencyService(ModListService modListService, CompatibilityServi
     {
         var wrapper = new ModVersionWrapper
         {
-            Version = compatibilityService.GetCompatibleVersionFromRelation(dependency)
+            Version = compatibilityService.GetCompatibleVersionFromRelation(dependency),
+            Relationship = dependency
         };
         wrapper.ModsForReason = [.. reasons];
 

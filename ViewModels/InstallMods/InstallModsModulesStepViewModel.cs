@@ -43,16 +43,34 @@ public partial class InstallModsModulesStepViewModel(
                 Choices.Add(compatibilityService.GetVersionsFromModule(choosableVersion.Name));
             }
         }
+
         EliminateSingleChoices();
     }
 
     private void EliminateDuplicates()
     {
+        // TODO take another look at this because this doesnt look right at all
+        // yeah this is actually very wrong but the combineRelationships is actually useful
         foreach (var choosableVersion in InstallModsData.ChoosableVersions)
         {
-            // TODO remove choices where one option is already in finalModList
-            // maybe also look at how versions are stored until now, it would be easier to to check compatibility if
-            // we keep the relations in the wrapper perhaps so we can check version requirements
+            if (InstallModsData.FinalModList.Any(v =>
+                    v.Relationship is not null && v.Version.Identifier == choosableVersion.Name))
+            {
+                var duplicateVersion = InstallModsData.FinalModList.First(v =>
+                    v.Relationship is not null && v.Version.Identifier == choosableVersion.Name);
+
+                if (!compatibilityService.IsVersionCompatibleWithRelation(duplicateVersion.Version, choosableVersion))
+                {
+                    var newRelationship =
+                        compatibilityService.CombineRelationships(duplicateVersion.Relationship!, choosableVersion);
+
+                    var newVersion = compatibilityService.GetCompatibleVersionFromRelation(newRelationship);
+
+                    InstallModsData.FinalModList.Remove(duplicateVersion);
+                    InstallModsData.FinalModList.Add(new ModVersionWrapper
+                        { Version = newVersion, Relationship = newRelationship });
+                }
+            }
         }
     }
 
