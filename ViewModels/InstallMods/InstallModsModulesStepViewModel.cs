@@ -21,6 +21,7 @@ public partial class InstallModsModulesStepViewModel(
 
     private void ProcessChoosables()
     {
+        EliminateDuplicates();
         foreach (var choosableVersion in InstallModsData.ChoosableVersions)
         {
             if (choosableVersion.AnyOf is not null && choosableVersion.AnyOf.Count > 0)
@@ -42,13 +43,16 @@ public partial class InstallModsModulesStepViewModel(
                 Choices.Add(compatibilityService.GetVersionsFromModule(choosableVersion.Name));
             }
         }
+        EliminateSingleChoices();
     }
 
     private void EliminateDuplicates()
     {
-        foreach (var choice in Choices)
+        foreach (var choosableVersion in InstallModsData.ChoosableVersions)
         {
             // TODO remove choices where one option is already in finalModList
+            // maybe also look at how versions are stored until now, it would be easier to to check compatibility if
+            // we keep the relations in the wrapper perhaps so we can check version requirements
         }
     }
 
@@ -58,7 +62,7 @@ public partial class InstallModsModulesStepViewModel(
         {
             if (choice.Count == 1)
             {
-                // TODO remove choices where there is only one option
+                // TODO remove choices where there is only one option and add to finalList
             }
         }
     }
