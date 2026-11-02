@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using KMRLauncherMvvm.Exceptions;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 
@@ -11,7 +13,7 @@ public partial class InstallModsModulesStepViewModel(
     CompatibilityService compatibilityService)
     : InstallModsStepViewModel(installModsData)
 {
-    [ObservableProperty] private List<List<ModVersion>> _choices = [];
+    [ObservableProperty] private List<List<ModVersionWrapper>> _choices = [];
 
     public override void OnEntering(InstallModsStepViewModel? previous)
     {
@@ -24,6 +26,7 @@ public partial class InstallModsModulesStepViewModel(
         EliminateDuplicates();
         foreach (var choosableVersion in InstallModsData.ChoosableVersions)
         {
+            Console.WriteLine(choosableVersion.Name);
             if (choosableVersion.AnyOf is not null && choosableVersion.AnyOf.Count > 0)
             {
                 List<ModVersion> anyOfVersions =
@@ -36,41 +39,87 @@ public partial class InstallModsModulesStepViewModel(
                         }))
                 ];
 
-                Choices.Add(anyOfVersions);
+                Choices.Add([
+                    .. anyOfVersions.Select(v => new ModVersionWrapper { Version = v, Relationship = choosableVersion })
+                ]);
             }
             else if (choosableVersion.Name != null)
             {
-                Choices.Add(compatibilityService.GetVersionsFromModule(choosableVersion.Name));
+                Choices.Add([
+                    .. compatibilityService.GetVersionsFromModule(choosableVersion.Name).Select(v =>
+                        new ModVersionWrapper { Version = v, Relationship = choosableVersion })
+                ]);
             }
         }
 
+        EliminateAlreadyQueued();
         EliminateSingleChoices();
     }
 
     private void EliminateDuplicates()
     {
-        // TODO take another look at this because this doesnt look right at all
-        // yeah this is actually very wrong but the combineRelationships is actually useful
-        foreach (var choosableVersion in InstallModsData.ChoosableVersions)
+        foreach (var choice in InstallModsData.ChoosableVersions.ToList())
         {
-            if (InstallModsData.FinalModList.Any(v =>
-                    v.Relationship is not null && v.Version.Identifier == choosableVersion.Name))
+            // remove duplicates Like FAR in rp-1 express install from the list of choosable versions
+        }
+    }
+
+    private void EliminateAlreadyQueued()
+    {
+        foreach (var choice in Choices.ToList())
+        {
+            var resolved = false;
+
+            foreach (var option in choice.ToList())
             {
-                var duplicateVersion = InstallModsData.FinalModList.First(v =>
-                    v.Relationship is not null && v.Version.Identifier == choosableVersion.Name);
+                var existing = InstallModsData.FinalModList
+                    .FirstOrDefault(m => m.Version.Identifier == option.Version.Identifier);
 
-                if (!compatibilityService.IsVersionCompatibleWithRelation(duplicateVersion.Version, choosableVersion))
+                if (existing is null) continue;
+
+                var existingRelation = existing.Relationship is not null &&
+                                       existing.Relationship.AnyOf is null &&
+                                       existing.Relationship.Name == existing.Version.Identifier
+                    ? existing.Relationship
+                    : new Relationship { Name = existing.Version.Identifier, Version = existing.Version.Version };
+
+                var anyOfEntry = option.Relationship?.AnyOf?
+                    .FirstOrDefault(a => a.Name == option.Version.Identifier);
+
+                var choiceRelation = anyOfEntry is not null
+                    ? new Relationship
+                    {
+                        Name = anyOfEntry.Name,
+                        Version = anyOfEntry.Version,
+                        MinVersion = anyOfEntry.MinVersion,
+                        MaxVersion = anyOfEntry.MaxVersion
+                    }
+                    : new Relationship { Name = option.Version.Identifier };
+
+                try
                 {
-                    var newRelationship =
-                        compatibilityService.CombineRelationships(duplicateVersion.Relationship!, choosableVersion);
+                    var combined = compatibilityService.CombineRelationships(existingRelation, choiceRelation);
+                    var newVersion = compatibilityService.GetCompatibleVersionFromRelation(combined);
 
-                    var newVersion = compatibilityService.GetCompatibleVersionFromRelation(newRelationship);
+                    var index = InstallModsData.FinalModList.IndexOf(existing);
+                    InstallModsData.FinalModList[index] = new ModVersionWrapper
+                    {
+                        Version = newVersion,
+                        IsUserRequested = existing.IsUserRequested,
+                        ModsForReason = existing.ModsForReason,
+                        Relationship = combined
+                    };
 
-                    InstallModsData.FinalModList.Remove(duplicateVersion);
-                    InstallModsData.FinalModList.Add(new ModVersionWrapper
-                        { Version = newVersion, Relationship = newRelationship });
+                    resolved = true;
+                    break;
+                }
+                catch (NoCompatibleVersionFoundException)
+                {
+                    choice.Remove(option);
                 }
             }
+
+            if (resolved) Choices.Remove(choice);
         }
     }
 
