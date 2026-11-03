@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Humanizer;
@@ -171,7 +172,7 @@ public class Relationship : IEquatable<Relationship>
         if (ReferenceEquals(this, other)) return true;
         return Name == other.Name && Version == other.Version && MinVersion == other.MinVersion &&
                MaxVersion == other.MaxVersion && SuppressRecommendations == other.SuppressRecommendations &&
-               Equals(AnyOf, other.AnyOf) && Comment == other.Comment;
+               AnyOfEquals(AnyOf, other.AnyOf) && Comment == other.Comment;
     }
 
     public override bool Equals(object? obj)
@@ -184,7 +185,22 @@ public class Relationship : IEquatable<Relationship>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Name, Version, MinVersion, MaxVersion, SuppressRecommendations, AnyOf, Comment);
+        var anyOfHash = 0;
+        if (AnyOf is not null)
+        {
+            foreach (var entry in AnyOf)
+            {
+                anyOfHash = HashCode.Combine(anyOfHash, entry);
+            }
+        }
+
+        return HashCode.Combine(Name, Version, MinVersion, MaxVersion, SuppressRecommendations, anyOfHash, Comment);
+    }
+
+    private static bool AnyOfEquals(List<AnyOfEntry>? a, List<AnyOfEntry>? b)
+    {
+        if (a is null || b is null) return a is null && b is null;
+        return a.SequenceEqual(b);
     }
 }
 

@@ -28,15 +28,31 @@ public partial class InstallModsModulesStepViewModel(
         {
             if (choosableVersion.AnyOf is not null && choosableVersion.AnyOf.Count > 0)
             {
-                List<ModVersion> anyOfVersions =
-                [
-                    .. choosableVersion.AnyOf.Select(anyOfEntry =>
-                        compatibilityService.GetCompatibleVersionFromRelation(new Relationship
-                        {
-                            Name = anyOfEntry.Name, Version = anyOfEntry.Version, MinVersion = anyOfEntry.MinVersion,
-                            MaxVersion = anyOfEntry.MaxVersion
-                        }))
-                ];
+                List<ModVersion> anyOfVersions = [];
+
+                foreach (var anyOfEntry in choosableVersion.AnyOf)
+                {
+                    var relation = new Relationship
+                    {
+                        Name = anyOfEntry.Name, Version = anyOfEntry.Version,
+                        MinVersion = anyOfEntry.MinVersion, MaxVersion = anyOfEntry.MaxVersion
+                    };
+
+                    try
+                    {
+                        anyOfVersions.Add(compatibilityService.GetCompatibleVersionFromRelation(relation));
+                    }
+                    catch (NotSupportedException)
+                    {
+                        anyOfVersions.AddRange(compatibilityService.GetVersionsFromModule(anyOfEntry.Name));
+                    }
+                    catch (NoCompatibleVersionFoundException)
+                    {
+                        // This option can't be installed, so skip it
+                    }
+                }
+
+                anyOfVersions = [.. anyOfVersions.DistinctBy(v => v.Identifier)];
 
                 Choices.Add([
                     .. anyOfVersions.Select(v => new ModVersionWrapper { Version = v, Relationship = choosableVersion })
@@ -51,6 +67,7 @@ public partial class InstallModsModulesStepViewModel(
             }
         }
 
+        EliminateAlreadyInstalled();
         EliminateAlreadyQueued();
         EliminateCoveredChoices();
         EliminateSingleChoices();
@@ -90,6 +107,18 @@ public partial class InstallModsModulesStepViewModel(
             }
 
             InstallModsData.ChoosableVersions.Add(combined);
+        }
+    }
+
+    private void EliminateAlreadyInstalled()
+    {
+        var installed = InstallModsData.SelectedInstance?.Mods;
+        if (installed is null) return;
+
+        foreach (var choice in Choices.ToList())
+        {
+            if (choice.Any(option => installed.Any(m => m.Identifier == option.Version.Identifier)))
+                Choices.Remove(choice);
         }
     }
 
@@ -169,15 +198,14 @@ public partial class InstallModsModulesStepViewModel(
             Choices.Remove(choice);
         }
     }
-    
+
     private void EliminateCoveredChoices()
     {
         foreach (var choice in Choices.ToList())
         {
             var module = choice.FirstOrDefault()?.Relationship?.Name;
-            if (module is null) continue; // AnyOf choices have no module name
+            if (module is null) continue;
 
-            // Every option of another choice already brings in a provider of this module
             var coveredByOtherChoice = Choices.Any(other =>
                 other != choice && other.Count > 0 &&
                 other.All(option => DependsOnProviderOf(option.Version, module)));
