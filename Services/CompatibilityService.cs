@@ -132,7 +132,6 @@ public class CompatibilityService(ModListService modListService)
         if (first.Name != second.Name)
             throw new ArgumentException("Only relationships for the same mod can be combined.");
 
-        // A relationship can't have an exact version AND a min/max at the same time
         if (first.Version is not null && (first.MinVersion is not null || first.MaxVersion is not null))
             throw new InvalidRelationshipException(first);
         if (second.Version is not null && (second.MinVersion is not null || second.MaxVersion is not null))
@@ -140,7 +139,12 @@ public class CompatibilityService(ModListService modListService)
 
         var mod = modListService.Mods?.FirstOrDefault(m => m.Id == first.Name);
         if (mod is null)
+        {
+            if (first.Name is not null && GetVersionsFromModule(first.Name).Count > 0)
+                return CombineModuleRelationships(first, second);
+
             throw new NotSupportedException("Relationship should be handled in a different way.");
+        }
 
         var combined = new Relationship
         {
@@ -149,13 +153,10 @@ public class CompatibilityService(ModListService modListService)
                 ? true
                 : null,
             Comment = CombineComments(first.Comment, second.Comment),
-            // The strictest minimum is the NEWEST of the two
             MinVersion = PickNewest(mod, first.MinVersion, second.MinVersion),
-            // The strictest maximum is the OLDEST of the two
             MaxVersion = PickOldest(mod, first.MaxVersion, second.MaxVersion)
         };
 
-        // Case 1: at least one of them asks for an exact version
         if (first.Version is not null || second.Version is not null)
         {
             if (first.Version is not null && second.Version is not null && first.Version != second.Version)
@@ -164,26 +165,48 @@ public class CompatibilityService(ModListService modListService)
             var exactVersion = first.Version ?? second.Version!;
             var exactIndex = FindVersionIndex(mod, exactVersion);
 
-            // Remember: a higher index means an OLDER version
             if (combined.MinVersion is not null && exactIndex > FindVersionIndex(mod, combined.MinVersion))
                 throw new NoCompatibleVersionFoundException(combined);
 
             if (combined.MaxVersion is not null && exactIndex < FindVersionIndex(mod, combined.MaxVersion))
                 throw new NoCompatibleVersionFoundException(combined);
 
-            // The exact version satisfies everything, so only keep that
             combined.Version = exactVersion;
             combined.MinVersion = null;
             combined.MaxVersion = null;
             return combined;
         }
 
-        // Case 2: only ranges. Check that the min isn't newer than the max
         if (combined.MinVersion is not null && combined.MaxVersion is not null &&
             FindVersionIndex(mod, combined.MinVersion) < FindVersionIndex(mod, combined.MaxVersion))
             throw new NoCompatibleVersionFoundException(combined);
 
         return combined;
+    }
+    
+    private static Relationship CombineModuleRelationships(Relationship first, Relationship second)
+    {
+        return new Relationship
+        {
+            Name = first.Name,
+            SuppressRecommendations = first.SuppressRecommendations == true || second.SuppressRecommendations == true
+                ? true
+                : null,
+            Comment = CombineComments(first.Comment, second.Comment),
+            Version = PickSameVersion(first, first.Version, second.Version),
+            MinVersion = PickSameVersion(first, first.MinVersion, second.MinVersion),
+            MaxVersion = PickSameVersion(first, first.MaxVersion, second.MaxVersion)
+        };
+    }
+
+    private static string? PickSameVersion(Relationship relationship, string? a, string? b)
+    {
+        if (a is null) return b;
+        if (b is null) return a;
+        if (a == b) return a;
+
+        throw new NotSupportedException(
+            $"Can't combine different version rules for module {relationship.Name}.");
     }
 
     private static string? PickNewest(Mod mod, string? a, string? b)

@@ -26,7 +26,6 @@ public partial class InstallModsModulesStepViewModel(
         EliminateDuplicates();
         foreach (var choosableVersion in InstallModsData.ChoosableVersions)
         {
-            Console.WriteLine(choosableVersion.Name);
             if (choosableVersion.AnyOf is not null && choosableVersion.AnyOf.Count > 0)
             {
                 List<ModVersion> anyOfVersions =
@@ -53,14 +52,44 @@ public partial class InstallModsModulesStepViewModel(
         }
 
         EliminateAlreadyQueued();
+        EliminateCoveredChoices();
         EliminateSingleChoices();
+
+        foreach (var choice in Choices)
+        {
+            foreach (var option in choice)
+            {
+                Console.WriteLine(option.Version);
+            }
+
+            Console.WriteLine();
+        }
     }
 
     private void EliminateDuplicates()
     {
-        foreach (var choice in InstallModsData.ChoosableVersions.ToList())
+        var duplicateGroups = InstallModsData.ChoosableVersions
+            .Where(r => r.Name is not null && r.AnyOf is null)
+            .GroupBy(r => r.Name)
+            .Where(group => group.Count() > 1)
+            .ToList();
+
+        foreach (var group in duplicateGroups)
         {
-            // remove duplicates Like FAR in rp-1 express install from the list of choosable versions
+            var relations = group.ToList();
+
+            var combined = relations[0];
+            for (var i = 1; i < relations.Count; i++)
+            {
+                combined = compatibilityService.CombineRelationships(combined, relations[i]);
+            }
+
+            foreach (var relation in relations)
+            {
+                InstallModsData.ChoosableVersions.Remove(relation);
+            }
+
+            InstallModsData.ChoosableVersions.Add(combined);
         }
     }
 
@@ -125,13 +154,46 @@ public partial class InstallModsModulesStepViewModel(
 
     private void EliminateSingleChoices()
     {
-        foreach (var choice in Choices)
+        foreach (var choice in Choices.ToList())
         {
-            if (choice.Count == 1)
-            {
-                // TODO remove choices where there is only one option and add to finalList
-            }
+            if (choice.Count != 1) continue;
+
+            var option = choice[0];
+
+            var alreadyQueued = InstallModsData.FinalModList
+                .Any(m => m.Version.Identifier == option.Version.Identifier);
+
+            if (!alreadyQueued)
+                InstallModsData.FinalModList.Add(option);
+
+            Choices.Remove(choice);
         }
+    }
+    
+    private void EliminateCoveredChoices()
+    {
+        foreach (var choice in Choices.ToList())
+        {
+            var module = choice.FirstOrDefault()?.Relationship?.Name;
+            if (module is null) continue; // AnyOf choices have no module name
+
+            // Every option of another choice already brings in a provider of this module
+            var coveredByOtherChoice = Choices.Any(other =>
+                other != choice && other.Count > 0 &&
+                other.All(option => DependsOnProviderOf(option.Version, module)));
+
+            if (coveredByOtherChoice) Choices.Remove(choice);
+        }
+    }
+
+    private bool DependsOnProviderOf(ModVersion version, string module)
+    {
+        if (version.Depends is null) return false;
+
+        var providers = compatibilityService.GetVersionsFromModule(module);
+
+        return version.Depends.Any(d => d.Name is not null &&
+                                        (d.Name == module || providers.Any(p => p.Identifier == d.Name)));
     }
 
     public override string Title => "Choose Modules";
