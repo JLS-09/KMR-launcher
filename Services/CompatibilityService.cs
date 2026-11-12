@@ -68,7 +68,7 @@ public class CompatibilityService(ModListService modListService)
             .Where(v => v.Provides?.Contains(module) == true && IsCompatible(v, criteria))
             .ToList();
     }
-    
+
     public List<ModVersion> GetVersionsFromModule(string module, GameVersionCriteria? criteria = null)
     {
         if (modListService.Mods is null) return [];
@@ -80,6 +80,54 @@ public class CompatibilityService(ModListService modListService)
             .ToList();
     }
 
+    public static List<ResolutionProblem> FindConflicts(IReadOnlyList<ModVersion> toInstall,
+        IReadOnlyList<ModVersion> installed)
+    {
+        List<ResolutionProblem> problems = [];
+        HashSet<string> reported = [];
+
+        for (var i = 0; i < toInstall.Count; i++)
+        {
+            var mod = toInstall[i];
+
+            var others = toInstall.Skip(i + 1).Select(m => (Mod: m, IsInstalled: false))
+                .Concat(installed.Select(m => (Mod: m, IsInstalled: true)));
+
+            foreach (var (other, isInstalled) in others)
+            {
+                if (other.Identifier == mod.Identifier) continue;
+                if (!ConflictsWith(mod, other) && !ConflictsWith(other, mod)) continue;
+
+                var pair = string.CompareOrdinal(mod.Identifier, other.Identifier) < 0
+                    ? $"{mod.Identifier}|{other.Identifier}"
+                    : $"{other.Identifier}|{mod.Identifier}";
+                if (!reported.Add(pair)) continue;
+
+                problems.Add(new ResolutionProblem
+                {
+                    Mod = mod.Identifier,
+                    IsConflict = true,
+                    Message = isInstalled
+                        ? $"{mod.Identifier} {mod.Version} conflicts with {other.Identifier} {other.Version}, " +
+                          $"which is already installed in this instance."
+                        : $"{mod.Identifier} {mod.Version} and {other.Identifier} {other.Version} conflict, " +
+                          $"so they can't be installed together."
+                });
+            }
+        }
+
+        return problems;
+    }
+
+    private static bool ConflictsWith(ModVersion mod, ModVersion other) =>
+        mod.Conflicts?.Any(conflict => conflict.AnyOf is { Count: > 0 } anyOf
+            ? anyOf.Any(e => MatchesModule(other, e.Name, e.Version, e.MinVersion, e.MaxVersion))
+            : MatchesModule(other, conflict.Name, conflict.Version, conflict.MinVersion, conflict.MaxVersion)) == true;
+
+    private static bool MatchesModule(ModVersion mod, string? name, string? exact, string? min, string? max) =>
+        name is not null &&
+        ((mod.Identifier == name && SatisfiesVersionLimits(mod.Version, exact, min, max)) ||
+         mod.Provides?.Contains(name) == true);
 
     private static readonly (int, int, int) LowestKsp = (0, 0, 0);
     private static readonly (int, int, int) HighestKsp = (int.MaxValue, int.MaxValue, int.MaxValue);

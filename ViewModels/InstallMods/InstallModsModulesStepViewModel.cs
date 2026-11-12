@@ -61,7 +61,7 @@ public partial class InstallModsModulesStepViewModel(
             : null;
 
         var queued = InstallModsData.FinalModList.ToList();
-        List<ResolutionProblem> problems = [.. InstallModsData.Problems];
+        List<ResolutionProblem> problems = [.. InstallModsData.Problems.Where(p => !p.IsConflict)];
         var rawChoices = BuildRawChoices(InstallModsData.ChoosableVersions, queued, problems, out var autoAdded);
 
         _baseProblems = problems;
@@ -105,6 +105,10 @@ public partial class InstallModsModulesStepViewModel(
                 desired.AddRange(newGroups);
                 pending = [.. autoAdded, .. SelectedOptions(newGroups)];
             }
+
+            problems.AddRange(CompatibilityService.FindConflicts(
+                [.. queued.Select(q => q.Version)],
+                DependencyService.RemainingInstalled(InstallModsData.SelectedInstance, queued, removes)));
 
             InstallModsData.FinalModList = new ObservableCollection<PlannedModVersion>(queued);
             InstallModsData.RequestedRemoveModVersions = new ObservableCollection<PlannedModVersion>(removes);

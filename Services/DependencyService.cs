@@ -15,6 +15,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
 
         public GameVersionCriteria? Criteria { get; } =
             instance is null ? null : GameVersionCriteria.FromInstance(instance);
+
         public List<PlannedModVersion> Resolved { get; } = [];
         public List<PlannedModVersion> ToRemove { get; } = [];
         public HashSet<Relationship> Choosable { get; } = [];
@@ -64,6 +65,9 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         installModsData.ChoosableVersions = dependencyResolutionState.Choosable;
         installModsData.ModsWithIgnoredRecommendations =
             [.. dependencyResolutionState.IgnoredRecommendations];
+        dependencyResolutionState.Problems.AddRange(CompatibilityService.FindConflicts(
+            [.. dependencyResolutionState.Resolved.Select(r => r.Version)],
+            RemainingInstalled(instance, dependencyResolutionState.Resolved, dependencyResolutionState.ToRemove)));
         installModsData.Problems = new ObservableCollection<ResolutionProblem>(dependencyResolutionState.Problems);
         return installModsData;
     }
@@ -294,5 +298,16 @@ public class DependencyService(ModListService modListService, CompatibilityServi
             ? ""
             : $" {DescribeLimits(relationship)}";
 
+    public static List<ModVersion> RemainingInstalled(Instance? instance, IEnumerable<PlannedModVersion> toInstall,
+        IEnumerable<PlannedModVersion> toRemove)
+    {
+        if (instance is null) return [];
+
+        var replaced = toInstall.Select(m => m.Version.Identifier).ToHashSet();
+        var removed = toRemove.Select(m => m.Version.Id).ToHashSet();
+
+        return instance.Mods.Where(m => !replaced.Contains(m.Identifier) && !removed.Contains(m.Id)).ToList();
+    }
+    
     private bool ModExists(string? name) => modListService.Mods?.Any(m => m.Id == name) == true;
 }
