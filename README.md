@@ -30,8 +30,8 @@ The full plan is split into milestones:
 
 | Milestone | Goal | Status |
 |---|---|---|
-| **M1** | Choose between alternative dependencies (`any_of` / virtual modules) in the install wizard | 🚧 In progress |
-| **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | ⏳ Planned |
+| **M1** | Choose between alternative dependencies (`any_of` / virtual modules) in the install wizard | ✅ Done |
+| **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | 🚧 In progress |
 | **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | ⏳ Planned |
 | **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | ⏳ Planned |
 | **M5** | Instance management:<br>• remove and update mods<br>• `replaced_by`<br>• currently-playing card<br>• create an instance from inside the wizard<br>• import an existing KSP install (with CKAN registry)<br>• offline mode | ⏳ Planned |
