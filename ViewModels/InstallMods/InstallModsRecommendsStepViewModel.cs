@@ -4,12 +4,14 @@ using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Models;
+using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;
 
 public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewModel
 {
     private ModListService _modListService;
+    private readonly DependencyService _dependencyService;
     [ObservableProperty] private List<VersionListItemViewModel> _recommendations = [];
     [ObservableProperty] private List<VersionListItemViewModel> _suggestions = [];
     [ObservableProperty] private List<VersionListItemViewModel> _supported = [];
@@ -17,13 +19,14 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
     [ObservableProperty] private bool _showSuggestions;
     [ObservableProperty] private bool _showSupported;
 
-    public InstallModsRecommendsStepViewModel(InstallModsData installModsData, ModListService modListService) : base(
-        installModsData)
+    public InstallModsRecommendsStepViewModel(InstallModsData installModsData, ModListService modListService,
+        DependencyService dependencyService) : base(installModsData)
     {
         _modListService = modListService;
+        _dependencyService = dependencyService;
     }
 
-    public override void PopulateRecommendations()
+    private void PopulateRecommendations()
     {
         Recommendations = [];
         Suggestions = [];
@@ -103,6 +106,13 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
     {
         foreach (var version in versions)
             version.IsSelected = false;
+    }
+
+    public override void OnEntering(InstallModsStepViewModel? previous)
+    {
+        _dependencyService.ResolveDependencies(InstallModsData);
+        PopulateRecommendations();
+        base.OnEntering(previous);
     }
 
     public override string Title => "Choose Recommendations";

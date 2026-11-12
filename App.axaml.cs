@@ -35,6 +35,7 @@ public class App : Application
         var modListService = new ModListService();
         var jsonHelper = new GitHelper(modListService);
         var compatibilityService = new CompatibilityService(modListService);
+        var dependencyService = new DependencyService(modListService, compatibilityService);
         
         var collection = new ServiceCollection();
         collection.AddSingleton<IModApiService, ModGitService>();
@@ -42,6 +43,7 @@ public class App : Application
         collection.AddSingleton(modListService);
         collection.AddSingleton(jsonHelper);
         collection.AddSingleton(compatibilityService);
+        collection.AddSingleton(dependencyService);
         
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<HomePageViewModel>();

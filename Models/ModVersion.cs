@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Humanizer;
@@ -10,8 +11,10 @@ public class ModVersion
 {
     // Identifier + Version
     public string? Id { get; set; }
+
     // Same identifier as the mod it belongs to: (ModVersion) Identifier == Id (Mod)
     [JsonPropertyName("identifier")] public required string Identifier { get; set; }
+
     // Version tag
     [JsonPropertyName("version")] public required string Version { get; set; }
 
@@ -64,24 +67,25 @@ public class ModVersion
 
     public override string ToString()
     {
-        return $"{{ Id: \"{Id}\", Identifier: \"{Identifier}\", Version: \"{Version}\", SpecVersion: \"{SpecVersion}\", " +
-               $"KspVersion: {(KspVersion is not null ? $"\"{KspVersion}\"" : "null")}, " +
-               $"KspVersionMin: {(KspVersionMin is not null ? $"\"{KspVersionMin}\"" : "null")}, " +
-               $"KspVersionMax: {(KspVersionMax is not null ? $"\"{KspVersionMax}\"" : "null")}, KspVersionStrict: \"{KspVersionStrict}\", " +
-               $"License: [\"{string.Join("\", \"", License)}\"], Download: {(Download is not null ? $"[\"{string.Join("\", \"", Download)}\"]" : "null")}, " +
-               $"DownloadHash: {DownloadHash}, DownloadSize: {(DownloadSize is not null ? $"{DownloadSize}" : "null")}, " +
-               $"DownloadContentType: {(DownloadContentType is not null ? $"\"{DownloadContentType}\"" : "null")}, " +
-               $"InstallSize: {(InstallSize is not null ? $"{InstallSize}" : "null")}, " +
-               $"ReleaseDate: {(ReleaseDate is not null ? $"\"{ReleaseDate}\"" : "null")}, " +
-               $"Kind: {(Kind is not null ? $"\"{Kind}\"" : "null")}, " +
-               $"Localizations: {(Localizations is not null ? $"[\"{string.Join("\", \"", Localizations)}\"]" : "null")}, " +
-               $"Provides: {(Provides is not null ? $"[{string.Join(", ", Provides)}]" : "null")}, " +
-               $"Install: {(Install is not null ? $"[{string.Join(", ", Install)}]" : "null")}, " +
-               $"Depends: {(Depends is not null ? $"[{string.Join(", ", Depends)}]" : "null")}, " +
-               $"Recommends: {(Recommends is not null ? $"[{string.Join(", ", Recommends)}]" : "null")}, " +
-               $"Suggests: {(Suggests is not null ? $"[{string.Join(", ", Suggests)}]" : "null")}, " +
-               $"Conflicts: {(Conflicts is not null ? $"[{string.Join(", ", Conflicts)}]" : "null")}, " +
-               $"ReplacedBy: {(ReplacedBy is not null ? ReplacedBy : "null")} }}";
+        return
+            $"{{ Id: \"{Id}\", Identifier: \"{Identifier}\", Version: \"{Version}\", SpecVersion: \"{SpecVersion}\", " +
+            $"KspVersion: {(KspVersion is not null ? $"\"{KspVersion}\"" : "null")}, " +
+            $"KspVersionMin: {(KspVersionMin is not null ? $"\"{KspVersionMin}\"" : "null")}, " +
+            $"KspVersionMax: {(KspVersionMax is not null ? $"\"{KspVersionMax}\"" : "null")}, KspVersionStrict: \"{KspVersionStrict}\", " +
+            $"License: [\"{string.Join("\", \"", License)}\"], Download: {(Download is not null ? $"[\"{string.Join("\", \"", Download)}\"]" : "null")}, " +
+            $"DownloadHash: {DownloadHash}, DownloadSize: {(DownloadSize is not null ? $"{DownloadSize}" : "null")}, " +
+            $"DownloadContentType: {(DownloadContentType is not null ? $"\"{DownloadContentType}\"" : "null")}, " +
+            $"InstallSize: {(InstallSize is not null ? $"{InstallSize}" : "null")}, " +
+            $"ReleaseDate: {(ReleaseDate is not null ? $"\"{ReleaseDate}\"" : "null")}, " +
+            $"Kind: {(Kind is not null ? $"\"{Kind}\"" : "null")}, " +
+            $"Localizations: {(Localizations is not null ? $"[\"{string.Join("\", \"", Localizations)}\"]" : "null")}, " +
+            $"Provides: {(Provides is not null ? $"[{string.Join(", ", Provides)}]" : "null")}, " +
+            $"Install: {(Install is not null ? $"[{string.Join(", ", Install)}]" : "null")}, " +
+            $"Depends: {(Depends is not null ? $"[{string.Join(", ", Depends)}]" : "null")}, " +
+            $"Recommends: {(Recommends is not null ? $"[{string.Join(", ", Recommends)}]" : "null")}, " +
+            $"Suggests: {(Suggests is not null ? $"[{string.Join(", ", Suggests)}]" : "null")}, " +
+            $"Conflicts: {(Conflicts is not null ? $"[{string.Join(", ", Conflicts)}]" : "null")}, " +
+            $"ReplacedBy: {(ReplacedBy is not null ? ReplacedBy : "null")} }}";
     }
 }
 
@@ -138,7 +142,7 @@ public class InstallDirective
     }
 }
 
-public class Relationship
+public class Relationship : IEquatable<Relationship>
 {
     [JsonPropertyName("name")] public string? Name { get; set; }
     [JsonPropertyName("version")] public string? Version { get; set; }
@@ -150,6 +154,7 @@ public class Relationship
 
     [JsonPropertyName("any_of")] public List<AnyOfEntry>? AnyOf { get; set; }
     [JsonPropertyName("comment")] public string? Comment { get; set; }
+    [JsonPropertyName("choice_help_text")] public string? ChoiceHelpText { get; set; }
 
     public override string ToString()
     {
@@ -159,11 +164,50 @@ public class Relationship
             $"MaxVersion: {(MaxVersion is not null ? $"\"{(MaxVersion is not null ? $"\"{MaxVersion}\"" : "null")}\"" : "null")}, " +
             $"SuppressRecommendations: {(SuppressRecommendations is not null ? $"{SuppressRecommendations}" : "null")}, " +
             $"Comment: {(Comment is not null ? $"\"{Comment}\"" : "null")}, " +
-            $"AnyOf: {(AnyOf is not null ? $"{AnyOf}" : "null")} }}";
+            $"AnyOf: {(AnyOf is not null ? $"[\"{string.Join("\", \"", AnyOf)}\"]" : "null")} }}";
+    }
+
+    public bool Equals(Relationship? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Name == other.Name && Version == other.Version && MinVersion == other.MinVersion &&
+               MaxVersion == other.MaxVersion && SuppressRecommendations == other.SuppressRecommendations &&
+               AnyOfEquals(AnyOf, other.AnyOf) && Comment == other.Comment &&
+               ChoiceHelpText == other.ChoiceHelpText;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((Relationship)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        var anyOfHash = 0;
+        if (AnyOf is not null)
+        {
+            foreach (var entry in AnyOf)
+            {
+                anyOfHash = HashCode.Combine(anyOfHash, entry);
+            }
+        }
+
+        return HashCode.Combine(Name, Version, MinVersion, MaxVersion, SuppressRecommendations, anyOfHash, Comment,
+            ChoiceHelpText);
+    }
+
+    private static bool AnyOfEquals(List<AnyOfEntry>? a, List<AnyOfEntry>? b)
+    {
+        if (a is null || b is null) return a is null && b is null;
+        return a.SequenceEqual(b);
     }
 }
 
-public class AnyOfEntry
+public class AnyOfEntry : IEquatable<AnyOfEntry>
 {
     [JsonPropertyName("name")] public required string Name { get; set; }
     [JsonPropertyName("version")] public string? Version { get; set; }
@@ -175,6 +219,27 @@ public class AnyOfEntry
         return $"{{ Name: \"{Name}\", Version: {(Version is not null ? $"\"{Version}\"" : "null")},  " +
                $"MinVersion: {(MinVersion is not null ? $"\"{MinVersion}\"" : "null")}, " +
                $"MaxVersion: {(MaxVersion is not null ? $"\"{MaxVersion}\"" : "null")} }}";
+    }
+
+    public bool Equals(AnyOfEntry? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Name == other.Name && Version == other.Version && MinVersion == other.MinVersion &&
+               MaxVersion == other.MaxVersion;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((AnyOfEntry)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Version, MinVersion, MaxVersion);
     }
 }
 

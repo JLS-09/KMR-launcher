@@ -26,14 +26,16 @@ public partial class InstallModsViewModel : ViewModelBase
     public event Action<InstallModsData>? Finished;
     public event Action? Cancelled;
 
-    public InstallModsViewModel(List<ModVersionDurum> mods, ModListService modListService, CompatibilityService compatibilityService)
+    public InstallModsViewModel(List<PlannedModVersion> mods, ModListService modListService,
+        DependencyService dependencyService, CompatibilityService compatibilityService)
     {
-        InstallModsData.RequestedModVersions = new ObservableCollection<ModVersionDurum>(mods);
+        InstallModsData.RequestedModVersions = new ObservableCollection<PlannedModVersion>(mods);
 
         _steps =
         [
-            new InstallModsSelectInstanceStepViewModel(InstallModsData, modListService, compatibilityService),
-            new InstallModsRecommendsStepViewModel(InstallModsData, modListService)
+            new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService),
+            new InstallModsRecommendsStepViewModel(InstallModsData, modListService, dependencyService),
+            new InstallModsModulesStepViewModel(InstallModsData, compatibilityService, dependencyService)
         ];
         SetStep(0, fromIndex: -1);
     }
@@ -68,10 +70,6 @@ public partial class InstallModsViewModel : ViewModelBase
     private void Next()
     {
         SetStep(_index + 1, _index);
-        if (CurrentStep.GetType() == typeof(InstallModsRecommendsStepViewModel))
-        {
-            CurrentStep.PopulateRecommendations();
-        }
     }
 
     [RelayCommand(CanExecute = nameof(CanGoBack))]

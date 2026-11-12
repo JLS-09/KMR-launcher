@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -5,10 +6,12 @@ namespace KMRLauncherMvvm.Services;
 
 public static class WineLauncher
 {
-    private const string LauncherDataDir = "/home/jls/.config/kmrLauncher/";
+    private static readonly string LauncherDataDir =
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
     private const string WinePath = "/usr/bin/wine";
 
-    public static Process Launch(string instanceId, string exePath, 
+    public static Process Launch(string instanceId, string exePath,
         string[]? gameArgs = null)
     {
         var prefixDir = Path.Combine(LauncherDataDir, "prefixes", instanceId);
@@ -30,9 +33,9 @@ public static class WineLauncher
         };
 
         psi.ArgumentList.Add(exePath);
-        
+
         if (gameArgs == null) return Process.Start(psi)!;
-        
+
         foreach (var arg in gameArgs) psi.ArgumentList.Add(arg);
 
         return Process.Start(psi)!;
