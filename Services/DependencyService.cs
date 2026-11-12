@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using KMRLauncherMvvm.Exceptions;
 using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.Services;
@@ -10,10 +12,14 @@ public class DependencyService(ModListService modListService, CompatibilityServi
     private sealed class DependencyResolutionState(Instance? instance)
     {
         public Instance? Instance { get; } = instance;
+
+        public GameVersionCriteria? Criteria { get; } =
+            instance is null ? null : GameVersionCriteria.FromInstance(instance);
         public List<PlannedModVersion> Resolved { get; } = [];
         public List<PlannedModVersion> ToRemove { get; } = [];
         public HashSet<Relationship> Choosable { get; } = [];
         public HashSet<string> IgnoredRecommendations { get; } = [];
+        public List<ResolutionProblem> Problems { get; } = [];
     }
 
     public InstallModsData ResolveDependencies(InstallModsData installModsData)
@@ -22,6 +28,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         installModsData.FinalModList = [];
         installModsData.RequestedRemoveModVersions = [];
         installModsData.ModsWithIgnoredRecommendations = [];
+        installModsData.Problems = [];
 
         var instance = installModsData.SelectedInstance;
         if (modListService.Mods is null || instance is null) return installModsData;
@@ -32,6 +39,17 @@ public class DependencyService(ModListService modListService, CompatibilityServi
                      r.Version.Id is null || !instance.Mods.Exists(m => m.Id == r.Version.Id)))
         {
             dependencyResolutionState.Resolved.Add(requested);
+
+            if (!CompatibilityService.IsCompatible(requested.Version, dependencyResolutionState.Criteria))
+            {
+                dependencyResolutionState.Problems.Add(new ResolutionProblem
+                {
+                    Mod = requested.Version.Identifier,
+                    Message = $"You picked {requested.Version.Identifier} {requested.Version.Version}, which doesn't " +
+                              $"support KSP {dependencyResolutionState.Criteria}. Pick another version, or add more " +
+                              $"compatible KSP versions to this instance."
+                });
+            }
         }
 
         foreach (var requested in dependencyResolutionState.Resolved.ToList()
@@ -46,6 +64,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         installModsData.ChoosableVersions = dependencyResolutionState.Choosable;
         installModsData.ModsWithIgnoredRecommendations =
             [.. dependencyResolutionState.IgnoredRecommendations];
+        installModsData.Problems = new ObservableCollection<ResolutionProblem>(dependencyResolutionState.Problems);
         return installModsData;
     }
 
@@ -54,6 +73,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         public required List<PlannedModVersion> FinalModList { get; init; }
         public required List<PlannedModVersion> ToRemove { get; init; }
         public required HashSet<Relationship> NewChoosables { get; init; }
+        public required List<ResolutionProblem> Problems { get; init; }
     }
 
     public AdditionalResolution ResolveAdditional(Instance? instance,
@@ -78,7 +98,8 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         {
             FinalModList = state.Resolved,
             ToRemove = state.ToRemove,
-            NewChoosables = state.Choosable
+            NewChoosables = state.Choosable,
+            Problems = state.Problems
         };
     }
 
@@ -86,10 +107,11 @@ public class DependencyService(ModListService modListService, CompatibilityServi
     {
         Version = wrapper.Version,
         IsUserRequested = wrapper.IsUserRequested,
+        IsVersionPickedByUser = wrapper.IsVersionPickedByUser,
         Relationship = wrapper.Relationship,
         RequiredBy = [.. wrapper.RequiredBy]
     };
-    
+
     public List<PlannedModVersion> GetDependencies(PlannedModVersion wrapper)
     {
         if (modListService.Mods is null) return [];
@@ -108,7 +130,27 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         var reason = wrapper.Version.Id ?? wrapper.Version.Identifier;
         foreach (var dependency in depends)
         {
-            ResolveDependency(dependency, reason, dependencyResolutionState);
+            try
+            {
+                ResolveDependency(dependency, reason, dependencyResolutionState);
+            }
+            catch (NoCompatibleVersionFoundException)
+            {
+                dependencyResolutionState.Problems.Add(
+                    NoVersionProblem(dependency, reason, dependencyResolutionState.Criteria));
+            }
+            catch (InvalidRelationshipException)
+            {
+                dependencyResolutionState.Problems.Add(InvalidMetadataProblem(dependency, reason));
+            }
+            catch (Exception e) when (e is NotSupportedException or ArgumentException)
+            {
+                dependencyResolutionState.Problems.Add(new ResolutionProblem
+                {
+                    Mod = reason, Relationship = dependency,
+                    Message = $"{reason} needs {dependency.Name}, which couldn't be resolved: {e.Message}"
+                });
+            }
         }
     }
 
@@ -122,15 +164,14 @@ public class DependencyService(ModListService modListService, CompatibilityServi
             return;
         }
 
+        if (dependency.Version is not null && (dependency.MinVersion is not null || dependency.MaxVersion is not null))
+            throw new InvalidRelationshipException(dependency);
+
         if (dependency is { Name: not null, SuppressRecommendations: true })
         {
             dependencyResolutionState.IgnoredRecommendations.Add(dependency.Name);
         }
 
-        if (dependency.Version is not null && (dependency.MinVersion is not null || dependency.MaxVersion is not null))
-            return;
-
-        // 1. Already scheduled for install in this run
         var scheduled = dependencyResolutionState.Resolved.FirstOrDefault(v => v.Version.Identifier == dependency.Name);
         if (scheduled is not null)
         {
@@ -140,33 +181,67 @@ public class DependencyService(ModListService modListService, CompatibilityServi
                 return;
             }
 
+            if (scheduled.IsUserRequested || scheduled.IsVersionPickedByUser)
+            {
+                dependencyResolutionState.Problems.Add(new ResolutionProblem
+                {
+                    Mod = reason, Relationship = dependency,
+                    Message = $"You picked {scheduled.Version.Identifier} {scheduled.Version.Version}, but {reason} " +
+                              $"needs {dependency.Name} {DescribeLimits(dependency)}."
+                });
+                return;
+            }
+
+            var combined = dependency;
+            if (scheduled.Relationship is { AnyOf: null } previous && previous.Name == dependency.Name)
+            {
+                try
+                {
+                    combined = compatibilityService.CombineRelationships(previous, dependency);
+                }
+                catch (NoCompatibleVersionFoundException)
+                {
+                    dependencyResolutionState.Problems.Add(new ResolutionProblem
+                    {
+                        Mod = reason, Relationship = dependency,
+                        Message = $"{string.Join(", ", scheduled.RequiredBy)} needs {dependency.Name} " +
+                                  $"{DescribeLimits(previous)}, but {reason} needs {DescribeLimits(dependency)}."
+                    });
+                    return;
+                }
+            }
+
+            var replacement = compatibilityService.GetCompatibleVersionFromRelation(combined,
+                dependencyResolutionState.Criteria);
             dependencyResolutionState.Resolved.Remove(scheduled);
-            AddDependency(dependency, [.. scheduled.RequiredBy, reason], dependencyResolutionState);
+            AddDependency(combined, replacement, [.. scheduled.RequiredBy, reason], dependencyResolutionState);
             return;
         }
 
-        // 2. Already installed in the instance
         var installed = dependencyResolutionState.Instance?.Mods.FirstOrDefault(v => v.Identifier == dependency.Name);
         if (installed is not null)
         {
             if (compatibilityService.IsVersionCompatibleWithRelation(installed, dependency)) return;
 
-            var existing = new PlannedModVersion { Version = installed };
+            var replacement = compatibilityService.GetCompatibleVersionFromRelation(dependency,
+                dependencyResolutionState.Criteria);
             if (!dependencyResolutionState.ToRemove.Exists(w => w.Version.Id == installed.Id))
-                dependencyResolutionState.ToRemove.Add(existing);
-            AddDependency(dependency, [reason], dependencyResolutionState);
+                dependencyResolutionState.ToRemove.Add(new PlannedModVersion { Version = installed });
+            AddDependency(dependency, replacement, [reason], dependencyResolutionState);
             return;
         }
 
-        // 3. Not present anywhere yet
-        AddDependency(dependency, [reason], dependencyResolutionState);
+        var version = compatibilityService.GetCompatibleVersionFromRelation(dependency,
+            dependencyResolutionState.Criteria);
+        AddDependency(dependency, version, [reason], dependencyResolutionState);
     }
 
-    private void AddDependency(Relationship dependency, IEnumerable<string> reasons, DependencyResolutionState state)
+    private void AddDependency(Relationship dependency, ModVersion version, IEnumerable<string> reasons,
+        DependencyResolutionState state)
     {
         var wrapper = new PlannedModVersion
         {
-            Version = compatibilityService.GetCompatibleVersionFromRelation(dependency),
+            Version = version,
             Relationship = dependency
         };
         wrapper.RequiredBy = [.. reasons];
@@ -182,6 +257,42 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         state.Resolved.Add(wrapper);
         ResolveRecursive(wrapper, state);
     }
+
+    private ResolutionProblem NoVersionProblem(Relationship dependency, string reason, GameVersionCriteria? criteria)
+    {
+        var withinLimits = compatibilityService.GetVersionsWithinLimits(dependency.Name ?? "", dependency.Version,
+            dependency.MinVersion, dependency.MaxVersion, null);
+
+        var message = withinLimits.Count > 0 && criteria is not null
+            ? $"{reason} needs {dependency.Name}{LimitsSuffix(dependency)}, but no version of it supports KSP " +
+              $"{criteria}. Add more compatible KSP versions to this instance?"
+            : $"{reason} needs {dependency.Name} {DescribeLimits(dependency)}, but no such version exists.";
+
+        return new ResolutionProblem { Mod = reason, Relationship = dependency, Message = message };
+    }
+
+    private static ResolutionProblem InvalidMetadataProblem(Relationship dependency, string reason) => new()
+    {
+        Mod = reason,
+        Relationship = dependency,
+        Message = $"{reason} has invalid metadata for {dependency.Name}: an exact version can't be combined with " +
+                  $"min_version or max_version."
+    };
+
+    public static string DescribeLimits(Relationship relationship) =>
+        (relationship.Version, relationship.MinVersion, relationship.MaxVersion) switch
+        {
+            ({ } exact, _, _) => $"version {exact}",
+            (null, { } min, { } max) => $"version {min} to {max}",
+            (null, { } min, null) => $"version {min} or newer",
+            (null, null, { } max) => $"version {max} or older",
+            _ => "(any version)"
+        };
+
+    private static string LimitsSuffix(Relationship relationship) =>
+        relationship.Version is null && relationship.MinVersion is null && relationship.MaxVersion is null
+            ? ""
+            : $" {DescribeLimits(relationship)}";
 
     private bool ModExists(string? name) => modListService.Mods?.Any(m => m.Id == name) == true;
 }

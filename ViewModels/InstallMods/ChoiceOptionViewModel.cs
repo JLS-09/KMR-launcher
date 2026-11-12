@@ -40,6 +40,7 @@ public partial class ChoiceOptionViewModel : ObservableObject
     public PlannedModVersion ToPlanned() => new()
     {
         Version = _selectedVersion,
+        IsVersionPickedByUser = _selectedVersion != _option.Version,
         Relationship = _option.Relationship,
         RequiredBy = [.. _option.RequiredBy]
     };

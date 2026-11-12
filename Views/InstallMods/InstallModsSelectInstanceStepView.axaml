@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
+             xmlns:models="clr-namespace:KMRLauncherMvvm.Models"
              x:DataType="vm:InstallModsSelectInstanceStepViewModel"
              mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
              Background="#1F1F20"
@@ -52,6 +53,21 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            <!-- Problems the resolver couldn't solve; they block Next. Bounded height, so the ScrollViewer is fine. -->
+            <Border IsVisible="{Binding HasProblems}" Margin="0 8 0 0" Padding="12 8"
+                    Background="{DynamicResource SideBarBackground}"
+                    BorderBrush="{DynamicResource PrimaryRed}" BorderThickness="2 0 0 0">
+                <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding InstallModsData.Problems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:ResolutionProblem">
+                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Margin="0 2"
+                                           Foreground="{DynamicResource PrimaryRed}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
         </StackPanel>
         <Grid Grid.Row="2" RowDefinitions="Auto *" RowSpacing="8">
             <Grid Grid.Row="0" ColumnDefinitions="50 *" ColumnSpacing="24">
