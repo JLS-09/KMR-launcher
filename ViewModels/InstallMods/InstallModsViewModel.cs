@@ -34,7 +34,7 @@ public partial class InstallModsViewModel : ViewModelBase
         _steps =
         [
             new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService),
-            new InstallModsRecommendsStepViewModel(InstallModsData, modListService),
+            new InstallModsRecommendsStepViewModel(InstallModsData, modListService, dependencyService),
             new InstallModsModulesStepViewModel(InstallModsData, compatibilityService)
         ];
         SetStep(0, fromIndex: -1);

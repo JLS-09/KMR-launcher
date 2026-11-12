@@ -3,13 +3,48 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
+             xmlns:models="clr-namespace:KMRLauncherMvvm.Models"
              x:DataType="vm:InstallModsModulesStepViewModel"
              mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
              Background="#1F1F20"
              Foreground="{DynamicResource PrimaryText}"
              x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsModulesStepView">
 
-    <Grid Margin="32 32 32 0" RowDefinitions="Auto Auto Auto *">
+    <UserControl.Styles>
+        <!-- Outer list: the cards themselves aren't selectable, so hide the selection/hover look -->
+        <Style Selector="ListBox.choice-groups">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.choice-groups > ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0 0 0 16" />
+        </Style>
+        <Style Selector="ListBox.choice-groups > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.choice-groups > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <!-- Inner list: one row per option, selected row gets the green bar like the recommendations step -->
+        <Style Selector="ListBox.choice-options">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.choice-options > ListBoxItem">
+            <Setter Property="Padding" Value="8 4" />
+            <Setter Property="BorderThickness" Value="2 0 0 0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="ListBox.choice-options > ListBoxItem:selected">
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
+        </Style>
+        <Style Selector="ListBox.choice-options > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SideBarButtonActiveBackground}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Margin="32 32 32 0" RowDefinitions="Auto Auto *">
         <StackPanel Grid.Row="0" Spacing="4">
             <Grid ColumnDefinitions="* * * *" ColumnSpacing="8">
                 <Rectangle Grid.Column="0" Height="4" Fill="{DynamicResource PrimaryRed}" />
@@ -18,7 +53,55 @@
                 <Rectangle Grid.Column="3" Height="4" Fill="{DynamicResource PrimaryBackground}" />
             </Grid>
         </StackPanel>
-        
+
+        <TextBlock Grid.Row="1" Margin="0 32 0 8" Text="CHOOSE BETWEEN MODS" LetterSpacing="1"
+                   Foreground="{DynamicResource SecondaryText}"
+                   FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
+
+        <TextBlock Grid.Row="2" Text="Nothing to choose, every dependency could be resolved automatically."
+                   Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap"
+                   IsVisible="{Binding !HasChoices}" />
+
+        <!-- ListBox scrolls itself; no StackPanel inside a ScrollViewer -->
+        <ListBox Grid.Row="2" Classes="choice-groups" ItemsSource="{Binding Choices}"
+                 IsVisible="{Binding HasChoices}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:ChoiceGroupViewModel">
+                    <Border Background="{DynamicResource SideBarBackground}" Padding="16">
+                        <Grid RowDefinitions="Auto Auto Auto Auto Auto" RowSpacing="4">
+                            <TextBlock Grid.Row="0" Text="{Binding Title}" FontWeight="Bold" TextWrapping="Wrap" />
+                            <TextBlock Grid.Row="1" Text="{Binding RequiredByText}" FontSize="12"
+                                       Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap" />
+                            <TextBlock Grid.Row="2" Text="{Binding HelpText}" FontStyle="Italic"
+                                       TextWrapping="Wrap" Margin="0 4 0 0"
+                                       IsVisible="{Binding HasHelpText}" />
+                            <TextBlock Grid.Row="3" Text="{Binding ErrorText}" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource PrimaryRed}" Margin="0 4 0 0"
+                                       IsVisible="{Binding IsUnsatisfiable}" />
+                            <ListBox Grid.Row="4" Classes="choice-options" Margin="0 8 0 0"
+                                     ItemsSource="{Binding Options}"
+                                     SelectedItem="{Binding SelectedOption}"
+                                     SelectionMode="Single"
+                                     IsVisible="{Binding !IsUnsatisfiable}"
+                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:ModVersionWrapper">
+                                        <Grid ColumnDefinitions="* Auto" ColumnSpacing="16">
+                                            <TextBlock Grid.Column="0" Text="{Binding Version.Identifier}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Version.Version}"
+                                                       Foreground="{DynamicResource SecondaryText}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 
 </UserControl>

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using KMRLauncherMvvm.Exceptions;
@@ -13,19 +15,45 @@ public partial class InstallModsModulesStepViewModel(
     CompatibilityService compatibilityService)
     : InstallModsStepViewModel(installModsData)
 {
-    [ObservableProperty] private List<List<ModVersionWrapper>> _choices = [];
+    private sealed class RawChoice(Relationship relationship, List<string> requiredBy)
+    {
+        public Relationship Relationship { get; } = relationship;
+        public List<string> RequiredBy { get; } = requiredBy;
+        public List<ModVersionWrapper> Options { get; } = [];
+    }
+
+    private List<RawChoice> _rawChoices = [];
+
+    private List<ModVersionWrapper> _baseFinalModList = [];
+
+    [ObservableProperty] private ObservableCollection<ChoiceGroupViewModel> _choices = [];
+    [ObservableProperty] private bool _hasChoices;
+    [ObservableProperty] private bool _hasUnsatisfiableChoices;
+    [ObservableProperty] private bool _allChoicesMade;
+
+    public override bool CanGoNext => AllChoicesMade;
+
+    partial void OnAllChoicesMadeChanged(bool value) => OnPropertyChanged(nameof(CanGoNext));
 
     public override void OnEntering(InstallModsStepViewModel? previous)
     {
         base.OnEntering(previous);
+
+        foreach (var group in Choices)
+            group.PropertyChanged -= OnChoiceGroupChanged;
+
         ProcessChoosables();
     }
 
     private void ProcessChoosables()
     {
+        _rawChoices = [];
+
         EliminateDuplicates();
         foreach (var choosableVersion in InstallModsData.ChoosableVersions)
         {
+            var choice = new RawChoice(choosableVersion, FindRequiredBy(choosableVersion));
+
             if (choosableVersion.AnyOf is not null && choosableVersion.AnyOf.Count > 0)
             {
                 List<ModVersion> anyOfVersions = [];
@@ -52,19 +80,17 @@ public partial class InstallModsModulesStepViewModel(
                     }
                 }
 
-                anyOfVersions = [.. anyOfVersions.DistinctBy(v => v.Identifier)];
-
-                Choices.Add([
-                    .. anyOfVersions.Select(v => new ModVersionWrapper { Version = v, Relationship = choosableVersion })
-                ]);
+                choice.Options.AddRange(anyOfVersions
+                    .DistinctBy(v => v.Identifier)
+                    .Select(v => CreateOption(v, choice)));
             }
             else if (choosableVersion.Name != null)
             {
-                Choices.Add([
-                    .. compatibilityService.GetVersionsFromModule(choosableVersion.Name).Select(v =>
-                        new ModVersionWrapper { Version = v, Relationship = choosableVersion })
-                ]);
+                choice.Options.AddRange(compatibilityService.GetVersionsFromModule(choosableVersion.Name)
+                    .Select(v => CreateOption(v, choice)));
             }
+
+            _rawChoices.Add(choice);
         }
 
         EliminateAlreadyInstalled();
@@ -72,15 +98,63 @@ public partial class InstallModsModulesStepViewModel(
         EliminateCoveredChoices();
         EliminateSingleChoices();
 
-        foreach (var choice in Choices)
-        {
-            foreach (var option in choice)
-            {
-                Console.WriteLine(option.Version);
-            }
+        _baseFinalModList = [.. InstallModsData.FinalModList];
 
-            Console.WriteLine();
+        var groups = _rawChoices
+            .Select(c => new ChoiceGroupViewModel(c.Relationship, c.Options, c.RequiredBy))
+            .ToList();
+
+        foreach (var group in groups)
+            group.PropertyChanged += OnChoiceGroupChanged;
+
+        Choices = new ObservableCollection<ChoiceGroupViewModel>(groups);
+        HasChoices = Choices.Count > 0;
+        HasUnsatisfiableChoices = Choices.Any(c => c.IsUnsatisfiable);
+        UpdateAllChoicesMade();
+    }
+
+    private static ModVersionWrapper CreateOption(ModVersion version, RawChoice choice) => new()
+    {
+        Version = version,
+        Relationship = choice.Relationship,
+        ModsForReason = [.. choice.RequiredBy]
+    };
+
+    private List<string> FindRequiredBy(Relationship relationship)
+    {
+        return InstallModsData.FinalModList
+            .Where(w => w.Version.Depends?.Any(d =>
+                d.Equals(relationship) ||
+                (relationship.AnyOf is null && d.AnyOf is null && d.Name == relationship.Name)) == true)
+            .Select(w => w.Version.Id ?? w.Version.Identifier)
+            .Distinct()
+            .ToList();
+    }
+
+    private void OnChoiceGroupChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ChoiceGroupViewModel.SelectedOption)) return;
+
+        ApplySelections();
+        UpdateAllChoicesMade();
+    }
+    
+    private void ApplySelections()
+    {
+        var finalModList = new ObservableCollection<ModVersionWrapper>(_baseFinalModList);
+
+        foreach (var option in Choices.Select(c => c.SelectedOption).OfType<ModVersionWrapper>())
+        {
+            if (finalModList.Any(w => w.Version.Identifier == option.Version.Identifier)) continue;
+            finalModList.Add(option);
         }
+
+        InstallModsData.FinalModList = finalModList;
+    }
+
+    private void UpdateAllChoicesMade()
+    {
+        AllChoicesMade = Choices.All(c => !c.IsUnsatisfiable && c.SelectedOption is not null);
     }
 
     private void EliminateDuplicates()
@@ -115,20 +189,20 @@ public partial class InstallModsModulesStepViewModel(
         var installed = InstallModsData.SelectedInstance?.Mods;
         if (installed is null) return;
 
-        foreach (var choice in Choices.ToList())
+        foreach (var choice in _rawChoices.ToList())
         {
-            if (choice.Any(option => installed.Any(m => m.Identifier == option.Version.Identifier)))
-                Choices.Remove(choice);
+            if (choice.Options.Any(option => installed.Any(m => m.Identifier == option.Version.Identifier)))
+                _rawChoices.Remove(choice);
         }
     }
 
     private void EliminateAlreadyQueued()
     {
-        foreach (var choice in Choices.ToList())
+        foreach (var choice in _rawChoices.ToList())
         {
             var resolved = false;
 
-            foreach (var option in choice.ToList())
+            foreach (var option in choice.Options.ToList())
             {
                 var existing = InstallModsData.FinalModList
                     .FirstOrDefault(m => m.Version.Identifier == option.Version.Identifier);
@@ -173,21 +247,21 @@ public partial class InstallModsModulesStepViewModel(
                 }
                 catch (NoCompatibleVersionFoundException)
                 {
-                    choice.Remove(option);
+                    choice.Options.Remove(option);
                 }
             }
 
-            if (resolved) Choices.Remove(choice);
+            if (resolved) _rawChoices.Remove(choice);
         }
     }
 
     private void EliminateSingleChoices()
     {
-        foreach (var choice in Choices.ToList())
+        foreach (var choice in _rawChoices.ToList())
         {
-            if (choice.Count != 1) continue;
+            if (choice.Options.Count != 1) continue;
 
-            var option = choice[0];
+            var option = choice.Options[0];
 
             var alreadyQueued = InstallModsData.FinalModList
                 .Any(m => m.Version.Identifier == option.Version.Identifier);
@@ -195,22 +269,24 @@ public partial class InstallModsModulesStepViewModel(
             if (!alreadyQueued)
                 InstallModsData.FinalModList.Add(option);
 
-            Choices.Remove(choice);
+            _rawChoices.Remove(choice);
         }
     }
 
     private void EliminateCoveredChoices()
     {
-        foreach (var choice in Choices.ToList())
+        foreach (var choice in _rawChoices.ToList())
         {
-            var module = choice.FirstOrDefault()?.Relationship?.Name;
+            if (choice.Options.Count == 0) continue;
+
+            var module = choice.Relationship.Name;
             if (module is null) continue;
 
-            var coveredByOtherChoice = Choices.Any(other =>
-                other != choice && other.Count > 0 &&
-                other.All(option => DependsOnProviderOf(option.Version, module)));
+            var coveredByOtherChoice = _rawChoices.Any(other =>
+                other != choice && other.Options.Count > 0 &&
+                other.Options.All(option => DependsOnProviderOf(option.Version, module)));
 
-            if (coveredByOtherChoice) Choices.Remove(choice);
+            if (coveredByOtherChoice) _rawChoices.Remove(choice);
         }
     }
 

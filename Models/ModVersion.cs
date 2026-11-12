@@ -154,6 +154,7 @@ public class Relationship : IEquatable<Relationship>
 
     [JsonPropertyName("any_of")] public List<AnyOfEntry>? AnyOf { get; set; }
     [JsonPropertyName("comment")] public string? Comment { get; set; }
+    [JsonPropertyName("choice_help_text")] public string? ChoiceHelpText { get; set; }
 
     public override string ToString()
     {
@@ -172,7 +173,8 @@ public class Relationship : IEquatable<Relationship>
         if (ReferenceEquals(this, other)) return true;
         return Name == other.Name && Version == other.Version && MinVersion == other.MinVersion &&
                MaxVersion == other.MaxVersion && SuppressRecommendations == other.SuppressRecommendations &&
-               AnyOfEquals(AnyOf, other.AnyOf) && Comment == other.Comment;
+               AnyOfEquals(AnyOf, other.AnyOf) && Comment == other.Comment &&
+               ChoiceHelpText == other.ChoiceHelpText;
     }
 
     public override bool Equals(object? obj)
@@ -194,7 +196,8 @@ public class Relationship : IEquatable<Relationship>
             }
         }
 
-        return HashCode.Combine(Name, Version, MinVersion, MaxVersion, SuppressRecommendations, anyOfHash, Comment);
+        return HashCode.Combine(Name, Version, MinVersion, MaxVersion, SuppressRecommendations, anyOfHash, Comment,
+            ChoiceHelpText);
     }
 
     private static bool AnyOfEquals(List<AnyOfEntry>? a, List<AnyOfEntry>? b)

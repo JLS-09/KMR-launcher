@@ -153,6 +153,7 @@ public class CompatibilityService(ModListService modListService)
                 ? true
                 : null,
             Comment = CombineComments(first.Comment, second.Comment),
+            ChoiceHelpText = first.ChoiceHelpText ?? second.ChoiceHelpText,
             MinVersion = PickNewest(mod, first.MinVersion, second.MinVersion),
             MaxVersion = PickOldest(mod, first.MaxVersion, second.MaxVersion)
         };
@@ -193,6 +194,7 @@ public class CompatibilityService(ModListService modListService)
                 ? true
                 : null,
             Comment = CombineComments(first.Comment, second.Comment),
+            ChoiceHelpText = first.ChoiceHelpText ?? second.ChoiceHelpText,
             Version = PickSameVersion(first, first.Version, second.Version),
             MinVersion = PickSameVersion(first, first.MinVersion, second.MinVersion),
             MaxVersion = PickSameVersion(first, first.MaxVersion, second.MaxVersion)
