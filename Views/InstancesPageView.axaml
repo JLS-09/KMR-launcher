@@ -86,7 +86,7 @@
                                     </StackPanel>
                                 </Border>
                             </Grid>
-                            <Grid ColumnDefinitions="7* 2* *" ColumnSpacing="16">
+                            <Grid ColumnDefinitions="7* 2* Auto *" ColumnSpacing="16">
                                 <Button Classes="Primary" Grid.Column="0" HorizontalAlignment="Stretch" CornerRadius="4"
                                         Padding="0 16" Command="{Binding PrimaryInstance.LaunchInstanceWithWine}">
                                     <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"
@@ -101,7 +101,13 @@
                                         HorizontalAlignment="Stretch">
                                     MANAGE
                                 </Button>
-                                <Button Grid.Column="2" Classes="Tertiary" Command="{Binding PrimaryInstance.DeleteInstance}">
+                                <Button Grid.Column="2" Classes="Secondary" Padding="16"
+                                        ToolTip.Tip="Compatible KSP versions"
+                                        Command="{Binding OpenCompatibleVersionsWindowCommand}"
+                                        CommandParameter="{Binding PrimaryInstance}">
+                                    <Label Classes="icon" FontWeight="Regular" Content="&#xE270;" FontSize="28" />
+                                </Button>
+                                <Button Grid.Column="3" Classes="Tertiary" Command="{Binding PrimaryInstance.DeleteInstance}">
                                     <Label Classes="icon" FontWeight="Regular" Content="&#xE4A6;" FontSize="28" />
                                 </Button>
                             </Grid>
@@ -154,7 +160,10 @@
                                             Command="{Binding SecondInstance.LaunchInstanceWithWine}">
                                         LAUNCH
                                     </Button>
-                                    <Button Grid.Column="1" Classes="Secondary" Padding="6 6">
+                                    <Button Grid.Column="1" Classes="Secondary" Padding="6 6"
+                                            ToolTip.Tip="Compatible KSP versions"
+                                            Command="{Binding OpenCompatibleVersionsWindowCommand}"
+                                            CommandParameter="{Binding SecondInstance}">
                                         <Label Classes="icon" FontWeight="Regular" Content="&#xE270;" FontSize="24"
                                                Foreground="#A1A1AA" />
                                     </Button>
@@ -242,7 +251,10 @@
                                                         Command="{Binding LaunchInstanceWithWine}">
                                                     LAUNCH
                                                 </Button>
-                                                <Button Grid.Column="1" Classes="Secondary" Padding="6 6">
+                                                <Button Grid.Column="1" Classes="Secondary" Padding="6 6"
+                                                        ToolTip.Tip="Compatible KSP versions"
+                                                        Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).OpenCompatibleVersionsWindowCommand}"
+                                                        CommandParameter="{Binding}">
                                                     <Label Classes="icon" FontWeight="Regular" Content="&#xE270;" FontSize="24"
                                                            Foreground="#A1A1AA" />
                                                 </Button>

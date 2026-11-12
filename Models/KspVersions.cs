@@ -4,6 +4,20 @@ namespace KMRLauncherMvvm.Models;
 
 public static class KspVersions
 {
+    public static string ToFullVersion(string version)
+    {
+        var parts = version.Split('.');
+        return parts.Length == 2 ? $"{version}.0" : version;
+    }
+
+    public static string ToMinorPrefix(string version)
+    {
+        var parts = version.Split('.');
+        return parts.Length >= 2 ? $"{parts[0]}.{parts[1]}" : version;
+    }
+
+    public static bool IsMinorPrefix(string version) => version.Split('.').Length == 2;
+    
     public static string? GetKspVersionFromBuildId(string buildId)
     {
         var normalizedId = buildId.Trim().TrimStart('0');
