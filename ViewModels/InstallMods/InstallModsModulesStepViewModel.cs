@@ -94,7 +94,7 @@ public partial class InstallModsModulesStepViewModel(
                     removes.Add(remove);
 
                 var newChoosables = result.NewChoosables
-                    .Where(r => !desired.Exists(g => g.Relationship.Equals(r)))
+                    .Where(r => !desired.Exists(g => g.Relationship.Equals(r) || IsSameVirtualName(g.Relationship, r)))
                     .ToHashSet();
 
                 var rawChoices = BuildRawChoices(newChoosables, queued, problems, out var autoAdded);
@@ -247,10 +247,10 @@ public partial class InstallModsModulesStepViewModel(
             choices.Add(choice);
         }
 
-        EliminateAlreadyInstalled(choices);
-        EliminateAlreadyQueued(choices, queued);
+        var swapped = EliminateAlreadyQueued(choices, queued);
         EliminateCoveredChoices(choices);
         autoAdded = EliminateSingleChoices(choices, queued);
+        autoAdded.AddRange(swapped);
 
         return choices;
     }
@@ -335,8 +335,12 @@ public partial class InstallModsModulesStepViewModel(
              mod.Provides?.Contains(name) == true);
     }
 
-    private void EliminateAlreadyQueued(List<RawChoice> choices, List<PlannedModVersion> queued)
+    private static bool IsSameVirtualName(Relationship a, Relationship b) =>
+        a.AnyOf is null && b.AnyOf is null && a.Name is not null && a.Name == b.Name;
+    
+    private List<PlannedModVersion> EliminateAlreadyQueued(List<RawChoice> choices, List<PlannedModVersion> queued)
     {
+        List<PlannedModVersion> swapped = [];
         foreach (var choice in choices.ToList())
         {
             var resolved = false;
@@ -404,6 +408,7 @@ public partial class InstallModsModulesStepViewModel(
 
             if (resolved) choices.Remove(choice);
         }
+        return swapped;
     }
 
     private static List<PlannedModVersion> EliminateSingleChoices(List<RawChoice> choices,

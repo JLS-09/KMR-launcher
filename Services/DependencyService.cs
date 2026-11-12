@@ -235,6 +235,17 @@ public class DependencyService(ModListService modListService, CompatibilityServi
             return;
         }
 
+        var provider = dependencyResolutionState.Resolved
+            .FirstOrDefault(v => v.Version.Provides?.Contains(dependency.Name!) == true);
+        if (provider is not null)
+        {
+            provider.RequiredBy.Add(reason);
+            return;
+        }
+
+        if (dependencyResolutionState.Instance?.Mods.Any(m => m.Provides?.Contains(dependency.Name!) == true) == true)
+            return;
+        
         var version = compatibilityService.GetCompatibleVersionFromRelation(dependency,
             dependencyResolutionState.Criteria);
         AddDependency(dependency, version, [reason], dependencyResolutionState);

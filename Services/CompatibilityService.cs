@@ -218,13 +218,7 @@ public class CompatibilityService(ModListService modListService)
         if (HasInvalidVersionFields(second)) throw new InvalidRelationshipException(second);
 
         var mod = modListService.Mods?.FirstOrDefault(m => m.Id == first.Name);
-        if (mod is null)
-        {
-            if (first.Name is not null && GetVersionsFromModule(first.Name).Count > 0)
-                return CombineModuleRelationships(first, second);
-
-            throw new NotSupportedException("Relationship should be handled in a different way.");
-        }
+        if (mod is null) return CombineModuleRelationships(first, second);
 
         var combined = new Relationship
         {
@@ -271,21 +265,8 @@ public class CompatibilityService(ModListService modListService)
                 ? true
                 : null,
             Comment = CombineComments(first.Comment, second.Comment),
-            ChoiceHelpText = first.ChoiceHelpText ?? second.ChoiceHelpText,
-            Version = PickSameVersion(first, first.Version, second.Version),
-            MinVersion = PickSameVersion(first, first.MinVersion, second.MinVersion),
-            MaxVersion = PickSameVersion(first, first.MaxVersion, second.MaxVersion)
+            ChoiceHelpText = first.ChoiceHelpText ?? second.ChoiceHelpText
         };
-    }
-
-    private static string? PickSameVersion(Relationship relationship, string? a, string? b)
-    {
-        if (a is null) return b;
-        if (b is null) return a;
-        if (a == b) return a;
-
-        throw new NotSupportedException(
-            $"Can't combine different version rules for module {relationship.Name}.");
     }
 
     private static string? PickNewest(string? a, string? b)
