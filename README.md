@@ -1,50 +1,76 @@
 # KMR-launcher
 
-## Disclaimer
+A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalonia. It manages separate KSP instances and installs mods from the official [CKAN](https://github.com/KSP-CKAN/CKAN) metadata, following the [CKAN spec](https://github.com/KSP-CKAN/CKAN/blob/master/Spec.md).
 
-This project is under heavy development, a lot of the features are not yet implemented. This project is currently only being developed by me (JLS-09) on Linux, so the chances that this project currently works on Windows or macOS are very slim. Official support for Windows and macOS will come at a later date.
+> [!WARNING]
+> **Early development.** KMR-launcher is developed by one person (JLS-09) on Linux. Mods can't be installed yet, and Windows and macOS are not supported for now. See the [roadmap](#roadmap) below.
 
-## Implemented features
+## Features
 
-- Adding zips of ksp to the launcher for automatic instance creation (with version detection)
-- Creating new instances
-- Deleting instances
-- Playing instance (only on Linux through wine)
-- Instance stats tracking (mod count, playtime, last played and instance size)
-- Browsing mods
-- searching mods on name and authors
-- Full caching of mod list
-- Refreshing mod list on demand
-- Multi mod select in mod list
-- Direct version selection in mod list
+### Instances
+- Add a KSP zip and have an instance created automatically, with the KSP version detected from the build
+- Create and delete instances
+- Launch an instance through Wine (Linux only)
+- Instance stats: mod count, playtime, last played and install size
 
-## Planned features (In no particular order)
+### Mods
+- Mod list built from [CKAN-meta](https://github.com/KSP-CKAN/CKAN-meta), cloned and cached locally with git
+- Full local caching of the mod list, with a refresh on demand
+- Search by mod name and author
+- Select several mods at once, and choose a version per mod directly in the list
+- Install wizard (in progress):
+  - choose the target instance
+  - automatic dependency resolution
+  - recommendations, suggestions and supported mods
+  - choosing between alternatives (`any_of` and virtual modules)
 
-- No internet handling (git request step gets skipped and modlist straight from cache)
-- Sorting mod list
-- Apply changes button on mod list
-- Entire mod installation pipeline
-- Currently playing instance card above settings
-- Manage instances (with installing, removing and updating mods per instance)
-- Export/import instances (with ckan support)
-- Integrated back-up and restore system
-- Ability to add other repos
+## Roadmap
 
-## Personal notes
+The full plan is split into milestones:
 
-- check exception catching in InstallModsSelectInstanceStepViewModel for the compatibilityService
-- make SuppressRecommendations flag in Relationship actually do its thing
-- skip recommendations screen when there are no recommendations/suggestions/supported
-- conflict and compatible version checking on everything!!!
-- Add version selection in recommendations
+| Milestone | Goal | Status |
+|---|---|---|
+| **M1** | Choose between alternative dependencies (`any_of` / virtual modules) in the install wizard | 🚧 In progress |
+| **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | ⏳ Planned |
+| **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | ⏳ Planned |
+| **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | ⏳ Planned |
+| **M5** | Instance management:<br>• remove and update mods<br>• `replaced_by`<br>• currently-playing card<br>• create an instance from inside the wizard<br>• import an existing KSP install (with CKAN registry)<br>• offline mode | ⏳ Planned |
+| **M6** | Extras:<br>• sorting the mod list<br>• instance export/import (`.ckan` metapackage)<br>• backup & restore<br>• extra metadata repos<br>• Windows and macOS support | ⏳ Planned |
 
-- anyOf dependency gets handled like a provides module, not in the dependency resolution but after recommendations, suggestions,... Where the user is able to choose
-    - gets ignored when any one of the mods is installed
-    - gets skipped in first step when there is only one option
-- check compatibility between versions -> conflict checking
-- also check compatibility with ksp version
-- implement supports list
-- handling of user wanting to install mods without instance
-- handling of user wanting to create an instance without version added
-- add already existing instance to instances + ckan support
-- no internet handling
+## Building from source
+
+**Requirements**
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- Linux, with Wine at `/usr/bin/wine` (needed to launch instances)
+- A KSP 1 zip to create an instance from
+
+```bash
+git clone https://github.com/JLS-09/KMR-launcher.git
+cd KMR-launcher
+dotnet run
+```
+
+On first start, the launcher clones CKAN-meta. This can take a few minutes.
+
+## Where data is stored
+
+Everything lives under your application-data folder, which is `~/.config/kmrLauncher/` on Linux:
+
+| Path | Contents |
+|---|---|
+| `settings.json` | Instances and app settings |
+| `mods.json` | Cached, parsed mod list |
+| `cache/ckan-meta/` | Local clone of CKAN-meta |
+| `prefixes/<instance>/` | Wine prefix for each instance |
+
+## Built with
+
+- [Avalonia UI](https://avaloniaui.net/) 12 for the user interface
+- [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/) for the MVVM structure
+- [LibGit2Sharp](https://github.com/libgit2/libgit2sharp) to clone and update CKAN-meta
+- [Humanizer](https://github.com/Humanizr/Humanizer) to format times and sizes
+- `Microsoft.Extensions.DependencyInjection` for dependency injection
+
+## Acknowledgements
+
+Mod metadata comes from the [CKAN](https://github.com/KSP-CKAN) project and its contributors. KMR-launcher is not affiliated with CKAN or with Squad / Private Division.
