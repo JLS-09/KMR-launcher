@@ -9,7 +9,7 @@ namespace KMRLauncherMvvm.ViewModels.InstallMods;
 public partial class ChoiceGroupViewModel : ObservableObject
 {
     public Relationship Relationship { get; }
-    public ObservableCollection<ModVersionWrapper> Options { get; }
+    public ObservableCollection<PlannedModVersion> Options { get; }
 
     public string Title { get; }
     public string RequiredByText { get; }
@@ -19,13 +19,13 @@ public partial class ChoiceGroupViewModel : ObservableObject
     public bool IsUnsatisfiable { get; }
     public string ErrorText { get; }
 
-    [ObservableProperty] private ModVersionWrapper? _selectedOption;
+    [ObservableProperty] private PlannedModVersion? _selectedOption;
 
-    public ChoiceGroupViewModel(Relationship relationship, IEnumerable<ModVersionWrapper> options,
+    public ChoiceGroupViewModel(Relationship relationship, IEnumerable<PlannedModVersion> options,
         IReadOnlyCollection<string> requiredBy)
     {
         Relationship = relationship;
-        Options = new ObservableCollection<ModVersionWrapper>(options);
+        Options = new ObservableCollection<PlannedModVersion>(options);
 
         var wanted = relationship.AnyOf is { Count: > 0 } anyOf
             ? $"one of {string.Join(", ", anyOf.Select(a => a.Name))}"

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace KMRLauncherMvvm.Models;
 
-public class ModVersionWrapper
+public class PlannedModVersion
 {
     public required ModVersion Version { get; set; }
     public HashSet<string> ModsForReason = [];

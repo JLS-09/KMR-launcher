@@ -87,7 +87,7 @@
                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="models:ModVersionWrapper">
+                                    <DataTemplate x:DataType="models:PlannedModVersion">
                                         <Grid ColumnDefinitions="* Auto" ColumnSpacing="16">
                                             <TextBlock Grid.Column="0" Text="{Binding Version.Identifier}"
                                                        TextTrimming="CharacterEllipsis" />

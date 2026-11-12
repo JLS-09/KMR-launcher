@@ -118,7 +118,7 @@ public partial class DiscoverPageViewModel : PageViewModel
                 new InstallModsViewModel(
                     [
                         .. SelectedMods
-                            .Select(m => new ModVersionWrapper { Version = m.SelectedVersion, IsUserRequested = true })
+                            .Select(m => new PlannedModVersion { Version = m.SelectedVersion, IsUserRequested = true })
                     ],
                     ModListService, _dependencyService, _compatibilityService)
         };

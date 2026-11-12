@@ -10,8 +10,8 @@ public class DependencyService(ModListService modListService, CompatibilityServi
     private sealed class DependencyResolutionState(Instance? instance)
     {
         public Instance? Instance { get; } = instance;
-        public List<ModVersionWrapper> Resolved { get; } = [];
-        public List<ModVersionWrapper> ToRemove { get; } = [];
+        public List<PlannedModVersion> Resolved { get; } = [];
+        public List<PlannedModVersion> ToRemove { get; } = [];
         public HashSet<Relationship> Choosable { get; } = [];
         public HashSet<string> IgnoredRecommendations { get; } = [];
     }
@@ -40,16 +40,57 @@ public class DependencyService(ModListService modListService, CompatibilityServi
             ResolveRecursive(requested, dependencyResolutionState);
         }
 
-        installModsData.FinalModList = new ObservableCollection<ModVersionWrapper>(dependencyResolutionState.Resolved);
+        installModsData.FinalModList = new ObservableCollection<PlannedModVersion>(dependencyResolutionState.Resolved);
         installModsData.RequestedRemoveModVersions =
-            new ObservableCollection<ModVersionWrapper>(dependencyResolutionState.ToRemove);
+            new ObservableCollection<PlannedModVersion>(dependencyResolutionState.ToRemove);
         installModsData.ChoosableVersions = dependencyResolutionState.Choosable;
         installModsData.ModsWithIgnoredRecommendations =
             [.. dependencyResolutionState.IgnoredRecommendations];
         return installModsData;
     }
 
-    public List<ModVersionWrapper> GetDependencies(ModVersionWrapper wrapper)
+    public sealed class AdditionalResolution
+    {
+        public required List<PlannedModVersion> FinalModList { get; init; }
+        public required List<PlannedModVersion> ToRemove { get; init; }
+        public required HashSet<Relationship> NewChoosables { get; init; }
+    }
+
+    public AdditionalResolution ResolveAdditional(Instance? instance,
+        IEnumerable<PlannedModVersion> alreadyResolved, IEnumerable<PlannedModVersion> additions)
+    {
+        var state = new DependencyResolutionState(instance);
+        state.Resolved.AddRange(alreadyResolved.Select(Copy));
+
+        if (modListService.Mods is not null)
+        {
+            foreach (var addition in additions)
+            {
+                if (state.Resolved.Exists(w => w.Version.Identifier == addition.Version.Identifier)) continue;
+
+                var copy = Copy(addition);
+                state.Resolved.Add(copy);
+                ResolveRecursive(copy, state);
+            }
+        }
+
+        return new AdditionalResolution
+        {
+            FinalModList = state.Resolved,
+            ToRemove = state.ToRemove,
+            NewChoosables = state.Choosable
+        };
+    }
+
+    private static PlannedModVersion Copy(PlannedModVersion wrapper) => new()
+    {
+        Version = wrapper.Version,
+        IsUserRequested = wrapper.IsUserRequested,
+        Relationship = wrapper.Relationship,
+        ModsForReason = [.. wrapper.ModsForReason]
+    };
+    
+    public List<PlannedModVersion> GetDependencies(PlannedModVersion wrapper)
     {
         if (modListService.Mods is null) return [];
 
@@ -60,7 +101,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         return dependencyResolutionState.Resolved;
     }
 
-    private void ResolveRecursive(ModVersionWrapper wrapper, DependencyResolutionState dependencyResolutionState)
+    private void ResolveRecursive(PlannedModVersion wrapper, DependencyResolutionState dependencyResolutionState)
     {
         if (wrapper.Version.Depends is not { Count: > 0 } depends) return;
 
@@ -110,7 +151,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         {
             if (compatibilityService.IsVersionCompatibleWithRelation(installed, dependency)) return;
 
-            var existing = new ModVersionWrapper { Version = installed };
+            var existing = new PlannedModVersion { Version = installed };
             if (!dependencyResolutionState.ToRemove.Exists(w => w.Version.Id == installed.Id))
                 dependencyResolutionState.ToRemove.Add(existing);
             AddDependency(dependency, [reason], dependencyResolutionState);
@@ -123,7 +164,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
 
     private void AddDependency(Relationship dependency, IEnumerable<string> reasons, DependencyResolutionState state)
     {
-        var wrapper = new ModVersionWrapper
+        var wrapper = new PlannedModVersion
         {
             Version = compatibilityService.GetCompatibleVersionFromRelation(dependency),
             Relationship = dependency
