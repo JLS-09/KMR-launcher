@@ -110,13 +110,34 @@ public partial class InstallModsModulesStepViewModel(
     }
 
     private static IEnumerable<PlannedModVersion> SelectedOptions(IEnumerable<ChoiceGroupViewModel> groups) =>
-        groups.Select(g => g.SelectedOption).OfType<PlannedModVersion>();
+        groups.Select(g => g.SelectedPlan).OfType<PlannedModVersion>();
 
     private ChoiceGroupViewModel? FindVisibleGroup(Relationship relationship, List<ChoiceGroupViewModel> desired) =>
         Choices.FirstOrDefault(g => g.Relationship.Equals(relationship) && !desired.Contains(g));
 
-    private static ChoiceGroupViewModel CreateGroup(RawChoice choice) =>
-        new(choice.Relationship, choice.Options, choice.RequiredBy);
+    private ChoiceGroupViewModel CreateGroup(RawChoice choice) =>
+        new(choice.Relationship,
+            choice.Options.Select(option => new ChoiceOptionViewModel(option, GetPickableVersions(option))),
+            choice.RequiredBy);
+
+    private List<ModVersion> GetPickableVersions(PlannedModVersion option)
+    {
+        var identifier = option.Version.Identifier;
+
+        var anyOfEntry = option.Relationship?.AnyOf?.FirstOrDefault(a => a.Name == identifier);
+        if (anyOfEntry is not null)
+            return compatibilityService.GetVersionsWithinLimits(identifier, anyOfEntry.Version,
+                anyOfEntry.MinVersion, anyOfEntry.MaxVersion);
+
+        var module = option.Relationship?.AnyOf?
+                         .Select(a => a.Name)
+                         .FirstOrDefault(name => option.Version.Provides?.Contains(name) == true)
+                     ?? option.Relationship?.Name;
+
+        return module is null
+            ? [option.Version]
+            : compatibilityService.GetProvidingVersions(identifier, module);
+    }
 
     private void SyncChoices(List<ChoiceGroupViewModel> desired)
     {
@@ -135,7 +156,7 @@ public partial class InstallModsModulesStepViewModel(
 
     private void OnChoiceGroupChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (_isApplying || e.PropertyName != nameof(ChoiceGroupViewModel.SelectedOption)) return;
+        if (_isApplying || e.PropertyName != nameof(ChoiceGroupViewModel.SelectedPlan)) return;
 
         ApplySelections();
     }

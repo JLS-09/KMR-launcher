@@ -87,11 +87,25 @@
                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="models:PlannedModVersion">
+                                    <DataTemplate x:DataType="vm:ChoiceOptionViewModel">
                                         <Grid ColumnDefinitions="* Auto" ColumnSpacing="16">
-                                            <TextBlock Grid.Column="0" Text="{Binding Version.Identifier}"
+                                            <TextBlock Grid.Column="0" Text="{Binding Identifier}"
+                                                       VerticalAlignment="Center"
                                                        TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Version.Version}"
+                                            <ComboBox Grid.Column="1" ItemsSource="{Binding Versions}"
+                                                      SelectedItem="{Binding SelectedVersion}"
+                                                      IsVisible="{Binding HasMultipleVersions}"
+                                                      VerticalAlignment="Center" MinWidth="120"
+                                                      CornerRadius="0" FontSize="13">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate x:DataType="models:ModVersion">
+                                                        <TextBlock Text="{Binding Version}" FontSize="13" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedVersion.Version}"
+                                                       IsVisible="{Binding !HasMultipleVersions}"
+                                                       VerticalAlignment="Center"
                                                        Foreground="{DynamicResource SecondaryText}" />
                                         </Grid>
                                     </DataTemplate>

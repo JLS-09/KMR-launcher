@@ -47,6 +47,22 @@ public class CompatibilityService(ModListService modListService)
         relationship.Version is not null &&
         (relationship.MinVersion is not null || relationship.MaxVersion is not null);
 
+    public List<ModVersion> GetVersionsWithinLimits(string identifier, string? exact, string? min, string? max)
+    {
+        var mod = modListService.Mods?.FirstOrDefault(m => m.Id == identifier);
+        if (mod is null) return [];
+
+        return mod.Versions.Where(v => SatisfiesVersionLimits(v.Version, exact, min, max)).ToList();
+    }
+
+    public List<ModVersion> GetProvidingVersions(string identifier, string module)
+    {
+        var mod = modListService.Mods?.FirstOrDefault(m => m.Id == identifier);
+        if (mod is null) return [];
+
+        return mod.Versions.Where(v => v.Provides?.Contains(module) == true).ToList();
+    }
+    
     public List<ModVersion> GetVersionsFromModule(string module)
     {
         var versions = modListService.Mods!

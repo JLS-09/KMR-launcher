@@ -141,16 +141,7 @@ public class GitHelper(ModListService modList)
             if (modVersions.Count == 0)
                 continue;
 
-            modVersions.Sort((x, y) =>
-            {
-                if (x.ReleaseDate.HasValue && y.ReleaseDate.HasValue)
-                    return DateTime.Compare(y.ReleaseDate.Value, x.ReleaseDate.Value);
-
-                if (x.ReleaseDate.HasValue) return -1;
-                if (y.ReleaseDate.HasValue) return 1;
-
-                return CkanVersion.Compare(y.Version, x.Version);
-            });
+            modVersions.Sort((x, y) => CkanVersion.Compare(y.Version, x.Version));
 
             var latestJson = await File.ReadAllTextAsync(
                 Path.Combine(modDir, modVersions[0].Id + ".ckan"));
