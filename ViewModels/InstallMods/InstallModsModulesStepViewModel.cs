@@ -62,7 +62,7 @@ public partial class InstallModsModulesStepViewModel(
 
         ApplySelections();
     }
-    
+
     private void ApplySelections()
     {
         _isApplying = true;
@@ -117,7 +117,7 @@ public partial class InstallModsModulesStepViewModel(
 
     private static ChoiceGroupViewModel CreateGroup(RawChoice choice) =>
         new(choice.Relationship, choice.Options, choice.RequiredBy);
-    
+
     private void SyncChoices(List<ChoiceGroupViewModel> desired)
     {
         foreach (var group in Choices.Where(g => !desired.Contains(g)).ToList())
@@ -139,7 +139,7 @@ public partial class InstallModsModulesStepViewModel(
 
         ApplySelections();
     }
-    
+
     private List<RawChoice> BuildRawChoices(IEnumerable<Relationship> choosables, List<PlannedModVersion> queued,
         out List<PlannedModVersion> autoAdded)
     {
@@ -250,15 +250,17 @@ public partial class InstallModsModulesStepViewModel(
 
         choices.RemoveAll(choice => installed.Any(mod => IsSatisfiedBy(mod, choice.Relationship)));
     }
-    
+
     private static bool IsSatisfiedBy(ModVersion mod, Relationship relationship)
     {
         return relationship.AnyOf is { Count: > 0 } anyOf
-            ? anyOf.Any(entry => Matches(entry.Name))
-            : Matches(relationship.Name);
+            ? anyOf.Any(entry => Matches(entry.Name, entry.Version, entry.MinVersion, entry.MaxVersion))
+            : Matches(relationship.Name, relationship.Version, relationship.MinVersion, relationship.MaxVersion);
 
-        bool Matches(string? name) =>
-            name is not null && (mod.Identifier == name || mod.Provides?.Contains(name) == true);
+        bool Matches(string? name, string? exact, string? min, string? max) =>
+            name is not null &&
+            ((mod.Identifier == name && CompatibilityService.SatisfiesVersionLimits(mod.Version, exact, min, max)) ||
+             mod.Provides?.Contains(name) == true);
     }
 
     private void EliminateAlreadyQueued(List<RawChoice> choices, List<PlannedModVersion> queued)

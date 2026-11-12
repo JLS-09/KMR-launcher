@@ -149,7 +149,7 @@ public class GitHelper(ModListService modList)
                 if (x.ReleaseDate.HasValue) return -1;
                 if (y.ReleaseDate.HasValue) return 1;
 
-                return Helpers.CompareVersions(x.Version, y.Version);
+                return CkanVersion.Compare(y.Version, x.Version);
             });
 
             var latestJson = await File.ReadAllTextAsync(
