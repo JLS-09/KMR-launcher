@@ -202,7 +202,7 @@ public partial class InstallModsModulesStepViewModel(
     {
         Version = version,
         Relationship = choice.Relationship,
-        ModsForReason = [.. choice.RequiredBy]
+        RequiredBy = [.. choice.RequiredBy]
     };
 
     private static List<string> FindRequiredBy(Relationship relationship, List<PlannedModVersion> queued)
@@ -302,7 +302,7 @@ public partial class InstallModsModulesStepViewModel(
                     {
                         Version = newVersion,
                         IsUserRequested = existing.IsUserRequested,
-                        ModsForReason = [.. existing.ModsForReason],
+                        RequiredBy = [.. existing.RequiredBy],
                         Relationship = combined
                     };
 

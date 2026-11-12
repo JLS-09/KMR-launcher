@@ -87,7 +87,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         Version = wrapper.Version,
         IsUserRequested = wrapper.IsUserRequested,
         Relationship = wrapper.Relationship,
-        ModsForReason = [.. wrapper.ModsForReason]
+        RequiredBy = [.. wrapper.RequiredBy]
     };
     
     public List<PlannedModVersion> GetDependencies(PlannedModVersion wrapper)
@@ -136,12 +136,12 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         {
             if (compatibilityService.IsVersionCompatibleWithRelation(scheduled.Version, dependency))
             {
-                scheduled.ModsForReason.Add(reason);
+                scheduled.RequiredBy.Add(reason);
                 return;
             }
 
             dependencyResolutionState.Resolved.Remove(scheduled);
-            AddDependency(dependency, [.. scheduled.ModsForReason, reason], dependencyResolutionState);
+            AddDependency(dependency, [.. scheduled.RequiredBy, reason], dependencyResolutionState);
             return;
         }
 
@@ -169,7 +169,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
             Version = compatibilityService.GetCompatibleVersionFromRelation(dependency),
             Relationship = dependency
         };
-        wrapper.ModsForReason = [.. reasons];
+        wrapper.RequiredBy = [.. reasons];
 
         if (dependency is { Name: not null, SuppressRecommendations: true } && wrapper.Version.Depends is not null)
         {

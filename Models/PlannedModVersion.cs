@@ -5,11 +5,11 @@ namespace KMRLauncherMvvm.Models;
 public class PlannedModVersion
 {
     public required ModVersion Version { get; set; }
-    public HashSet<string> ModsForReason = [];
+    public HashSet<string> RequiredBy = [];
     public bool IsUserRequested { get; set; }
     public Relationship? Relationship { get; set; }
     
-    public string ReasonForAction => IsUserRequested && ModsForReason.Count > 0
-        ? $"Requested by user; Dependency of {string.Join(", ", ModsForReason)}"
-        : IsUserRequested ? "Requested by user" : $"Dependency of {string.Join(", ", ModsForReason)}";
+    public string ReasonForAction => IsUserRequested && RequiredBy.Count > 0
+        ? $"Requested by user; Dependency of {string.Join(", ", RequiredBy)}"
+        : IsUserRequested ? "Requested by user" : $"Dependency of {string.Join(", ", RequiredBy)}";
 }
