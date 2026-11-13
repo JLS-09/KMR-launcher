@@ -113,6 +113,7 @@ public partial class InstallModsModulesStepViewModel(
             InstallModsData.FinalModList = new ObservableCollection<PlannedModVersion>(queued);
             InstallModsData.RequestedRemoveModVersions = new ObservableCollection<PlannedModVersion>(removes);
             InstallModsData.Problems = new ObservableCollection<ResolutionProblem>(problems);
+            InstallModsData.ModsWithIgnoredRecommendations = [.. DependencyService.FindSuppressedRecommendations(queued)];
 
             SyncChoices(desired);
         }
@@ -388,13 +389,16 @@ public partial class InstallModsModulesStepViewModel(
                     var combined = compatibilityService.CombineRelationships(existingRelation, choiceRelation);
                     var newVersion = compatibilityService.GetCompatibleVersionFromRelation(combined, _criteria);
 
-                    var index = queued.IndexOf(existing);
-                    queued[index] = new PlannedModVersion
+                    var replacement = new PlannedModVersion
                     {
                         Version = newVersion,
                         RequiredBy = [.. existing.RequiredBy],
                         Relationship = combined
                     };
+                    queued[queued.IndexOf(existing)] = replacement;
+
+                    if (newVersion.Id != existing.Version.Id)
+                        swapped.Add(replacement);
 
                     resolved = true;
                     break;

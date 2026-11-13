@@ -19,7 +19,6 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         public List<PlannedModVersion> Resolved { get; } = [];
         public List<PlannedModVersion> ToRemove { get; } = [];
         public HashSet<Relationship> Choosable { get; } = [];
-        public HashSet<string> IgnoredRecommendations { get; } = [];
         public List<ResolutionProblem> Problems { get; } = [];
     }
 
@@ -64,7 +63,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
             new ObservableCollection<PlannedModVersion>(dependencyResolutionState.ToRemove);
         installModsData.ChoosableVersions = dependencyResolutionState.Choosable;
         installModsData.ModsWithIgnoredRecommendations =
-            [.. dependencyResolutionState.IgnoredRecommendations];
+            [.. FindSuppressedRecommendations(dependencyResolutionState.Resolved)];
         dependencyResolutionState.Problems.AddRange(CompatibilityService.FindConflicts(
             [.. dependencyResolutionState.Resolved.Select(r => r.Version)],
             RemainingInstalled(instance, dependencyResolutionState.Resolved, dependencyResolutionState.ToRemove)));
@@ -90,7 +89,13 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         {
             foreach (var addition in additions)
             {
-                if (state.Resolved.Exists(w => w.Version.Identifier == addition.Version.Identifier)) continue;
+                var existing = state.Resolved.FirstOrDefault(w => w.Version.Identifier == addition.Version.Identifier);
+                if (existing is not null)
+                {
+                    if (existing.Version.Id == addition.Version.Id)
+                        ResolveRecursive(existing, state);
+                    continue;
+                }
 
                 var copy = Copy(addition);
                 state.Resolved.Add(copy);
@@ -170,11 +175,6 @@ public class DependencyService(ModListService modListService, CompatibilityServi
 
         if (dependency.Version is not null && (dependency.MinVersion is not null || dependency.MaxVersion is not null))
             throw new InvalidRelationshipException(dependency);
-
-        if (dependency is { Name: not null, SuppressRecommendations: true })
-        {
-            dependencyResolutionState.IgnoredRecommendations.Add(dependency.Name);
-        }
 
         var scheduled = dependencyResolutionState.Resolved.FirstOrDefault(v => v.Version.Identifier == dependency.Name);
         if (scheduled is not null)
@@ -261,14 +261,6 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         };
         wrapper.RequiredBy = [.. reasons];
 
-        if (dependency is { Name: not null, SuppressRecommendations: true } && wrapper.Version.Depends is not null)
-        {
-            foreach (var depend in wrapper.Version.Depends.Where(d => d.Name is not null))
-            {
-                state.IgnoredRecommendations.Add(depend.Name!);
-            }
-        }
-
         state.Resolved.Add(wrapper);
         ResolveRecursive(wrapper, state);
     }
@@ -308,6 +300,46 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         relationship.Version is null && relationship.MinVersion is null && relationship.MaxVersion is null
             ? ""
             : $" {DescribeLimits(relationship)}";
+
+    public static HashSet<string> FindSuppressedRecommendations(IReadOnlyList<PlannedModVersion> finalList)
+    {
+        var byId = finalList
+            .GroupBy(m => m.Version.Id ?? m.Version.Identifier)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        HashSet<PlannedModVersion> suppressed = [];
+
+        var changed = true;
+        while (changed)
+        {
+            changed = false;
+
+            foreach (var mod in finalList)
+            {
+                if (suppressed.Contains(mod) || mod.IsUserRequested || mod.RequiredBy.Count == 0) continue;
+
+                var allSuppressed = mod.RequiredBy.All(reason =>
+                    byId.TryGetValue(reason, out var requirer) &&
+                    (suppressed.Contains(requirer) || SuppressesFor(requirer.Version, mod.Version)));
+
+                if (!allSuppressed) continue;
+
+                suppressed.Add(mod);
+                changed = true;
+            }
+        }
+
+        return suppressed.Select(m => m.Version.Identifier).ToHashSet();
+    }
+
+    private static bool SuppressesFor(ModVersion requirer, ModVersion mod) =>
+        requirer.Depends?.Any(d => d.SuppressRecommendations == true &&
+                                   (d.AnyOf is { Count: > 0 } anyOf
+                                       ? anyOf.Any(e => Names(mod, e.Name))
+                                       : Names(mod, d.Name))) == true;
+
+    private static bool Names(ModVersion mod, string? name) =>
+        name is not null && (mod.Identifier == name || mod.Provides?.Contains(name) == true);
 
     public static List<ModVersion> RemainingInstalled(Instance? instance, IEnumerable<PlannedModVersion> toInstall,
         IEnumerable<PlannedModVersion> toRemove)
