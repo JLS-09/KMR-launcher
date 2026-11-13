@@ -1,0 +1,80 @@
+using KMRLauncherMvvm.Models;
+using KMRLauncherMvvm.ViewModels.InstallMods;
+using static KMRLauncherMvvm.Tests.TestData;
+
+namespace KMRLauncherMvvm.Tests;
+
+// The Modules step without UI: build it from InstallModsData and call OnEntering like the wizard does
+public class ModulesStepTests
+{
+    private static (InstallModsModulesStepViewModel step, InstallModsData data) Enter(TestServices services,
+        Instance instance, ModVersion host)
+    {
+        var data = new InstallModsData { SelectedInstance = instance, RequestedModVersions = [Requested(host)] };
+        services.Dependency.ResolveDependencies(data);
+
+        var step = new InstallModsModulesStepViewModel(data, services.Compatibility, services.Dependency);
+        step.OnEntering(null);
+        return (step, data);
+    }
+
+    [Fact]
+    public void Choice_filtered_to_one_option_by_ksp_is_picked_automatically()
+    {
+        // Phase 1 task 8: three options, only one supports KSP 1.12
+        var host = Version("Host", "1.0", depends: [AnyOf(Entry("X"), Entry("Y"), Entry("Z"))]);
+        var services = new TestServices(Mod(host), Mod(Version("X", "1.0", "1.9")), Mod(Version("Y", "1.0")),
+            Mod(Version("Z", "1.0", "1.10")));
+
+        var (step, data) = Enter(services, Instance(), host);
+
+        Assert.Empty(step.Choices);
+        Assert.Contains(data.FinalModList, m => m.Version.Identifier == "Y");
+    }
+
+    [Fact]
+    public void Choice_filtered_to_no_options_is_unsatisfiable()
+    {
+        var host = Version("Host", "1.0", depends: [AnyOf(Entry("X"), Entry("Z"))]);
+        var services = new TestServices(Mod(host), Mod(Version("X", "1.0", "1.9")), Mod(Version("Z", "1.0", "1.10")));
+
+        var (step, _) = Enter(services, Instance(), host);
+
+        Assert.True(Assert.Single(step.Choices).IsUnsatisfiable);
+        Assert.False(step.CanGoNext);
+    }
+
+    [Fact]
+    public void Swapped_queued_mod_gets_its_dependencies()
+    {
+        // LibA 2.0 is queued; the any_of needs LibA <= 1.0, which depends on LibCore
+        var libA = Mod(Version("LibA", "2.0"), Version("LibA", "1.0", depends: [Rel("LibCore")]));
+        var host = Version("Host", "1.0", depends: [Rel("LibA"), AnyOf(Entry("LibA", max: "1.0"), Entry("Alt"))]);
+        var services = new TestServices(Mod(host), libA, Mod(Version("LibCore", "1.0")), Mod(Version("Alt", "1.0")));
+
+        var (step, data) = Enter(services, Instance(), host);
+
+        Assert.Empty(step.Choices);
+        Assert.Contains(data.FinalModList, m => m.Version.Id == "LibA-1.0");
+        Assert.Contains(data.FinalModList, m => m.Version.Identifier == "LibCore");
+    }
+
+    [Fact]
+    public void Picking_a_conflicting_option_shows_a_conflict()
+    {
+        var host = Version("Host", "1.0", depends: [AnyOf(Entry("X"), Entry("Y"))]);
+        var services = new TestServices(Mod(host), Mod(Version("X", "1.0", conflicts: [Rel("Installed")])),
+            Mod(Version("Y", "1.0")));
+
+        var (step, data) = Enter(services, Instance("1.12.5", Version("Installed", "1.0")), host);
+        var choice = Assert.Single(step.Choices);
+
+        choice.SelectedOption = choice.Options.Single(o => o.Identifier == "X");
+        Assert.Contains(data.Problems, p => p.IsConflict);
+        Assert.False(step.CanGoNext);
+
+        choice.SelectedOption = choice.Options.Single(o => o.Identifier == "Y");
+        Assert.Empty(data.Problems);
+        Assert.True(step.CanGoNext);
+    }
+}
