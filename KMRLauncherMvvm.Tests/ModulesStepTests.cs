@@ -118,15 +118,16 @@ public class ModulesStepTests
     }
 
     [Fact]
-    public void Step_is_shown_when_there_is_a_problem_but_no_choice()
+    public void Step_is_skipped_when_there_is_a_problem_but_no_choice()
     {
-        // No choices, but a conflict with an installed mod: it must still be shown
+        // No choices, but a conflict with an installed mod: the step is skipped and the summary shows the conflict
         var host = Version("Host", "1.0", conflicts: [Rel("Installed")]);
         var services = new TestServices(Mod(host));
 
-        var (step, _) = Enter(services, Instance("1.12.5", Version("Installed", "1.0")), host);
+        var (step, data) = Enter(services, Instance("1.12.5", Version("Installed", "1.0")), host);
 
         Assert.Empty(step.Choices);
-        Assert.False(step.ShouldSkip);
+        Assert.True(step.ShouldSkip);
+        Assert.Contains(data.Problems, p => p.IsConflict);
     }
 }

@@ -22,6 +22,9 @@
         <DataTemplate DataType="viewModels:InstallModsModulesStepViewModel">
             <views:InstallModsModulesStepView />
         </DataTemplate>
+        <DataTemplate DataType="viewModels:InstallModsSummaryStepViewModel">
+            <views:InstallModsSummaryStepView />
+        </DataTemplate>
     </Window.DataTemplates>
 
     <Design.DataContext>
@@ -63,8 +66,16 @@
                                FontSize="16" FontWeight="Bold" LetterSpacing="1" />
                 </StackPanel>
             </Button>
+            <!-- Finish replaces Next on the last step -->
+            <Button Classes="Primary" Padding="24 12" HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Command="{Binding FinishCommand}"
+                    IsVisible="{Binding IsLastStep}">
+                <TextBlock Text="INSTALL" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
+                           FontSize="16" FontWeight="Bold" LetterSpacing="1" />
+            </Button>
             <Button Classes="Primary" Padding="24 7" HorizontalAlignment="Right" VerticalAlignment="Center"
-                    Command="{Binding NextCommand}">
+                    Command="{Binding NextCommand}"
+                    IsVisible="{Binding !IsLastStep}">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock Text="NEXT" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
                                FontSize="16" FontWeight="Bold" LetterSpacing="1" />

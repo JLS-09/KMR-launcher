@@ -25,6 +25,7 @@ public partial class InstallModsViewModel : ViewModelBase
 
     [ObservableProperty] private bool _isFirstStep = true;
     [ObservableProperty] private List<ProgressSegment> _progressSegments = [];
+    [ObservableProperty] private bool _isLastStep;
     public event Action<InstallModsData>? Finished;
     public event Action? Cancelled;
 
@@ -38,7 +39,8 @@ public partial class InstallModsViewModel : ViewModelBase
             new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService),
             new InstallModsRecommendsStepViewModel(InstallModsData, modListService, compatibilityService,
                 dependencyService),
-            new InstallModsModulesStepViewModel(InstallModsData, compatibilityService, dependencyService)
+            new InstallModsModulesStepViewModel(InstallModsData, compatibilityService, dependencyService),
+            new InstallModsSummaryStepViewModel(InstallModsData)
         ];
         ShowStep(0, forward: true);
     }
@@ -107,6 +109,7 @@ public partial class InstallModsViewModel : ViewModelBase
     {
         _index = index;
         IsFirstStep = index == 0;
+        IsLastStep = index == _steps.Count - 1;
         CurrentStep = _steps[index];
         CurrentStep.OnEntering(forward);
         UpdateProgress();

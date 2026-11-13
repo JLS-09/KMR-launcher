@@ -50,7 +50,7 @@ public partial class InstallModsModulesStepViewModel(
 
         ProcessChoosables();
 
-        ShouldSkip = !HasChoices && !HasProblems;
+        ShouldSkip = !HasChoices;
     }
 
     private void ProcessChoosables()
