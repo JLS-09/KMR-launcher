@@ -77,4 +77,20 @@ public class ModulesStepTests
         Assert.Empty(data.Problems);
         Assert.True(step.CanGoNext);
     }
+    
+    [Fact]
+    public void Choice_satisfied_by_an_installed_mod_is_dropped()
+    {
+        // Phase 1 task 7: by identifier (within the limits) or by provides
+        var host = Version("Host", "1.0", depends: [AnyOf(Entry("X", min: "2.0"), Entry("Y")), Rel("Virtual")]);
+        var services = new TestServices(Mod(host), Mod(Version("X", "2.0"), Version("X", "1.0")), Mod(Version("Y", "1.0")),
+            Mod(Version("P", "1.0", provides: ["Virtual"])), Mod(Version("Q", "1.0", provides: ["Virtual"])));
+
+        var (satisfied, _) = Enter(services, Instance("1.12.5", Version("X", "2.0"), Version("P", "1.0", provides: ["Virtual"])), host);
+        Assert.Empty(satisfied.Choices);
+
+        // X 1.0 is installed but the any_of needs X >= 2.0, so that card stays
+        var (tooOld, _) = Enter(services, Instance("1.12.5", Version("X", "1.0"), Version("P", "1.0", provides: ["Virtual"])), host);
+        Assert.Single(tooOld.Choices);
+    }
 }
