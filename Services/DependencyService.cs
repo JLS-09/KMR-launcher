@@ -167,7 +167,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         DependencyResolutionState dependencyResolutionState)
     {
         // Needs a user choice (any_of) or isn't a known mod
-        if (dependency.AnyOf is not null || !ModExists(dependency.Name))
+        if (dependency.AnyOf is not null || !compatibilityService.ModExists(dependency.Name))
         {
             dependencyResolutionState.Choosable.Add(dependency);
             return;
@@ -351,6 +351,4 @@ public class DependencyService(ModListService modListService, CompatibilityServi
 
         return instance.Mods.Where(m => !replaced.Contains(m.Identifier) && !removed.Contains(m.Id)).ToList();
     }
-    
-    private bool ModExists(string? name) => modListService.Mods?.Any(m => m.Id == name) == true;
 }

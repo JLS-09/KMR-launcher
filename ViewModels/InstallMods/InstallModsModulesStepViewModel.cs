@@ -35,7 +35,6 @@ public partial class InstallModsModulesStepViewModel(
 
     [ObservableProperty] private ObservableCollection<ChoiceGroupViewModel> _choices = [];
     [ObservableProperty] private bool _hasChoices;
-    [ObservableProperty] private bool _hasUnsatisfiableChoices;
     [ObservableProperty] private bool _hasProblems;
     [ObservableProperty] private bool _allChoicesMade;
 
@@ -131,7 +130,6 @@ public partial class InstallModsModulesStepViewModel(
         }
 
         HasChoices = Choices.Count > 0;
-        HasUnsatisfiableChoices = Choices.Any(c => c.IsUnsatisfiable);
         HasProblems = InstallModsData.Problems.Count > 0;
         AllChoicesMade = !HasProblems && Choices.All(c => !c.IsUnsatisfiable && c.SelectedOption is not null);
     }
@@ -211,13 +209,15 @@ public partial class InstallModsModulesStepViewModel(
                         MinVersion = anyOfEntry.MinVersion, MaxVersion = anyOfEntry.MaxVersion
                     };
 
+                    if (!compatibilityService.ModExists(anyOfEntry.Name))
+                    {
+                        anyOfVersions.AddRange(compatibilityService.GetVersionsFromModule(anyOfEntry.Name, _criteria));
+                        continue;
+                    }
+
                     try
                     {
                         anyOfVersions.Add(compatibilityService.GetCompatibleVersionFromRelation(relation, _criteria));
-                    }
-                    catch (NotSupportedException)
-                    {
-                        anyOfVersions.AddRange(compatibilityService.GetVersionsFromModule(anyOfEntry.Name, _criteria));
                     }
                     catch (NoCompatibleVersionFoundException)
                     {
@@ -248,6 +248,7 @@ public partial class InstallModsModulesStepViewModel(
             choices.Add(choice);
         }
 
+        EliminateAlreadyInstalled(choices);
         var swapped = EliminateAlreadyQueued(choices, queued);
         EliminateCoveredChoices(choices);
         autoAdded = EliminateSingleChoices(choices, queued);
@@ -295,8 +296,7 @@ public partial class InstallModsModulesStepViewModel(
                     combined = compatibilityService.CombineRelationships(combined, relations[i]);
                 }
             }
-            catch (Exception e) when (e is NoCompatibleVersionFoundException or NotSupportedException
-                                          or InvalidRelationshipException)
+            catch (Exception e) when (e is NoCompatibleVersionFoundException or InvalidRelationshipException)
             {
                 problems.Add(new ResolutionProblem
                 {
@@ -403,8 +403,7 @@ public partial class InstallModsModulesStepViewModel(
                     resolved = true;
                     break;
                 }
-                catch (Exception e) when (e is NoCompatibleVersionFoundException or NotSupportedException
-                                              or InvalidRelationshipException)
+                catch (Exception e) when (e is NoCompatibleVersionFoundException or InvalidRelationshipException)
                 {
                     choice.Options.Remove(option);
                 }

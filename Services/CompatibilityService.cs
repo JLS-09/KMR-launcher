@@ -21,6 +21,8 @@ public class CompatibilityService(ModListService modListService)
                    SatisfiesVersionLimits(v.Version, relationship) && IsCompatible(v, criteria))
                ?? throw new NoCompatibleVersionFoundException(relationship);
     }
+    
+    public bool ModExists(string? identifier) => modListService.Mods?.Any(m => m.Id == identifier) == true;
 
     public bool IsVersionCompatibleWithRelation(ModVersion version, Relationship relationship)
     {
