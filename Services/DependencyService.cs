@@ -121,17 +121,6 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         RequiredBy = [.. wrapper.RequiredBy]
     };
 
-    public List<PlannedModVersion> GetDependencies(PlannedModVersion wrapper)
-    {
-        if (modListService.Mods is null) return [];
-
-        var dependencyResolutionState = new DependencyResolutionState(null);
-        dependencyResolutionState.Resolved.Add(wrapper);
-        ResolveRecursive(wrapper, dependencyResolutionState);
-        dependencyResolutionState.Resolved.Remove(wrapper);
-        return dependencyResolutionState.Resolved;
-    }
-
     private void ResolveRecursive(PlannedModVersion wrapper, DependencyResolutionState dependencyResolutionState)
     {
         if (wrapper.Version.Depends is not { Count: > 0 } depends) return;

@@ -137,7 +137,10 @@ public partial class NewInstanceViewModel : ViewModelBase
             
             Directory.CreateDirectory(fullInstancePath);
             await ZipService.ExtractFolderFromZip(SelectedZip.Path, SelectedZip.RelativeRootPath, fullInstancePath, progress);
-            AppSettings.Instances.Add(new Instance(Name, fullInstancePath, SelectedZip.Version));
+            AppSettings.Instances.Add(new Instance(Name, fullInstancePath, SelectedZip.Version)
+            {
+                CompatibleKspVersions = KspVersions.DefaultCompatibleVersions(SelectedZip.Version)
+            });
             SettingsService.Save(AppSettings);
             CloseWindow(window);
         }
