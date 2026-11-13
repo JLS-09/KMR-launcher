@@ -33,6 +33,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
     {
         public List<ModVersion> Versions { get; set; } = versions;
         public List<string> Sources { get; } = [];
+        public bool SelectedByDefault { get; set; }
     }
 
     private sealed record RowState(bool IsSelected, string? VersionId);
@@ -61,18 +62,27 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
                 var source = planned.Version.Identifier;
 
                 foreach (var recommendation in planned.Version.Recommends ?? [])
-                    AddRelationship(recommendations, recommendation, source, criteria);
+                    AddRelationship(recommendations, recommendation, source, criteria, true);
 
                 foreach (var suggestion in planned.Version.Suggests ?? [])
-                    AddRelationship(suggestions, suggestion, source, criteria);
+                    AddRelationship(suggestions, suggestion, source, criteria, false);
 
                 AddSupporting(supported, source, criteria);
             }
         }
 
-        Recommendations = BuildRows(recommendations, "Recommended by", previousRecommendations, true);
-        Suggestions = BuildRows(suggestions, "Suggested by", previousSuggestions, false);
-        Supported = BuildRows(supported, "Supports", previousSupported, false);
+        foreach (var identifier in recommendations.Keys)
+        {
+            suggestions.Remove(identifier);
+            supported.Remove(identifier);
+        }
+
+        foreach (var identifier in suggestions.Keys)
+            supported.Remove(identifier);
+
+        Recommendations = BuildRows(recommendations, "Recommended by", previousRecommendations);
+        Suggestions = BuildRows(suggestions, "Suggested by", previousSuggestions);
+        Supported = BuildRows(supported, "Supports", previousSupported);
 
         ShowRecommendations = Recommendations.Count > 0;
         ShowSuggestions = Suggestions.Count > 0;
@@ -80,15 +90,56 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
     }
 
     private void AddRelationship(Dictionary<string, RowData> rows, Relationship relationship, string source,
+        GameVersionCriteria? criteria, bool isRecommendation)
+    {
+        if (IsSatisfied(relationship)) return;
+
+        var options = GetOptions(relationship, criteria);
+        
+        var selectedByDefault = isRecommendation && options.Count == 1;
+
+        foreach (var (identifier, versions) in options)
+            AddRow(rows, identifier, versions, source, selectedByDefault);
+    }
+
+    private List<(string Identifier, List<ModVersion> Versions)> GetOptions(Relationship relationship,
         GameVersionCriteria? criteria)
     {
-        if (relationship.Name is not { } name || IsPlannedOrInstalled(name)) return;
+        List<(string, List<ModVersion>)> options = [];
 
-        var versions = _compatibilityService.GetVersionsWithinLimits(name, relationship.Version,
-            relationship.MinVersion, relationship.MaxVersion, criteria);
-        if (versions.Count == 0) return;
+        List<(string? Name, string? Exact, string? Min, string? Max)> entries =
+            relationship.AnyOf is { Count: > 0 } anyOf
+                ? [.. anyOf.Select(e => (e.Name, e.Version, e.MinVersion, e.MaxVersion))]
+                : [(relationship.Name, relationship.Version, relationship.MinVersion, relationship.MaxVersion)];
 
-        AddRow(rows, name, versions, source);
+        foreach (var (name, exact, min, max) in entries)
+        {
+            if (name is null) continue;
+
+            if (_compatibilityService.ModExists(name))
+            {
+                var versions = _compatibilityService.GetVersionsWithinLimits(name, exact, min, max, criteria);
+                if (versions.Count > 0) options.Add((name, versions));
+                continue;
+            }
+
+            foreach (var provider in _compatibilityService.GetVersionsFromModule(name, criteria))
+                options.Add((provider.Identifier,
+                    _compatibilityService.GetProvidingVersions(provider.Identifier, name, criteria)));
+        }
+
+        return [.. options.Where(o => !IsPlannedOrInstalled(o.Item1)).DistinctBy(o => o.Item1)];
+    }
+
+    private bool IsSatisfied(Relationship relationship)
+    {
+        HashSet<string> names = relationship.AnyOf is { Count: > 0 } anyOf
+            ? [.. anyOf.Select(e => e.Name).OfType<string>()]
+            : [.. new[] { relationship.Name }.OfType<string>()];
+
+        return InstallModsData.FinalModList.Select(m => m.Version)
+            .Concat(InstallModsData.SelectedInstance?.Mods ?? [])
+            .Any(m => names.Contains(m.Identifier) || m.Provides?.Any(names.Contains) == true);
     }
 
     private void AddSupporting(Dictionary<string, RowData> rows, string supportedMod, GameVersionCriteria? criteria)
@@ -102,7 +153,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
                 .ToList();
             if (versions.Count == 0) continue;
 
-            AddRow(rows, mod.Id, versions, supportedMod);
+            AddRow(rows, mod.Id, versions, supportedMod, false);
         }
     }
 
@@ -112,7 +163,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             s.AnyOf?.Any(a => string.Equals(a.Name, supportedMod, StringComparison.OrdinalIgnoreCase)) == true) == true;
 
     private static void AddRow(Dictionary<string, RowData> rows, string identifier, List<ModVersion> versions,
-        string source)
+        string source, bool selectedByDefault)
     {
         if (rows.TryGetValue(identifier, out var row))
         {
@@ -126,6 +177,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         }
 
         if (!row.Sources.Contains(source)) row.Sources.Add(source);
+        row.SelectedByDefault |= selectedByDefault;
     }
 
     private bool IsPlannedOrInstalled(string identifier) =>
@@ -133,12 +185,12 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         InstallModsData.SelectedInstance?.Mods.Any(m => m.Identifier == identifier) == true;
 
     private static List<VersionListItemViewModel> BuildRows(Dictionary<string, RowData> rows, string sourcesPrefix,
-        Dictionary<string, RowState> previous, bool selectedByDefault) =>
+        Dictionary<string, RowState> previous) =>
         rows.Select(pair =>
         {
             var state = previous.GetValueOrDefault(pair.Key);
             return new VersionListItemViewModel(pair.Key, pair.Value.Versions, pair.Value.Sources, sourcesPrefix,
-                state?.IsSelected ?? selectedByDefault, state?.VersionId);
+                state?.IsSelected ?? pair.Value.SelectedByDefault, state?.VersionId);
         }).ToList();
 
     private static Dictionary<string, RowState> RowStates(List<VersionListItemViewModel> items) =>
