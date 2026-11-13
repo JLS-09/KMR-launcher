@@ -16,8 +16,8 @@ public class PlannedModVersion
         get
         {
             List<string> reasons = [];
-            if (IsUserRequested) reasons.Add("Requested by user");
             if (OptionalReason is not null) reasons.Add(OptionalReason);
+            else if (IsUserRequested) reasons.Add("Requested by user");
             if (RequiredBy.Count > 0) reasons.Add($"Dependency of {string.Join(", ", RequiredBy)}");
             return string.Join("; ", reasons);
         }

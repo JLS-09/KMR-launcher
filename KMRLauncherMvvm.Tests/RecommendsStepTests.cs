@@ -47,7 +47,7 @@ public class RecommendsStepTests
 
         var rec = Assert.Single(data.FinalModList, m => m.Version.Identifier == "Rec");
         Assert.Equal("Recommended by Host", rec.ReasonForAction);
-        Assert.False(rec.IsUserRequested);
+        Assert.True(rec.IsUserRequested);
         Assert.Contains(data.FinalModList, m => m.Version.Identifier == "RecLib");
         Assert.DoesNotContain(data.FinalModList, m => m.Version.Identifier == "Sug");
     }
@@ -123,5 +123,25 @@ public class RecommendsStepTests
         step.OnLeaving(modules);
         Assert.Single(data.FinalModList, m => m.Version.Identifier == "Sug");
         Assert.DoesNotContain(data.FinalModList, m => m.Version.Identifier == "Rec");
+    }
+    
+    [Fact]
+    public void Ticked_recommendation_keeps_its_version_when_an_any_of_wants_another()
+    {
+        // Rec 2.0 is ticked; the any_of accepts Rec 1.0 or older, or Alt. Rec isn't swapped, so Alt is picked.
+        var host = Version("Host", "1.0", depends: [AnyOf(Entry("Rec", max: "1.0"), Entry("Alt"))]);
+        host.Recommends = [Rel("Rec")];
+        var services = new TestServices(Mod(host), Mod(Version("Rec", "2.0"), Version("Rec", "1.0")),
+            Mod(Version("Alt", "1.0")));
+
+        var (step, data) = Enter(services, Instance(), host);
+        var modules = Modules(services, data);
+        step.OnLeaving(modules);
+        modules.OnEntering(step);
+
+        Assert.Empty(modules.Choices);
+        Assert.Contains(data.FinalModList, m => m.Version.Id == "Rec-2.0");
+        Assert.DoesNotContain(data.FinalModList, m => m.Version.Id == "Rec-1.0");
+        Assert.Contains(data.FinalModList, m => m.Version.Identifier == "Alt");
     }
 }

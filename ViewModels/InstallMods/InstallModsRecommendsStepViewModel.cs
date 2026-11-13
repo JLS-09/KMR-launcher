@@ -189,6 +189,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         items.Where(i => i.IsSelected).Select(i => new PlannedModVersion
         {
             Version = i.Version,
+            IsUserRequested = true,
             OptionalReason = $"{reason} {string.Join(", ", i.Sources)}"
         });
 
