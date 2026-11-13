@@ -12,6 +12,7 @@ A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalon
 - Create and delete instances
 - Launch an instance through Wine (Linux only)
 - Instance stats: mod count, playtime, last played and install size
+- Choose per instance which KSP versions count as compatible (like CKAN), including "all 1.12.x"
 
 ### Mods
 - Mod list built from [CKAN-meta](https://github.com/KSP-CKAN/CKAN-meta), cloned and cached locally with git
@@ -20,9 +21,13 @@ A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalon
 - Select several mods at once, and choose a version per mod directly in the list
 - Install wizard (in progress):
   - choose the target instance
-  - automatic dependency resolution
+  - automatic dependency resolution following the CKAN spec:
+    - version ranges (`version`, `min_version`, `max_version`) with CKAN's version ordering
+    - KSP compatibility (`ksp_version`, `ksp_version_min`/`max`, `ksp_version_strict`) against the instance's compatible versions
+    - conflicts with new and installed mods, `provides` and `suppress_recommendations`
+  - problems are shown in the wizard and block the next step, instead of crashing
   - recommendations, suggestions and supported mods
-  - choosing between alternatives (`any_of` and virtual modules)
+  - choosing between alternatives (`any_of` and virtual modules), with a version picker per option
 
 ## Roadmap
 
@@ -31,8 +36,8 @@ The full plan is split into milestones:
 | Milestone | Goal | Status |
 |---|---|---|
 | **M1** | Choose between alternative dependencies (`any_of` / virtual modules) in the install wizard | ✅ Done |
-| **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | 🚧 In progress |
-| **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | ⏳ Planned |
+| **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | ✅ Done |
+| **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | 🚧 Next |
 | **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | ⏳ Planned |
 | **M5** | Instance management:<br>• remove and update mods<br>• `replaced_by`<br>• currently-playing card<br>• create an instance from inside the wizard<br>• import an existing KSP install (with CKAN registry)<br>• offline mode | ⏳ Planned |
 | **M6** | Extras:<br>• sorting the mod list<br>• instance export/import (`.ckan` metapackage)<br>• backup & restore<br>• extra metadata repos<br>• Windows and macOS support | ⏳ Planned |
@@ -52,6 +57,14 @@ dotnet run
 
 On first start, the launcher clones CKAN-meta. This can take a few minutes.
 
+**Running the tests**
+
+The resolver logic (version ordering, KSP compatibility, conflicts, `provides`, `suppress_recommendations` and the module choices) is covered by xUnit tests in `KMRLauncherMvvm.Tests`:
+
+```bash
+dotnet test
+```
+
 ## Where data is stored
 
 Everything lives under your application-data folder, which is `~/.config/kmrLauncher/` on Linux:
@@ -70,6 +83,7 @@ Everything lives under your application-data folder, which is `~/.config/kmrLaun
 - [LibGit2Sharp](https://github.com/libgit2/libgit2sharp) to clone and update CKAN-meta
 - [Humanizer](https://github.com/Humanizr/Humanizer) to format times and sizes
 - `Microsoft.Extensions.DependencyInjection` for dependency injection
+- [xUnit.net](https://xunit.net/) for the unit tests
 
 ## Acknowledgements
 

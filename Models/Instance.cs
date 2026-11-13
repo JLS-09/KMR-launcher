@@ -15,6 +15,7 @@ public class Instance(string name, string rootPath, string version) : InstanceTi
     public string RootPath { get; set; } = rootPath;
     public List<ModVersion> Mods { get; set; } = [];
     public string Version { get; set; } =  version;
+    public List<string> CompatibleKspVersions { get; set; } = [];
     public int PlayTime  { get; set; } = 0;
     public DateTime LastPlayed { get; set; }
     public bool IsPrimary { get; set; } = false;

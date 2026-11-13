@@ -34,6 +34,10 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
 
         if (_modListService.Mods is null || !InstallModsData.FinalModList.Any()) return;
 
+        var criteria = InstallModsData.SelectedInstance is { } instance
+            ? GameVersionCriteria.FromInstance(instance)
+            : null;
+
         foreach (var version in InstallModsData.FinalModList)
         {
             if (InstallModsData.ModsWithIgnoredRecommendations.Contains(version.Version.Identifier))
@@ -50,9 +54,9 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
                         _modListService.Mods.FirstOrDefault(m => m.Id.Equals(recommendation.Name)) is null)
                         continue;
 
-                    Recommendations.Add(new VersionListItemViewModel(_modListService.Mods
-                        .First(m => m.Id.Equals(recommendation.Name)).Versions
-                        .First()));
+                    var recommended = FirstCompatibleVersion(recommendation.Name, criteria);
+                    if (recommended is not null)
+                        Recommendations.Add(new VersionListItemViewModel(recommended));
                 }
             }
 
@@ -67,9 +71,9 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
                         _modListService.Mods.FirstOrDefault(m => m.Id.Equals(suggestion.Name)) is null)
                         continue;
 
-                    Suggestions.Add(new VersionListItemViewModel(_modListService.Mods
-                        .First(m => m.Id.Equals(suggestion.Name)).Versions
-                        .First()));
+                    var suggested = FirstCompatibleVersion(suggestion.Name, criteria);
+                    if (suggested is not null)
+                        Suggestions.Add(new VersionListItemViewModel(suggested));
                 }
             }
 
@@ -80,13 +84,20 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
                     (s.AnyOf?.Any(a =>
                          string.Equals(a.Name, version.Version.Identifier, StringComparison.OrdinalIgnoreCase)) ??
                      false)
-                ) ?? false).Select(v => new VersionListItemViewModel(v)));
+                ) ?? false)
+                .Where(v => CompatibilityService.IsCompatible(v, criteria))
+                .Select(v => new VersionListItemViewModel(v)));
         }
 
         ShowRecommendations = Recommendations.Count > 0;
         ShowSuggestions = Suggestions.Count > 0;
         ShowSupported = Supported.Count > 0;
     }
+
+    private ModVersion? FirstCompatibleVersion(string? identifier, GameVersionCriteria? criteria) =>
+        _modListService.Mods?
+            .FirstOrDefault(m => m.Id == identifier)?
+            .Versions.FirstOrDefault(v => CompatibilityService.IsCompatible(v, criteria));
 
     [RelayCommand]
     private void ToggleRecommendation(VersionListItemViewModel item)

@@ -1,0 +1,89 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:KMRLauncherMvvm.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="600"
+        x:Class="KMRLauncherMvvm.Views.CompatibleKspVersionsWindow"
+        x:DataType="viewModels:CompatibleKspVersionsViewModel"
+        Background="#1F1F20"
+        Foreground="{DynamicResource PrimaryText}"
+        Width="700" Height="600"
+        Title="Compatible KSP versions">
+
+    <Design.DataContext>
+        <viewModels:CompatibleKspVersionsViewModel />
+    </Design.DataContext>
+
+    <Window.Styles>
+        <!-- The group cards aren't selectable, so hide the selection/hover look -->
+        <Style Selector="ListBox.version-groups">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.version-groups > ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0 0 0 8" />
+        </Style>
+        <Style Selector="ListBox.version-groups > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.version-groups > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </Window.Styles>
+
+    <Grid Margin="32" RowDefinitions="Auto Auto * Auto" RowSpacing="16">
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="{Binding Title}" FontSize="22" FontFamily="{DynamicResource SpaceMonoBold}"
+                       LetterSpacing="1.5" TextWrapping="Wrap" />
+            <Rectangle Height="4" Fill="{DynamicResource PrimaryRed}" Width="80" HorizontalAlignment="Left" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="1" Text="{Binding InstanceVersionText}" TextWrapping="Wrap"
+                   Foreground="{DynamicResource SecondaryText}" />
+
+        <!-- ListBox scrolls and virtualizes itself; no StackPanel inside a ScrollViewer -->
+        <ListBox Grid.Row="2" Classes="version-groups" ItemsSource="{Binding Groups}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="viewModels:KspVersionGroupViewModel">
+                    <Border Background="{DynamicResource SideBarBackground}" Padding="16 12">
+                        <Grid RowDefinitions="Auto Auto" RowSpacing="4">
+                            <CheckBox Grid.Row="0" Content="{Binding AllowAllText}"
+                                      IsChecked="{Binding AllowAll}" FontWeight="Bold" />
+                            <!-- At most a handful of versions per group, so a plain WrapPanel is fine here -->
+                            <ItemsControl Grid.Row="1" ItemsSource="{Binding Versions}" Margin="24 0 0 0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="viewModels:KspVersionOptionViewModel">
+                                        <CheckBox Content="{Binding Version}" IsChecked="{Binding IsChecked}"
+                                                  IsEnabled="{Binding CanToggle}" MinWidth="100" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <DockPanel Grid.Row="3">
+            <Button Classes="Secondary" Padding="32 16" IsCancel="True"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                <TextBlock Text="CANCEL" FontFamily="{DynamicResource SpaceGrotesk}"
+                           FontWeight="Bold" LetterSpacing="1.5" FontSize="18" />
+            </Button>
+            <Button Classes="Primary" Padding="31 16" HorizontalAlignment="Right"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding $parent[Window]}">
+                <TextBlock Text="SAVE" FontFamily="{DynamicResource SpaceGrotesk}"
+                           FontWeight="Bold" LetterSpacing="1.5" FontSize="18" />
+            </Button>
+        </DockPanel>
+    </Grid>
+</Window>

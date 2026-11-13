@@ -124,6 +124,18 @@ public partial class InstancesPageViewModel : PageViewModel
         window.Show();
     }
     
+    [RelayCommand]
+    private void OpenCompatibleVersionsWindow(Instance? instance)
+    {
+        if (instance is null) return;
+
+        var window = new CompatibleKspVersionsWindow
+        {
+            DataContext = new CompatibleKspVersionsViewModel(instance)
+        };
+        window.Show();
+    }
+    
     private void OnSettingsChanged(object? sender, AppSettings settings) => Rebuild(settings);
     
     public void Dispose() => SettingsService.SettingsChanged -= OnSettingsChanged;

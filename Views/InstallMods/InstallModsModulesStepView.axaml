@@ -54,9 +54,26 @@
             </Grid>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Margin="0 32 0 8" Text="CHOOSE BETWEEN MODS" LetterSpacing="1"
-                   Foreground="{DynamicResource SecondaryText}"
-                   FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
+        <StackPanel Grid.Row="1" Margin="0 32 0 8">
+            <TextBlock Text="CHOOSE BETWEEN MODS" LetterSpacing="1"
+                       Foreground="{DynamicResource SecondaryText}"
+                       FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
+            <!-- Problems the resolver couldn't solve; they block Next. Bounded height, so the ScrollViewer is fine. -->
+            <Border IsVisible="{Binding HasProblems}" Margin="0 8 0 0" Padding="12 8"
+                    Background="{DynamicResource SideBarBackground}"
+                    BorderBrush="{DynamicResource PrimaryRed}" BorderThickness="2 0 0 0">
+                <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding InstallModsData.Problems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:ResolutionProblem">
+                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Margin="0 2"
+                                           Foreground="{DynamicResource PrimaryRed}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+        </StackPanel>
 
         <TextBlock Grid.Row="2" Text="Nothing to choose, every dependency could be resolved automatically."
                    Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap"
@@ -87,11 +104,25 @@
                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="models:PlannedModVersion">
+                                    <DataTemplate x:DataType="vm:ChoiceOptionViewModel">
                                         <Grid ColumnDefinitions="* Auto" ColumnSpacing="16">
-                                            <TextBlock Grid.Column="0" Text="{Binding Version.Identifier}"
+                                            <TextBlock Grid.Column="0" Text="{Binding Identifier}"
+                                                       VerticalAlignment="Center"
                                                        TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Version.Version}"
+                                            <ComboBox Grid.Column="1" ItemsSource="{Binding Versions}"
+                                                      SelectedItem="{Binding SelectedVersion}"
+                                                      IsVisible="{Binding HasMultipleVersions}"
+                                                      VerticalAlignment="Center" MinWidth="120"
+                                                      CornerRadius="0" FontSize="13">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate x:DataType="models:ModVersion">
+                                                        <TextBlock Text="{Binding Version}" FontSize="13" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedVersion.Version}"
+                                                       IsVisible="{Binding !HasMultipleVersions}"
+                                                       VerticalAlignment="Center"
                                                        Foreground="{DynamicResource SecondaryText}" />
                                         </Grid>
                                     </DataTemplate>

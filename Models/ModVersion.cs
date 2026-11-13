@@ -160,8 +160,8 @@ public class Relationship : IEquatable<Relationship>
     {
         return
             $"{{ Name: {(Name is not null ? $"\"{Name}\"" : "null")}, Version: {(Version is not null ? $"\"{Version}\"" : "null")}, " +
-            $"MinVersion: {(MinVersion is not null ? $"\"{(MinVersion is not null ? $"\"{MinVersion}\"" : "null")}\"" : "null")}, " +
-            $"MaxVersion: {(MaxVersion is not null ? $"\"{(MaxVersion is not null ? $"\"{MaxVersion}\"" : "null")}\"" : "null")}, " +
+            $"MinVersion: {(MinVersion is not null ? $"\"{MinVersion}\"" : "null")}, " +
+            $"MaxVersion: {(MaxVersion is not null ? $"\"{MaxVersion}\"" : "null")}, " +
             $"SuppressRecommendations: {(SuppressRecommendations is not null ? $"{SuppressRecommendations}" : "null")}, " +
             $"Comment: {(Comment is not null ? $"\"{Comment}\"" : "null")}, " +
             $"AnyOf: {(AnyOf is not null ? $"[\"{string.Join("\", \"", AnyOf)}\"]" : "null")} }}";
