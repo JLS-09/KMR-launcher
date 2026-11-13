@@ -4,7 +4,7 @@ using static KMRLauncherMvvm.Tests.TestData;
 
 namespace KMRLauncherMvvm.Tests;
 
-// The Modules step without UI: build it from InstallModsData and call OnEntering like the wizard does
+// The Modules step without UI: build it from InstallModsData and call Prepare like the wizard does
 public class ModulesStepTests
 {
     private static (InstallModsModulesStepViewModel step, InstallModsData data) Enter(TestServices services,
@@ -14,7 +14,7 @@ public class ModulesStepTests
         services.Dependency.ResolveDependencies(data);
 
         var step = new InstallModsModulesStepViewModel(data, services.Compatibility, services.Dependency);
-        step.OnEntering(null);
+        step.Prepare();
         return (step, data);
     }
 
@@ -92,5 +92,41 @@ public class ModulesStepTests
         // X 1.0 is installed but the any_of needs X >= 2.0, so that card stays
         var (tooOld, _) = Enter(services, Instance("1.12.5", Version("X", "1.0"), Version("P", "1.0", provides: ["Virtual"])), host);
         Assert.Single(tooOld.Choices);
+    }
+
+    [Fact]
+    public void Step_is_skipped_when_nothing_needs_a_choice()
+    {
+        var host = Version("Host", "1.0", depends: [AnyOf(Entry("X"), Entry("Z"))]);
+        var services = new TestServices(Mod(host), Mod(Version("X", "1.0")), Mod(Version("Z", "1.0", "1.9")));
+
+        var (step, data) = Enter(services, Instance(), host);
+
+        Assert.True(step.ShouldSkip);
+        Assert.Contains(data.FinalModList, m => m.Version.Identifier == "X");
+    }
+
+    [Fact]
+    public void Step_is_shown_when_there_is_a_choice()
+    {
+        var host = Version("Host", "1.0", depends: [AnyOf(Entry("X"), Entry("Y"))]);
+        var services = new TestServices(Mod(host), Mod(Version("X", "1.0")), Mod(Version("Y", "1.0")));
+
+        var (step, _) = Enter(services, Instance(), host);
+
+        Assert.False(step.ShouldSkip);
+    }
+
+    [Fact]
+    public void Step_is_shown_when_there_is_a_problem_but_no_choice()
+    {
+        // No choices, but a conflict with an installed mod: it must still be shown
+        var host = Version("Host", "1.0", conflicts: [Rel("Installed")]);
+        var services = new TestServices(Mod(host));
+
+        var (step, _) = Enter(services, Instance("1.12.5", Version("Installed", "1.0")), host);
+
+        Assert.Empty(step.Choices);
+        Assert.False(step.ShouldSkip);
     }
 }

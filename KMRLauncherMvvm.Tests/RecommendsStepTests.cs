@@ -4,7 +4,7 @@ using static KMRLauncherMvvm.Tests.TestData;
 
 namespace KMRLauncherMvvm.Tests;
 
-// The Recommends step without UI: OnEntering fills the lists, OnLeaving adds the ticked rows
+// The Recommends step without UI: Prepare fills the lists, OnLeaving(forward: true) adds the ticked rows
 public class RecommendsStepTests
 {
     private static (InstallModsRecommendsStepViewModel step, InstallModsData data) Enter(TestServices services,
@@ -13,7 +13,7 @@ public class RecommendsStepTests
         var data = new InstallModsData { SelectedInstance = instance, RequestedModVersions = [Requested(host)] };
         var step = new InstallModsRecommendsStepViewModel(data, services.ModList, services.Compatibility,
             services.Dependency);
-        step.OnEntering(null);
+        step.Prepare();
         return (step, data);
     }
 
@@ -44,7 +44,7 @@ public class RecommendsStepTests
             Mod(Version("RecLib", "1.0")), Mod(Version("Sug", "1.0")));
 
         var (step, data) = Enter(services, Instance(), host);
-        step.OnLeaving(Modules(services, data));
+        step.OnLeaving(forward: true);
 
         var rec = Assert.Single(data.FinalModList, m => m.Version.Identifier == "Rec");
         Assert.Equal("Recommended by Host", rec.ReasonForAction);
@@ -62,7 +62,7 @@ public class RecommendsStepTests
 
         var (step, data) = Enter(services, Instance(), host);
         step.Recommendations[0].IsSelected = false;
-        step.OnLeaving(Modules(services, data));
+        step.OnLeaving(forward: true);
 
         Assert.DoesNotContain(data.FinalModList, m => m.Version.Identifier == "Rec");
     }
@@ -77,8 +77,8 @@ public class RecommendsStepTests
 
         var (step, data) = Enter(services, Instance(), host);
         var modules = Modules(services, data);
-        step.OnLeaving(modules);
-        modules.OnEntering(step);
+        step.OnLeaving(forward: true);
+        modules.Prepare();
 
         Assert.Single(modules.Choices);
         Assert.Contains(data.FinalModList, m => m.Version.Identifier == "Rec");
@@ -96,8 +96,8 @@ public class RecommendsStepTests
         var data = new InstallModsData { SelectedInstance = Instance(), RequestedModVersions = [Requested(a), Requested(b)] };
         var step = new InstallModsRecommendsStepViewModel(data, services.ModList, services.Compatibility,
             services.Dependency);
-        step.OnEntering(null);
-        step.OnLeaving(Modules(services, data));
+        step.Prepare();
+        step.OnLeaving(forward: true);
 
         Assert.Equal(new[] { "A", "B" }, Assert.Single(step.Recommendations).Sources.Order());
         Assert.Single(data.FinalModList, m => m.Version.Identifier == "Rec");
@@ -114,15 +114,14 @@ public class RecommendsStepTests
         var (step, data) = Enter(services, Instance(), host);
         step.Recommendations[0].IsSelected = false;
         step.Suggestions[0].IsSelected = true;
-        var modules = Modules(services, data);
-        step.OnLeaving(modules);
+        step.OnLeaving(forward: true);
 
         // Back from the Modules step, then Next again
-        step.OnEntering(modules);
+        step.OnEntering(forward: false);
         Assert.False(step.Recommendations[0].IsSelected);
         Assert.True(step.Suggestions[0].IsSelected);
 
-        step.OnLeaving(modules);
+        step.OnLeaving(forward: true);
         Assert.Single(data.FinalModList, m => m.Version.Identifier == "Sug");
         Assert.DoesNotContain(data.FinalModList, m => m.Version.Identifier == "Rec");
     }
@@ -138,8 +137,8 @@ public class RecommendsStepTests
 
         var (step, data) = Enter(services, Instance(), host);
         var modules = Modules(services, data);
-        step.OnLeaving(modules);
-        modules.OnEntering(step);
+        step.OnLeaving(forward: true);
+        modules.Prepare();
 
         Assert.Empty(modules.Choices);
         Assert.Contains(data.FinalModList, m => m.Version.Id == "Rec-2.0");
@@ -176,7 +175,7 @@ public class RecommendsStepTests
         row.SelectedVersion = row.Versions.Single(v => v.Id == "Sug-1.0");
         Assert.True(row.IsSelected);
 
-        step.OnLeaving(Modules(services, data));
+        step.OnLeaving(forward: true);
         Assert.Contains(data.FinalModList, m => m.Version.Id == "Sug-1.0");
     }
 
@@ -187,11 +186,10 @@ public class RecommendsStepTests
         host.Recommends = [Rel("Rec")];
         var services = new TestServices(Mod(host), Mod(Version("Rec", "2.0"), Version("Rec", "1.0")));
 
-        var (step, data) = Enter(services, Instance(), host);
+        var (step, _) = Enter(services, Instance(), host);
         step.Recommendations[0].SelectedVersion = step.Recommendations[0].Versions[1];
-        var modules = Modules(services, data);
-        step.OnLeaving(modules);
-        step.OnEntering(modules);
+        step.OnLeaving(forward: true);
+        step.OnEntering(forward: false);
 
         Assert.Equal("Rec-1.0", step.Recommendations[0].SelectedVersion!.Id);
     }
@@ -209,7 +207,7 @@ public class RecommendsStepTests
         var data = new InstallModsData { SelectedInstance = Instance(), RequestedModVersions = [Requested(a), Requested(b)] };
         var step = new InstallModsRecommendsStepViewModel(data, services.ModList, services.Compatibility,
             services.Dependency);
-        step.OnEntering(null);
+        step.Prepare();
 
         Assert.Equal("Rec-2.0", Assert.Single(Assert.Single(step.Recommendations).Versions).Id);
     }
@@ -269,7 +267,7 @@ public class RecommendsStepTests
         Assert.Equal(2, step.Recommendations.Single(r => r.Identifier == "P1").Versions.Count);
 
         step.Recommendations.Single(r => r.Identifier == "P2").IsSelected = true;
-        step.OnLeaving(Modules(services, data));
+        step.OnLeaving(forward: true);
         Assert.Contains(data.FinalModList, m => m.Version.Identifier == "P2");
     }
 
@@ -314,5 +312,29 @@ public class RecommendsStepTests
         Assert.Equal("Both", Assert.Single(step.Recommendations).Identifier);
         Assert.Equal("Sug", Assert.Single(step.Suggestions).Identifier);
         Assert.Empty(step.Supported);
+    }
+
+    [Fact]
+    public void Step_is_skipped_when_there_is_nothing_to_offer()
+    {
+        var host = Version("Host", "1.0");
+        host.Recommends = [Rel("Missing")];
+        var services = new TestServices(Mod(host));
+
+        var (step, _) = Enter(services, Instance(), host);
+
+        Assert.True(step.ShouldSkip);
+    }
+
+    [Fact]
+    public void Step_is_shown_when_there_is_a_suggestion()
+    {
+        var host = Version("Host", "1.0");
+        host.Suggests = [Rel("Sug")];
+        var services = new TestServices(Mod(host), Mod(Version("Sug", "1.0")));
+
+        var (step, _) = Enter(services, Instance(), host);
+
+        Assert.False(step.ShouldSkip);
     }
 }

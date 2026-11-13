@@ -41,16 +41,16 @@ public partial class InstallModsModulesStepViewModel(
     public override bool CanGoNext => AllChoicesMade;
 
     partial void OnAllChoicesMadeChanged(bool value) => OnPropertyChanged(nameof(CanGoNext));
-
-    public override void OnEntering(InstallModsStepViewModel? previous)
+    
+    public override void Prepare()
     {
-        base.OnEntering(previous);
-
         foreach (var group in Choices)
             group.PropertyChanged -= OnChoiceGroupChanged;
         Choices = [];
 
         ProcessChoosables();
+
+        ShouldSkip = !HasChoices && !HasProblems;
     }
 
     private void ProcessChoosables()

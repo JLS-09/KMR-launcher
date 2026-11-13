@@ -216,20 +216,23 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             version.IsSelected = false;
     }
 
-    public override void OnEntering(InstallModsStepViewModel? previous)
+    public override void Prepare() => Rebuild();
+
+    public override void OnEntering(bool forward)
+    {
+        if (!forward) Rebuild();
+    }
+
+    private void Rebuild()
     {
         _dependencyService.ResolveDependencies(InstallModsData);
         PopulateRecommendations();
-        base.OnEntering(previous);
+        ShouldSkip = !ShowRecommendations && !ShowSuggestions && !ShowSupported;
     }
 
-    public override void OnLeaving(InstallModsStepViewModel? next)
+    public override void OnLeaving(bool forward)
     {
-        base.OnLeaving(next);
-
-        if (next is InstallModsSelectInstanceStepViewModel) return;
-
-        AddSelectedMods();
+        if (forward) AddSelectedMods();
     }
     
     private void AddSelectedMods()

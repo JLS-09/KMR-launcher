@@ -46,6 +46,11 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         CanContinue = InstallModsData.SelectedInstance is not null && !HasProblems;
     }
 
+    public override void OnEntering(bool forward)
+    {
+        if (!forward) Resolve();
+    }
+
     partial void OnCanContinueChanged(bool value) => OnPropertyChanged(nameof(CanGoNext));
 
     public override string Title => "Choose instance";
