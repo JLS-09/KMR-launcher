@@ -11,7 +11,8 @@ public class RecommendsStepTests
         Instance instance, ModVersion host)
     {
         var data = new InstallModsData { SelectedInstance = instance, RequestedModVersions = [Requested(host)] };
-        var step = new InstallModsRecommendsStepViewModel(data, services.ModList, services.Dependency);
+        var step = new InstallModsRecommendsStepViewModel(data, services.ModList, services.Compatibility,
+            services.Dependency);
         step.OnEntering(null);
         return (step, data);
     }
@@ -93,7 +94,8 @@ public class RecommendsStepTests
         var services = new TestServices(Mod(a), Mod(b), Mod(Version("Rec", "1.0")));
 
         var data = new InstallModsData { SelectedInstance = Instance(), RequestedModVersions = [Requested(a), Requested(b)] };
-        var step = new InstallModsRecommendsStepViewModel(data, services.ModList, services.Dependency);
+        var step = new InstallModsRecommendsStepViewModel(data, services.ModList, services.Compatibility,
+            services.Dependency);
         step.OnEntering(null);
         step.OnLeaving(Modules(services, data));
 
@@ -143,5 +145,96 @@ public class RecommendsStepTests
         Assert.Contains(data.FinalModList, m => m.Version.Id == "Rec-2.0");
         Assert.DoesNotContain(data.FinalModList, m => m.Version.Id == "Rec-1.0");
         Assert.Contains(data.FinalModList, m => m.Version.Identifier == "Alt");
+    }
+
+    [Fact]
+    public void Recommendation_offers_only_versions_within_its_limits()
+    {
+        var host = Version("Host", "1.0");
+        host.Recommends = [Rel("Rec", max: "2.0")];
+        var services = new TestServices(Mod(host),
+            Mod(Version("Rec", "3.0"), Version("Rec", "2.0"), Version("Rec", "1.0"), Version("Rec", "0.5", "1.9")));
+
+        var (step, _) = Enter(services, Instance(), host);
+
+        var row = Assert.Single(step.Recommendations);
+        Assert.Equal(new[] { "Rec-2.0", "Rec-1.0" }, row.Versions.Select(v => v.Id));
+        Assert.Equal("Rec-2.0", row.SelectedVersion!.Id);
+    }
+
+    [Fact]
+    public void Picked_version_is_added_and_ticks_the_row()
+    {
+        var host = Version("Host", "1.0");
+        host.Suggests = [Rel("Sug")];
+        var services = new TestServices(Mod(host), Mod(Version("Sug", "2.0"), Version("Sug", "1.0")));
+
+        var (step, data) = Enter(services, Instance(), host);
+        var row = Assert.Single(step.Suggestions);
+        Assert.False(row.IsSelected);
+
+        row.SelectedVersion = row.Versions.Single(v => v.Id == "Sug-1.0");
+        Assert.True(row.IsSelected);
+
+        step.OnLeaving(Modules(services, data));
+        Assert.Contains(data.FinalModList, m => m.Version.Id == "Sug-1.0");
+    }
+
+    [Fact]
+    public void Picked_version_is_kept_on_back_and_next()
+    {
+        var host = Version("Host", "1.0");
+        host.Recommends = [Rel("Rec")];
+        var services = new TestServices(Mod(host), Mod(Version("Rec", "2.0"), Version("Rec", "1.0")));
+
+        var (step, data) = Enter(services, Instance(), host);
+        step.Recommendations[0].SelectedVersion = step.Recommendations[0].Versions[1];
+        var modules = Modules(services, data);
+        step.OnLeaving(modules);
+        step.OnEntering(modules);
+
+        Assert.Equal("Rec-1.0", step.Recommendations[0].SelectedVersion!.Id);
+    }
+
+    [Fact]
+    public void Two_recommenders_only_get_versions_that_fit_both()
+    {
+        var a = Version("A", "1.0");
+        a.Recommends = [Rel("Rec", min: "2.0")];
+        var b = Version("B", "1.0");
+        b.Recommends = [Rel("Rec", max: "2.0")];
+        var services = new TestServices(Mod(a), Mod(b),
+            Mod(Version("Rec", "3.0"), Version("Rec", "2.0"), Version("Rec", "1.0")));
+
+        var data = new InstallModsData { SelectedInstance = Instance(), RequestedModVersions = [Requested(a), Requested(b)] };
+        var step = new InstallModsRecommendsStepViewModel(data, services.ModList, services.Compatibility,
+            services.Dependency);
+        step.OnEntering(null);
+
+        Assert.Equal("Rec-2.0", Assert.Single(Assert.Single(step.Recommendations).Versions).Id);
+    }
+
+    [Fact]
+    public void Supporting_mod_is_one_row_with_only_its_supporting_compatible_versions()
+    {
+        var host = Version("Host", "1.0");
+        var sup3 = Version("Sup", "3.0");
+        var sup2 = Version("Sup", "2.0");
+        sup2.Supports = [Rel("Host")];
+        var sup1 = Version("Sup", "1.0");
+        sup1.Supports = [Rel("Host")];
+        var supOld = Version("Sup", "0.5", "1.9");
+        supOld.Supports = [Rel("Host")];
+        var queued = Version("Queued", "1.0");
+        queued.Supports = [Rel("Host")];
+        host.Depends = [Rel("Queued")];
+        var services = new TestServices(Mod(host), Mod(sup3, sup2, sup1, supOld), Mod(queued));
+
+        var (step, _) = Enter(services, Instance(), host);
+
+        var row = Assert.Single(step.Supported);
+        Assert.Equal("Sup", row.Identifier);
+        Assert.Equal(new[] { "Sup-2.0", "Sup-1.0" }, row.Versions.Select(v => v.Id));
+        Assert.False(row.IsSelected);
     }
 }

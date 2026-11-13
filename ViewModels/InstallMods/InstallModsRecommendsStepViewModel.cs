@@ -11,7 +11,8 @@ namespace KMRLauncherMvvm.ViewModels.InstallMods;
 
 public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewModel
 {
-    private ModListService _modListService;
+    private readonly ModListService _modListService;
+    private readonly CompatibilityService _compatibilityService;
     private readonly DependencyService _dependencyService;
     [ObservableProperty] private List<VersionListItemViewModel> _recommendations = [];
     [ObservableProperty] private List<VersionListItemViewModel> _suggestions = [];
@@ -21,108 +22,127 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
     [ObservableProperty] private bool _showSupported;
 
     public InstallModsRecommendsStepViewModel(InstallModsData installModsData, ModListService modListService,
-        DependencyService dependencyService) : base(installModsData)
+        CompatibilityService compatibilityService, DependencyService dependencyService) : base(installModsData)
     {
         _modListService = modListService;
+        _compatibilityService = compatibilityService;
         _dependencyService = dependencyService;
     }
 
+    private sealed class RowData(List<ModVersion> versions)
+    {
+        public List<ModVersion> Versions { get; set; } = versions;
+        public List<string> Sources { get; } = [];
+    }
+
+    private sealed record RowState(bool IsSelected, string? VersionId);
+
     private void PopulateRecommendations()
     {
-        var previousRecommendations = SelectionState(Recommendations);
-        var previousSuggestions = SelectionState(Suggestions);
-        var previousSupported = SelectionState(Supported);
+        var previousRecommendations = RowStates(Recommendations);
+        var previousSuggestions = RowStates(Suggestions);
+        var previousSupported = RowStates(Supported);
 
-        Recommendations = [];
-        Suggestions = [];
-        Supported = [];
+        Dictionary<string, RowData> recommendations = [];
+        Dictionary<string, RowData> suggestions = [];
+        Dictionary<string, RowData> supported = [];
 
-        if (_modListService.Mods is null || !InstallModsData.FinalModList.Any()) return;
-
-        var criteria = InstallModsData.SelectedInstance is { } instance
-            ? GameVersionCriteria.FromInstance(instance)
-            : null;
-
-        foreach (var version in InstallModsData.FinalModList)
+        if (_modListService.Mods is not null)
         {
-            if (InstallModsData.ModsWithIgnoredRecommendations.Contains(version.Version.Identifier))
-                continue;
+            var criteria = InstallModsData.SelectedInstance is { } instance
+                ? GameVersionCriteria.FromInstance(instance)
+                : null;
 
-            var source = version.Version.Identifier;
-
-            if (version.Version.Recommends is not null && version.Version.Recommends.Count > 0)
+            foreach (var planned in InstallModsData.FinalModList)
             {
-                foreach (var recommendation in version.Version.Recommends)
-                {
-                    if (InstallModsData.FinalModList.Any(v => v.Version.Identifier.Equals(recommendation.Name)) ||
-                        (InstallModsData.SelectedInstance is not null &&
-                         InstallModsData.SelectedInstance.Mods.Any(v => v.Identifier.Equals(recommendation.Name))) ||
-                        _modListService.Mods.FirstOrDefault(m => m.Id.Equals(recommendation.Name)) is null)
-                        continue;
+                if (InstallModsData.ModsWithIgnoredRecommendations.Contains(planned.Version.Identifier))
+                    continue;
 
-                    var recommended = FirstCompatibleVersion(recommendation.Name, criteria);
-                    if (recommended is not null)
-                        AddOrMerge(Recommendations, recommended, source, previousRecommendations, true);
-                }
+                var source = planned.Version.Identifier;
+
+                foreach (var recommendation in planned.Version.Recommends ?? [])
+                    AddRelationship(recommendations, recommendation, source, criteria);
+
+                foreach (var suggestion in planned.Version.Suggests ?? [])
+                    AddRelationship(suggestions, suggestion, source, criteria);
+
+                AddSupporting(supported, source, criteria);
             }
-
-            if (version.Version.Suggests is not null && version.Version.Suggests.Count > 0)
-            {
-                foreach (var suggestion in version.Version.Suggests)
-                {
-                    if (InstallModsData.FinalModList.Any(v => v.Version.Identifier.Equals(suggestion.Name)) ||
-                        (InstallModsData.SelectedInstance is not null &&
-                         InstallModsData.SelectedInstance.Mods.Any(v => v.Identifier.Equals(suggestion.Name))) ||
-                        _modListService.Mods.FirstOrDefault(m => m.Id.Equals(suggestion.Name)) is null)
-                        continue;
-
-                    var suggested = FirstCompatibleVersion(suggestion.Name, criteria);
-                    if (suggested is not null)
-                        AddOrMerge(Suggestions, suggested, source, previousSuggestions, false);
-                }
-            }
-
-            var supporting = _modListService.Mods
-                .SelectMany(mod => mod.Versions)
-                .Where(v => v.Supports?.Any(s =>
-                    string.Equals(s.Name, version.Version.Identifier, StringComparison.OrdinalIgnoreCase) ||
-                    (s.AnyOf?.Any(a =>
-                         string.Equals(a.Name, version.Version.Identifier, StringComparison.OrdinalIgnoreCase)) ??
-                     false)
-                ) ?? false)
-                .Where(v => CompatibilityService.IsCompatible(v, criteria));
-
-            foreach (var supportingVersion in supporting)
-                Supported.Add(new VersionListItemViewModel(supportingVersion, source,
-                    previousSupported.GetValueOrDefault(supportingVersion.Identifier, false)));
         }
+
+        Recommendations = BuildRows(recommendations, "Recommended by", previousRecommendations, true);
+        Suggestions = BuildRows(suggestions, "Suggested by", previousSuggestions, false);
+        Supported = BuildRows(supported, "Supports", previousSupported, false);
 
         ShowRecommendations = Recommendations.Count > 0;
         ShowSuggestions = Suggestions.Count > 0;
         ShowSupported = Supported.Count > 0;
     }
 
-    private static Dictionary<string, bool> SelectionState(List<VersionListItemViewModel> items) =>
-        items.GroupBy(i => i.Version.Identifier).ToDictionary(g => g.Key, g => g.First().IsSelected);
-
-    private static void AddOrMerge(List<VersionListItemViewModel> items, ModVersion version, string source,
-        Dictionary<string, bool> previousSelection, bool selectedByDefault)
+    private void AddRelationship(Dictionary<string, RowData> rows, Relationship relationship, string source,
+        GameVersionCriteria? criteria)
     {
-        var existing = items.FirstOrDefault(i => i.Version.Identifier == version.Identifier);
-        if (existing is not null)
-        {
-            existing.Sources.Add(source);
-            return;
-        }
+        if (relationship.Name is not { } name || IsPlannedOrInstalled(name)) return;
 
-        items.Add(new VersionListItemViewModel(version, source,
-            previousSelection.GetValueOrDefault(version.Identifier, selectedByDefault)));
+        var versions = _compatibilityService.GetVersionsWithinLimits(name, relationship.Version,
+            relationship.MinVersion, relationship.MaxVersion, criteria);
+        if (versions.Count == 0) return;
+
+        AddRow(rows, name, versions, source);
     }
 
-    private ModVersion? FirstCompatibleVersion(string? identifier, GameVersionCriteria? criteria) =>
-        _modListService.Mods?
-            .FirstOrDefault(m => m.Id == identifier)?
-            .Versions.FirstOrDefault(v => CompatibilityService.IsCompatible(v, criteria));
+    private void AddSupporting(Dictionary<string, RowData> rows, string supportedMod, GameVersionCriteria? criteria)
+    {
+        foreach (var mod in _modListService.Mods!)
+        {
+            if (IsPlannedOrInstalled(mod.Id)) continue;
+
+            var versions = mod.Versions
+                .Where(v => Supports(v, supportedMod) && CompatibilityService.IsCompatible(v, criteria))
+                .ToList();
+            if (versions.Count == 0) continue;
+
+            AddRow(rows, mod.Id, versions, supportedMod);
+        }
+    }
+
+    private static bool Supports(ModVersion version, string supportedMod) =>
+        version.Supports?.Any(s =>
+            string.Equals(s.Name, supportedMod, StringComparison.OrdinalIgnoreCase) ||
+            s.AnyOf?.Any(a => string.Equals(a.Name, supportedMod, StringComparison.OrdinalIgnoreCase)) == true) == true;
+
+    private static void AddRow(Dictionary<string, RowData> rows, string identifier, List<ModVersion> versions,
+        string source)
+    {
+        if (rows.TryGetValue(identifier, out var row))
+        {
+            var shared = row.Versions.Where(versions.Contains).ToList();
+            if (shared.Count > 0) row.Versions = shared;
+        }
+        else
+        {
+            row = new RowData(versions);
+            rows[identifier] = row;
+        }
+
+        if (!row.Sources.Contains(source)) row.Sources.Add(source);
+    }
+
+    private bool IsPlannedOrInstalled(string identifier) =>
+        InstallModsData.FinalModList.Any(m => m.Version.Identifier == identifier) ||
+        InstallModsData.SelectedInstance?.Mods.Any(m => m.Identifier == identifier) == true;
+
+    private static List<VersionListItemViewModel> BuildRows(Dictionary<string, RowData> rows, string sourcesPrefix,
+        Dictionary<string, RowState> previous, bool selectedByDefault) =>
+        rows.Select(pair =>
+        {
+            var state = previous.GetValueOrDefault(pair.Key);
+            return new VersionListItemViewModel(pair.Key, pair.Value.Versions, pair.Value.Sources, sourcesPrefix,
+                state?.IsSelected ?? selectedByDefault, state?.VersionId);
+        }).ToList();
+
+    private static Dictionary<string, RowState> RowStates(List<VersionListItemViewModel> items) =>
+        items.ToDictionary(i => i.Identifier, i => new RowState(i.IsSelected, i.SelectedVersion?.Id));
 
     [RelayCommand]
     private void ToggleRecommendation(VersionListItemViewModel item)
@@ -164,9 +184,9 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
     {
         List<PlannedModVersion> additions =
         [
-            .. Selected(Recommendations, "Recommended by"),
-            .. Selected(Suggestions, "Suggested by"),
-            .. Selected(Supported, "Supports")
+            .. Selected(Recommendations),
+            .. Selected(Suggestions),
+            .. Selected(Supported)
         ];
         additions = [.. additions.DistinctBy(a => a.Version.Identifier)];
         if (additions.Count == 0) return;
@@ -185,12 +205,12 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             [.. DependencyService.FindSuppressedRecommendations(result.FinalModList)];
     }
 
-    private static IEnumerable<PlannedModVersion> Selected(List<VersionListItemViewModel> items, string reason) =>
-        items.Where(i => i.IsSelected).Select(i => new PlannedModVersion
+    private static IEnumerable<PlannedModVersion> Selected(List<VersionListItemViewModel> items) =>
+        items.Where(i => i.IsSelected && i.SelectedVersion is not null).Select(i => new PlannedModVersion
         {
-            Version = i.Version,
+            Version = i.SelectedVersion!,
             IsUserRequested = true,
-            OptionalReason = $"{reason} {string.Join(", ", i.Sources)}"
+            OptionalReason = i.SourcesText
         });
 
     public override string Title => "Choose Recommendations";
