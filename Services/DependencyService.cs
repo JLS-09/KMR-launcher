@@ -118,6 +118,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         IsUserRequested = wrapper.IsUserRequested,
         IsVersionPickedByUser = wrapper.IsVersionPickedByUser,
         Relationship = wrapper.Relationship,
+        OptionalReason = wrapper.OptionalReason,
         RequiredBy = [.. wrapper.RequiredBy]
     };
 

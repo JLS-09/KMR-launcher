@@ -22,15 +22,34 @@
         <DataTemplate DataType="viewModels:InstallModsModulesStepViewModel">
             <views:InstallModsModulesStepView />
         </DataTemplate>
+        <DataTemplate DataType="viewModels:InstallModsSummaryStepViewModel">
+            <views:InstallModsSummaryStepView />
+        </DataTemplate>
     </Window.DataTemplates>
 
     <Design.DataContext>
         <viewModels:InstallModsViewModel />
     </Design.DataContext>
 
-    <Grid RowDefinitions="* Auto">
-        <ContentControl Grid.Row="0" Content="{Binding CurrentStep}" VerticalAlignment="Stretch" />
-        <DockPanel Grid.Row="1" Margin="32" VerticalAlignment="Bottom">
+    <Grid RowDefinitions="Auto * Auto">
+        <!-- Progress: one segment per visible step, red up to the current one -->
+        <ItemsControl Grid.Row="0" Margin="32 32 32 0" ItemsSource="{Binding ProgressSegments}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="1" ColumnSpacing="8" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="viewModels:ProgressSegment">
+                    <Panel Height="4">
+                        <Rectangle Fill="{DynamicResource PrimaryBackground}" IsVisible="{Binding !IsReached}" />
+                        <Rectangle Fill="{DynamicResource PrimaryRed}" IsVisible="{Binding IsReached}" />
+                    </Panel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <ContentControl Grid.Row="1" Content="{Binding CurrentStep}" VerticalAlignment="Stretch" />
+        <DockPanel Grid.Row="2" Margin="32" VerticalAlignment="Bottom">
             <Button Classes="Secondary" Padding="24 12" IsCancel="True" VerticalAlignment="Center"
                     Command="{Binding CancelCommand}"
                     IsVisible="{Binding IsFirstStep}">
@@ -47,8 +66,16 @@
                                FontSize="16" FontWeight="Bold" LetterSpacing="1" />
                 </StackPanel>
             </Button>
+            <!-- Finish replaces Next on the last step -->
+            <Button Classes="Primary" Padding="24 12" HorizontalAlignment="Right" VerticalAlignment="Center"
+                    Command="{Binding FinishCommand}"
+                    IsVisible="{Binding IsLastStep}">
+                <TextBlock Text="INSTALL" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
+                           FontSize="16" FontWeight="Bold" LetterSpacing="1" />
+            </Button>
             <Button Classes="Primary" Padding="24 7" HorizontalAlignment="Right" VerticalAlignment="Center"
-                    Command="{Binding NextCommand}">
+                    Command="{Binding NextCommand}"
+                    IsVisible="{Binding !IsLastStep}">
                 <StackPanel Orientation="Horizontal" Spacing="12">
                     <TextBlock Text="NEXT" VerticalAlignment="Center" FontFamily="{DynamicResource SpaceGrotesk}"
                                FontSize="16" FontWeight="Bold" LetterSpacing="1" />

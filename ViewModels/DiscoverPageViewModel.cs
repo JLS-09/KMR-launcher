@@ -2,6 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
@@ -28,7 +30,7 @@ public partial class DiscoverPageViewModel : PageViewModel
     [ObservableProperty] private string _modFilter = "";
 
     public ObservableCollection<ModListItemViewModel> SelectedMods { get; } = [];
-    public bool HasSelectedMods => SelectedMods.Count > 0;
+    [ObservableProperty] private bool _hasSelectedMods;
 
     partial void OnModFilterChanged(string value)
     {
@@ -51,6 +53,7 @@ public partial class DiscoverPageViewModel : PageViewModel
         ModListService = modListService;
         PageName = ApplicationPageNames.Discover;
         SelectedMods.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSelectedMods));
+        SelectedMods.CollectionChanged += (_, _) => HasSelectedMods = SelectedMods.Count > 0;
         if (_modListService.Mods is null) _ = FetchMods();
         else
         {
@@ -112,16 +115,25 @@ public partial class DiscoverPageViewModel : PageViewModel
     [RelayCommand]
     private async Task ApplyChanges()
     {
-        var window = new InstallModsWindow
+        var viewModel = new InstallModsViewModel(
+            [
+                .. SelectedMods
+                    .Select(m => new PlannedModVersion { Version = m.SelectedVersion, IsUserRequested = true })
+            ],
+            ModListService, _dependencyService, _compatibilityService);
+        var window = new InstallModsWindow { DataContext = viewModel };
+
+        viewModel.Cancelled += () => window.Close(null);
+        viewModel.Finished += data => window.Close(data);
+
+        if ((Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow is not
+            { } owner)
         {
-            DataContext =
-                new InstallModsViewModel(
-                    [
-                        .. SelectedMods
-                            .Select(m => new PlannedModVersion { Version = m.SelectedVersion, IsUserRequested = true })
-                    ],
-                    ModListService, _dependencyService, _compatibilityService)
-        };
-        window.Show();
+            window.Show();
+            return;
+        }
+
+        var confirmed = await window.ShowDialog<InstallModsData?>(owner);
+        if (confirmed is null) return;
     }
 }

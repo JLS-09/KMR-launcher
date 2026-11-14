@@ -32,15 +32,8 @@
         </Style>
     </UserControl.Styles>
 
-    <Grid Margin="32 32 32 0" RowDefinitions="Auto Auto *" RowSpacing="32">
-        <StackPanel Grid.Row="0" Spacing="4">
-            <Grid ColumnDefinitions="* * * *" ColumnSpacing="8">
-                <Rectangle Grid.Column="0" Height="4" Fill="{DynamicResource PrimaryRed}" />
-                <Rectangle Grid.Column="1" Height="4" Fill="{DynamicResource PrimaryBackground}" />
-                <Rectangle Grid.Column="2" Height="4" Fill="{DynamicResource PrimaryBackground}" />
-                <Rectangle Grid.Column="3" Height="4" Fill="{DynamicResource PrimaryBackground}" />
-            </Grid>
-        </StackPanel>
+    <Grid Margin="32 0 32 0" RowDefinitions="Auto Auto *" RowSpacing="32">
+        <!-- Row 0 was the progress bar; it lives in InstallModsWindow now -->
         <StackPanel Grid.Row="1" Spacing="8">
             <TextBlock Text="TARGET INSTANCE" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
                        FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
@@ -71,9 +64,11 @@
         </StackPanel>
         <Grid Grid.Row="2" RowDefinitions="Auto *" RowSpacing="8">
             <Grid Grid.Row="0" ColumnDefinitions="50 *" ColumnSpacing="24">
-                <TextBlock Grid.Column="0" Grid.Row="0" Text="CHANGE" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="CHANGE" LetterSpacing="1"
+                           Foreground="{DynamicResource SecondaryText}"
                            FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                <TextBlock Grid.Column="1" Text="SELECTED MODS" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+                <TextBlock Grid.Column="1" Text="SELECTED MODS" LetterSpacing="1"
+                           Foreground="{DynamicResource SecondaryText}"
                            FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
             </Grid>
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
@@ -87,8 +82,8 @@
                                 <TextBlock Grid.Column="0" Text="Install" />
                                 <StackPanel Grid.Column="1" Spacing="4">
                                     <TextBlock Text="{Binding Version.Id}" />
-                                    <TextBlock Text="{Binding ReasonForAction}" FontSize="12" 
-                                               Foreground="{DynamicResource SecondaryText}"/>
+                                    <TextBlock Text="{Binding ReasonForAction}" FontSize="12"
+                                               Foreground="{DynamicResource SecondaryText}" />
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>

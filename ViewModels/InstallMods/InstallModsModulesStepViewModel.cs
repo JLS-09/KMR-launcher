@@ -42,15 +42,15 @@ public partial class InstallModsModulesStepViewModel(
 
     partial void OnAllChoicesMadeChanged(bool value) => OnPropertyChanged(nameof(CanGoNext));
 
-    public override void OnEntering(InstallModsStepViewModel? previous)
+    public override void Prepare()
     {
-        base.OnEntering(previous);
-
         foreach (var group in Choices)
             group.PropertyChanged -= OnChoiceGroupChanged;
         Choices = [];
 
         ProcessChoosables();
+
+        ShouldSkip = !HasChoices;
     }
 
     private void ProcessChoosables()
@@ -112,7 +112,8 @@ public partial class InstallModsModulesStepViewModel(
             InstallModsData.FinalModList = new ObservableCollection<PlannedModVersion>(queued);
             InstallModsData.RequestedRemoveModVersions = new ObservableCollection<PlannedModVersion>(removes);
             InstallModsData.Problems = new ObservableCollection<ResolutionProblem>(problems);
-            InstallModsData.ModsWithIgnoredRecommendations = [.. DependencyService.FindSuppressedRecommendations(queued)];
+            InstallModsData.ModsWithIgnoredRecommendations =
+                [.. DependencyService.FindSuppressedRecommendations(queued)];
 
             SyncChoices(desired);
         }
@@ -338,7 +339,7 @@ public partial class InstallModsModulesStepViewModel(
 
     private static bool IsSameVirtualName(Relationship a, Relationship b) =>
         a.AnyOf is null && b.AnyOf is null && a.Name is not null && a.Name == b.Name;
-    
+
     private List<PlannedModVersion> EliminateAlreadyQueued(List<RawChoice> choices, List<PlannedModVersion> queued)
     {
         List<PlannedModVersion> swapped = [];
@@ -411,6 +412,7 @@ public partial class InstallModsModulesStepViewModel(
 
             if (resolved) choices.Remove(choice);
         }
+
         return swapped;
     }
 

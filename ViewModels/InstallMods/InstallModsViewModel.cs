@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Models;
@@ -23,6 +24,8 @@ public partial class InstallModsViewModel : ViewModelBase
     private InstallModsStepViewModel _currentStep = null!;
 
     [ObservableProperty] private bool _isFirstStep = true;
+    [ObservableProperty] private List<ProgressSegment> _progressSegments = [];
+    [ObservableProperty] private bool _isLastStep;
     public event Action<InstallModsData>? Finished;
     public event Action? Cancelled;
 
@@ -34,10 +37,12 @@ public partial class InstallModsViewModel : ViewModelBase
         _steps =
         [
             new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService),
-            new InstallModsRecommendsStepViewModel(InstallModsData, modListService, dependencyService),
-            new InstallModsModulesStepViewModel(InstallModsData, compatibilityService, dependencyService)
+            new InstallModsRecommendsStepViewModel(InstallModsData, modListService, compatibilityService,
+                dependencyService),
+            new InstallModsModulesStepViewModel(InstallModsData, compatibilityService, dependencyService),
+            new InstallModsSummaryStepViewModel(InstallModsData)
         ];
-        SetStep(0, fromIndex: -1);
+        ShowStep(0, forward: true);
     }
 
     public InstallModsViewModel()
@@ -69,11 +74,30 @@ public partial class InstallModsViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanGoNext))]
     private void Next()
     {
-        SetStep(_index + 1, _index);
+        _steps[_index].OnLeaving(forward: true);
+
+        var target = _index + 1;
+        _steps[target].Prepare();
+        while (_steps[target].ShouldSkip && target < _steps.Count - 1)
+        {
+            _steps[target].OnLeaving(forward: true);
+            target++;
+            _steps[target].Prepare();
+        }
+
+        ShowStep(target, forward: true);
     }
 
     [RelayCommand(CanExecute = nameof(CanGoBack))]
-    private void Back() => SetStep(_index - 1, _index);
+    private void Back()
+    {
+        var target = _index - 1;
+        while (target > 0 && _steps[target].ShouldSkip)
+            target--;
+
+        _steps[_index].OnLeaving(forward: false);
+        ShowStep(target, forward: false);
+    }
 
     [RelayCommand(CanExecute = nameof(CanFinish))]
     private void Finish() => Finished?.Invoke(InstallModsData);
@@ -81,15 +105,26 @@ public partial class InstallModsViewModel : ViewModelBase
     [RelayCommand]
     private void Cancel() => Cancelled?.Invoke();
 
-    private void SetStep(int newIndex, int fromIndex)
+    private void ShowStep(int index, bool forward)
     {
-        var previous = fromIndex >= 0 ? _steps[fromIndex] : null;
-        var next = _steps[newIndex];
+        _index = index;
+        IsFirstStep = index == 0;
+        IsLastStep = index == _steps.Count - 1;
+        CurrentStep = _steps[index];
+        CurrentStep.OnEntering(forward);
+        UpdateProgress();
+    }
 
-        previous?.OnLeaving(next);
-        _index = newIndex;
-        IsFirstStep = newIndex == 0;
-        CurrentStep = next;
-        next.OnEntering(previous);
+    private void UpdateProgress()
+    {
+        ProgressSegments =
+        [
+            .. _steps
+                .Select((step, i) => (step, i))
+                .Where(s => s.i == _index || !s.step.ShouldSkip)
+                .Select(s => new ProgressSegment(s.i <= _index))
+        ];
     }
 }
+
+public record ProgressSegment(bool IsReached);
