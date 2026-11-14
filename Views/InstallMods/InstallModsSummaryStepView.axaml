@@ -20,7 +20,8 @@
             <Setter Property="Margin" Value="0 0 0 4" />
             <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
         </Style>
-        <Style Selector="ListBox.summary-list > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Style
+            Selector="ListBox.summary-list > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
         </Style>
         <Style Selector="ListBox.summary-list > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">

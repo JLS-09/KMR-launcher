@@ -23,7 +23,7 @@ public partial class InstallModsSummaryStepViewModel(InstallModsData installMods
     public override bool CanGoNext => CanFinish;
 
     partial void OnCanFinishChanged(bool value) => OnPropertyChanged(nameof(CanGoNext));
-    
+
     public override void Prepare() => Refresh();
 
     public override void OnEntering(bool forward) => Refresh();
@@ -41,7 +41,7 @@ public partial class InstallModsSummaryStepViewModel(InstallModsData installMods
                 .Select(m => new SummaryRow(m.Version.Identifier, m.Version.Version,
                     InstallDetails(m, installed), FormatSize(m.Version.DownloadSize)))
         ];
-        
+
         ToRemove =
         [
             .. InstallModsData.RequestedRemoveModVersions

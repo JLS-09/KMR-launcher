@@ -19,10 +19,12 @@
             <Setter Property="Padding" Value="0" />
             <Setter Property="Margin" Value="0 0 0 16" />
         </Style>
-        <Style Selector="ListBox.choice-groups > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Style
+            Selector="ListBox.choice-groups > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent" />
         </Style>
-        <Style Selector="ListBox.choice-groups > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Style
+            Selector="ListBox.choice-groups > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="Transparent" />
         </Style>
 
@@ -39,7 +41,8 @@
         <Style Selector="ListBox.choice-options > ListBoxItem:selected">
             <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
         </Style>
-        <Style Selector="ListBox.choice-options > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Style
+            Selector="ListBox.choice-options > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource SideBarButtonActiveBackground}" />
         </Style>
     </UserControl.Styles>

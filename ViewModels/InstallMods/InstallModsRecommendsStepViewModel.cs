@@ -95,7 +95,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         if (IsSatisfied(relationship)) return;
 
         var options = GetOptions(relationship, criteria);
-        
+
         var selectedByDefault = isRecommendation && options.Count == 1;
 
         foreach (var (identifier, versions) in options)
@@ -234,7 +234,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
     {
         if (forward) AddSelectedMods();
     }
-    
+
     private void AddSelectedMods()
     {
         List<PlannedModVersion> additions =

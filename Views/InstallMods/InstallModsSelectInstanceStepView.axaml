@@ -64,9 +64,11 @@
         </StackPanel>
         <Grid Grid.Row="2" RowDefinitions="Auto *" RowSpacing="8">
             <Grid Grid.Row="0" ColumnDefinitions="50 *" ColumnSpacing="24">
-                <TextBlock Grid.Column="0" Grid.Row="0" Text="CHANGE" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="CHANGE" LetterSpacing="1"
+                           Foreground="{DynamicResource SecondaryText}"
                            FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                <TextBlock Grid.Column="1" Text="SELECTED MODS" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
+                <TextBlock Grid.Column="1" Text="SELECTED MODS" LetterSpacing="1"
+                           Foreground="{DynamicResource SecondaryText}"
                            FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
             </Grid>
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
@@ -80,8 +82,8 @@
                                 <TextBlock Grid.Column="0" Text="Install" />
                                 <StackPanel Grid.Column="1" Spacing="4">
                                     <TextBlock Text="{Binding Version.Id}" />
-                                    <TextBlock Text="{Binding ReasonForAction}" FontSize="12" 
-                                               Foreground="{DynamicResource SecondaryText}"/>
+                                    <TextBlock Text="{Binding ReasonForAction}" FontSize="12"
+                                               Foreground="{DynamicResource SecondaryText}" />
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>

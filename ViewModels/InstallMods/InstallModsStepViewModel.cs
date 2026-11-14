@@ -15,10 +15,16 @@ public abstract partial class InstallModsStepViewModel : ViewModelBase
     {
         InstallModsData = installModsData;
     }
-    
-    public virtual void Prepare() { }
 
-    public virtual void OnEntering(bool forward) { }
+    public virtual void Prepare()
+    {
+    }
 
-    public virtual void OnLeaving(bool forward) { }
+    public virtual void OnEntering(bool forward)
+    {
+    }
+
+    public virtual void OnLeaving(bool forward)
+    {
+    }
 }
