@@ -19,15 +19,17 @@ A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalon
 - Full local caching of the mod list, with a refresh on demand
 - Search by mod name and author
 - Select several mods at once, and choose a version per mod directly in the list
-- Install wizard (in progress):
+- Install wizard (it plans the install; actually installing comes with [M4](#roadmap)):
   - choose the target instance
   - automatic dependency resolution following the CKAN spec:
     - version ranges (`version`, `min_version`, `max_version`) with CKAN's version ordering
     - KSP compatibility (`ksp_version`, `ksp_version_min`/`max`, `ksp_version_strict`) against the instance's compatible versions
     - conflicts with new and installed mods, `provides` and `suppress_recommendations`
   - problems are shown in the wizard and block the next step, instead of crashing
-  - recommendations, suggestions and supported mods
+  - recommendations (ticked by default), suggestions and supported mods, each with a version picker that respects the relationship's version limits; `any_of` and virtual recommendations are offered per option
   - choosing between alternatives (`any_of` and virtual modules), with a version picker per option
+  - steps with nothing to show are skipped
+  - summary of what will be installed, replaced and removed, with the total download size and any problems; Install is only enabled when there are none
 
 ## Roadmap
 
@@ -37,8 +39,8 @@ The full plan is split into milestones:
 |---|---|---|
 | **M1** | Choose between alternative dependencies (`any_of` / virtual modules) in the install wizard | ✅ Done |
 | **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | ✅ Done |
-| **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | 🚧 Next |
-| **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | ⏳ Planned |
+| **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | ✅ Done |
+| **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | 🚧 Next |
 | **M5** | Instance management:<br>• remove and update mods<br>• `replaced_by`<br>• currently-playing card<br>• create an instance from inside the wizard<br>• import an existing KSP install (with CKAN registry)<br>• offline mode | ⏳ Planned |
 | **M6** | Extras:<br>• sorting the mod list<br>• instance export/import (`.ckan` metapackage)<br>• backup & restore<br>• extra metadata repos<br>• Windows and macOS support | ⏳ Planned |
 
@@ -59,7 +61,7 @@ On first start, the launcher clones CKAN-meta. This can take a few minutes.
 
 **Running the tests**
 
-The resolver logic (version ordering, KSP compatibility, conflicts, `provides`, `suppress_recommendations` and the module choices) is covered by xUnit tests in `KMRLauncherMvvm.Tests`:
+The resolver logic (version ordering, KSP compatibility, conflicts, `provides`, `suppress_recommendations`) and the install wizard's steps (recommendations, module choices, skipping and the summary) are covered by xUnit tests in `KMRLauncherMvvm.Tests`:
 
 ```bash
 dotnet test
