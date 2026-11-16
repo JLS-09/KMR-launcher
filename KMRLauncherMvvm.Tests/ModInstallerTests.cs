@@ -16,7 +16,9 @@ public class ModInstallerTests
         {
             foreach (var path in paths)
             {
-                using var writer = new StreamWriter(zip.CreateEntry(path).Open());
+                var entry = zip.CreateEntry(path);
+                if (path.EndsWith('/')) continue; // a folder entry
+                using var writer = new StreamWriter(entry.Open());
                 writer.Write(path);
             }
         }
@@ -41,6 +43,14 @@ public class ModInstallerTests
         var zip = Zip("MyMod-1.0/GameData/MyMod/Parts/a.cfg", "MyMod-1.0/GameData/MyMod/b.dll", "MyMod-1.0/README.md");
 
         Assert.Equal(["GameData/MyMod/Parts/a.cfg", "GameData/MyMod/b.dll"], Targets(WithInstall("MyMod"), zip));
+    }
+
+    [Fact]
+    public void Ckan_files_inside_the_zip_are_not_installed()
+    {
+        var zip = Zip("MyMod/a.cfg", "MyMod/MyMod.ckan");
+
+        Assert.Equal(["GameData/MyMod/a.cfg"], Targets(WithInstall("MyMod"), zip));
     }
 
     [Fact]
@@ -149,6 +159,72 @@ public class ModInstallerTests
         Assert.False(ModInstaller.BuildPlan(
             WithInstall("X", new InstallDirective { File = "Craft/My.craft", InstallTo = "Ships/VAB" }), zip)[0]
             .MayCreateDirectories);
+        // CKAN also allows Missions and Ships/Script
+        Assert.True(ModInstaller.BuildPlan(
+            WithInstall("X", new InstallDirective { Find = "Craft", InstallTo = "Missions" }), zip)[0].MayCreateDirectories);
+        Assert.True(ModInstaller.BuildPlan(
+            WithInstall("X", new InstallDirective { Find = "Craft", InstallTo = "Ships/Script" }), zip)[0]
+            .MayCreateDirectories);
+    }
+
+    [Fact]
+    public void Find_with_a_path_matches_the_end_of_a_path()
+    {
+        // Advanced Jet Engine v2.20.1: { "find": "GameData/AJE", "install_to": "GameData" }
+        var zip = Zip("GameData/", "GameData/AJE/", "GameData/AJE/B9.cfg", "GameData/AJE/Plugins/AJE.dll");
+        var mod = WithInstall("AdvancedJetEngine",
+            new InstallDirective { Find = "GameData/AJE", InstallTo = "GameData" });
+
+        Assert.Equal(["GameData/AJE/B9.cfg", "GameData/AJE/Plugins/AJE.dll"], Targets(mod, zip));
+
+        var nested = Zip("AJE-2.20/GameData/AJE/B9.cfg", "AJE-2.20/Extras/AJE/x.cfg");
+        Assert.Equal(["GameData/AJE/B9.cfg"], Targets(mod, nested));
+    }
+
+    [Fact]
+    public void File_find_and_find_regexp_ignore_case()
+    {
+        var zip = Zip("release/gamedata/MyMod/a.cfg");
+
+        Assert.Equal(["GameData/MyMod/a.cfg"],
+            Targets(WithInstall("X", new InstallDirective { Find = "mymod", InstallTo = "GameData" }), zip));
+        Assert.Equal(["GameData/MyMod/a.cfg"],
+            Targets(WithInstall("X", new InstallDirective { File = "Release/GameData/MyMod", InstallTo = "GameData" }), zip));
+        Assert.Equal(["GameData/MyMod/a.cfg"],
+            Targets(WithInstall("X", new InstallDirective { FindRegexp = "MYMOD$", InstallTo = "GameData" }), zip));
+    }
+
+    [Fact]
+    public void Find_installs_every_match_that_starts_earliest()
+    {
+        var zip = Zip("A/Foo/a.cfg", "B/Foo/b.cfg", "C/Deep/Foo/c.cfg");
+        var mod = WithInstall("X", new InstallDirective { Find = "Foo", InstallTo = "GameData" });
+
+        Assert.Equal(["GameData/Foo/a.cfg", "GameData/Foo/b.cfg"], Targets(mod, zip));
+    }
+
+    [Fact]
+    public void Find_regexp_installs_every_match_not_inside_another()
+    {
+        var zip = Zip("Pack/Textures-HR/a.dds", "Pack/Textures-HR/Textures-Extra/b.dds", "Pack/Textures-LR/c.dds",
+            "Pack/Other/d.dds");
+        var mod = WithInstall("X", new InstallDirective { FindRegexp = "Textures-", InstallTo = "GameData/Pack" });
+
+        Assert.Equal(
+            ["GameData/Pack/Textures-HR/Textures-Extra/b.dds", "GameData/Pack/Textures-HR/a.dds",
+                "GameData/Pack/Textures-LR/c.dds"],
+            Targets(mod, zip));
+    }
+
+    [Fact]
+    public void A_matched_game_folder_is_not_installed_inside_itself_except_to_GameRoot()
+    {
+        var zip = Zip("Foo-1.0/GameData/Foo/a.cfg", "Foo-1.0/Ships/VAB/My.craft");
+
+        Assert.Equal(["GameData/Foo/a.cfg"],
+            Targets(WithInstall("X", new InstallDirective { File = "Foo-1.0/GameData", InstallTo = "GameData" }), zip));
+        Assert.Equal(["GameData/Foo/a.cfg"],
+            Targets(WithInstall("X", new InstallDirective { File = "Foo-1.0/GameData", InstallTo = "GameRoot" }), zip));
     }
 
     [Fact]
@@ -173,6 +249,20 @@ public class ModInstallerTests
             new InstallDirective { File = "A/Foo", InstallTo = "GameData" },
             new InstallDirective { File = "B/Foo", InstallTo = "GameData" });
         Assert.Throws<ModInstallException>(() => ModInstaller.BuildPlan(mod, twice));
+    }
+
+    [Fact]
+    public void A_directive_whose_files_another_directive_already_installs_is_fine()
+    {
+        // ImprovedTreeEnginePlacement v1.4.0
+        var zip = Zip("ImprovedTreeEnginePlacement/a.cfg", "ImprovedTreeEnginePlacement/Extras/b.cfg");
+        var mod = WithInstall("X",
+            new InstallDirective { Find = "ImprovedTreeEnginePlacement", InstallTo = "GameData" },
+            new InstallDirective
+                { Find = "ImprovedTreeEnginePlacement/Extras", InstallTo = "GameData/ImprovedTreeEnginePlacement" });
+
+        Assert.Equal(["GameData/ImprovedTreeEnginePlacement/Extras/b.cfg", "GameData/ImprovedTreeEnginePlacement/a.cfg"],
+            Targets(mod, zip));
     }
 
     [Fact]

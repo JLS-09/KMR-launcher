@@ -12,6 +12,8 @@ public record InstallStep(ZipArchiveEntry Entry, string TargetPath, bool MayCrea
 
 public static class ModInstaller
 {
+    private static readonly string[] ReservedPaths = ["GameData", "Ships", "Missions"];
+
     public static readonly string[] AllowedTargets =
     [
         "GameData", "Missions", "Ships", "Ships/SPH", "Ships/VAB", "Ships/@thumbs/VAB", "Ships/@thumbs/SPH",
@@ -50,17 +52,16 @@ public static class ModInstaller
         foreach (var directive in directives)
         {
             var target = CheckInstallTo(mod, directive.InstallTo);
-            var mayCreateDirectories = target == "GameData" || target.StartsWith("GameData/") ||
-                                       target == "Tutorial" || target == "Scenarios";
-            var root = FindRoot(mod, directive, files, directories);
-            var parentLength = ParentOf(root).Length;
+            var roots = FindRoots(mod, directive, files, directories);
             var added = 0;
 
             foreach (var (path, entry) in files)
             {
-                if (path != root && !path.StartsWith(root + "/")) continue;
-                if (!IsWanted(path, directive)) continue;
+                var root = roots.FirstOrDefault(r => path == r || path.StartsWith(r + "/"));
+                if (root is null || !IsWanted(path, directive)) continue;
+                if (path.EndsWith(".ckan", StringComparison.OrdinalIgnoreCase)) continue;
 
+                var parentLength = ParentOf(root).Length;
                 var relative = parentLength == 0 ? path : path[(parentLength + 1)..];
                 if (directive.As is { } newName)
                 {
@@ -69,6 +70,12 @@ public static class ModInstaller
                     var slash = relative.IndexOf('/');
                     relative = slash < 0 ? newName : newName + relative[slash..];
                 }
+                else if (target != "GameRoot")
+                {
+                    var reserved = ReservedPaths.FirstOrDefault(r =>
+                        relative.StartsWith(r + "/", StringComparison.OrdinalIgnoreCase));
+                    if (reserved is not null) relative = relative[(reserved.Length + 1)..];
+                }
 
                 if (relative.Split('/').Any(part => part is ".." or "."))
                     throw new ModInstallException($"{Name(mod)} contains a file with an unsafe path: \"{path}\".");
@@ -76,19 +83,23 @@ public static class ModInstaller
                 var targetPath = target == "GameRoot" ? relative : $"{target}/{relative}";
                 if (byTarget.TryGetValue(targetPath, out var other))
                 {
-                    if (other == path) continue; // Two directives picked the same file: install it once
+                    if (other == path)
+                    {
+                        added++;
+                        continue;
+                    }
                     throw new ModInstallException(
                         $"{Name(mod)} would install both \"{other}\" and \"{path}\" to \"{targetPath}\".");
                 }
 
                 byTarget[targetPath] = path;
-                steps.Add(new InstallStep(entry, targetPath, mayCreateDirectories));
+                steps.Add(new InstallStep(entry, targetPath, MayCreateDirectories(target, targetPath)));
                 added++;
             }
 
             if (added == 0)
                 throw new ModInstallException(
-                    $"{Name(mod)}: the install directive for \"{root}\" doesn't install any files.");
+                    $"{Name(mod)}: the install directive for \"{string.Join("\", \"", roots)}\" doesn't install any files.");
         }
 
         return steps;
@@ -104,8 +115,8 @@ public static class ModInstaller
         if (AllowedTargets.Contains(target) || isSubfolder) return target;
         throw new ModInstallException($"{Name(mod)} wants to install to \"{installTo}\", which isn't allowed.");
     }
-
-    private static string FindRoot(ModVersion mod, InstallDirective directive,
+    
+    private static List<string> FindRoots(ModVersion mod, InstallDirective directive,
         Dictionary<string, ZipArchiveEntry> files, HashSet<string> directories)
     {
         var sources = new[] { directive.File, directive.Find, directive.FindRegexp }.Count(s => s is not null);
@@ -116,47 +127,67 @@ public static class ModInstaller
         if (directive.File is { } file)
         {
             var path = Normalize(file);
-            if (files.ContainsKey(path) || directories.Contains(path)) return path;
+            var exact = files.Keys.Concat(directories)
+                .Where(p => p.Equals(path, StringComparison.OrdinalIgnoreCase))
+                .Distinct()
+                .ToList();
+            if (exact.Count > 0) return exact;
             throw new ModInstallException($"{Name(mod)}: \"{file}\" isn't in the downloaded archive.");
         }
 
-        var candidates = directive.FindMatchesFiles == true ? directories.Concat(files.Keys) : directories;
+        var candidates = directive.FindMatchesFiles == true
+            ? directories.Concat(files.Keys).ToList()
+            : directories.ToList();
+        var what = directive.FindMatchesFiles == true ? "a folder or file" : "a folder";
 
-        IEnumerable<string> matches;
+        List<string> roots;
         string description;
-        if (directive.Find is { } find)
+        if (directive.Find is { } rawFind)
         {
-            matches = candidates.Where(path => LastPart(path) == find);
-            description = $"a folder named \"{find}\"";
+            var find = Normalize(rawFind);
+            var matches = candidates
+                .Select(path => (Path: path, Start: FindStart(path, find)))
+                .Where(m => m.Start >= 0)
+                .ToList();
+            var earliest = matches.Count > 0 ? matches.Min(m => m.Start) : -1;
+            roots = [.. matches.Where(m => m.Start == earliest).Select(m => m.Path)];
+            description = find.Contains('/') ? $"{what} at \"{find}\"" : $"{what} named \"{find}\"";
         }
         else
         {
             Regex regex;
             try
             {
-                regex = new Regex(directive.FindRegexp!);
+                regex = new Regex(directive.FindRegexp!, RegexOptions.IgnoreCase);
             }
             catch (ArgumentException)
             {
                 throw new ModInstallException($"{Name(mod)} has an invalid find_regexp: \"{directive.FindRegexp}\".");
             }
 
-            matches = candidates.Where(path => regex.IsMatch(path));
-            description = $"a folder matching \"{directive.FindRegexp}\"";
+            roots = [.. candidates.Where(path => regex.IsMatch(path))];
+            description = $"{what} matching \"{directive.FindRegexp}\"";
         }
 
-        // "Top-most": the match with the fewest folders above it; the shortest path breaks a tie
-        var root = matches
-            .OrderBy(path => path.Count(c => c == '/'))
-            .ThenBy(path => path.Length)
-            .ThenBy(path => path, StringComparer.Ordinal)
-            .FirstOrDefault();
+        roots = [.. roots.Where(r => !roots.Any(other => r != other && r.StartsWith(other + "/")))
+            .Distinct()
+            .Order(StringComparer.Ordinal)];
 
-        return root ?? throw new ModInstallException(
-            $"{Name(mod)}: the downloaded archive doesn't contain {description}.");
+        return roots.Count > 0
+            ? roots
+            : throw new ModInstallException($"{Name(mod)}: the downloaded archive doesn't contain {description}.");
     }
 
-    // filter / filter_regexp / include_only / include_only_regexp, matched against the full path in the zip
+    private static int FindStart(string path, string find)
+    {
+        if (path.Equals(find, StringComparison.OrdinalIgnoreCase)) return 0;
+        return path.EndsWith("/" + find, StringComparison.OrdinalIgnoreCase) ? path.Length - find.Length - 1 : -1;
+    }
+
+    private static bool MayCreateDirectories(string target, string targetPath) =>
+        target is "GameData" or "Tutorial" or "Scenarios" or "Missions" || target.StartsWith("GameData/") ||
+        targetPath.StartsWith("Ships/Script/");
+
     private static bool IsWanted(string path, InstallDirective directive)
     {
         var parts = path.Split('/');
@@ -174,7 +205,6 @@ public static class ModInstaller
                (directive.IncludeOnlyRegexp?.Any(r => Regex.IsMatch(path, r)) ?? false);
     }
 
-    // Forward slashes, no leading or trailing slash
     private static string Normalize(string path) => path.Replace('\\', '/').Trim('/');
 
     private static string ParentOf(string path)
@@ -182,8 +212,6 @@ public static class ModInstaller
         var slash = path.LastIndexOf('/');
         return slash < 0 ? "" : path[..slash];
     }
-
-    private static string LastPart(string path) => path[(path.LastIndexOf('/') + 1)..];
 
     private static string Name(ModVersion mod) => $"{mod.Identifier} {mod.Version}";
 }

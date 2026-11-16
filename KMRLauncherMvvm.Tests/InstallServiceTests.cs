@@ -312,8 +312,8 @@ public class InstallServiceTests : IDisposable
         var instance = Instance();
         var craft = Package("Craft", "1.0", "Craft/My.craft");
         craft.Install = [new InstallDirective { File = "Craft/My.craft", InstallTo = "Ships/VAB" }];
-        var missions = Package("Mission", "1.0", "M/x.mission");
-        missions.Install = [new InstallDirective { File = "M", InstallTo = "Missions" }];
+        var missions = Package("Spaceplane", "1.0", "M/x.craft");
+        missions.Install = [new InstallDirective { File = "M", InstallTo = "Ships/SPH" }];
 
         await Service().RunAsync(Run(instance, [Requested(craft)]), 4, CancellationToken.None);
         Assert.True(Exists("Ships/VAB/My.craft"));
