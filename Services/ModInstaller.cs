@@ -12,7 +12,7 @@ public record InstallStep(ZipArchiveEntry Entry, string TargetPath, bool MayCrea
 
 public static class ModInstaller
 {
-    private static readonly string[] AllowedTargets =
+    public static readonly string[] AllowedTargets =
     [
         "GameData", "Missions", "Ships", "Ships/SPH", "Ships/VAB", "Ships/@thumbs/VAB", "Ships/@thumbs/SPH",
         "Ships/Script", "Tutorial", "Scenarios", "GameRoot"
