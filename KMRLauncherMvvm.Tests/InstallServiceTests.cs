@@ -32,6 +32,7 @@ public class InstallServiceTests : IDisposable
     private class FakeDownloader(string folder) : IModDownloader
     {
         public Dictionary<string, string[]> Archives { get; } = [];
+        public Dictionary<string, UnixFileMode> StoredModes { get; } = [];
         public HashSet<string> Cached { get; } = [];
         public HashSet<string> Failing { get; } = [];
         public ConcurrentDictionary<string, TaskCompletionSource> Gates { get; } = [];
@@ -74,7 +75,10 @@ public class InstallServiceTests : IDisposable
             using var zip = ZipFile.Open(path, ZipArchiveMode.Create);
             foreach (var entry in Archives[mod.Identifier])
             {
-                using var writer = new StreamWriter(zip.CreateEntry(entry).Open());
+                var zipEntry = zip.CreateEntry(entry);
+                if (StoredModes.TryGetValue(mod.Identifier, out var mode))
+                    zipEntry.ExternalAttributes = (0x8000 | (int)mode) << 16;
+                using var writer = new StreamWriter(zipEntry.Open());
                 writer.Write($"{mod.Identifier} {mod.Version}");
             }
 
@@ -355,5 +359,24 @@ public class InstallServiceTests : IDisposable
 
         Assert.Equal(["Meta"], instance.Mods.Select(m => m.Identifier));
         Assert.Empty(instance.ModRecords["Meta"].Files);
+    }
+    
+    [Fact]
+    public async Task Files_are_readable_whatever_permissions_the_zip_stored()
+    {
+        if (OperatingSystem.IsWindows()) return;
+        var instance = Instance();
+        _downloader.StoredModes["Odd"] = UnixFileMode.UserWrite;
+        _downloader.StoredModes["Tool"] = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute;
+
+        await Service().RunAsync(Run(instance, [Requested(Package("Odd")), Requested(Package("Tool"))]), 4,
+            CancellationToken.None);
+
+        var odd = File.GetUnixFileMode(Path.Combine(_root, "GameData", "Odd", "Odd.cfg"));
+        Assert.Equal(UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead | UnixFileMode.OtherRead,
+            odd);
+        Assert.True(File.GetUnixFileMode(Path.Combine(_root, "GameData", "Tool", "Tool.cfg"))
+            .HasFlag(UnixFileMode.UserExecute | UnixFileMode.OtherRead));
+        Assert.Equal("Odd 1.0", await File.ReadAllTextAsync(Path.Combine(_root, "GameData", "Odd", "Odd.cfg")));
     }
 }

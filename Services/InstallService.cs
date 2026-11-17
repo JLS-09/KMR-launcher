@@ -281,11 +281,21 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
                 lock (changes) changes.Written.Add(step.TargetPath);
                 job.InstalledFiles.Add(step.TargetPath);
                 step.Entry.ExtractToFile(target, overwrite: false);
+                MakeReadable(target);
                 job.FilesDone++;
             }
         }
 
         job.State = ModInstallState.Done;
+    }
+    
+    private static void MakeReadable(string path)
+    {
+        if (OperatingSystem.IsWindows()) return;
+        const UnixFileMode readable = UnixFileMode.UserRead | UnixFileMode.UserWrite |
+                                      UnixFileMode.GroupRead | UnixFileMode.OtherRead;
+        var mode = File.GetUnixFileMode(path);
+        if ((mode & readable) != readable) File.SetUnixFileMode(path, mode | readable);
     }
 
     private static void CreateFolders(string root, string folder, RunChanges changes)
