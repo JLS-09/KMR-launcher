@@ -8,77 +8,105 @@
              x:Class="KMRLauncherMvvm.Views.SettingsPageView"
              Background="{DynamicResource PrimaryBackground}"
              Foreground="{DynamicResource PrimaryText}">
-    
+
     <Design.DataContext>
-        <vm:SettingsPageViewModel/>
+        <vm:SettingsPageViewModel />
     </Design.DataContext>
-    
+
     <StackPanel Margin="32 16" Spacing="32">
-        <TextBlock Text="GLOBAL SETTINGS" 
+        <TextBlock Text="GLOBAL SETTINGS"
                    FontFamily="{DynamicResource SpaceMonoBold}"
                    FontSize="48"
                    LetterSpacing="1"
-                   Foreground="{DynamicResource PrimaryText}"/>
-            <StackPanel Spacing="16">
-                <Grid ColumnDefinitions="Auto, *" Margin="0">
-                    <TextBlock Grid.Column="0" Text="GENERAL CONFIGURATION" FontFamily="{DynamicResource SpaceMonoBold}" FontSize="18" LetterSpacing="3" Foreground="{DynamicResource SecondaryText}" />
-                    <Border Grid.Column="1" Background="{DynamicResource SecondaryText}" Height="2" HorizontalAlignment="Stretch" Margin="16 10 0 10" Opacity="0.4"/>
-                </Grid>
-                <Border Padding="32" Background="{DynamicResource SideBarButtonActiveBackground}" CornerRadius="20">
-                    <StackPanel Spacing="16">
-                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
-                            <ComboBox Grid.Column="0" ItemsSource="{Binding AllKspVersions}" 
-                                      SelectedValue="{Binding ZipVersion}" 
-                                      Background="{DynamicResource SideBarBackground}" 
-                                      HorizontalAlignment="Right" Width="100" BorderBrush="{DynamicResource PrimaryRed}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                            <Border Grid.Column="1" Background="Black" CornerRadius="9">
-                                <Grid ColumnDefinitions="Auto, *">
-                                    <Button Grid.Column="0" Classes="Primary" HorizontalAlignment="Right"
-                                            Command="{Binding BrowseFolderCommand}"
-                                            CommandParameter="{Binding $parent[UserControl]}">Open File</Button>
-                                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Disabled" 
-                                                  HorizontalScrollBarVisibility="Auto" Padding="15 0">
-                                        <TextBlock FontFamily="{DynamicResource SpaceMonoRegular}"
-                                                   Foreground="{DynamicResource SecondaryText}"
-                                                   VerticalAlignment="Center"
-                                                   TextWrapping="NoWrap"
-                                                   FontSize="15"
-                                                   Text="{Binding ZipPath}"/>
-                                    </ScrollViewer>
-                                </Grid>
-                            </Border>
-                            <Button Grid.Column="2" Classes="Primary" HorizontalAlignment="Right"
-                                    Command="{Binding AddKspZipCommand}">Add KSP Zip</Button>
-                        </Grid>
-                        
-                        <ListBox ItemsSource="{Binding AppSettings.KspZips}">
-                            <ListBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel/>
-                                </ItemsPanelTemplate>
-                            </ListBox.ItemsPanel>
-                            
-                            <ListBox.ItemTemplate>
+                   Foreground="{DynamicResource PrimaryText}" />
+        <StackPanel Spacing="16">
+            <Grid ColumnDefinitions="Auto, *" Margin="0">
+                <TextBlock Grid.Column="0" Text="GENERAL CONFIGURATION" FontFamily="{DynamicResource SpaceMonoBold}"
+                           FontSize="18" LetterSpacing="3" Foreground="{DynamicResource SecondaryText}" />
+                <Border Grid.Column="1" Background="{DynamicResource SecondaryText}" Height="2"
+                        HorizontalAlignment="Stretch" Margin="16 10 0 10" Opacity="0.4" />
+            </Grid>
+            <Border Padding="32" Background="{DynamicResource SideBarButtonActiveBackground}" CornerRadius="20">
+                <StackPanel Spacing="16">
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
+                        <ComboBox Grid.Column="0" ItemsSource="{Binding AllKspVersions}"
+                                  SelectedValue="{Binding ZipVersion}"
+                                  Background="{DynamicResource SideBarBackground}"
+                                  HorizontalAlignment="Right" Width="100" BorderBrush="{DynamicResource PrimaryRed}">
+                            <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid ColumnDefinitions="5*, *, auto" Margin="0 8">
-                                        <TextBlock Grid.Column="0" Text="{Binding Path}" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Version}" VerticalAlignment="Center"/>
-                                        <Button Grid.Column="2" Classes="Primary"
-                                                Command="{Binding $parent[UserControl].((vm:SettingsPageViewModel)DataContext).RemoveKspZipCommand}"
-                                                CommandParameter="{Binding}">REMOVE</Button>
-                                    </Grid>
+                                    <TextBlock Text="{Binding}" />
                                 </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Border Grid.Column="1" Background="Black" CornerRadius="9">
+                            <Grid ColumnDefinitions="Auto, *">
+                                <Button Grid.Column="0" Classes="Primary" HorizontalAlignment="Right"
+                                        Command="{Binding BrowseFolderCommand}"
+                                        CommandParameter="{Binding $parent[UserControl]}">
+                                    Open File
+                                </Button>
+                                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Disabled"
+                                              HorizontalScrollBarVisibility="Auto" Padding="15 0">
+                                    <TextBlock FontFamily="{DynamicResource SpaceMonoRegular}"
+                                               Foreground="{DynamicResource SecondaryText}"
+                                               VerticalAlignment="Center"
+                                               TextWrapping="NoWrap"
+                                               FontSize="15"
+                                               Text="{Binding ZipPath}" />
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                        <Button Grid.Column="2" Classes="Primary" HorizontalAlignment="Right"
+                                Command="{Binding AddKspZipCommand}">
+                            Add KSP Zip
+                        </Button>
+                    </Grid>
+
+                    <ListBox ItemsSource="{Binding AppSettings.KspZips}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="5*, *, auto" Margin="0 8">
+                                    <TextBlock Grid.Column="0" Text="{Binding Path}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Version}" VerticalAlignment="Center" />
+                                    <Button Grid.Column="2" Classes="Primary"
+                                            Command="{Binding $parent[UserControl].((vm:SettingsPageViewModel)DataContext).RemoveKspZipCommand}"
+                                            CommandParameter="{Binding}">
+                                        REMOVE
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        <StackPanel Spacing="16">
+            <Grid ColumnDefinitions="Auto, *" Margin="0">
+                <TextBlock Grid.Column="0" Text="DOWNLOADS" FontFamily="{DynamicResource SpaceMonoBold}" FontSize="18"
+                           LetterSpacing="3" Foreground="{DynamicResource SecondaryText}" />
+                <Border Grid.Column="1" Background="{DynamicResource SecondaryText}" Height="2"
+                        HorizontalAlignment="Stretch" Margin="16 10 0 10" Opacity="0.4" />
+            </Grid>
+            <Border Padding="32" Background="{DynamicResource SideBarButtonActiveBackground}" CornerRadius="20">
+                <Grid ColumnDefinitions="*, Auto" ColumnSpacing="16">
+                    <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Text="Parallel downloads" FontSize="16" />
+                        <TextBlock Text="How many mods are downloaded at the same time when installing (1-16)."
+                                   Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap" />
                     </StackPanel>
-                </Border>
-            </StackPanel>
+                    <NumericUpDown Grid.Column="1" Width="140" Minimum="1" Maximum="16" Increment="1"
+                                   FormatString="0" ParsingNumberStyle="Integer"
+                                   Value="{Binding MaxParallelDownloads}" />
+                </Grid>
+            </Border>
+        </StackPanel>
     </StackPanel>
-    
+
 </UserControl>

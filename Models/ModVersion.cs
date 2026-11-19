@@ -38,7 +38,7 @@ public class ModVersion
     public List<string>? Download { get; set; }
 
     [JsonPropertyName("download_hash")] public DownloadHash? DownloadHash { get; set; }
-    [JsonPropertyName("download_size")] public int? DownloadSize { get; set; }
+    [JsonPropertyName("download_size")] public long? DownloadSize { get; set; }
 
     [JsonPropertyName("download_content_type")]
     public string? DownloadContentType { get; set; }
@@ -108,9 +108,6 @@ public class InstallDirective
     [JsonPropertyName("find")] public string? Find { get; set; }
     [JsonPropertyName("find_regexp")] public string? FindRegexp { get; set; }
 
-    [JsonPropertyName("find_matches_file")]
-    public bool? FindMatchesFile { get; set; }
-
     [JsonPropertyName("find_matches_files")]
     public bool? FindMatchesFiles { get; set; }
 
@@ -124,7 +121,14 @@ public class InstallDirective
     [JsonConverter(typeof(StringOrArrayConverter))]
     public List<string>? FilterRegexp { get; set; }
 
-    [JsonPropertyName("include_only")] public List<string>? IncludeOnly { get; set; }
+    [JsonPropertyName("include_only")]
+    [JsonConverter(typeof(StringOrArrayConverter))]
+    public List<string>? IncludeOnly { get; set; }
+
+    [JsonPropertyName("include_only_regexp")]
+    [JsonConverter(typeof(StringOrArrayConverter))]
+    public List<string>? IncludeOnlyRegexp { get; set; }
+
     [JsonPropertyName("comment")] public string? Comment { get; set; }
 
     public override string ToString()
@@ -132,12 +136,12 @@ public class InstallDirective
         return $"{{ InstallTo: \"{InstallTo}\", File: {(File is not null ? $"\"{File}\"" : "null")}, " +
                $"Find: {(Find is not null ? $"\"{Find}\"" : "null")}, " +
                $"FindRegexp: {(FindRegexp is not null ? $"\"{FindRegexp}\"" : "null")}, " +
-               $"FindMatchesFile: {(FindMatchesFile is not null ? $"{FindMatchesFile}" : "null")}, " +
                $"FindMatchesFiles: {(FindMatchesFiles is not null ? $"{FindMatchesFiles}" : "null")}, " +
                $"As: {(As is not null ? $"\"{As}\"" : "null")}, " +
                $"Filter: {(Filter is not null ? $"[\"{string.Join("\", \"", Filter)}\"]" : "null")}, " +
                $"FilterRegexp: {(FilterRegexp is not null ? $"[\"{string.Join("\", \"", FilterRegexp)}\"]" : "null")}, " +
                $"IncludeOnly: {(IncludeOnly is not null ? $"[\"{string.Join("\", \"", IncludeOnly)}\"]" : "null")}, " +
+               $"IncludeOnlyRegexp: {(IncludeOnlyRegexp is not null ? $"[\"{string.Join("\", \"", IncludeOnlyRegexp)}\"]" : "null")}, " +
                $"Comment: {(Comment is not null ? $"\"{Comment}\"" : "null")} }}";
     }
 }

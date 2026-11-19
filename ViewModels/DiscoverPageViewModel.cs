@@ -19,6 +19,7 @@ public partial class DiscoverPageViewModel : PageViewModel
 {
     public bool IsEnabledFlag => true;
     private readonly IModApiService _api;
+    private readonly InstallService? _installService;
     private DependencyService _dependencyService;
     private CompatibilityService _compatibilityService;
 
@@ -45,14 +46,14 @@ public partial class DiscoverPageViewModel : PageViewModel
     }
 
     public DiscoverPageViewModel(IModApiService api, ModListService modListService,
-        DependencyService dependencyService, CompatibilityService compatibilityService)
+        DependencyService dependencyService, CompatibilityService compatibilityService, InstallService installService)
     {
         _api = api;
         _dependencyService = dependencyService;
         _compatibilityService = compatibilityService;
+        _installService = installService;
         ModListService = modListService;
         PageName = ApplicationPageNames.Discover;
-        SelectedMods.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSelectedMods));
         SelectedMods.CollectionChanged += (_, _) => HasSelectedMods = SelectedMods.Count > 0;
         if (_modListService.Mods is null) _ = FetchMods();
         else
@@ -134,6 +135,19 @@ public partial class DiscoverPageViewModel : PageViewModel
         }
 
         var confirmed = await window.ShowDialog<InstallModsData?>(owner);
-        if (confirmed is null) return;
+        if (confirmed?.SelectedInstance is not { } instance || _installService is null) return;
+
+        var progress = new InstallProgressViewModel(_installService, InstallRun.Create(instance, confirmed),
+            App.Settings.MaxParallelDownloads);
+        var progressWindow = new InstallProgressWindow { DataContext = progress };
+        progress.CloseRequested += () => progressWindow.Close();
+
+        var shown = progressWindow.ShowDialog(owner);
+        var succeeded = await progress.RunAsync();
+        await shown;
+
+        if (!succeeded) return;
+        foreach (var item in SelectedMods) item.IsSelected = false;
+        SelectedMods.Clear();
     }
 }

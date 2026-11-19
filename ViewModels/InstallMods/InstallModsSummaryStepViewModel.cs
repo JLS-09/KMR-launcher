@@ -50,7 +50,7 @@ public partial class InstallModsSummaryStepViewModel(InstallModsData installMods
         ];
 
         var sizes = install.Select(m => m.Version.DownloadSize).ToList();
-        var total = sizes.OfType<int>().Sum(s => (long)s);
+        var total = sizes.OfType<long>().Sum();
         var unknown = sizes.Count(s => s is null);
 
         TotalsText = $"{Plural(install.Count, "mod")} to install, {FormatSize(total)} to download" +

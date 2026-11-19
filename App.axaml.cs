@@ -44,6 +44,9 @@ public class App : Application
         collection.AddSingleton(jsonHelper);
         collection.AddSingleton(compatibilityService);
         collection.AddSingleton(dependencyService);
+        var downloader = new ModDownloader(ModDownloader.CreateHttpClient(), ModDownloader.DefaultCacheFolder);
+        collection.AddSingleton<IModDownloader>(downloader);
+        collection.AddSingleton(new InstallService(downloader, () => SettingsService.Save(App.Settings)));
         
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<HomePageViewModel>();

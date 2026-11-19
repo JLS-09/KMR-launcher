@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -54,6 +55,21 @@ public partial class SettingsPageViewModel : PageViewModel
         }
     }
 
+    public decimal? MaxParallelDownloads
+    {
+        get => AppSettings.MaxParallelDownloads;
+        set
+        {
+            var downloads = (int)Math.Clamp(value ?? AppSettings.DefaultParallelDownloads, 1,
+                AppSettings.MaxAllowedParallelDownloads);
+            if (downloads == AppSettings.MaxParallelDownloads) return;
+
+            AppSettings.MaxParallelDownloads = downloads;
+            SettingsService.Save(AppSettings);
+            OnPropertyChanged();
+        }
+    }
+    
     public SettingsPageViewModel(ZipService zipService)
     {
         PageName = ApplicationPageNames.Settings;

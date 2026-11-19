@@ -7,6 +7,11 @@ public class AppSettings
 {
     public ObservableCollection<KspZip> KspZips { get; set; } = [];
     public ObservableCollection<Instance> Instances { get; set; } = [];
+    
+    public int MaxParallelDownloads { get; set; } = DefaultParallelDownloads;
+
+    public const int DefaultParallelDownloads = 4;
+    public const int MaxAllowedParallelDownloads = 16;
 }
 
 public class KspZip
