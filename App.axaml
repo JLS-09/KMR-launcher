@@ -2,41 +2,83 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="KMRLauncherMvvm.App"
              xmlns:local="using:KMRLauncherMvvm"
-             RequestedThemeVariant="Default">
-    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             RequestedThemeVariant="Dark">
+    <!-- Always dark: the design has no light variant -->
 
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
 
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="Styles/Icons.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Design colours (Phase 9 task 1) -->
+            <SolidColorBrush x:Key="Background">#0E0E0F</SolidColorBrush>
+            <SolidColorBrush x:Key="Bar">#131314</SolidColorBrush>
+            <SolidColorBrush x:Key="Surface">#151517</SolidColorBrush>
+            <SolidColorBrush x:Key="SurfaceRaised">#1B1B1E</SolidColorBrush>
+            <SolidColorBrush x:Key="Control">#1F1F22</SolidColorBrush>
+            <SolidColorBrush x:Key="ControlHover">#232327</SolidColorBrush>
+            <SolidColorBrush x:Key="NavActive">#1F1F23</SolidColorBrush>
+            <SolidColorBrush x:Key="RowHover">#18181B</SolidColorBrush>
+            <SolidColorBrush x:Key="Line">#232326</SolidColorBrush>
+            <SolidColorBrush x:Key="LineStrong">#2E2E32</SolidColorBrush>
+            <SolidColorBrush x:Key="Off">#2A2A2D</SolidColorBrush>
+            <SolidColorBrush x:Key="TextPrimary">#FFF8F0</SolidColorBrush>
+            <SolidColorBrush x:Key="TextSecondary">#A1A1AA</SolidColorBrush>
+            <SolidColorBrush x:Key="TextMuted">#8B8B94</SolidColorBrush>
+
+            <SolidColorBrush x:Key="StatusFits">#3FB950</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusFitsSoft">#132A19</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusUpdate">#58A6FF</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusUpdateSoft">#10233A</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusWarning">#D9B526</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusWarningSoft">#2A2410</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusError">#FF6B6B</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusErrorSoft">#2D1416</SolidColorBrush>
+
+            <!-- Accent: these defaults are for the designer; ThemeService.ApplyAccent replaces them at startup -->
+            <SolidColorBrush x:Key="Accent">#DF0105</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentText">#EA5A5D</SolidColorBrush>
+            <SolidColorBrush x:Key="OnAccent">#FFFFFF</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentSoft">#24DF0105</SolidColorBrush>
+            <SolidColorBrush x:Key="AccentLine">#73DF0105</SolidColorBrush>
+
+            <!-- Old keys, still used by the screens that aren't redesigned yet -->
+            <SolidColorBrush x:Key="PrimaryRed">#DF0105</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryGreen">#0CCA4A</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryBlue">#008CFF</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryOrange">#F97316</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
+            <!-- was #71717A: too dark for small text (about 3.9:1 on #131314) -->
+            <SolidColorBrush x:Key="SecondaryText">#8B8B94</SolidColorBrush>
+            <SolidColorBrush x:Key="PrimaryBackground">#0E0E0F</SolidColorBrush>
+            <SolidColorBrush x:Key="ButtonInactiveText">#8B8B94</SolidColorBrush>
+            <SolidColorBrush x:Key="SideBarButtonActiveBackground">#2A2A2B</SolidColorBrush>
+            <SolidColorBrush x:Key="HoverButtonBackground">#282A29</SolidColorBrush>
+            <SolidColorBrush x:Key="SideBarBackground">#1B1B1C</SolidColorBrush>
+            <SolidColorBrush x:Key="SecondaryButtonBackgrorund">#353436</SolidColorBrush>
+
+            <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
+            <FontFamily x:Key="PhosphorBold">/Assets/Fonts/Phosphor-Bold.ttf#Phosphor-Bold</FontFamily>
+            <FontFamily x:Key="PhosphorFill">/Assets/Fonts/Phosphor-Fill.ttf#Phosphor-Fill</FontFamily>
+            <FontFamily x:Key="SpaceMonoRegular">/Assets/Fonts/Space_Mono/SpaceMono-Regular.ttf#Space Mono Regular</FontFamily>
+            <FontFamily x:Key="SpaceMonoBold">/Assets/Fonts/Space_Mono/SpaceMono-Bold.ttf#Space Mono Bold</FontFamily>
+            <FontFamily x:Key="SpaceMonoItalic">/Assets/Fonts/Space_Mono/SpaceMono-Italic.ttf#Space Mono Italic</FontFamily>
+            <FontFamily x:Key="SpaceMonoBoldItalic">/Assets/Fonts/Space_Mono/SpaceMono-BoldItalic.ttf#Space Mono BoldItalic</FontFamily>
+            <!-- Static weights: Avalonia picks the default instance of a variable font (Space Grotesk would always be Light) -->
+            <FontFamily x:Key="Inter">fonts:Inter#Inter</FontFamily>
+            <FontFamily x:Key="SpaceGrotesk">/Assets/Fonts/Space_Grotesk/static#Space Grotesk</FontFamily>
+            <FontFamily x:Key="Mono">/Assets/Fonts/JetBrains_Mono#JetBrains Mono</FontFamily>
+        </ResourceDictionary>
+    </Application.Resources>
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="Styles/AppDefaultStyles.axaml"></StyleInclude>
+        <StyleInclude Source="Styles/Controls.axaml"></StyleInclude>
     </Application.Styles>
-
-    <Application.Resources>
-        <SolidColorBrush x:Key="PrimaryRed">#DF0105</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryGreen">#0CCA4A</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryBlue">#008CFF</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryOrange">#F97316</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
-        <SolidColorBrush x:Key="SecondaryText">#71717A</SolidColorBrush>
-        <SolidColorBrush x:Key="PrimaryBackground">#131314</SolidColorBrush>
-        <SolidColorBrush x:Key="ButtonInactiveText">#71717A</SolidColorBrush>
-        <SolidColorBrush x:Key="SideBarButtonActiveBackground">#2A2A2B</SolidColorBrush>
-        <SolidColorBrush x:Key="HoverButtonBackground">#282A29</SolidColorBrush>
-        <SolidColorBrush x:Key="SideBarBackground">#1B1B1C</SolidColorBrush>
-        <SolidColorBrush x:Key="SecondaryButtonBackgrorund">#353436</SolidColorBrush>
-
-        <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
-        <FontFamily x:Key="PhosphorBold">/Assets/Fonts/Phosphor-Bold.ttf#Phosphor-Bold</FontFamily>
-        <FontFamily x:Key="PhosphorFill">/Assets/Fonts/Phosphor-Fill.ttf#Phosphor-Fill</FontFamily>
-        <FontFamily x:Key="SpaceMonoRegular">/Assets/Fonts/Space_Mono/SpaceMono-Regular.ttf#Space Mono Regular</FontFamily>
-        <FontFamily x:Key="SpaceMonoBold">/Assets/Fonts/Space_Mono/SpaceMono-Bold.ttf#Space Mono Bold</FontFamily>
-        <FontFamily x:Key="SpaceMonoItalic">/Assets/Fonts/Space_Mono/SpaceMono-Italic.ttf#Space Mono Italic</FontFamily>
-        <FontFamily x:Key="SpaceMonoBoldItalic">/Assets/Fonts/Space_Mono/SpaceMono-BoldItalic.ttf#Space Mono BoldItalic</FontFamily>
-        <FontFamily x:Key="Inter">/Assets/Fonts/Inter/Inter-VariableFont_opsz,wght.ttf#Inter</FontFamily>
-        <FontFamily x:Key="SpaceGrotesk">/Assets/Fonts/Space_Grotesk/SpaceGrotesk-VariableFont_wght.ttf#Space Grotesk</FontFamily>
-
-    </Application.Resources>
 </Application>

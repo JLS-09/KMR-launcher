@@ -156,6 +156,50 @@ public class CompatibilityService(ModListService modListService)
         return false;
     }
 
+    // True when the mod's KSP range overlaps any patch of the given minor version ("1.12").
+    // Used for the KSP strip; strictness doesn't matter here, the strip shows the range.
+    public static bool CoversMinor(ModVersion version, string minorPrefix)
+    {
+        var (modMin, modMax) = GetKspRange(version);
+        return LowerBound(minorPrefix).CompareTo(modMax) <= 0 && UpperBound(minorPrefix).CompareTo(modMin) >= 0;
+    }
+
+    // Short text for a mod's KSP range: "any", "1.12", "1.8–1.12", "1.10+", "≤ 1.9", "1.12.3 strict"
+    public static string DescribeKspRange(ModVersion version)
+    {
+        var strict = version.KspVersionStrict;
+        string range;
+
+        if (version.KspVersion is not null)
+        {
+            range = IsAny(version.KspVersion) ? "any" : ShortKsp(version.KspVersion, strict);
+        }
+        else
+        {
+            var min = version.KspVersionMin is null || IsAny(version.KspVersionMin)
+                ? null
+                : ShortKsp(version.KspVersionMin, strict);
+            var max = version.KspVersionMax is null || IsAny(version.KspVersionMax)
+                ? null
+                : ShortKsp(version.KspVersionMax, strict);
+
+            range = (min, max) switch
+            {
+                (null, null) => "any",
+                (_, null) => $"{min}+",
+                (null, _) => $"≤ {max}",
+                _ when min == max => min!,
+                _ => $"{min}–{max}"
+            };
+        }
+
+        return strict ? $"{range} strict" : range;
+    }
+
+    // Strict mods keep their patch version, the others are shown per minor version
+    private static string ShortKsp(string kspVersion, bool strict) =>
+        strict ? kspVersion : KspVersions.ToMinorPrefix(kspVersion);
+
     private static ((int, int, int) min, (int, int, int) max) GetKspRange(ModVersion version)
     {
         if (version.KspVersion is not null)

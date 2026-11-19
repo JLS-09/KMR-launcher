@@ -2,14 +2,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
              x:DataType="vm:HomePageViewModel"
              x:Class="KMRLauncherMvvm.Views.HomePageView">
-    
+
     <Design.DataContext>
-        <vm:HomePageViewModel/>
+        <vm:HomePageViewModel />
     </Design.DataContext>
-    
-    <Label Content="{Binding Test}"></Label>
+
+    <!-- Placeholder: Home is built in Phase 6 -->
+    <ScrollViewer>
+        <StackPanel Margin="28" Spacing="12" MaxWidth="720" HorizontalAlignment="Left">
+            <Border Classes="placeholder">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="NOT BUILT YET · PHASE 6" />
+                    <TextBlock Classes="h2" Text="Home" />
+                    <TextBlock Text="Home needs the data from Phase 5 (updates, incompatible mods, replaced mods) and the startup work from Phase 6, so it stays empty until then. It will show:" />
+                    <TextBlock Text="• Continue: the last-played instance with its stats, a pre-flight line and Launch" />
+                    <TextBlock Text="• Needs attention: updates, incompatible and replaced mods, unused downloads" />
+                    <TextBlock Text="• Instances, each with a quick Launch button" />
+                    <TextBlock Text="• New on CKAN since your last sync, and Popular for your KSP version" />
+                    <TextBlock Text="For now, launch the primary instance from the sidebar or use the Instances page." />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>

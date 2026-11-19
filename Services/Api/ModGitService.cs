@@ -21,7 +21,7 @@ public class ModGitService(GitHelper gitHelper, ModListService modList) : IModAp
         };
 
         var applicationBasePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var gitCacheFolder = Path.Combine(applicationBasePath, "kmrLauncher/cache/ckan-meta");
+        var gitCacheFolder = GitHelper.DefaultCkanMetaFolder;
 
         var latestCommitHash = Repository.ListRemoteReferences("https://github.com/KSP-CKAN/CKAN-meta.git")
             .First(r => r.CanonicalName == "refs/heads/master").TargetIdentifier;

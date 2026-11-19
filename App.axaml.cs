@@ -31,6 +31,7 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         InitializeSettings();
+        ThemeService.ApplyAccent(Settings.AccentColor);
         
         var modListService = new ModListService();
         var jsonHelper = new GitHelper(modListService);
@@ -38,6 +39,7 @@ public class App : Application
         var dependencyService = new DependencyService(modListService, compatibilityService);
         
         var collection = new ServiceCollection();
+        collection.AddSingleton<StatusBarViewModel>();
         collection.AddSingleton<IModApiService, ModGitService>();
         collection.AddSingleton<ZipService>();
         collection.AddSingleton(modListService);

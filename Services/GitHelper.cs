@@ -10,6 +10,9 @@ namespace KMRLauncherMvvm.Services;
 
 public class GitHelper(ModListService modList)
 {
+    public static string DefaultCkanMetaFolder => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "kmrLauncher/cache/ckan-meta");
+
     public static void CloneCkanMetaRepo(string gitCacheFolder, IProgress<ModFetchProgress>? progress)
     {
         Directory.CreateDirectory(gitCacheFolder);
