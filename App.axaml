@@ -61,12 +61,10 @@
             <SolidColorBrush x:Key="PrimaryRed">#DF0105</SolidColorBrush>
             <SolidColorBrush x:Key="PrimaryGreen">#0CCA4A</SolidColorBrush>
             <SolidColorBrush x:Key="PrimaryBlue">#008CFF</SolidColorBrush>
-            <SolidColorBrush x:Key="PrimaryOrange">#F97316</SolidColorBrush>
             <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
             <!-- was #71717A: too dark for small text (about 3.9:1 on #131314) -->
             <SolidColorBrush x:Key="SecondaryText">#8B8B94</SolidColorBrush>
             <SolidColorBrush x:Key="PrimaryBackground">#0E0E0F</SolidColorBrush>
-            <SolidColorBrush x:Key="ButtonInactiveText">#8B8B94</SolidColorBrush>
             <SolidColorBrush x:Key="SideBarButtonActiveBackground">#2A2A2B</SolidColorBrush>
             <SolidColorBrush x:Key="HoverButtonBackground">#282A29</SolidColorBrush>
             <SolidColorBrush x:Key="SideBarBackground">#1B1B1C</SolidColorBrush>
@@ -74,11 +72,8 @@
 
             <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
             <FontFamily x:Key="PhosphorBold">/Assets/Fonts/Phosphor-Bold.ttf#Phosphor-Bold</FontFamily>
-            <FontFamily x:Key="PhosphorFill">/Assets/Fonts/Phosphor-Fill.ttf#Phosphor-Fill</FontFamily>
             <FontFamily x:Key="SpaceMonoRegular">/Assets/Fonts/Space_Mono/SpaceMono-Regular.ttf#Space Mono Regular</FontFamily>
             <FontFamily x:Key="SpaceMonoBold">/Assets/Fonts/Space_Mono/SpaceMono-Bold.ttf#Space Mono Bold</FontFamily>
-            <FontFamily x:Key="SpaceMonoItalic">/Assets/Fonts/Space_Mono/SpaceMono-Italic.ttf#Space Mono Italic</FontFamily>
-            <FontFamily x:Key="SpaceMonoBoldItalic">/Assets/Fonts/Space_Mono/SpaceMono-BoldItalic.ttf#Space Mono BoldItalic</FontFamily>
             <!-- Static weights: Avalonia picks the default instance of a variable font (Space Grotesk would always be Light) -->
             <FontFamily x:Key="Inter">fonts:Inter#Inter</FontFamily>
             <FontFamily x:Key="SpaceGrotesk">/Assets/Fonts/Space_Grotesk/static#Space Grotesk</FontFamily>

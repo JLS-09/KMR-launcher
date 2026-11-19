@@ -30,7 +30,6 @@
     <StreamGeometry x:Key="IconStar">M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z</StreamGeometry>
     <StreamGeometry x:Key="IconMore">M3.8 12a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0-2.4 0z M10.8 12a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0-2.4 0z M17.8 12a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0-2.4 0z</StreamGeometry>
     <StreamGeometry x:Key="IconPlus">M12 5v14M5 12h14</StreamGeometry>
-    <StreamGeometry x:Key="IconConstruction">M3.5 19h17 M5 19l3.5-12h7L19 19 M7 13h10 M10 7V4.5h4V7</StreamGeometry>
 
     <!-- Logo (from the "KMR Launcher logo" canvas), in the mockup's SVG coordinates (viewBox -12 18 502 200).
          The rocket parts are on a 0–100 grid and get translate(-53.5 16.72) scale(1.91), like in the SVG.

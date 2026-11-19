@@ -89,13 +89,6 @@
         </Setter>
     </Style>
     
-    <Style Selector="TextBlock.title">
-        <Setter Property="FontFamily" Value="{DynamicResource SpaceMonoBold}"></Setter>
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryRed}"></Setter>
-        <Setter Property="FontSize" Value="28"></Setter>
-        <Setter Property="LetterSpacing" Value="6"></Setter>
-    </Style>
-    
     <Style Selector="TextBlock.ModListEntry">
         <Setter Property="FontFamily" Value="{DynamicResource Inter}"/>
         <Setter Property="FontWeight" Value="Regular"/>
@@ -118,32 +111,6 @@
     
     <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="Transparent"/>
-    </Style>
-    
-    <Style Selector="Button.SettingsNav">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Padding" Value="12 8"/>
-        <Setter Property="Width" Value="200"/>
-        <Setter Property="CornerRadius" Value="8"/>
-    </Style>
-    
-    <Style Selector="TextBlock.SettingsNav">
-        <Setter Property="Foreground" Value="{DynamicResource ButtonInactiveText}" />
-        <Setter Property="FontSize" Value="18"/>
-        <Setter Property="FontFamily" Value="{DynamicResource SpaceMonoBold}"/>
-        <Setter Property="LetterSpacing" Value="1.2"/>
-    </Style>
-    
-    <Style Selector="Button.SettingsNav.Active">
-        <Setter Property="Background" Value="{DynamicResource SideBarButtonActiveBackground}"/>
-    </Style>
-    
-    <Style Selector="TextBlock.SettingsNav.Active">
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryRed}" />
-    </Style>
-    
-    <Style Selector="Button.SettingsNav:pointerover /template/ ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource SideBarButtonActiveBackground}"/>
     </Style>
     
     <Style Selector="Button.NewInstance:pointerover /template/ ContentPresenter">

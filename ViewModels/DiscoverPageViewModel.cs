@@ -17,8 +17,6 @@ namespace KMRLauncherMvvm.ViewModels;
 
 public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage
 {
-    public string SearchPlaceholder => "Search mods by name or identifier";
-
     // The top bar's search box filters by name, like the MOD NAME box (until Discover is redesigned)
     public void ApplySearch(string text) => ModFilter = text;
 

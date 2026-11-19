@@ -4,7 +4,5 @@ namespace KMRLauncherMvvm.ViewModels;
 // searching across mods, instances and actions comes later (Phase 9, "Later").
 public interface ISearchablePage
 {
-    string SearchPlaceholder { get; }
-
     void ApplySearch(string text);
 }
