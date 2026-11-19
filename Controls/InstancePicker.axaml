@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:KMRLauncherMvvm.Controls"
+             xmlns:models="using:KMRLauncherMvvm.Models"
+             x:Class="KMRLauncherMvvm.Controls.InstancePicker"
+             x:DataType="controls:InstancePicker">
+    <!-- A button that shows the picked instance and opens a list of instances.
+         Default: 40 px with name + "1.12.5 · 1.12.x" (Discover's "Check against");
+         IsCompact: a 36 px secondary button with the name only (the selection tray's "Install to"). -->
+    <UserControl.Styles>
+        <Style Selector="Button.picker">
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Padding" Value="10 0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+            <Setter Property="Background" Value="{DynamicResource Surface}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.picker.compact">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="14 0" />
+            <Setter Property="Background" Value="{DynamicResource Control}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.picker:pointerover /template/ ContentPresenter, Button.picker:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHover}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="controls|StrokeIcon.compact">
+            <Setter Property="Size" Value="16" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="ListBox.instances ListBoxItem">
+            <Setter Property="Padding" Value="10 6" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="ListBox.instances ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHover}" />
+        </Style>
+        <Style Selector="ListBox.instances ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Button x:Name="PickerButton" Classes="picker" Classes.compact="{Binding IsCompact}"
+            HorizontalAlignment="Stretch">
+        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock Text="{Binding SelectedInstance.Name, FallbackValue='No instance'}" FontSize="13"
+                           FontWeight="Medium" LineHeight="15.6" TextTrimming="CharacterEllipsis" />
+                <TextBlock Classes="mono muted" FontSize="11" LineHeight="13.2" IsVisible="{Binding !IsCompact}"
+                           Text="{Binding SelectedInstance.CompatibleSummary, FallbackValue=''}"
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+            <controls:StrokeIcon Grid.Column="1" Data="{DynamicResource IconChevronDown}" Size="14"
+                                 Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"
+                                 Classes.compact="{Binding IsCompact}" />
+        </Grid>
+        <Button.Flyout>
+            <Flyout Placement="BottomEdgeAlignedLeft">
+                <ListBox x:Name="InstanceList" Classes="instances" MinWidth="220" Background="Transparent"
+                         ItemsSource="{Binding Instances}" SelectedItem="{Binding SelectedInstance}"
+                         SelectionChanged="OnSelectionChanged">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:Instance">
+                            <StackPanel Spacing="1">
+                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium" />
+                                <TextBlock Classes="mono muted" FontSize="11" Text="{Binding CompatibleSummary}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Flyout>
+        </Button.Flyout>
+    </Button>
+</UserControl>

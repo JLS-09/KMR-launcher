@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Humanizer;
 using KMRLauncherMvvm.Services;
@@ -44,6 +45,8 @@ public class Instance(string name, string rootPath, string version) : InstanceTi
             .Replace(" second", " sec");
 
     public string InstallSize => Helpers.BytesToString(Helpers.GetDirectorySize(RootPath));
+
+    [JsonIgnore] public string CompatibleSummary => KspVersions.DescribeCompatible(this);
 
     public async Task DeleteInstance()
     {

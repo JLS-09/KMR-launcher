@@ -15,7 +15,9 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
     private readonly DependencyService _dependencyService;
 
-    public InstallModsSelectInstanceStepViewModel(InstallModsData installModsData, DependencyService dependencyService)
+    // target: the instance picked in Discover's "Install to"; the first instance when there is none
+    public InstallModsSelectInstanceStepViewModel(InstallModsData installModsData, DependencyService dependencyService,
+        Instance? target = null)
         :
         base(installModsData)
     {
@@ -28,7 +30,8 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         };
 
         _instances = App.Settings.Instances;
-        InstallModsData.SelectedInstance = Instances.FirstOrDefault();
+        InstallModsData.SelectedInstance =
+            Instances.FirstOrDefault(i => i.RootPath == target?.RootPath) ?? Instances.FirstOrDefault();
     }
 
     private void Resolve()

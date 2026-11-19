@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KMRLauncherMvvm.Models;
 
@@ -29,6 +30,36 @@ public static class KspVersions
     }
     
     public static bool IsMinorPrefix(string version) => version.Split('.').Length == 2;
+
+    // "1.12.5 · 1.8.x–1.12.x": the instance's version and the versions it also accepts.
+    // Runs of whole minor versions are joined, so the default list (1.8–1.12) stays short.
+    public static string DescribeCompatible(Instance instance)
+    {
+        var criteria = GameVersionCriteria.FromInstance(instance);
+        List<string> parts = [.. criteria.ExactVersions.Where(v => v != criteria.InstanceVersion)];
+
+        var minors = criteria.MinorPrefixes
+            .Select(p => p.Split('.'))
+            .Where(p => int.TryParse(p[0], out _) && int.TryParse(p[1], out _))
+            .Select(p => (Major: int.Parse(p[0]), Minor: int.Parse(p[1])))
+            .OrderBy(p => p.Major).ThenBy(p => p.Minor)
+            .ToList();
+
+        for (var i = 0; i < minors.Count;)
+        {
+            var end = i;
+            while (end + 1 < minors.Count && minors[end + 1].Major == minors[i].Major &&
+                   minors[end + 1].Minor == minors[end].Minor + 1)
+                end++;
+
+            parts.Add(end > i
+                ? $"{minors[i].Major}.{minors[i].Minor}.x–{minors[end].Major}.{minors[end].Minor}.x"
+                : $"{minors[i].Major}.{minors[i].Minor}.x");
+            i = end + 1;
+        }
+
+        return parts.Count == 0 ? instance.Version : $"{instance.Version} · {string.Join(", ", parts)}";
+    }
     
     public static string? GetKspVersionFromBuildId(string buildId)
     {

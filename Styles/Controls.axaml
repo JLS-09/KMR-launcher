@@ -388,6 +388,7 @@
     <!-- Switch: ToggleButton.switch, the label as Content (13 px, #A1A1AA) and a 38 x 22 switch on the right.
          Fluent's own switch control requires its knob parts in the template, so a plain ToggleButton is used. -->
     <Style Selector="ToggleButton.switch">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
         <Setter Property="Cursor" Value="Hand" />
@@ -411,6 +412,64 @@
     </Style>
     <Style Selector="ToggleButton.switch:checked /template/ Border#Knob">
         <Setter Property="Margin" Value="18 0 0 0" />
+    </Style>
+
+    <!-- Checkbox: 16 px box (radius 4), accent fill with a check when ticked. Content (if any) 10 px to the right.
+         .filterRow = a 30 px row in the filters column (15 px box, hover background, light text when ticked). -->
+    <Style Selector="CheckBox.box">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="RowBorder" Background="Transparent" Padding="{TemplateBinding Padding}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <Border Name="Box" Width="16" Height="16" CornerRadius="4" BorderThickness="1.5"
+                                BorderBrush="{DynamicResource TextMuted}" Background="Transparent"
+                                VerticalAlignment="Center">
+                            <controls:StrokeIcon Name="Check" Data="{DynamicResource IconCheck}" Size="12"
+                                                 StrokeThickness="3" Foreground="{DynamicResource OnAccent}"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                 IsVisible="False" />
+                        </Border>
+                        <ContentPresenter Grid.Column="1" Name="PART_ContentPresenter" Margin="10 0 0 0"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="Center"
+                                          IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="CheckBox.box:checked /template/ Border#Box">
+        <Setter Property="Background" Value="{DynamicResource Accent}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="CheckBox.box:checked /template/ controls|StrokeIcon#Check">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="CheckBox.box.filterRow">
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="8 0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="CheckBox.box.filterRow /template/ Border#Box">
+        <Setter Property="Width" Value="15" />
+        <Setter Property="Height" Value="15" />
+    </Style>
+    <Style Selector="CheckBox.box.filterRow:pointerover /template/ Border#RowBorder">
+        <Setter Property="Background" Value="{DynamicResource RowHover}" />
+    </Style>
+    <Style Selector="CheckBox.box.filterRow:checked">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
     </Style>
 
     <!-- Status label: icon 14 + 12 px text in the status colour, gap 5 -->
