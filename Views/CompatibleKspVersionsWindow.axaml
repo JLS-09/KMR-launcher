@@ -9,7 +9,7 @@
         Background="#1F1F20"
         Foreground="{DynamicResource PrimaryText}"
         Width="700" Height="600"
-        Title="Compatible KSP versions">
+        Title="Instance settings">
 
     <Design.DataContext>
         <viewModels:CompatibleKspVersionsViewModel />
@@ -32,18 +32,30 @@
         </Style>
     </Window.Styles>
 
-    <Grid Margin="32" RowDefinitions="Auto Auto * Auto" RowSpacing="16">
+    <Grid Margin="32" RowDefinitions="Auto Auto Auto * Auto" RowSpacing="16">
         <StackPanel Grid.Row="0" Spacing="4">
             <TextBlock Text="{Binding Title}" FontSize="22" FontFamily="{DynamicResource SpaceMonoBold}"
                        LetterSpacing="1.5" TextWrapping="Wrap" />
             <Rectangle Height="4" Fill="{DynamicResource PrimaryRed}" Width="80" HorizontalAlignment="Left" />
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Text="{Binding InstanceVersionText}" TextWrapping="Wrap"
-                   Foreground="{DynamicResource SecondaryText}" />
+        <StackPanel Grid.Row="1" Spacing="6">
+            <TextBlock Text="LAUNCH ARGUMENTS" FontFamily="{DynamicResource SpaceMonoBold}" LetterSpacing="2"
+                       Foreground="{DynamicResource SecondaryText}" />
+            <TextBox Text="{Binding LaunchArguments}" PlaceholderText="e.g. -force-glcore" />
+            <TextBlock Text="Passed to KSP_x64.exe when this instance is launched. Use -force-glcore if KSP crashes under Wine with many mods."
+                       TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource SecondaryText}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Spacing="6">
+            <TextBlock Text="COMPATIBLE KSP VERSIONS" FontFamily="{DynamicResource SpaceMonoBold}" LetterSpacing="2"
+                       Foreground="{DynamicResource SecondaryText}" />
+            <TextBlock Text="{Binding InstanceVersionText}" TextWrapping="Wrap"
+                       Foreground="{DynamicResource SecondaryText}" />
+        </StackPanel>
 
         <!-- ListBox scrolls and virtualizes itself; no StackPanel inside a ScrollViewer -->
-        <ListBox Grid.Row="2" Classes="version-groups" ItemsSource="{Binding Groups}"
+        <ListBox Grid.Row="3" Classes="version-groups" ItemsSource="{Binding Groups}"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="viewModels:KspVersionGroupViewModel">
@@ -71,7 +83,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <DockPanel Grid.Row="3">
+        <DockPanel Grid.Row="4">
             <Button Classes="Secondary" Padding="32 16" IsCancel="True"
                     Command="{Binding CancelCommand}"
                     CommandParameter="{Binding $parent[Window]}">

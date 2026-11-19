@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
@@ -16,6 +17,7 @@ public partial class CompatibleKspVersionsViewModel : ViewModelBase
     public string Title { get; }
     public string InstanceVersionText { get; }
     public ObservableCollection<KspVersionGroupViewModel> Groups { get; }
+    [ObservableProperty] private string _launchArguments;
 
     public CompatibleKspVersionsViewModel(Instance instance)
     {
@@ -24,7 +26,8 @@ public partial class CompatibleKspVersionsViewModel : ViewModelBase
         var instanceVersion = KspVersions.ToFullVersion(instance.Version);
         var saved = instance.CompatibleKspVersions.ToHashSet();
 
-        Title = $"COMPATIBLE KSP VERSIONS — {instance.Name.ToUpper()}";
+        Title = $"INSTANCE SETTINGS — {instance.Name.ToUpper()}";
+        _launchArguments = instance.LaunchArguments;
         InstanceVersionText =
             $"Mods for KSP {instanceVersion} (this instance) are always allowed. Tick other versions to allow " +
             $"mods made for them too. \"All x.y.x\" doesn't count for mods that are marked as strict; " +
@@ -56,6 +59,7 @@ public partial class CompatibleKspVersionsViewModel : ViewModelBase
     private void Save(Window window)
     {
         _instance.CompatibleKspVersions = [.. Groups.SelectMany(g => g.ToEntries()), .. _unknownEntries];
+        _instance.LaunchArguments = LaunchArguments.Trim();
         SettingsService.Save(App.Settings);
         window.Close();
     }

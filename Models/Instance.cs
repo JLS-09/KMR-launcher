@@ -15,29 +15,34 @@ public class Instance(string name, string rootPath, string version) : InstanceTi
     public string RootPath { get; set; } = rootPath;
     public List<ModVersion> Mods { get; set; } = [];
     public Dictionary<string, InstalledModRecord> ModRecords { get; set; } = [];
-    public string Version { get; set; } =  version;
+    public string Version { get; set; } = version;
     public List<string> CompatibleKspVersions { get; set; } = [];
-    public int PlayTime  { get; set; } = 0;
+    public string LaunchArguments { get; set; } = "";
+    public int PlayTime { get; set; } = 0;
     public DateTime LastPlayed { get; set; }
     public bool IsPrimary { get; set; } = false;
-    
-    public string PlayTimeHumanized => PlayTime <= 0 ? "0s" : new TimeSpan(0, 0, PlayTime)
-        .Humanize(precision: 2, maxUnit: TimeUnit.Hour)
-        .Replace(" hours", "h")
-        .Replace(" minutes", "m")
-        .Replace(" seconds", "s")
-        .Replace(" hour", "h")
-        .Replace(" minute", "m")
-        .Replace(" second", "s");
-    
-    public string LastPlayedHumanized => PlayTime <= 0 ? "Never" : LastPlayed.Humanize()
-        .Replace(" year", " yr")
-        .Replace(" month", " mon")
-        .Replace(" day", " d")
-        .Replace(" hour", " hr")
-        .Replace(" minute", " min")
-        .Replace(" second", " sec");
-    
+
+    public string PlayTimeHumanized => PlayTime <= 0
+        ? "0s"
+        : new TimeSpan(0, 0, PlayTime)
+            .Humanize(precision: 2, maxUnit: TimeUnit.Hour)
+            .Replace(" hours", "h")
+            .Replace(" minutes", "m")
+            .Replace(" seconds", "s")
+            .Replace(" hour", "h")
+            .Replace(" minute", "m")
+            .Replace(" second", "s");
+
+    public string LastPlayedHumanized => PlayTime <= 0
+        ? "Never"
+        : LastPlayed.Humanize()
+            .Replace(" year", " yr")
+            .Replace(" month", " mon")
+            .Replace(" day", " d")
+            .Replace(" hour", " hr")
+            .Replace(" minute", " min")
+            .Replace(" second", " sec");
+
     public string InstallSize => Helpers.BytesToString(Helpers.GetDirectorySize(RootPath));
 
     public async Task DeleteInstance()
@@ -47,31 +52,63 @@ public class Instance(string name, string rootPath, string version) : InstanceTi
         SettingsService.Save(App.Settings);
     }
 
+    public static string[] SplitArguments(string arguments)
+    {
+        var result = new List<string>();
+        var current = new System.Text.StringBuilder();
+        var inQuotes = false;
+        var hasArgument = false;
+
+        foreach (var c in arguments)
+        {
+            if (c == '"')
+            {
+                inQuotes = !inQuotes;
+                hasArgument = true;
+            }
+            else if (char.IsWhiteSpace(c) && !inQuotes)
+            {
+                if (hasArgument) result.Add(current.ToString());
+                current.Clear();
+                hasArgument = false;
+            }
+            else
+            {
+                current.Append(c);
+                hasArgument = true;
+            }
+        }
+
+        if (hasArgument) result.Add(current.ToString());
+        return [.. result];
+    }
+
     public async Task LaunchInstanceWithWine()
     {
-        var kspProcess = WineLauncher.Launch(Name, Path.Combine(RootPath, "KSP_x64.exe"));
+        var kspProcess = WineLauncher.Launch(Name, Path.Combine(RootPath, "KSP_x64.exe"),
+            SplitArguments(LaunchArguments));
         var startTime = kspProcess.StartTime;
-        
-        kspProcess.OutputDataReceived += (_, e) => 
+
+        kspProcess.OutputDataReceived += (_, e) =>
         {
             if (e.Data != null) Console.WriteLine(e.Data);
         };
-        kspProcess.ErrorDataReceived += (_, e) => 
+        kspProcess.ErrorDataReceived += (_, e) =>
         {
             if (e.Data != null) Console.Error.WriteLine(e.Data);
         };
         kspProcess.BeginOutputReadLine();
         kspProcess.BeginErrorReadLine();
-        
+
         await kspProcess.WaitForExitAsync();
-        
+
         var endTime = kspProcess.ExitTime;
         var playedSeconds = (endTime - startTime).TotalSeconds;
 
-        PlayTime += (int) playedSeconds;
-        
+        PlayTime += (int)playedSeconds;
+
         LastPlayed = kspProcess.ExitTime;
-        
+
         SettingsService.Save(App.Settings);
 
         SettingsService.Reload();
