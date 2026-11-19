@@ -10,6 +10,7 @@ using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.Services.Api;
 using KMRLauncherMvvm.ViewModels;
+using KMRLauncherMvvm.ViewModels.InstallMods;
 using KMRLauncherMvvm.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +41,9 @@ public class App : Application
         
         var collection = new ServiceCollection();
         collection.AddSingleton<StatusBarViewModel>();
+        collection.AddSingleton<GameSessionService>();
+        collection.AddSingleton<NavigationService>();
+        collection.AddSingleton<InstallFlow>();
         collection.AddSingleton<IModApiService, ModGitService>();
         collection.AddSingleton<ZipService>();
         collection.AddSingleton(modListService);

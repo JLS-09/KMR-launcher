@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
@@ -13,18 +11,15 @@ using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.Services.Api;
 using KMRLauncherMvvm.ViewModels.Discover;
 using KMRLauncherMvvm.ViewModels.InstallMods;
-using KMRLauncherMvvm.Views.InstallMods;
 
 namespace KMRLauncherMvvm.ViewModels;
 
-public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage
+public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INavigationTarget
 {
     private const int TagsShownCollapsed = 11;
 
     private readonly IModApiService? _api;
-    private readonly InstallService? _installService;
-    private readonly DependencyService? _dependencyService;
-    private readonly CompatibilityService? _compatibilityService;
+    private readonly InstallFlow? _installFlow;
     private readonly ModListService? _modListService;
 
     private List<ModListItemViewModel> _allRows = [];
@@ -64,15 +59,12 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage
     [ObservableProperty] private bool _hasSelectedMods;
     [ObservableProperty] private Instance? _installTarget;
 
-    public DiscoverPageViewModel(IModApiService api, ModListService modListService,
-        DependencyService dependencyService, CompatibilityService compatibilityService, InstallService installService)
+    public DiscoverPageViewModel(IModApiService api, ModListService modListService, InstallFlow installFlow)
         : this()
     {
         _api = api;
         _modListService = modListService;
-        _dependencyService = dependencyService;
-        _compatibilityService = compatibilityService;
-        _installService = installService;
+        _installFlow = installFlow;
 
         LoadInstances(App.Settings);
         SettingsService.SettingsChanged += (_, settings) => LoadInstances(settings);
@@ -261,35 +253,22 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage
     [RelayCommand]
     private async Task ApplyChanges()
     {
-        if (_modListService is null || _dependencyService is null || _compatibilityService is null) return;
+        if (_installFlow is null) return;
 
-        var viewModel = new InstallModsViewModel(
+        var installed = await _installFlow.InstallAsync(
             [.. SelectedMods.Select(m => new PlannedModVersion { Version = m.SelectedVersion, IsUserRequested = true })],
-            _modListService, _dependencyService, _compatibilityService, InstallTarget);
-        var window = new InstallModsWindow { DataContext = viewModel };
+            InstallTarget);
+        if (installed) ClearSelection();
+    }
 
-        viewModel.Cancelled += () => window.Close(null);
-        viewModel.Finished += data => window.Close(data);
+    // The Instances page's "Add mods" opens Discover for one instance
+    public void OnNavigatedTo(object? parameter)
+    {
+        if (parameter is not Instance instance) return;
 
-        if ((Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow is not
-            { } owner)
-        {
-            window.Show();
-            return;
-        }
-
-        var confirmed = await window.ShowDialog<InstallModsData?>(owner);
-        if (confirmed?.SelectedInstance is not { } instance || _installService is null) return;
-
-        var progress = new InstallProgressViewModel(_installService, InstallRun.Create(instance, confirmed),
-            App.Settings.MaxParallelDownloads);
-        var progressWindow = new InstallProgressWindow { DataContext = progress };
-        progress.CloseRequested += () => progressWindow.Close();
-
-        var shown = progressWindow.ShowDialog(owner);
-        var succeeded = await progress.RunAsync();
-        await shown;
-
-        if (succeeded) ClearSelection();
+        var match = Instances.FirstOrDefault(i => i.RootPath == instance.RootPath);
+        if (match is null) return;
+        CheckAgainst = match;
+        InstallTarget = match;
     }
 }

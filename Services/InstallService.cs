@@ -314,6 +314,7 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
     private static void Commit(InstallRun run)
     {
         var instance = run.Instance;
+        var previous = new Dictionary<string, InstalledModRecord>(instance.ModRecords);
         foreach (var removed in run.ToRemove)
         {
             instance.Mods.RemoveAll(m => m.Identifier == removed.Identifier);
@@ -322,12 +323,18 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
 
         foreach (var job in run.Jobs)
         {
+            // A mod that was picked before stays picked when it comes back as a dependency (an update or a
+            // newer version another mod needs), so it isn't removed later as an unused dependency
+            previous.TryGetValue(job.Version.Identifier, out var old);
+            var isUserRequested = job.Planned.IsUserRequested || (old?.IsUserRequested ?? false);
+
             instance.Mods.RemoveAll(m => m.Identifier == job.Version.Identifier);
             instance.Mods.Add(job.Version);
             instance.ModRecords[job.Version.Identifier] = new InstalledModRecord
             {
                 Files = [.. job.InstalledFiles],
-                IsUserRequested = job.Planned.IsUserRequested
+                IsUserRequested = isUserRequested,
+                Reason = job.Planned.OptionalReason ?? (job.Planned.IsUserRequested ? null : old?.Reason)
             };
         }
     }

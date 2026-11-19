@@ -61,7 +61,7 @@ public partial class InstallProgressViewModel : ViewModelBase
 
         IsRunning = true;
         CanCancel = true;
-        StatusText = "INSTALLING";
+        StatusText = Rows.Count == 0 ? "REMOVING" : "INSTALLING";
         _clock.Start();
         var timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background,
             (_, _) => Refresh(_clock.Elapsed));
@@ -127,7 +127,11 @@ public partial class InstallProgressViewModel : ViewModelBase
         if (Rows.Count == 0)
         {
             OverallProgress = IsFinished && !HasError ? 1 : 0;
-            OverallText = "No mods to install";
+            // A removal (from the Instances page) has no install jobs
+            var removing = _run?.ToRemove.Count ?? 0;
+            OverallText = removing == 0 ? "No mods to install"
+                : IsFinished && !HasError ? $"Removed {removing} mod{(removing == 1 ? "" : "s")}"
+                : $"Removing {removing} mod{(removing == 1 ? "" : "s")}";
             PercentText = $"{OverallProgress:0%}";
             return;
         }

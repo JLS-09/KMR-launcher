@@ -16,6 +16,7 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly PageFactory? _pageFactory;
     private readonly IModApiService? _api;
+    private readonly GameSessionService? _session;
     private readonly DispatcherTimer? _runningTimer;
     private DateTime _runningSince;
 
@@ -70,10 +71,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public StatusBarViewModel StatusBar { get; }
 
-    public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar, IModApiService api)
+    public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar, IModApiService api,
+        GameSessionService session, NavigationService navigation)
     {
         _pageFactory = pageFactory;
         _api = api;
+        _session = session;
+        session.Changed += OnSessionChanged;
+        navigation.NavigationRequested += (page, parameter) =>
+        {
+            ShowPage(page);
+            (CurrentPage as INavigationTarget)?.OnNavigatedTo(parameter);
+        };
         StatusBar = statusBar;
 
         _runningTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -124,28 +133,34 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanLaunchPrimary))]
     private async Task LaunchPrimary()
     {
-        if (PrimaryInstance is not { } instance) return;
+        if (PrimaryInstance is not { } instance || _session is null) return;
 
         LaunchError = null;
-        RunningInstanceName = instance.Name;
-        RunningTime = "00:00:00";
-        _runningSince = DateTime.Now;
-        IsRunning = true;
-        _runningTimer?.Start();
-
         try
         {
-            await instance.LaunchInstanceWithWine();
+            await _session.LaunchAsync(instance);
         }
         catch (Exception e)
         {
             // e.g. wine isn't installed at /usr/bin/wine
             LaunchError = $"Couldn't launch {instance.Name}: {e.Message}";
         }
-        finally
+    }
+
+    // A game started here or on the Instances page
+    private void OnSessionChanged()
+    {
+        IsRunning = _session?.IsRunning ?? false;
+        if (_session?.Running is { } running)
+        {
+            RunningInstanceName = running.Name;
+            RunningTime = "00:00:00";
+            _runningSince = _session.StartedAt;
+            _runningTimer?.Start();
+        }
+        else
         {
             _runningTimer?.Stop();
-            IsRunning = false;
         }
     }
 

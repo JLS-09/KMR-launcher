@@ -2,298 +2,590 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="1144" d:DesignHeight="720"
+             mc:Ignorable="d" d:DesignWidth="1184" d:DesignHeight="800"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
-             xmlns:models="clr-namespace:KMRLauncherMvvm.Models"
+             xmlns:instances="clr-namespace:KMRLauncherMvvm.ViewModels.Instances"
+             xmlns:controls="using:KMRLauncherMvvm.Controls"
              x:DataType="vm:InstancesPageViewModel"
              x:Class="KMRLauncherMvvm.Views.InstancesPageView"
-             Background="{DynamicResource PrimaryBackground}"
-             Foreground="{DynamicResource PrimaryText}">
+             Foreground="{DynamicResource TextPrimary}">
 
     <Design.DataContext>
         <vm:InstancesPageViewModel />
     </Design.DataContext>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
-        <StackPanel Margin="32" Spacing="32">
-            <TextBlock Text="INSTANCES" FontFamily="{DynamicResource SpaceMonoBold}" FontSize="48" LetterSpacing="4" />
-            <StackPanel Spacing="24">
-                <Grid ColumnDefinitions="2* *" ColumnSpacing="24">
-                    <Border Grid.Column="0" Padding="32" Background="#1F1F20"
-                            CornerRadius="12"
-                            IsVisible="{Binding PrimaryInstance,
-                                    Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <StackPanel Spacing="48">
-                            <Grid ColumnDefinitions="* Auto">
-                                <StackPanel Grid.Column="0" Spacing="16">
-                                    <Border Background="#321C1D" Padding="12 4" HorizontalAlignment="Left" CornerRadius="4">
-                                        <TextBlock Text="PRIMARY_DEPLOYMENT" Foreground="{DynamicResource PrimaryRed}"
-                                                   LetterSpacing="1" FontFamily="{DynamicResource SpaceMonoBold}" />
-                                    </Border>
-                                    <TextBlock Text="{Binding PrimaryInstance.Name}" FontSize="40"
-                                               FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"
-                                               LetterSpacing="1.5" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="STABLE_RELEASE" Foreground="{DynamicResource SecondaryText}"
-                                               FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="12"
-                                               LetterSpacing="0.7" />
-                                    <TextBlock Text="{Binding PrimaryInstance.Version, StringFormat='v{0}'}"
-                                               HorizontalAlignment="Right" FontFamily="{DynamicResource SpaceGrotesk}"
-                                               FontWeight="Bold" FontSize="24" LetterSpacing="4" />
-                                </StackPanel>
-                            </Grid>
-                            <Grid ColumnSpacing="32" ColumnDefinitions="* * * *">
-                                <Border Grid.Column="0" Background="#0E0E0F" Padding="16" CornerRadius="8">
-                                    <StackPanel>
-                                        <TextBlock Text="TOTAL_MODS" Foreground="{DynamicResource SecondaryText}"
-                                                   FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="10"
-                                                   LetterSpacing="1" />
-                                        <TextBlock Text="{Binding PrimaryInstance.Mods.Count}"
-                                                   Foreground="{DynamicResource PrimaryText}"
-                                                   FontFamily="" FontSize="24" FontWeight="Bold" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Column="1" Background="#0E0E0F" Padding="16" CornerRadius="8">
-                                    <StackPanel>
-                                        <TextBlock Text="LAST_PLAYED" Foreground="{DynamicResource SecondaryText}"
-                                                   FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="10"
-                                                   LetterSpacing="1" />
-                                        <TextBlock Text="{Binding PrimaryInstance.LastPlayedHumanized}"
-                                                   Foreground="{DynamicResource PrimaryText}"
-                                                   FontFamily="" FontSize="24" FontWeight="Bold" TextWrapping="Wrap"
-                                                   ToolTip.Tip="{Binding PrimaryInstance.LastPlayed}" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Column="2" Background="#0E0E0F" Padding="16" CornerRadius="8">
-                                    <StackPanel>
-                                        <TextBlock Text="TOTAL_PLAYTIME" Foreground="{DynamicResource SecondaryText}"
-                                                   FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="10"
-                                                   LetterSpacing="1" />
-                                        <TextBlock Text="{Binding PrimaryInstance.PlayTimeHumanized}"
-                                                   Foreground="{DynamicResource PrimaryText}"
-                                                   FontFamily="" FontSize="24" FontWeight="Bold" TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Grid.Column="3" Background="#0E0E0F" Padding="16" CornerRadius="8">
-                                    <StackPanel>
-                                        <TextBlock Text="DISK_SPACE" Foreground="{DynamicResource SecondaryText}"
-                                                   FontFamily="{DynamicResource SpaceMonoRegular}" FontSize="10"
-                                                   LetterSpacing="1" />
-                                        <TextBlock Text="{Binding PrimaryInstance.InstallSize}"
-                                                   Foreground="{DynamicResource PrimaryText}"
-                                                   FontFamily="" FontSize="24" FontWeight="Bold" TextWrapping="Wrap" />
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                            <Grid ColumnDefinitions="7* 2* Auto *" ColumnSpacing="16">
-                                <Button Classes="Primary" Grid.Column="0" HorizontalAlignment="Stretch" CornerRadius="4"
-                                        Padding="0 16" Command="{Binding PrimaryInstance.LaunchInstanceWithWine}">
-                                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"
-                                                HorizontalAlignment="Center">
-                                        <Label Classes="icon" FontWeight="Regular" Content="&#xE3D0;" FontSize="28" />
-                                        <TextBlock Text="LAUNCH" LetterSpacing="2" VerticalAlignment="Center" FontSize="24"
-                                                   FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"/>
-                                    </StackPanel>
-                                </Button>
-                                <Button Grid.Column="1" Classes="Secondary" Padding="16"
-                                        HorizontalContentAlignment="Center"
-                                        HorizontalAlignment="Stretch">
-                                    MANAGE
-                                </Button>
-                                <Button Grid.Column="2" Classes="Secondary" Padding="16"
-                                        ToolTip.Tip="Compatible KSP versions"
-                                        Command="{Binding OpenCompatibleVersionsWindowCommand}"
-                                        CommandParameter="{Binding PrimaryInstance}">
-                                    <Label Classes="icon" FontWeight="Regular" Content="&#xE270;" FontSize="28" />
-                                </Button>
-                                <Button Grid.Column="3" Classes="Tertiary" Command="{Binding PrimaryInstance.DeleteInstance}">
-                                    <Label Classes="icon" FontWeight="Regular" Content="&#xE4A6;" FontSize="28" />
-                                </Button>
-                            </Grid>
+    <UserControl.Styles>
+        <!-- Instance list rows: padding 12 20, line under; selected = #1C1C20 with a 2 px accent line on the left -->
+        <Style Selector="ListBox.instanceList ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="ListBox.instanceList ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHover}" />
+        </Style>
+        <Style Selector="ListBox.instanceList ListBoxItem:selected /template/ ContentPresenter, ListBox.instanceList ListBoxItem:selected:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SelectedRow}" />
+        </Style>
+        <Style Selector="ListBox.instanceList ListBoxItem Border.accentEdge">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="ListBox.instanceList ListBoxItem:selected Border.accentEdge">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- Stat cells: padding 12 16, a line on the left -->
+        <Style Selector="Border.stat">
+            <Setter Property="Padding" Value="16 12" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="1 0 0 0" />
+        </Style>
+        <Style Selector="TextBlock.statValue">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <Style Selector="TextBlock.statDetail">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <!-- Tabs: 42 px, 14 px / 500, 2 px accent line under the active one -->
+        <Style Selector="RadioButton.tab">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TabBorder" Height="42" Padding="2 0" BorderThickness="0 0 0 2"
+                            BorderBrush="Transparent" Background="Transparent">
+                        <ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center"
+                                          Foreground="{TemplateBinding Foreground}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="RadioButton.tab:checked">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="RadioButton.tab:checked /template/ Border#TabBorder">
+            <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+        </Style>
+
+        <!-- Filter box on the Mods tab: 34 px, a filter icon -->
+        <Style Selector="TextBox.filter">
+            <Setter Property="Height" Value="34" />
+            <Setter Property="MinHeight" Value="34" />
+        </Style>
+
+        <!-- Installed mod rows -->
+        <Style Selector="ListBox.installed ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ListBox.installed ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource RowHover}" />
+        </Style>
+        <Style Selector="ListBox.installed ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.modRow.checked">
+            <Setter Property="Background" Value="#1A1A1E" />
+        </Style>
+        <Style Selector="TextBlock.installedVersion">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="TextBlock.installedVersion.outdated">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.reason">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.reason.dependency">
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <!-- The update badge next to the version: 22 px, #14243A, border #23415F, mono 11 -->
+        <Style Selector="Button.updateBadge">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Padding" Value="6 0" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StatusUpdateLine}" />
+            <Setter Property="Background" Value="{DynamicResource StatusUpdateSoft}" />
+            <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.updateBadge:pointerover /template/ ContentPresenter, Button.updateBadge:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource StatusUpdateSoft}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StatusUpdate}" />
+            <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
+        </Style>
+        <!-- Row menu button: 28 × 28, transparent, muted icon -->
+        <Style Selector="Button.rowMenu">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.rowMenu:pointerover /template/ ContentPresenter, Button.rowMenu:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHover}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <!-- The small "Last played" sort button: 26 px, transparent -->
+        <Style Selector="Button.sort">
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Padding" Value="6 0" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.sort:pointerover /template/ ContentPresenter, Button.sort:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHover}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid ColumnDefinitions="300, *">
+
+        <!-- Instance list -->
+        <Border Grid.Column="0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 1 0">
+            <DockPanel>
+                <Grid DockPanel.Dock="Top" ColumnDefinitions="*, Auto" ColumnSpacing="8" Margin="20 16 20 8">
+                    <Button Grid.Column="0" Classes="accent" HorizontalAlignment="Stretch"
+                            Command="{Binding NewInstanceCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="16"
+                                                 Foreground="{DynamicResource OnAccent}" VerticalAlignment="Center" />
+                            <TextBlock Text="New instance" VerticalAlignment="Center" />
                         </StackPanel>
-                    </Border>
-                    <Border Grid.Column="1" IsVisible="{Binding !HasZeroOrOneInstance}"
-                            Background="{DynamicResource SideBarBackground}" CornerRadius="12" Padding="32">
-                        <Grid RowSpacing="16" RowDefinitions="Auto *">
-                            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" HorizontalAlignment="Stretch">
-                                <Border Grid.Column="0" Padding="12"
-                                        Background="{DynamicResource SecondaryButtonBackgrorund}"
-                                        CornerRadius="8" HorizontalAlignment="Left">
-                                    <Label Classes="icon" FontWeight="Regular" Content="&#xE3FE;" FontSize="32"
-                                           Foreground="#A1A1AA" />
-                                </Border>
-                            </Grid>
-                            <Grid Grid.Row="1" RowDefinitions="Auto Auto * *">
-                                <TextBlock Grid.Row="0" Text="{Binding SecondInstance.Name}" FontSize="20"
-                                           FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"
-                                           LetterSpacing="1.5" />
-                                <StackPanel Grid.Row="1" Orientation="Horizontal">
-                                    <TextBlock Text="{Binding SecondInstance.Version, StringFormat='KSP v{0} • '}"
-                                               FontSize="13" FontFamily="{DynamicResource SpaceMonoRegular}"
-                                               Foreground="{DynamicResource SecondaryText}" />
-                                    <TextBlock Text="{Binding SecondInstance.Mods.Count, StringFormat='{}{0} Mods'}"
-                                               FontSize="13" FontFamily="{DynamicResource SpaceMonoRegular}"
-                                               Foreground="{DynamicResource SecondaryText}" />
-                                </StackPanel>
-                                <Grid Grid.Row="2" VerticalAlignment="Stretch" ColumnDefinitions="* *" Margin="0 24 0 24">
-                                    <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="5">
-                                        <TextBlock Text="PLAY_TIME" Foreground="{DynamicResource PrimaryRed}"
-                                                   FontSize="14"
-                                                   FontFamily="{DynamicResource SpaceMonoBold}" />
-                                        <TextBlock Text="{Binding SecondInstance.PlayTimeHumanized}"
-                                                   Foreground="{DynamicResource PrimaryText}"
-                                                   FontSize="15" FontFamily="{DynamicResource Inter}" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Orientation="Vertical" Spacing="5">
-                                        <TextBlock Text="LAST_PLAYED" Foreground="{DynamicResource PrimaryRed}"
-                                                   FontSize="14" FontFamily="{DynamicResource SpaceMonoBold}" />
-                                        <TextBlock Text="{Binding SecondInstance.LastPlayedHumanized}"
-                                                   Foreground="{DynamicResource PrimaryText}"
-                                                   FontSize="15" FontFamily="{DynamicResource Inter}" />
-                                    </StackPanel>
-                                </Grid>
-                                <Grid Grid.Row="3" VerticalAlignment="Bottom" ColumnDefinitions="4.5* * Auto"
-                                      ColumnSpacing="8">
-                                    <Button Grid.Column="0" Classes="Secondary" Padding="0 14"
-                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                            Command="{Binding SecondInstance.LaunchInstanceWithWine}">
-                                        LAUNCH
-                                    </Button>
-                                    <Button Grid.Column="1" Classes="Secondary" Padding="6 6"
-                                            ToolTip.Tip="Compatible KSP versions"
-                                            Command="{Binding OpenCompatibleVersionsWindowCommand}"
-                                            CommandParameter="{Binding SecondInstance}">
-                                        <Label Classes="icon" FontWeight="Regular" Content="&#xE270;" FontSize="24"
-                                               Foreground="#A1A1AA" />
-                                    </Button>
-                                    <Button Grid.Column="2" Classes="Tertiary" Padding="0 4" Command="{Binding SecondInstance.DeleteInstance}">
-                                        <Label Classes="icon" FontWeight="Regular" Content="&#xE4A6;" FontSize="24" />
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Border>
-                    <Button Classes="NewInstance" Grid.Column="{Binding InstancesCount}"
-                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                            Background="Transparent" Command="{Binding OpenNewInstanceWindowCommand}"
-                            IsVisible="{Binding HasZeroOrOneInstance}" MinHeight="300">
-                        <Grid Background="Transparent">
-                            <Rectangle StrokeDashArray="1.5, 1" Stroke="#1F1F20" StrokeThickness="4"
-                                       RadiusX="12" RadiusY="12" Fill="Transparent" />
-                            <StackPanel Spacing="16" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Border Background="{DynamicResource SideBarBackground}" VerticalAlignment="Center"
-                                        HorizontalAlignment="Center" Padding="16" CornerRadius="109">
-                                    <Label Classes="iconBold" FontWeight="Regular" Content="&#xE3D4;" FontSize="18"
-                                           Foreground="{DynamicResource SecondaryText}" />
-                                </Border>
-                                <TextBlock Text="NEW_INSTANCE" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                           FontSize="16"
-                                           FontFamily="{DynamicResource SpaceMonoRegular}" LetterSpacing="1"
-                                           Foreground="{DynamicResource SecondaryText}" />
-                            </StackPanel>
-                        </Grid>
+                    </Button>
+                    <!-- Placeholder: adding an existing KSP folder is Phase 7 task 3 -->
+                    <Button Grid.Column="1" Classes="secondary icon"
+                            ToolTip.Tip="Add an existing KSP install (not built yet: Phase 7 task 3)">
+                        <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="16" />
                     </Button>
                 </Grid>
-                <ItemsControl ItemsSource="{Binding InstancesWithoutFirstRow}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Columns="3" ColumnSpacing="24" RowSpacing="24"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+                <Border DockPanel.Dock="Top" Padding="20 8" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBlock Grid.Column="0" Classes="label" Text="{Binding InstancesCountText}"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Classes="sort">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock VerticalAlignment="Center" Text="Last played" IsVisible="{Binding !SortByName}" />
+                                <TextBlock VerticalAlignment="Center" Text="Name" IsVisible="{Binding SortByName}" />
+                                <controls:StrokeIcon Data="{StaticResource IconChevronDown}" Size="12"
+                                                     VerticalAlignment="Center" />
+                            </StackPanel>
+                            <Button.Flyout>
+                                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                    <MenuItem Header="Last played" Command="{Binding SortInstancesCommand}"
+                                              CommandParameter="lastPlayed" />
+                                    <MenuItem Header="Name" Command="{Binding SortInstancesCommand}"
+                                              CommandParameter="name" />
+                                </MenuFlyout>
+                            </Button.Flyout>
+                        </Button>
+                    </Grid>
+                </Border>
 
-                    <ItemsControl.DataTemplates>
-                        <DataTemplate DataType="{x:Type models:Instance}">
-                            <Border Background="{DynamicResource SideBarBackground}" 
-                                        CornerRadius="12" Padding="32">
-                                    <Grid RowSpacing="16" RowDefinitions="Auto *">
-                                        <Border Grid.Row="0" Padding="12"
-                                                Background="{DynamicResource SecondaryButtonBackgrorund}"
-                                                CornerRadius="8" HorizontalAlignment="Left">
-                                            <Label Classes="icon" FontWeight="Regular" Content="&#xE3FE;" FontSize="32"
-                                                   Foreground="#A1A1AA" />
-                                        </Border>
-                                        <Grid Grid.Row="1" RowDefinitions="Auto Auto * *">
-                                            <TextBlock Grid.Row="0" Text="{Binding Name}" FontSize="20"
-                                                       FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"
-                                                       LetterSpacing="1.5" />
-                                            <StackPanel Grid.Row="1" Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Version, StringFormat='KSP v{0} • '}"
-                                                           FontSize="13" FontFamily="{DynamicResource SpaceMonoRegular}"
-                                                           Foreground="{DynamicResource SecondaryText}" />
-                                                <TextBlock
-                                                    Text="{Binding Mods.Count, StringFormat='{}{0} Mods'}"
-                                                    FontSize="13" FontFamily="{DynamicResource SpaceMonoRegular}"
-                                                    Foreground="{DynamicResource SecondaryText}" />
-                                            </StackPanel>
-                                            <Grid Grid.Row="2" VerticalAlignment="Stretch" ColumnDefinitions="* *"
-                                                  Margin="0 24 0 24">
-                                                <StackPanel Grid.Column="0" Orientation="Vertical" Spacing="5">
-                                                    <TextBlock Text="PLAY_TIME" Foreground="{DynamicResource PrimaryRed}"
-                                                               FontSize="14"
-                                                               FontFamily="{DynamicResource SpaceMonoBold}" />
-                                                    <TextBlock Text="{Binding PlayTimeHumanized}"
-                                                               Foreground="{DynamicResource PrimaryText}"
-                                                               FontSize="15" FontFamily="{DynamicResource Inter}" />
-                                                </StackPanel>
-                                                <StackPanel Grid.Column="1" Orientation="Vertical" Spacing="5">
-                                                    <TextBlock Text="LAST_PLAYED" Foreground="{DynamicResource PrimaryRed}"
-                                                               FontSize="14" FontFamily="{DynamicResource SpaceMonoBold}" />
-                                                    <TextBlock Text="{Binding LastPlayedHumanized}"
-                                                               Foreground="{DynamicResource PrimaryText}"
-                                                               FontSize="15" FontFamily="{DynamicResource Inter}" />
-                                                </StackPanel>
-                                            </Grid>
-                                            <Grid Grid.Row="3" VerticalAlignment="Bottom" ColumnDefinitions="4.5* * Auto"
-                                                  ColumnSpacing="8">
-                                                <Button Grid.Column="0" Classes="Secondary" Padding="0 14"
-                                                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
-                                                        Command="{Binding LaunchInstanceWithWine}">
-                                                    LAUNCH
-                                                </Button>
-                                                <Button Grid.Column="1" Classes="Secondary" Padding="6 6"
-                                                        ToolTip.Tip="Compatible KSP versions"
-                                                        Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).OpenCompatibleVersionsWindowCommand}"
-                                                        CommandParameter="{Binding}">
-                                                    <Label Classes="icon" FontWeight="Regular" Content="&#xE270;" FontSize="24"
-                                                           Foreground="#A1A1AA" />
-                                                </Button>
-                                                <Button Grid.Column="2" Classes="Tertiary" Padding="0 4" Command="{Binding DeleteInstance}">
-                                                    <Label Classes="icon" FontWeight="Regular" Content="&#xE4A6;" FontSize="24" />
-                                                </Button>
-                                            </Grid>
+                <!-- Import: placeholder until Phase 7 task 3 -->
+                <Border DockPanel.Dock="Bottom" Padding="20 16" BorderBrush="{DynamicResource Line}"
+                        BorderThickness="0 1 0 0">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Import" FontSize="13" FontWeight="Medium" />
+                        <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextMuted}"
+                                   Text="Add a KSP folder you already have. Mods installed by CKAN are picked up from its registry." />
+                        <Button Classes="secondary small" HorizontalAlignment="Left"
+                                ToolTip.Tip="Not built yet: Phase 7 task 3">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="14"
+                                                     VerticalAlignment="Center" />
+                                <TextBlock Text="Choose folder" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <ListBox Classes="instanceList" Background="Transparent" ItemsSource="{Binding Instances}"
+                         SelectedItem="{Binding SelectedItem}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="instances:InstanceListItemViewModel">
+                            <Grid>
+                                <Border Padding="20 12" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
+                                    <StackPanel Spacing="6">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <controls:StrokeIcon Data="{StaticResource IconStar}" Size="13"
+                                                                 IsFilled="True" VerticalAlignment="Center"
+                                                                 Foreground="{DynamicResource AccentText}"
+                                                                 IsVisible="{Binding IsPrimary}" />
+                                        </StackPanel>
+                                        <Grid ColumnDefinitions="Auto, Auto, *" ColumnSpacing="10">
+                                            <TextBlock Grid.Column="0" Classes="mono muted" FontSize="12"
+                                                       Text="{Binding Version}" />
+                                            <TextBlock Grid.Column="1" Classes="muted" FontSize="12"
+                                                       Text="{Binding ModsText}" />
+                                            <TextBlock Grid.Column="2" Classes="muted" FontSize="12"
+                                                       Text="{Binding LastPlayedText}" HorizontalAlignment="Right" />
                                         </Grid>
-                                    </Grid>
-                                </Border>
-                        </DataTemplate>
-
-                        <DataTemplate DataType="{x:Type models:NewInstancePlaceholder}">
-                            <Button Classes="NewInstance"
-                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                    Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).OpenNewInstanceWindowCommand}"
-                                    Background="Transparent" MinHeight="300">
-                                <Grid Background="Transparent">
-                                    <Rectangle StrokeDashArray="1.5, 1" Stroke="#1F1F20" StrokeThickness="4"
-                                               RadiusX="12" RadiusY="12" Fill="Transparent" />
-                                    <StackPanel Spacing="16" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        <Border Background="{DynamicResource SideBarBackground}" VerticalAlignment="Center"
-                                                HorizontalAlignment="Center" Padding="16" CornerRadius="109">
-                                            <Label Classes="iconBold" FontWeight="Regular" Content="&#xE3D4;" FontSize="18"
-                                                   Foreground="{DynamicResource SecondaryText}" />
-                                        </Border>
-                                        <TextBlock Text="NEW_INSTANCE" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                   FontSize="16"
-                                                   FontFamily="{DynamicResource SpaceMonoRegular}" LetterSpacing="1"
-                                                   Foreground="{DynamicResource SecondaryText}" />
                                     </StackPanel>
-                                </Grid>
-                            </Button>
+                                </Border>
+                                <Border Classes="accentEdge" Width="2" HorizontalAlignment="Left"
+                                        Background="{DynamicResource Accent}" />
+                            </Grid>
                         </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
 
-                    </ItemsControl.DataTemplates>
-                </ItemsControl>
-            </StackPanel>
+        <!-- No instances (not in the mockups) -->
+        <StackPanel Grid.Column="1" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    IsVisible="{Binding !HasInstances}">
+            <TextBlock Classes="h2" Text="No instances yet" HorizontalAlignment="Center" />
+            <TextBlock Classes="muted" FontSize="13" HorizontalAlignment="Center"
+                       Text="Create one from a KSP zip to start installing mods." />
+            <Button Classes="accent" HorizontalAlignment="Center" Content="New instance"
+                    Command="{Binding NewInstanceCommand}" />
         </StackPanel>
-    </ScrollViewer>
 
+        <!-- Selected instance: padding 20 28 28, sections 18 px apart -->
+        <Grid Grid.Column="1" RowDefinitions="Auto, Auto, Auto, *, Auto" IsVisible="{Binding HasInstances}">
+            <!-- Header: name + star, chips, path; Open folder, More, Launch -->
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="16" Margin="28 20 28 18">
+                <StackPanel Grid.Column="0" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="{Binding Selected.Name, FallbackValue=''}" FontSize="26" LineHeight="30"
+                                   FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis" />
+                        <controls:StrokeIcon Data="{StaticResource IconStar}" Size="16" IsFilled="True"
+                                             VerticalAlignment="Center" Foreground="{DynamicResource AccentText}"
+                                             IsVisible="{Binding Selected.IsPrimary, FallbackValue=False}" />
+                    </StackPanel>
+                    <WrapPanel ItemSpacing="6" LineSpacing="6">
+                        <Border Classes="chip plain"><TextBlock Classes="mono" Text="{Binding KspText}" /></Border>
+                        <Border Classes="chip plain"><TextBlock Classes="mono" Text="{Binding CompatibleText}" /></Border>
+                        <!-- Wine is the only runner until the Proton work (Phase 8) -->
+                        <Border Classes="chip plain"><TextBlock Text="Wine" /></Border>
+                        <TextBlock Classes="mono muted" FontSize="12" Text="{Binding PathText}"
+                                   VerticalAlignment="Center" Margin="6 0 0 0" />
+                    </WrapPanel>
+                    <TextBlock Text="{Binding ActionError}" FontSize="12" TextWrapping="Wrap"
+                               Foreground="{DynamicResource StatusError}"
+                               IsVisible="{Binding ActionError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                    <Button Classes="secondary icon large" Command="{Binding OpenFolderCommand}"
+                            ToolTip.Tip="Open instance folder">
+                        <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="16" />
+                    </Button>
+                    <Button Classes="secondary icon large" ToolTip.Tip="More actions">
+                        <controls:StrokeIcon Data="{StaticResource IconMore}" Size="16" IsFilled="True" />
+                        <Button.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="Make primary" Command="{Binding MakePrimaryCommand}"
+                                          IsEnabled="{Binding !Selected.IsPrimary, FallbackValue=False}" />
+                                <MenuItem Header="Instance settings…" Command="{Binding OpenSettingsCommand}" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                    <controls:LaunchButton MinWidth="171" Command="{Binding LaunchCommand}">
+                        <controls:LaunchButton.Menu>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuItem Header="Launch arguments…" Command="{Binding OpenSettingsCommand}" />
+                            </MenuFlyout>
+                        </controls:LaunchButton.Menu>
+                    </controls:LaunchButton>
+                </StackPanel>
+            </Grid>
+
+            <!-- Stats strip -->
+            <Border Grid.Row="1" Margin="28 0" BorderBrush="{DynamicResource Line}" BorderThickness="0 1">
+                <Grid ColumnDefinitions="*, *, *, *" ClipToBounds="True">
+                    <Border Grid.Column="0" Classes="stat" Margin="-1 0 0 0">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="label" Text="MODS" />
+                            <TextBlock Classes="statValue" Text="{Binding ModsCount}" />
+                            <TextBlock Classes="statDetail" Text="{Binding ModsDetail}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" Classes="stat">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="label" Text="PLAYTIME" />
+                            <TextBlock Classes="statValue" Text="{Binding PlayTime}" />
+                            <TextBlock Classes="statDetail" Text="in total" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Classes="stat">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="label" Text="LAST PLAYED" />
+                            <TextBlock Classes="statValue" Text="{Binding LastPlayed}" />
+                            <TextBlock Classes="statDetail" Text="{Binding LastPlayedDetail}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="3" Classes="stat">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="label" Text="INSTALL SIZE" />
+                            <TextBlock Classes="statValue" Text="{Binding InstallSize}" />
+                            <TextBlock Classes="statDetail" Text="{Binding GameDataSize}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Tabs -->
+            <Border Grid.Row="2" Margin="28 18 28 0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
+                <StackPanel Orientation="Horizontal" Spacing="24">
+                    <RadioButton Classes="tab" GroupName="instanceTab" IsChecked="True"
+                                 Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Mods}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Mods" VerticalAlignment="Center" />
+                            <TextBlock Classes="mono muted" FontSize="11" Text="{Binding ModsCount}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Classes="tab" GroupName="instanceTab" Content="Settings"
+                                 Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Settings}" />
+                    <RadioButton Classes="tab" GroupName="instanceTab" Content="Logs"
+                                 Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Logs}" />
+                    <RadioButton Classes="tab" GroupName="instanceTab" Content="Backups"
+                                 Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Backups}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Mods tab -->
+            <Grid Grid.Row="3" RowDefinitions="Auto, Auto, *, Auto" Margin="28 18 28 0"
+                  IsVisible="{Binding Tab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Mods}}">
+                <!-- Filter, filters with counts, Update N, Add mods -->
+                <!-- The filter box shrinks from 260 to 180 px before anything else (flex: 0 1 260px in the mockup) -->
+                <Grid Grid.Row="0" ColumnSpacing="10" Margin="0 0 0 18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1000*" MinWidth="180" MaxWidth="260" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Classes="search filter" PlaceholderText="Filter installed mods"
+                             Text="{Binding ModFilterText}">
+                        <TextBox.InnerLeftContent>
+                            <controls:StrokeIcon Data="{StaticResource IconFilter}" Size="14" Margin="10 0 8 0"
+                                                 Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" />
+                        </TextBox.InnerLeftContent>
+                    </TextBox>
+                    <Border Grid.Column="1" Classes="segmented">
+                        <StackPanel Orientation="Horizontal" Spacing="2">
+                            <RadioButton Classes="segment" GroupName="modsFilter" IsChecked="True"
+                                         Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.All}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="All" />
+                                    <TextBlock Classes="mono muted" FontSize="11" Text="{Binding AllCount}" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton Classes="segment" GroupName="modsFilter"
+                                         Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.Picked}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="Picked" />
+                                    <TextBlock Classes="mono muted" FontSize="11" Text="{Binding PickedCount}" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton Classes="segment" GroupName="modsFilter"
+                                         Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.Dependencies}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="Dependencies" />
+                                    <TextBlock Classes="mono muted" FontSize="11" Text="{Binding DependenciesCount}" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton Classes="segment" GroupName="modsFilter"
+                                         Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.Updates}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="Updates" />
+                                    <TextBlock Classes="mono muted" FontSize="11" Text="{Binding UpdatesCount}" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton Classes="segment" GroupName="modsFilter"
+                                         Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.Issues}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="Issues" />
+                                    <TextBlock Classes="mono" FontSize="11" Text="{Binding IssuesCount}"
+                                               Foreground="{DynamicResource StatusWarning}" />
+                                </StackPanel>
+                            </RadioButton>
+                        </StackPanel>
+                    </Border>
+                    <Button Grid.Column="3" Classes="secondary" Command="{Binding UpdateAllCommand}"
+                            IsVisible="{Binding HasUpdates}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <controls:StrokeIcon Data="{StaticResource IconArrowUp}" Size="16" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding UpdatesCount, StringFormat='Update {0}'}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="4" Classes="accentOutline" Command="{Binding AddModsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="16"
+                                                 Foreground="{DynamicResource AccentText}" VerticalAlignment="Center" />
+                            <TextBlock Text="Add mods" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- Column header: 28 | mod | 210 version | 96 KSP | 72 size | 32 menu -->
+                <Border Grid.Row="1" Height="38" Padding="6 0" BorderBrush="{DynamicResource Line}"
+                        BorderThickness="0 1">
+                    <Grid ColumnDefinitions="28, *, 210, 96, 72, 32" ColumnSpacing="12">
+                        <TextBlock Grid.Column="1" Classes="label" LetterSpacing="0.66" Text="MOD" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Classes="label" LetterSpacing="0.66" Text="VERSION" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="3" Classes="label" LetterSpacing="0.66" Text="KSP" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="4" Classes="label" LetterSpacing="0.66" Text="SIZE"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+
+                <ListBox Grid.Row="2" Classes="installed" Background="Transparent" ItemsSource="{Binding Rows}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="instances:InstalledModRowViewModel">
+                            <Border Classes="modRow" Classes.checked="{Binding IsSelected}" MinHeight="50"
+                                    Padding="6" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
+                                <Grid ColumnDefinitions="28, *, 210, 96, 72, 32" ColumnSpacing="12">
+                                    <CheckBox Grid.Column="0" Classes="box" IsChecked="{Binding IsSelected}"
+                                              VerticalAlignment="Center"
+                                              ToolTip.Tip="{Binding Name, StringFormat='Select {0}'}" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Medium"
+                                                       LineHeight="20.3" TextTrimming="CharacterEllipsis" />
+                                            <Border Classes="badge warning" IsVisible="{Binding IsNotListed}">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <controls:StrokeIcon Data="{StaticResource IconWarning}" />
+                                                    <TextBlock Text="{Binding NotListedText}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Classes="reason" Classes.dependency="{Binding IsDependency}"
+                                                   FontSize="12" LineHeight="17.4" Text="{Binding Reason}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Classes="mono installedVersion" Classes.outdated="{Binding HasUpdate}"
+                                                   FontSize="12" Text="{Binding Version.Version}"
+                                                   TextTrimming="CharacterEllipsis" MaxWidth="130"
+                                                   VerticalAlignment="Center" />
+                                        <Button Classes="updateBadge" IsVisible="{Binding HasUpdate}"
+                                                Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).UpdateRowCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip.Tip="{Binding NextVersion.Version, StringFormat='Update to {0}', FallbackValue=''}">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <controls:StrokeIcon Data="{StaticResource IconArrowUp}" Size="11"
+                                                                     Foreground="{DynamicResource StatusUpdate}"
+                                                                     VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding NextText}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                    <controls:KspStrip Grid.Column="3" Version="{Binding Version}"
+                                                       VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="4" Classes="mono secondary" FontSize="12"
+                                               Text="{Binding SizeText}" HorizontalAlignment="Right"
+                                               VerticalAlignment="Center" />
+                                    <Button Grid.Column="5" Classes="rowMenu" VerticalAlignment="Center"
+                                            ToolTip.Tip="{Binding Name, StringFormat='More actions for {0}'}">
+                                        <controls:StrokeIcon Data="{StaticResource IconMore}" Size="16" IsFilled="True" />
+                                        <Button.Flyout>
+                                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                <MenuItem Header="Update"
+                                                          IsVisible="{Binding HasUpdate}"
+                                                          Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).UpdateRowCommand}"
+                                                          CommandParameter="{Binding}" />
+                                                <MenuItem Header="Remove"
+                                                          Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).RemoveRowCommand}"
+                                                          CommandParameter="{Binding}" />
+                                            </MenuFlyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <TextBlock Grid.Row="3" Margin="6 10" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                           Text="{Binding ShownText}" />
+            </Grid>
+
+            <!-- Settings tab: placeholder until Phase 5 step 4 replaces the instance settings window -->
+            <StackPanel Grid.Row="3" Margin="28 18 28 0" Spacing="12" MaxWidth="720" HorizontalAlignment="Left"
+                        IsVisible="{Binding Tab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Settings}}">
+                <Border Classes="placeholder">
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="label" Text="NOT BUILT YET · PHASE 5 STEP 4" />
+                        <TextBlock Text="The Settings tab (name, primary, launching, compatible KSP versions, delete) replaces the instance settings window in the next step. Until then:" />
+                        <Button Classes="secondary small" HorizontalAlignment="Left" Content="Open instance settings"
+                                Command="{Binding OpenSettingsCommand}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Logs and Backups: not mocked yet -->
+            <StackPanel Grid.Row="3" Margin="28 18 28 0" MaxWidth="720" HorizontalAlignment="Left"
+                        IsVisible="{Binding Tab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Logs}}">
+                <Border Classes="placeholder">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="NOT BUILT YET · PHASE 8" />
+                        <TextBlock Text="Wine's output goes to the console for now. Writing it to a log file in the instance folder comes with the Proton work." />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+            <StackPanel Grid.Row="3" Margin="28 18 28 0" MaxWidth="720" HorizontalAlignment="Left"
+                        IsVisible="{Binding Tab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Backups}}">
+                <Border Classes="placeholder">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="NOT BUILT YET · PHASE 8" />
+                        <TextBlock Text="Backups of GameData and saves, with restore into this or a new instance." />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Selection bar: 2 px accent line, full width at the bottom -->
+            <Border Grid.Row="4" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Accent}"
+                    BorderThickness="0 2 0 0" Padding="20 12" IsVisible="{Binding HasSelection}">
+                <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto, Auto" ColumnSpacing="12">
+                    <TextBlock Grid.Column="0" Classes="mono" FontSize="13" FontWeight="SemiBold"
+                               Text="{Binding SelectedCount}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" FontSize="13" Text="selected" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                               Text="{Binding RemovalNote}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                    <Button Grid.Column="3" Classes="ghost" Content="Clear" Command="{Binding ClearSelectionCommand}" />
+                    <Button Grid.Column="4" Classes="secondary" Command="{Binding UpdateSelectedCommand}"
+                            IsEnabled="{Binding SelectionHasUpdates}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <controls:StrokeIcon Data="{StaticResource IconArrowUp}" Size="16" VerticalAlignment="Center" />
+                            <TextBlock Text="Update" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="5" Classes="danger" Command="{Binding RemoveSelectedCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <controls:StrokeIcon Data="{StaticResource IconTrash}" Size="16"
+                                                 Foreground="{DynamicResource StatusError}" VerticalAlignment="Center" />
+                            <TextBlock Text="Remove" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
 </UserControl>

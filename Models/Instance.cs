@@ -8,9 +8,7 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.Models;
 
-public abstract class InstanceTile;
-
-public class Instance(string name, string rootPath, string version) : InstanceTile
+public class Instance(string name, string rootPath, string version)
 {
     public string Name { get; set; } = name;
     public string RootPath { get; set; } = rootPath;
