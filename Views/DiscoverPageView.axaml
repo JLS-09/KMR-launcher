@@ -6,7 +6,6 @@
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
              xmlns:discover="clr-namespace:KMRLauncherMvvm.ViewModels.Discover"
              xmlns:controls="using:KMRLauncherMvvm.Controls"
-             xmlns:models="using:KMRLauncherMvvm.Models"
              x:DataType="vm:DiscoverPageViewModel"
              x:Class="KMRLauncherMvvm.Views.DiscoverPageView"
              Foreground="{DynamicResource TextPrimary}">
