@@ -28,6 +28,11 @@
             <SolidColorBrush x:Key="Line">#232326</SolidColorBrush>
             <SolidColorBrush x:Key="LineStrong">#2E2E32</SolidColorBrush>
             <SolidColorBrush x:Key="Off">#2A2A2D</SolidColorBrush>
+            <SolidColorBrush x:Key="ToggleOff">#3A3A3F</SolidColorBrush>
+            <SolidColorBrush x:Key="SegmentSelected">#2A2A2E</SolidColorBrush>
+            <SolidColorBrush x:Key="BadgeNeutral">#26262A</SolidColorBrush>
+            <SolidColorBrush x:Key="SelectedRow">#1C1C20</SolidColorBrush>
+            <SolidColorBrush x:Key="SplitLine">#59000000</SolidColorBrush>
             <SolidColorBrush x:Key="TextPrimary">#FFF8F0</SolidColorBrush>
             <SolidColorBrush x:Key="TextSecondary">#A1A1AA</SolidColorBrush>
             <SolidColorBrush x:Key="TextMuted">#8B8B94</SolidColorBrush>
@@ -35,11 +40,15 @@
             <SolidColorBrush x:Key="StatusFits">#3FB950</SolidColorBrush>
             <SolidColorBrush x:Key="StatusFitsSoft">#132A19</SolidColorBrush>
             <SolidColorBrush x:Key="StatusUpdate">#58A6FF</SolidColorBrush>
-            <SolidColorBrush x:Key="StatusUpdateSoft">#10233A</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusUpdateSoft">#14243A</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusUpdateLine">#23415F</SolidColorBrush>
             <SolidColorBrush x:Key="StatusWarning">#D9B526</SolidColorBrush>
             <SolidColorBrush x:Key="StatusWarningSoft">#2A2410</SolidColorBrush>
             <SolidColorBrush x:Key="StatusError">#FF6B6B</SolidColorBrush>
             <SolidColorBrush x:Key="StatusErrorSoft">#2D1416</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusErrorLine">#5A2A2C</SolidColorBrush>
+            <SolidColorBrush x:Key="FitsRow">#16211A</SolidColorBrush>
+            <SolidColorBrush x:Key="FitsRowLine">#1F3A26</SolidColorBrush>
 
             <!-- Accent: these defaults are for the designer; ThemeService.ApplyAccent replaces them at startup -->
             <SolidColorBrush x:Key="Accent">#DF0105</SolidColorBrush>

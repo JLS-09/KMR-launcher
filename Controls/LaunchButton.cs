@@ -5,8 +5,6 @@ using Avalonia.Controls.Primitives;
 
 namespace KMRLauncherMvvm.Controls;
 
-// The split Launch button: "Launch" on the left, a menu with launch options on the right.
-// The template is in Styles/Controls.axaml.
 public class LaunchButton : TemplatedControl
 {
     public static readonly StyledProperty<ICommand?> CommandProperty =

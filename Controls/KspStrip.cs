@@ -8,7 +8,6 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.Controls;
 
-// What the strip shows for one mod version: a cell per minor version 1.8–1.12 and a label
 public record KspStripInfo(bool[] Cells, string Label)
 {
     public static readonly string[] Minors = ["1.8", "1.9", "1.10", "1.11", "1.12"];
@@ -43,6 +42,7 @@ public class KspStrip : Control
     private const double CellGap = 2;
     private const double LabelTop = CellHeight + 4;
     private const double LabelSize = 11;
+    private const double LabelLineHeight = 16;
 
     private KspStripInfo _info = KspStripInfo.For(null);
 
@@ -90,7 +90,7 @@ public class KspStrip : Control
     }
 
     protected override Size MeasureOverride(Size availableSize) =>
-        new(double.IsInfinity(availableSize.Width) ? 104 : availableSize.Width, LabelTop + LabelSize + 4);
+        new(double.IsInfinity(availableSize.Width) ? 104 : availableSize.Width, LabelTop + LabelLineHeight);
 
     public override void Render(DrawingContext context)
     {
@@ -107,6 +107,6 @@ public class KspStrip : Control
         if (_info.Label.Length == 0) return;
         var text = new FormattedText(_info.Label, CultureInfo.CurrentCulture, FlowDirection.LeftToRight,
             new Typeface(FontFamily), LabelSize, LabelBrush);
-        context.DrawText(text, new Point(0, LabelTop));
+        context.DrawText(text, new Point(0, LabelTop + (LabelLineHeight - text.Height) / 2));
     }
 }

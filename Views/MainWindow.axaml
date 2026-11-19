@@ -38,105 +38,110 @@
     <Grid RowDefinitions="*, Auto">
         <Grid Grid.Row="0" ColumnDefinitions="216, *">
 
-            <!-- Sidebar -->
+            <!-- Sidebar: 216 px, padding 16 12, items 4 px apart -->
             <Border Grid.Column="0" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Line}"
                     BorderThickness="0 0 1 0" Padding="12 16">
                 <DockPanel>
-                    <!-- Logo lockup: rocket (flame follows the accent) + KMR / LAUNCHER -->
-                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="10 6 10 22">
-                        <Viewbox Width="30" Height="56" Stretch="Uniform">
-                            <Canvas Width="44" Height="89">
+                    <!-- Logo lockup, 160 × 64 (the mockup's SVG); the flame follows the accent -->
+                    <Viewbox DockPanel.Dock="Top" Width="160" Height="64" HorizontalAlignment="Left"
+                             Margin="10 6 10 26" Stretch="Fill">
+                        <Canvas Width="502" Height="200">
+                            <Canvas RenderTransformOrigin="0,0">
                                 <Canvas.RenderTransform>
-                                    <TranslateTransform X="-28" Y="-8" />
+                                    <TranslateTransform X="12" Y="-18" />
                                 </Canvas.RenderTransform>
-                                <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketBody}" />
-                                <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketWindow}" />
-                                <Path Fill="{DynamicResource Accent}" Data="{StaticResource LogoFlame}" />
+                                <Canvas RenderTransformOrigin="0,0">
+                                    <Canvas.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="1.91" ScaleY="1.91" />
+                                            <TranslateTransform X="-53.5" Y="16.72" />
+                                        </TransformGroup>
+                                    </Canvas.RenderTransform>
+                                    <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketBody}" />
+                                    <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketWindow}" />
+                                    <Path Fill="{DynamicResource Accent}" Data="{StaticResource LogoFlame}" />
+                                </Canvas>
+                                <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoKmr}" />
+                                <Path Fill="{DynamicResource TextSecondary}" Data="{StaticResource LogoLauncher}" />
                             </Canvas>
-                        </Viewbox>
-                        <StackPanel VerticalAlignment="Center" Spacing="-4">
-                            <TextBlock Text="KMR" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold"
-                                       FontSize="40" LetterSpacing="4" Foreground="{DynamicResource TextPrimary}" />
-                            <TextBlock Text="LAUNCHER" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Medium"
-                                       FontSize="11" LetterSpacing="4.5" Foreground="{DynamicResource TextSecondary}" />
-                        </StackPanel>
-                    </StackPanel>
+                        </Canvas>
+                    </Viewbox>
 
-                    <!-- Bottom: the primary instance, or the game that is running -->
+                    <!-- Bottom: the primary instance, or the game that is running.
+                         Border-top, padding 14 4 2; 12 px + the two 4 px gaps above it -->
                     <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0"
                             Padding="4 14 4 2">
-                        <Panel>
-                            <!-- Running (started from here). Log and Stop come with Phase 5 task 5. -->
-                            <StackPanel Spacing="8" IsVisible="{Binding IsRunning}">
-                                <Grid ColumnDefinitions="Auto, *, Auto">
-                                    <Ellipse Grid.Column="0" Width="8" Height="8" Fill="{DynamicResource StatusFits}"
-                                             VerticalAlignment="Center" Margin="0 0 8 0" />
-                                    <TextBlock Grid.Column="1" Classes="label" Text="RUNNING"
-                                               Foreground="{DynamicResource StatusFits}" />
-                                    <TextBlock Grid.Column="2" Classes="mono secondary" FontSize="12"
-                                               Text="{Binding RunningTime}" />
-                                </Grid>
-                                <TextBlock Text="{Binding RunningInstanceName}" FontSize="13" FontWeight="Medium"
-                                           TextTrimming="CharacterEllipsis" />
-                                <Grid ColumnDefinitions="*, 6, *">
-                                    <Button Grid.Column="0" Classes="secondary small" HorizontalAlignment="Stretch"
-                                            IsEnabled="False" ToolTip.ShowOnDisabled="True"
-                                            ToolTip.Tip="Not built yet (Phase 5 task 5). Wine's output still goes to the console.">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <controls:StrokeIcon Data="{StaticResource IconTerminal}" Size="14" />
-                                            <TextBlock Text="Log" />
-                                        </StackPanel>
-                                    </Button>
-                                    <Button Grid.Column="2" Classes="secondary small" HorizontalAlignment="Stretch"
-                                            IsEnabled="False" ToolTip.ShowOnDisabled="True"
-                                            ToolTip.Tip="Not built yet (Phase 5 task 5)">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <controls:StrokeIcon Data="{StaticResource IconStop}" Size="14" />
-                                            <TextBlock Text="Stop" />
-                                        </StackPanel>
-                                    </Button>
-                                </Grid>
-                            </StackPanel>
+                        <StackPanel Spacing="8">
+                            <Panel>
+                                <!-- Running (started from the sidebar). Log and Stop do nothing yet: Phase 5 task 5. -->
+                                <StackPanel Spacing="8" IsVisible="{Binding IsRunning}">
+                                    <Grid ColumnDefinitions="Auto, Auto, *">
+                                        <Ellipse Grid.Column="0" Width="8" Height="8" Fill="{DynamicResource StatusFits}"
+                                                 VerticalAlignment="Center" Margin="0 0 8 0" />
+                                        <TextBlock Grid.Column="1" Classes="label" Text="RUNNING" LineHeight="16"
+                                                   Foreground="{DynamicResource StatusFits}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Classes="mono secondary" FontSize="12" LineHeight="17.4"
+                                                   Text="{Binding RunningTime}" HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Text="{Binding RunningInstanceName}" FontSize="13" FontWeight="Medium"
+                                               LineHeight="18.85" TextTrimming="CharacterEllipsis" />
+                                    <Grid ColumnDefinitions="*, 6, *">
+                                        <Button Grid.Column="0" Classes="secondary small" HorizontalAlignment="Stretch"
+                                                ToolTip.Tip="Not built yet (Phase 5 task 5). Wine's output still goes to the console.">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <controls:StrokeIcon Data="{StaticResource IconTerminal}" Size="14"
+                                                                     VerticalAlignment="Center" />
+                                                <TextBlock Text="Log" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Grid.Column="2" Classes="secondary small" HorizontalAlignment="Stretch"
+                                                ToolTip.Tip="Not built yet (Phase 5 task 5)">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <controls:StrokeIcon Data="{StaticResource IconStop}" Size="14"
+                                                                     IsFilled="True" VerticalAlignment="Center" />
+                                                <TextBlock Text="Stop" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
 
-                            <!-- Idle: primary instance with Launch -->
-                            <StackPanel Spacing="8" IsVisible="{Binding !IsRunning}">
-                                <StackPanel Spacing="8" IsVisible="{Binding HasPrimaryInstance}">
-                                    <TextBlock Classes="label" Text="PRIMARY INSTANCE" />
-                                    <StackPanel Spacing="1">
+                                <!-- Idle: primary instance on the left, a 36 × 36 Launch button on the right -->
+                                <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10" IsVisible="{Binding !IsRunning}">
+                                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center"
+                                                IsVisible="{Binding HasPrimaryInstance}">
+                                        <TextBlock Classes="label" Text="PRIMARY" LineHeight="16" />
                                         <TextBlock Text="{Binding PrimaryInstance.Name, FallbackValue=''}" FontSize="13"
-                                                   FontWeight="Medium" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Classes="mono muted" FontSize="11"
+                                                   FontWeight="Medium" LineHeight="18.85" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Classes="mono muted" FontSize="11" LineHeight="16"
                                                    Text="{Binding PrimaryInstance.Version, StringFormat='KSP {0}', FallbackValue=''}" />
                                     </StackPanel>
-                                    <controls:LaunchButton Command="{Binding LaunchPrimaryCommand}">
-                                        <controls:LaunchButton.Menu>
-                                            <MenuFlyout Placement="TopEdgeAlignedRight">
-                                                <MenuItem Header="Instance settings…"
-                                                          Command="{Binding OpenPrimaryInstanceSettingsCommand}" />
-                                                <MenuItem Header="Open folder"
-                                                          Command="{Binding OpenPrimaryInstanceFolderCommand}" />
-                                                <Separator />
-                                                <MenuItem Header="Launch with Proton" IsEnabled="False"
-                                                          ToolTip.ShowOnDisabled="True"
-                                                          ToolTip.Tip="Not built yet (Phase 8, Proton)" />
-                                            </MenuFlyout>
-                                        </controls:LaunchButton.Menu>
-                                    </controls:LaunchButton>
-                                </StackPanel>
-                                <StackPanel Spacing="8" IsVisible="{Binding !HasPrimaryInstance}">
-                                    <TextBlock Classes="muted" FontSize="13" Text="No instances yet" />
-                                    <Button Classes="secondary small" HorizontalAlignment="Stretch"
-                                            Command="{Binding GoToInstancesCommand}" Content="Go to Instances" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Panel>
+                                    <Button Grid.Column="1" Classes="accent icon" BorderThickness="0" CornerRadius="8"
+                                            VerticalAlignment="Center" IsVisible="{Binding HasPrimaryInstance}"
+                                            Command="{Binding LaunchPrimaryCommand}"
+                                            ToolTip.Tip="{Binding PrimaryInstance.Name, StringFormat='Launch {0}', FallbackValue=''}">
+                                        <controls:StrokeIcon Data="{StaticResource IconPlay}" Size="16" IsFilled="True"
+                                                             Foreground="{DynamicResource OnAccent}" />
+                                    </Button>
+
+                                    <!-- No instances (not in the mockups) -->
+                                    <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Spacing="8"
+                                                IsVisible="{Binding !HasPrimaryInstance}">
+                                        <TextBlock Classes="muted" FontSize="13" Text="No instances yet" />
+                                        <Button Classes="secondary small" HorizontalAlignment="Stretch"
+                                                Command="{Binding GoToInstancesCommand}" Content="Go to Instances" />
+                                    </StackPanel>
+                                </Grid>
+                            </Panel>
+                            <!-- Only when launching failed (not in the mockups) -->
+                            <TextBlock Text="{Binding LaunchError}" FontSize="12" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource StatusError}"
+                                       IsVisible="{Binding LaunchError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </StackPanel>
                     </Border>
-                    <TextBlock DockPanel.Dock="Bottom" Text="{Binding LaunchError}" IsVisible="{Binding LaunchError, Converter={x:Static ObjectConverters.IsNotNull}}"
-                               Foreground="{DynamicResource StatusError}" FontSize="12" TextWrapping="Wrap"
-                               Margin="4 0 4 10" />
 
                     <Button DockPanel.Dock="Bottom" Classes="nav" Classes.active="{Binding SettingsPageIsActive}"
-                            Command="{Binding GoToSettingsCommand}" Margin="0 0 0 12">
+                            Command="{Binding GoToSettingsCommand}" Margin="0 28 0 20">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <controls:StrokeIcon Data="{StaticResource IconSettings}" VerticalAlignment="Center" />
                             <TextBlock Text="Settings" VerticalAlignment="Center" />
@@ -172,24 +177,30 @@
                 </DockPanel>
             </Border>
 
-            <!-- Top bar + page -->
+            <!-- Top bar (padding 16 28, gap 16) + page -->
             <Grid Grid.Column="1" RowDefinitions="Auto, *">
                 <Border Grid.Row="0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1" Padding="28 16">
-                    <Grid ColumnDefinitions="*, Auto">
+                    <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="16">
                         <TextBlock Grid.Column="0" Classes="h1" Text="{Binding PageTitle}" VerticalAlignment="Center" />
+                        <!-- Searches only the current page for now; read-only on pages it can't search yet -->
                         <TextBox Grid.Column="1" x:Name="SearchBox" Classes="search" Width="400"
-                                 Text="{Binding SearchText}" PlaceholderText="{Binding SearchPlaceholder}"
-                                 IsEnabled="{Binding CanSearch}">
+                                 Text="{Binding SearchText}" PlaceholderText="Search mods, instances and actions"
+                                 IsReadOnly="{Binding !CanSearch}" ToolTip.Tip="{Binding SearchHint}">
                             <TextBox.InnerLeftContent>
-                                <controls:StrokeIcon Data="{StaticResource IconSearch}" Size="16" Margin="2 0 0 0"
+                                <controls:StrokeIcon Data="{StaticResource IconSearch}" Size="16" Margin="10 0 8 0"
                                                      Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" />
                             </TextBox.InnerLeftContent>
                             <TextBox.InnerRightContent>
-                                <Border Classes="kbd" Margin="0 0 2 0">
+                                <Border Classes="kbd" Margin="8 0 10 0">
                                     <TextBlock Text="Ctrl K" />
                                 </Border>
                             </TextBox.InnerRightContent>
                         </TextBox>
+                        <!-- Only on Home and Discover, like the mockups -->
+                        <Button Grid.Column="2" Classes="secondary icon" IsVisible="{Binding ShowFetchButton}"
+                                Command="{Binding FetchCkanMetaCommand}" ToolTip.Tip="Fetch CKAN-meta now">
+                            <controls:StrokeIcon Data="{StaticResource IconRefresh}" Size="16" />
+                        </Button>
                     </Grid>
                 </Border>
                 <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" />
@@ -208,7 +219,7 @@
                     <TextBlock Text="{Binding StatusBar.VersionsText}" />
                     <TextBlock Classes="sep" Text="|" />
                     <!-- Placeholder: the time of the last sync is saved by the startup work (Phase 6 task 1) -->
-                    <TextBlock Text="last sync –" ToolTip.Tip="Not built yet: the sync time is saved from Phase 6 (startup window) on" />
+                    <TextBlock Text="{Binding StatusBar.SyncText}" ToolTip.Tip="{Binding StatusBar.SyncHint}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Classes="status" Orientation="Horizontal" Spacing="8">
                     <controls:StrokeIcon Data="{StaticResource IconDownload}" />

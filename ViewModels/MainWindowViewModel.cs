@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -9,13 +8,14 @@ using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
-using KMRLauncherMvvm.Views;
+using KMRLauncherMvvm.Services.Api;
 
 namespace KMRLauncherMvvm.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly PageFactory? _pageFactory;
+    private readonly IModApiService? _api;
     private readonly DispatcherTimer? _runningTimer;
     private DateTime _runningSince;
 
@@ -26,7 +26,8 @@ public partial class MainWindowViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(SettingsPageIsActive))]
     [NotifyPropertyChangedFor(nameof(PageTitle))]
     [NotifyPropertyChangedFor(nameof(CanSearch))]
-    [NotifyPropertyChangedFor(nameof(SearchPlaceholder))]
+    [NotifyPropertyChangedFor(nameof(SearchHint))]
+    [NotifyPropertyChangedFor(nameof(ShowFetchButton))]
     private PageViewModel? _currentPage;
 
     public bool HomePageIsActive => CurrentPage?.PageName == ApplicationPageNames.Home;
@@ -46,7 +47,12 @@ public partial class MainWindowViewModel : ViewModelBase
     // Top bar search: only searches the current page for now
     [ObservableProperty] private string _searchText = "";
     public bool CanSearch => CurrentPage is ISearchablePage;
-    public string SearchPlaceholder => (CurrentPage as ISearchablePage)?.SearchPlaceholder ?? "Search (not on this page yet)";
+    public string? SearchHint => CanSearch ? null : "Search works on Discover for now";
+
+    // The "Fetch CKAN-meta now" button: in the mockups only on Home and Discover
+    public bool ShowFetchButton => HomePageIsActive || DiscoverPageIsActive;
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(FetchCkanMetaCommand))]
+    private bool _isFetching;
 
     // Sidebar: instance count and the primary instance with its Launch button
     [ObservableProperty] private int _instanceCount;
@@ -64,9 +70,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public StatusBarViewModel StatusBar { get; }
 
-    public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar)
+    public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar, IModApiService api)
     {
         _pageFactory = pageFactory;
+        _api = api;
         StatusBar = statusBar;
 
         _runningTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -142,25 +149,28 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand]
-    private void OpenPrimaryInstanceSettings()
-    {
-        if (PrimaryInstance is not { } instance) return;
-        new CompatibleKspVersionsWindow { DataContext = new CompatibleKspVersionsViewModel(instance) }.Show();
-    }
+    private bool CanFetch() => !IsFetching;
 
-    [RelayCommand]
-    private void OpenPrimaryInstanceFolder()
+    // Discover fetches itself so its list updates; on other pages the mod list is fetched in the background
+    [RelayCommand(CanExecute = nameof(CanFetch))]
+    private async Task FetchCkanMeta()
     {
-        if (PrimaryInstance is not { } instance) return;
-
+        IsFetching = true;
         try
         {
-            Process.Start(new ProcessStartInfo("xdg-open") { ArgumentList = { instance.RootPath } });
+            if (CurrentPage is DiscoverPageViewModel discover)
+                await discover.FetchModsCommand.ExecuteAsync(true);
+            else if (_api is not null)
+                await Task.Run(() => _api.GetAllModsAsync(null, true));
         }
         catch (Exception e)
         {
-            LaunchError = $"Couldn't open the folder: {e.Message}";
+            // e.g. no internet; offline handling is Phase 7 task 4
+            StatusBar.ShowSyncFailed(e.Message);
+        }
+        finally
+        {
+            IsFetching = false;
         }
     }
 }

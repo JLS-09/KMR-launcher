@@ -19,6 +19,10 @@ public partial class StatusBarViewModel : ObservableObject
     [ObservableProperty] private string _versionsText = "mod list not loaded";
     [ObservableProperty] private string _cacheText = "Cache –";
 
+    // Placeholder until the startup work saves the sync time (Phase 6 task 1)
+    [ObservableProperty] private string _syncText = "synced –";
+    [ObservableProperty] private string _syncHint = "Not built yet: the time of the last sync is saved from Phase 6 on";
+
     public StatusBarViewModel(ModListService modListService)
     {
         _modListService = modListService;
@@ -28,6 +32,12 @@ public partial class StatusBarViewModel : ObservableObject
 
     public StatusBarViewModel()
     {
+    }
+
+    public void ShowSyncFailed(string reason)
+    {
+        SyncText = "sync failed";
+        SyncHint = reason;
     }
 
     public async Task RefreshAsync()
