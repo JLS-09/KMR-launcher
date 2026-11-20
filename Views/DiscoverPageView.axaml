@@ -71,6 +71,19 @@
             <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
         </Style>
 
+        <!-- Narrow page (below 1070 px = filters 210 + list 520 + details 340): the details panel lies over
+             the right side of the list instead of taking a column of its own (set in the code-behind) -->
+        <!-- Set in styles, not on the element: a value set on the element would win over the narrow style -->
+        <Style Selector="Border#DetailsPanel">
+            <Setter Property="Grid.Column" Value="2" />
+        </Style>
+        <Style Selector=":is(UserControl).narrow Border#DetailsPanel">
+            <!-- Only column 1 (the list): spanning the Auto column too would make the Grid widen that column -->
+            <Setter Property="Grid.Column" Value="1" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="BoxShadow" Value="-16 0 32 0 #99000000" />
+        </Style>
+
         <!-- Selected-mod chips in the tray: 28 px, padding 0 4 0 10, radius 7, #1B1B1E -->
         <Style Selector="Border.selectionChip">
             <Setter Property="Height" Value="28" />
@@ -167,7 +180,7 @@
         </Border>
 
         <!-- Mod list -->
-        <Grid Grid.Column="1" RowDefinitions="Auto, Auto, *, Auto" MinWidth="520">
+        <Grid Grid.Column="1" RowDefinitions="Auto, Auto, *, Auto">
             <!-- Toolbar: active filters, count, sort -->
             <Border Grid.Row="0" MinHeight="52" Padding="20 8" BorderBrush="{DynamicResource Line}"
                     BorderThickness="0 0 0 1">
@@ -338,7 +351,8 @@
         </Grid>
 
         <!-- Details panel -->
-        <Border Grid.Column="2" Width="340" BorderBrush="{DynamicResource Line}" BorderThickness="1 0 0 0"
+        <Border x:Name="DetailsPanel" Width="340" BorderBrush="{DynamicResource Line}"
+                BorderThickness="1 0 0 0" Background="{DynamicResource Background}"
                 IsVisible="{Binding Details, Converter={x:Static ObjectConverters.IsNotNull}}">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" DataContext="{Binding Details}">
                 <StackPanel x:DataType="discover:ModDetailsViewModel">
