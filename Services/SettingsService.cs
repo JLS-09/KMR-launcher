@@ -19,6 +19,7 @@ public static class SettingsService
         var basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var appFolder = Path.Combine(basePath, "kmrLauncher/settings.json");
         
+        WinePrefixes.AssignMissing(settings.Instances);
         var json = JsonSerializer.Serialize(settings, Options);
         File.WriteAllText(appFolder, json);
         
@@ -38,7 +39,11 @@ public static class SettingsService
         try
         {
             var json = File.ReadAllText(appFolder);
-            return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+            var settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+
+            // Instances saved before Phase 5 task 6 get their prefix path here; it's written on the next save
+            WinePrefixes.AssignMissing(settings.Instances);
+            return settings;
         }
         catch
         {

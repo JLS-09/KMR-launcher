@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Humanizer;
@@ -17,6 +18,8 @@ public class Instance(string name, string rootPath, string version)
     public string Version { get; set; } = version;
     public List<string> CompatibleKspVersions { get; set; } = [];
     public string LaunchArguments { get; set; } = "";
+
+    public string PrefixPath { get; set; } = "";
     public int PlayTime { get; set; } = 0;
     public DateTime LastPlayed { get; set; }
     public bool IsPrimary { get; set; } = false;
@@ -45,12 +48,21 @@ public class Instance(string name, string rootPath, string version)
     public string InstallSize => Helpers.BytesToString(Helpers.GetDirectorySize(RootPath));
 
     [JsonIgnore] public string CompatibleSummary => KspVersions.DescribeCompatible(this);
-
-    public async Task DeleteInstance()
+    
+    public async Task DeleteInstance(AppSettings settings)
     {
-        await Task.Factory.StartNew(path => Directory.Delete((string)path, true), RootPath);
-        App.Settings.Instances.Remove(this);
-        SettingsService.Save(App.Settings);
+        var prefix = PrefixPath;
+        var deletePrefix = WinePrefixes.IsManaged(prefix) &&
+                           !settings.Instances.Any(i => i != this && WinePrefixes.SamePath(i.PrefixPath, prefix));
+
+        await Task.Run(() =>
+        {
+            if (Directory.Exists(RootPath)) Directory.Delete(RootPath, true);
+            if (deletePrefix && Directory.Exists(prefix)) Directory.Delete(prefix, true);
+        });
+
+        settings.Instances.Remove(this);
+        SettingsService.Save(settings);
     }
 
     public static string[] SplitArguments(string arguments)
@@ -86,7 +98,9 @@ public class Instance(string name, string rootPath, string version)
 
     public async Task LaunchInstanceWithWine()
     {
-        var kspProcess = WineLauncher.Launch(Name, Path.Combine(RootPath, "KSP_x64.exe"),
+        if (string.IsNullOrWhiteSpace(PrefixPath)) PrefixPath = WinePrefixes.DefaultFor(this, App.Settings.Instances);
+
+        var kspProcess = WineLauncher.Launch(PrefixPath, Path.Combine(RootPath, "KSP_x64.exe"),
             SplitArguments(LaunchArguments));
         var startTime = kspProcess.StartTime;
 

@@ -26,6 +26,7 @@
     <StreamGeometry x:Key="IconFolder">M3 6.5h6l2 2h10V19H3z</StreamGeometry>
     <StreamGeometry x:Key="IconClock">M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0z M12 7v5l3 2</StreamGeometry>
     <StreamGeometry x:Key="IconFilter">M4 5h16l-6 8v6l-4-2v-4z</StreamGeometry>
+    <StreamGeometry x:Key="IconBackup">M4 4.5h16a1 1 0 0 1 1 1V8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1z M5 9v10h14V9 M10 13h4</StreamGeometry>
     <StreamGeometry x:Key="IconTrash">M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13</StreamGeometry>
     <StreamGeometry x:Key="IconStar">M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z</StreamGeometry>
     <StreamGeometry x:Key="IconMore">M3.8 12a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0-2.4 0z M10.8 12a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0-2.4 0z M17.8 12a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0-2.4 0z</StreamGeometry>

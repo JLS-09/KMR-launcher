@@ -255,6 +255,37 @@
         <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
     </Style>
 
+    <!-- Text field (settings): 36 px, padding 0 10, border #2E2E32, background #1B1B1E, 13 px text; .mono = 12 px mono -->
+    <Style Selector="TextBox.field">
+        <Setter Property="Height" Value="36" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="10 0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBox.field.mono">
+        <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="TextBox.field:pointerover /template/ Border#PART_BorderElement, TextBox.field:disabled /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox.field:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentLine}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox.field /template/ TextBlock#PART_Placeholder, TextBox.field:pointerover /template/ TextBlock#PART_Placeholder, TextBox.field:focus /template/ TextBlock#PART_Placeholder">
+        <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+    </Style>
+
     <!-- Keyboard shortcut hint ("Ctrl K") -->
     <Style Selector="Border.kbd">
         <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />

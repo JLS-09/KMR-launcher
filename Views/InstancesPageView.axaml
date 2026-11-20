@@ -73,6 +73,146 @@
             <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
         </Style>
 
+        <!-- Settings tab. Sections: padding 22 0 8 with a line on top (the first one 4 0 8, no line); title 16 px,
+             12 px under it. Rows: label column 220 px, gap 24, padding 14 0, a line on top. -->
+        <Style Selector="StackPanel.settingsSection">
+            <Setter Property="Margin" Value="0 22 0 8" />
+        </Style>
+        <Style Selector="StackPanel.settingsSection.first">
+            <Setter Property="Margin" Value="0 22 0 8" />
+        </Style>
+        <Style Selector="Border.sectionLine">
+            <Setter Property="Height" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource Line}" />
+        </Style>
+        <Style Selector="TextBlock.sectionTitle">
+            <Setter Property="Margin" Value="0 0 0 12" />
+        </Style>
+        <Style Selector="Border.settingsRow">
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="0 1 0 0" />
+            <Setter Property="Padding" Value="0 14" />
+        </Style>
+        <Style Selector="StackPanel.rowLabel">
+            <Setter Property="Spacing" Value="2" />
+            <Setter Property="Margin" Value="0 7 0 0" />
+        </Style>
+        <Style Selector="TextBlock.rowTitle">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <Style Selector="TextBlock.rowHint">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="LineHeight" Value="17.4" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="StackPanel.rowControls">
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Setter Property="Spacing" Value="8" />
+            <Setter Property="MinHeight" Value="36" />
+        </Style>
+        <!-- A switch without a label: no gap in front of it -->
+        <Style Selector="Border.settingsRow ToggleButton.switch /template/ Grid">
+            <Setter Property="ColumnSpacing" Value="0" />
+        </Style>
+        <Style Selector="StackPanel.rowControls > ToggleButton.switch">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!-- Compact page: the header's buttons go under the name, so the name and chips keep the full width -->
+        <Style Selector="StackPanel#HeaderActions">
+            <Setter Property="Grid.Column" Value="1" />
+        </Style>
+        <Style Selector=":is(UserControl).compact StackPanel#HeaderActions">
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Margin" Value="0 14 0 0" />
+        </Style>
+        <!-- Stacked page (narrow window): each settings row puts its control under its label -->
+        <Style Selector=":is(Control).rowValue">
+            <Setter Property="Grid.Column" Value="1" />
+        </Style>
+        <Style Selector=":is(UserControl).stacked Grid.settingsGrid">
+            <Setter Property="RowSpacing" Value="8" />
+        </Style>
+        <Style Selector=":is(UserControl).stacked StackPanel.rowLabel">
+            <Setter Property="Grid.ColumnSpan" Value="2" />
+            <Setter Property="Margin" Value="0" />
+        </Style>
+        <Style Selector=":is(UserControl).stacked :is(Control).rowValue">
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Grid.ColumnSpan" Value="2" />
+        </Style>
+        <!-- Run with: 30 px segments, padding 0 12, 13 px -->
+        <Style Selector="RadioButton.segment.big">
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style Selector="RadioButton.segment.big /template/ Border#SegmentBorder">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="12 0" />
+        </Style>
+        <!-- Placeholder: looks like the real control, can't be used, and the tooltip says which phase builds it -->
+        <Style Selector="Border.soon">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.soon > :is(Control)">
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+        <!-- Compatible KSP versions: rows of 52 / 120 / rest, padding 8 0, a line on top -->
+        <Style Selector="Border.versionRow">
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="0 1 0 0" />
+            <Setter Property="Padding" Value="0 8" />
+        </Style>
+        <Style Selector="CheckBox.box.allVersions">
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style Selector="CheckBox.box.allVersions /template/ Border#Box">
+            <Setter Property="Width" Value="15" />
+            <Setter Property="Height" Value="15" />
+        </Style>
+        <Style Selector="CheckBox.box.allVersions /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Margin" Value="8 0 0 0" />
+        </Style>
+        <Style Selector="CheckBox.box.allVersions:checked">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <!-- Version chips: 30 px, padding 0 10, radius 7, 12 px mono; the game version is an accent chip with a lock -->
+        <Style Selector="Border.versionChip">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Padding" Value="10 0" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+        </Style>
+        <Style Selector="Border.versionChip.locked">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentLine}" />
+            <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+        </Style>
+        <Style Selector="CheckBox.box.versionBox">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="CheckBox.box.versionBox /template/ Border#Box">
+            <Setter Property="Width" Value="14" />
+            <Setter Property="Height" Value="14" />
+        </Style>
+        <Style Selector="CheckBox.box.versionBox /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Margin" Value="6 0 0 0" />
+        </Style>
+        <Style Selector="CheckBox.box.versionBox:checked">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="controls|StrokeIcon.flipped">
+            <Setter Property="RenderTransform" Value="rotate(180deg)" />
+        </Style>
+
         <!-- Narrow page: the Mods tab's filters go on their own row; compact page: the stats are 2 × 2
              (classes set in the code-behind) -->
         <!-- The defaults are set here, not on the elements: a value set on an element would win over the styles -->
@@ -294,16 +434,17 @@
         <!-- Selected instance: padding 20 28 28, sections 18 px apart -->
         <Grid Grid.Column="1" RowDefinitions="Auto, Auto, Auto, *, Auto" IsVisible="{Binding HasInstances}">
             <!-- Header: name + star, chips, path; Open folder, More, Launch -->
-            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="16" Margin="28 20 28 18">
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto" ColumnSpacing="16"
+                  Margin="28 20 28 18">
                 <StackPanel Grid.Column="0" Spacing="8">
                     <!-- Name and star in one TextBlock, so a long name is trimmed instead of running under the buttons -->
                     <TextBlock FontSize="26" LineHeight="30" FontFamily="{DynamicResource SpaceGrotesk}"
                                FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
-                        <Run Text="{Binding Selected.Name, FallbackValue=''}" />
+                        <Run Text="{Binding SelectedName}" />
                         <InlineUIContainer BaselineAlignment="Center">
                             <controls:StrokeIcon Data="{StaticResource IconStar}" Size="16" IsFilled="True"
                                                  Margin="10 0 0 0" Foreground="{DynamicResource AccentText}"
-                                                 IsVisible="{Binding Selected.IsPrimary, FallbackValue=False}" />
+                                                 IsVisible="{Binding SelectedIsPrimary}" />
                         </InlineUIContainer>
                     </TextBlock>
                     <WrapPanel ItemSpacing="6" LineSpacing="6">
@@ -318,7 +459,7 @@
                                Foreground="{DynamicResource StatusError}"
                                IsVisible="{Binding ActionError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
+                <StackPanel x:Name="HeaderActions" Orientation="Horizontal" Spacing="8" VerticalAlignment="Top">
                     <Button Classes="secondary icon large" Command="{Binding OpenFolderCommand}"
                             ToolTip.Tip="Open instance folder">
                         <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="16" />
@@ -328,7 +469,7 @@
                         <Button.Flyout>
                             <MenuFlyout Placement="BottomEdgeAlignedRight">
                                 <MenuItem Header="Make primary" Command="{Binding MakePrimaryCommand}"
-                                          IsEnabled="{Binding !Selected.IsPrimary, FallbackValue=False}" />
+                                          IsEnabled="{Binding !SelectedIsPrimary}" />
                                 <MenuItem Header="Instance settings…" Command="{Binding OpenSettingsCommand}" />
                             </MenuFlyout>
                         </Button.Flyout>
@@ -380,7 +521,8 @@
             <!-- Tabs -->
             <Border Grid.Row="2" Margin="28 18 28 0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
                 <StackPanel Orientation="Horizontal" Spacing="24">
-                    <RadioButton Classes="tab" GroupName="instanceTab" IsChecked="True"
+                    <RadioButton Classes="tab" GroupName="instanceTab"
+                                 IsChecked="{Binding Tab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Mods}}"
                                  Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Mods}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="Mods" VerticalAlignment="Center" />
@@ -389,10 +531,13 @@
                         </StackPanel>
                     </RadioButton>
                     <RadioButton Classes="tab" GroupName="instanceTab" Content="Settings"
+                                 IsChecked="{Binding Tab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Settings}}"
                                  Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Settings}" />
                     <RadioButton Classes="tab" GroupName="instanceTab" Content="Logs"
+                                 IsChecked="{Binding Tab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Logs}}"
                                  Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Logs}" />
                     <RadioButton Classes="tab" GroupName="instanceTab" Content="Backups"
+                                 IsChecked="{Binding Tab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Backups}}"
                                  Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Backups}" />
                 </StackPanel>
             </Border>
@@ -564,18 +709,319 @@
                            Text="{Binding ShownText}" />
             </Grid>
 
-            <!-- Settings tab: placeholder until Phase 5 step 4 replaces the instance settings window -->
-            <StackPanel Grid.Row="3" Margin="28 18 28 0" Spacing="12" MaxWidth="720" HorizontalAlignment="Left"
-                        IsVisible="{Binding Tab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Settings}}">
-                <Border Classes="placeholder">
-                    <StackPanel Spacing="8">
-                        <TextBlock Classes="label" Text="NOT BUILT YET · PHASE 5 STEP 4" />
-                        <TextBlock Text="The Settings tab (name, primary, launching, compatible KSP versions, delete) replaces the instance settings window in the next step. Until then:" />
-                        <Button Classes="secondary small" HorizontalAlignment="Left" Content="Open instance settings"
-                                Command="{Binding OpenSettingsCommand}" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
+            <!-- Settings tab (replaces the instance settings window): General, Launching, Compatible KSP versions,
+                 Backups (Phase 8), Delete instance. Content column max 900 px. -->
+            <ScrollViewer Grid.Row="3" HorizontalScrollBarVisibility="Disabled"
+                          IsVisible="{Binding Tab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Settings}}">
+                <StackPanel Margin="28 0 28 0" MaxWidth="900" HorizontalAlignment="Stretch">
+                    <Border DataContext="{Binding InstanceSettings}">
+                        <StackPanel x:DataType="instances:InstanceSettingsViewModel">
+                            <!-- General -->
+                            <StackPanel Classes="settingsSection first">
+                                <TextBlock Classes="h2 sectionTitle" Text="General" />
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Name" />
+                                        </StackPanel>
+                                        <StackPanel Classes="rowValue" Spacing="6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" MaxWidth="360" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox Classes="field" Text="{Binding Name}" />
+                                            </Grid>
+                                            <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}"
+                                                       Text="{Binding NameError}"
+                                                       IsVisible="{Binding NameError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Primary instance" />
+                                        </StackPanel>
+                                        <StackPanel Classes="rowValue rowControls">
+                                            <ToggleButton Classes="switch" HorizontalAlignment="Left"
+                                                          IsChecked="{Binding IsPrimary}" />
+                                            <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center"
+                                                       Text="Shown in the sidebar for quick launch" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Folder" />
+                                        </StackPanel>
+                                        <StackPanel Classes="rowValue rowControls">
+                                            <TextBlock Classes="mono secondary" FontSize="12" VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis" Text="{Binding FolderText}" />
+                                            <Button Classes="secondary small"
+                                                    Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).OpenFolderCommand}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="14"
+                                                                         VerticalAlignment="Center" />
+                                                    <TextBlock Text="Open" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Launching -->
+                            <Border Classes="sectionLine" />
+                            <StackPanel Classes="settingsSection">
+                                <TextBlock Classes="h2 sectionTitle" Text="Launching" />
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Run with" />
+                                            <TextBlock Classes="rowHint" Text="Proton brings DXVK, so KSP renders through Vulkan." />
+                                        </StackPanel>
+                                        <WrapPanel Classes="rowValue" ItemSpacing="8" LineSpacing="8">
+                                            <Border Classes="segmented raised">
+                                                <StackPanel Orientation="Horizontal" Spacing="2">
+                                                    <RadioButton Classes="segment big" GroupName="runner" Content="Wine"
+                                                                 IsChecked="True" />
+                                                    <!-- Placeholder: Proton (umu-run) comes with Phase 8 -->
+                                                    <Border Classes="soon" ToolTip.Tip="Proton comes in Phase 8">
+                                                        <RadioButton Classes="segment big" GroupName="runnerSoon"
+                                                                     Content="Proton (umu-run)" />
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </WrapPanel>
+                                    </Grid>
+                                </Border>
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Proton version" />
+                                            <TextBlock Classes="rowHint" Text="Downloaded by umu-run on first launch." />
+                                        </StackPanel>
+                                        <StackPanel Classes="rowValue rowControls">
+                                            <Border Classes="soon" ToolTip.Tip="Proton comes in Phase 8">
+                                                <Button Classes="secondary" MinWidth="240" HorizontalContentAlignment="Stretch">
+                                                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                                                        <TextBlock Text="GE-Proton (latest)" VerticalAlignment="Center" />
+                                                        <controls:StrokeIcon Grid.Column="1" Data="{StaticResource IconChevronDown}"
+                                                                             Size="16" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </Button>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Prefix" />
+                                        </StackPanel>
+                                        <Grid Classes="rowValue" ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" MaxWidth="420" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Classes="field mono" Text="{Binding Prefix}"
+                                                     PlaceholderText="{Binding DefaultPrefix}" />
+                                            <Button Grid.Column="1" Classes="secondary" Content="Browse"
+                                                    Click="BrowsePrefix_OnClick" />
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Launch arguments" />
+                                            <TextBlock Classes="rowHint"
+                                                       Text="Split on spaces. Use double quotes to keep spaces together." />
+                                        </StackPanel>
+                                        <Grid Classes="rowValue">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" MaxWidth="420" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Classes="field mono" Text="{Binding LaunchArguments}"
+                                                     PlaceholderText="-force-glcore" />
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Log file" />
+                                        </StackPanel>
+                                        <!-- Placeholder: writing the game's output to a log file comes with Phase 8 -->
+                                        <Border Classes="rowValue soon"
+                                                ToolTip.Tip="Log files come in Phase 8. Until then the game's output goes to the console.">
+                                            <StackPanel Classes="rowControls">
+                                                <ToggleButton Classes="switch" />
+                                                <TextBlock Classes="mono muted" FontSize="12" VerticalAlignment="Center"
+                                                           Text="logs/launch-YYYY-MM-DD.log" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Compatible KSP versions: per minor version "All x.y.x" and the versions; the game version is locked -->
+                            <Border Classes="sectionLine" />
+                            <StackPanel Classes="settingsSection">
+                                <TextBlock Classes="h2 sectionTitle" Text="Compatible KSP versions" />
+                                <TextBlock Margin="0 0 0 12" MaxWidth="680" HorizontalAlignment="Left" FontSize="13"
+                                           LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}"
+                                           Text="Mods made for these versions count as compatible. The game version is always included. Strict mods only accept versions ticked one by one, not &quot;All x.x&quot;." />
+                                <ItemsControl ItemsSource="{Binding Groups}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:KspVersionGroupViewModel">
+                                            <Border Classes="versionRow">
+                                                <Grid ColumnDefinitions="52, 120, *" ColumnSpacing="12">
+                                                    <TextBlock Classes="mono" FontSize="13" FontWeight="Medium"
+                                                               VerticalAlignment="Center" Text="{Binding Prefix}" />
+                                                    <CheckBox Grid.Column="1" Classes="box allVersions"
+                                                              VerticalAlignment="Center"
+                                                              IsChecked="{Binding AllowAll}" Content="{Binding AllowAllText}" />
+                                                    <ItemsControl Grid.Column="2" ItemsSource="{Binding Versions}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <WrapPanel ItemSpacing="6" LineSpacing="6" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate x:DataType="vm:KspVersionOptionViewModel">
+                                                                <Panel>
+                                                                    <Border Classes="versionChip" IsVisible="{Binding CanToggle}">
+                                                                        <CheckBox Classes="box versionBox"
+                                                                                  IsChecked="{Binding IsChecked}"
+                                                                                  Content="{Binding Version}" />
+                                                                    </Border>
+                                                                    <Border Classes="versionChip locked"
+                                                                            IsVisible="{Binding IsInstanceVersion}"
+                                                                            ToolTip.Tip="The game version is always included">
+                                                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                            <controls:StrokeIcon Data="{StaticResource IconLock}"
+                                                                                                 Size="12" VerticalAlignment="Center"
+                                                                                                 Foreground="{DynamicResource TextSecondary}" />
+                                                                            <TextBlock Classes="mono" FontSize="12"
+                                                                                       VerticalAlignment="Center"
+                                                                                       Text="{Binding Version}" />
+                                                                        </StackPanel>
+                                                                    </Border>
+                                                                </Panel>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 10 0 12"
+                                        IsVisible="{Binding HasOlderGroups}">
+                                    <Button Classes="ghost small" HorizontalAlignment="Left" Command="{Binding ToggleOlderCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="{Binding OlderToggleText}" VerticalAlignment="Center" />
+                                            <controls:StrokeIcon Data="{StaticResource IconChevronDown}" Size="14"
+                                                                 VerticalAlignment="Center"
+                                                                 Classes.flipped="{Binding ShowOlder}" />
+                                        </StackPanel>
+                                    </Button>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Backups: placeholder until Phase 8 -->
+                            <Border Classes="sectionLine" />
+                            <StackPanel Classes="settingsSection">
+                                <TextBlock Classes="h2 sectionTitle" Text="Backups" />
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Before mod changes" />
+                                        </StackPanel>
+                                        <Border Classes="rowValue soon" ToolTip.Tip="Backups come in Phase 8">
+                                            <StackPanel Classes="rowControls">
+                                                <ToggleButton Classes="switch" />
+                                                <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center"
+                                                           Text="Zips saves and GameData before an install or removal" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Keep" />
+                                        </StackPanel>
+                                        <Border Classes="rowValue soon" ToolTip.Tip="Backups come in Phase 8">
+                                            <StackPanel Classes="rowControls">
+                                                <TextBox Classes="field mono" Width="80" FontSize="13" Text="5" />
+                                                <TextBlock Classes="secondary" FontSize="13" VerticalAlignment="Center"
+                                                           Text="latest backups" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                                <Border Classes="settingsRow">
+                                    <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto" ColumnSpacing="24">
+                                        <StackPanel Classes="rowLabel">
+                                            <TextBlock Classes="rowTitle" Text="Last backup" />
+                                        </StackPanel>
+                                        <Border Classes="rowValue soon" ToolTip.Tip="Backups come in Phase 8">
+                                          <WrapPanel ItemSpacing="8" LineSpacing="8">
+                                            <TextBlock FontSize="13" VerticalAlignment="Center" Text="None yet" />
+                                            <Button Classes="secondary small" Content="Restore" />
+                                            <Button Classes="secondary small">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <controls:StrokeIcon Data="{StaticResource IconBackup}" Size="14"
+                                                                         VerticalAlignment="Center" />
+                                                    <TextBlock Text="Back up now" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                          </WrapPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Delete instance (asks first) -->
+                    <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 22 0 28">
+                        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock FontSize="14" FontWeight="SemiBold" Text="Delete instance" />
+                                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding DeleteText}" />
+                            </StackPanel>
+                            <Button x:Name="DeleteButton" Grid.Column="1" Classes="danger" VerticalAlignment="Center"
+                                    IsEnabled="{Binding !IsGameRunning}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <controls:StrokeIcon Data="{StaticResource IconTrash}" Size="16"
+                                                         Foreground="{DynamicResource StatusError}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Delete instance" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <Button.Flyout>
+                                    <Flyout Placement="TopEdgeAlignedRight">
+                                        <StackPanel Width="300" Spacing="12">
+                                            <TextBlock FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"
+                                                       Text="{Binding SelectedName, StringFormat='Delete {0}?'}" />
+                                            <TextBlock FontSize="12" TextWrapping="Wrap"
+                                                       Foreground="{DynamicResource TextSecondary}"
+                                                       Text="{Binding DeleteText}" />
+                                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                                <Button Classes="ghost small" Content="Cancel" Click="CloseDeleteFlyout" />
+                                                <Button Classes="danger small" Content="Delete"
+                                                        Command="{Binding DeleteInstanceCommand}" Click="CloseDeleteFlyout" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
 
             <!-- Logs and Backups: not mocked yet -->
             <StackPanel Grid.Row="3" Margin="28 18 28 0" MaxWidth="720" HorizontalAlignment="Left"
@@ -599,7 +1045,7 @@
 
             <!-- Selection bar: 2 px accent line, full width at the bottom -->
             <Border Grid.Row="4" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Accent}"
-                    BorderThickness="0 2 0 0" Padding="20 12" IsVisible="{Binding HasSelection}">
+                    BorderThickness="0 2 0 0" Padding="20 12" IsVisible="{Binding ShowSelectionBar}">
                 <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto, Auto" ColumnSpacing="12">
                     <TextBlock Grid.Column="0" Classes="mono" FontSize="13" FontWeight="SemiBold"
                                Text="{Binding SelectedCount}" VerticalAlignment="Center" />
@@ -621,6 +1067,20 @@
                             <TextBlock Text="Remove" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
+                </Grid>
+            </Border>
+
+            <!-- Unsaved-changes bar of the Settings tab: same place and look as the selection bar -->
+            <Border Grid.Row="4" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Accent}"
+                    BorderThickness="0 2 0 0" Padding="20 12" IsVisible="{Binding ShowSettingsBar}">
+                <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="12" DataContext="{Binding InstanceSettings}">
+                    <Ellipse Grid.Column="0" Width="8" Height="8" Fill="{DynamicResource Accent}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" FontSize="13" VerticalAlignment="Center"
+                               x:DataType="instances:InstanceSettingsViewModel" Text="{Binding ChangesText}" />
+                    <Button Grid.Column="2" Classes="ghost" Content="Revert"
+                            x:DataType="instances:InstanceSettingsViewModel" Command="{Binding RevertCommand}" />
+                    <Button Grid.Column="3" Classes="accent" Content="Save"
+                            x:DataType="instances:InstanceSettingsViewModel" Command="{Binding SaveCommand}" />
                 </Grid>
             </Border>
         </Grid>

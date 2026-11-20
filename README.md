@@ -87,7 +87,7 @@ On Linux:
 | `~/.local/share/kmrLauncher/mods.json` | Cached, parsed mod list |
 | `~/.local/share/kmrLauncher/cache/ckan-meta/` | Local clone of CKAN-meta |
 | `~/.local/share/kmrLauncher/cache/downloads/` | Verified mod downloads, shared by all instances |
-| `~/.config/prefixes/<instance>/` | Wine prefix for each instance |
+| `~/.config/kmrLauncher/prefixes/<instance folder>/` | Wine prefix for each instance (the path is saved per instance and can be changed in its Settings tab; prefixes made before 2026-11 stay in `~/.config/prefixes/<instance name>/`) |
 
 During an install, files of mods that are being removed or replaced are kept in `.kmr-staging/` inside the instance folder until the install has finished.
 

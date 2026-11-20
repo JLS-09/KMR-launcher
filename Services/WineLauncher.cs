@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -6,15 +5,12 @@ namespace KMRLauncherMvvm.Services;
 
 public static class WineLauncher
 {
-    private static readonly string LauncherDataDir =
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
     private const string WinePath = "/usr/bin/wine";
 
-    public static Process Launch(string instanceId, string exePath,
+    // prefixDir: the instance's Wine prefix (Instance.PrefixPath, see WinePrefixes)
+    public static Process Launch(string prefixDir, string exePath,
         string[]? gameArgs = null)
     {
-        var prefixDir = Path.Combine(LauncherDataDir, "prefixes", instanceId);
         Directory.CreateDirectory(prefixDir);
 
         var psi = new ProcessStartInfo

@@ -62,12 +62,21 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
     [ObservableProperty] private string _playTime = "";
     [ObservableProperty] private string _lastPlayed = "";
     [ObservableProperty] private string _lastPlayedDetail = "";
-    [ObservableProperty] private string _installSize = "–";
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(DeleteText))]
+    private string _installSize = "–";
     [ObservableProperty] private string _gameDataSize = "";
-    [ObservableProperty] private InstanceTab _tab = InstanceTab.Mods;
+    [ObservableProperty] private string _selectedName = "";
+    [ObservableProperty] private bool _selectedIsPrimary;
 
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand))]
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowSelectionBar), nameof(ShowSettingsBar))]
+    private InstanceTab _tab = InstanceTab.Mods;
+
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand), nameof(DeleteInstanceCommand))]
     private bool _isGameRunning;
+
+    // Settings tab: one view model per instance (by folder), kept while it has unsaved changes
+    private readonly Dictionary<string, InstanceSettingsViewModel> _settingsByPath = [];
+    [ObservableProperty] private InstanceSettingsViewModel? _instanceSettings;
 
     [ObservableProperty] private string? _actionError;
 
@@ -85,7 +94,9 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
 
     // Selection bar
     [ObservableProperty] private int _selectedCount;
-    [ObservableProperty] private bool _hasSelection;
+
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowSelectionBar))]
+    private bool _hasSelection;
     [ObservableProperty] private string _removalNote = "";
     [ObservableProperty] private bool _selectionHasUpdates;
 
@@ -119,6 +130,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
 
     private void LoadInstances(AppSettings settings)
     {
+        var previous = Selected;
         var selectedPath = Selected?.RootPath;
 
         IEnumerable<Instance> ordered = SortByName
@@ -132,6 +144,13 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         SelectedItem = Instances.FirstOrDefault(i => i.Instance.RootPath == selectedPath)
                        ?? Instances.FirstOrDefault(i => i.IsPrimary)
                        ?? Instances.FirstOrDefault();
+
+        // Saving changes the same Instance object, so OnSelectedChanged doesn't run: refresh the details here
+        if (Selected is not null && ReferenceEquals(Selected, previous)) ShowDetails(Selected);
+
+        // Forget the settings of deleted instances
+        foreach (var path in _settingsByPath.Keys.Where(p => settings.Instances.All(i => i.RootPath != p)).ToList())
+            _settingsByPath.Remove(path);
     }
 
     partial void OnSortByNameChanged(bool value) => LoadInstances(App.Settings);
@@ -151,6 +170,15 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         ActionError = null;
         if (value is null) return;
 
+        ShowDetails(value);
+        _ = LoadSizes(value);
+    }
+
+    // The header, stats, mods and settings of the selected instance (sizes are worked out separately)
+    private void ShowDetails(Instance value)
+    {
+        SelectedName = value.Name;
+        SelectedIsPrimary = value.IsPrimary;
         KspText = $"KSP {value.Version}";
         CompatibleText = InstanceTexts.Compatible(value);
         PathText = InstanceTexts.ShortPath(value.RootPath);
@@ -158,8 +186,28 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         LastPlayed = InstanceTexts.LastPlayed(value);
         LastPlayedDetail = InstanceTexts.LastPlayedDetail(value);
         BuildRows();
-        _ = LoadSizes(value);
+
+        if (!_settingsByPath.TryGetValue(value.RootPath, out var settings) || !settings.HasChanges)
+        {
+            if (settings is not null) settings.PropertyChanged -= OnInstanceSettingsChanged;
+            settings = new InstanceSettingsViewModel(value, App.Settings.Instances);
+            settings.PropertyChanged += OnInstanceSettingsChanged;
+            _settingsByPath[value.RootPath] = settings;
+        }
+
+        InstanceSettings = settings;
+        OnPropertyChanged(nameof(DeleteText));
+        OnPropertyChanged(nameof(ShowSettingsBar));
     }
+
+    private void OnInstanceSettingsChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(InstanceSettingsViewModel.HasChanges)) OnPropertyChanged(nameof(ShowSettingsBar));
+    }
+
+    // The bottom bars: the selection bar on the Mods tab, the unsaved-changes bar on the Settings tab
+    public bool ShowSelectionBar => Tab == InstanceTab.Mods && HasSelection;
+    public bool ShowSettingsBar => Tab == InstanceTab.Settings && InstanceSettings is { HasChanges: true };
 
     private async Task LoadSizes(Instance instance)
     {
@@ -341,12 +389,44 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         }
     }
 
-    // The instance settings window until the Settings tab replaces it (Phase 5 step 4)
     [RelayCommand]
-    private void OpenSettings()
+    private void OpenSettings() => Tab = InstanceTab.Settings;
+
+    // "Removes the folder, its saves and its prefix (6.8 GB). Cached downloads stay."
+    public string DeleteText
     {
-        if (Selected is null) return;
-        new CompatibleKspVersionsWindow { DataContext = new CompatibleKspVersionsViewModel(Selected) }.Show();
+        get
+        {
+            if (Selected is not { } instance) return "";
+
+            var size = InstallSize == "–" ? "" : $" ({InstallSize})";
+            var ownPrefix = WinePrefixes.IsManaged(instance.PrefixPath) &&
+                            !App.Settings.Instances.Any(i =>
+                                i != instance && WinePrefixes.SamePath(i.PrefixPath, instance.PrefixPath));
+            return ownPrefix
+                ? $"Removes the folder, its saves and its prefix{size}. Cached downloads stay."
+                : $"Removes the folder and its saves{size}. The prefix in " +
+                  $"{InstanceTexts.ShortPath(instance.PrefixPath)} and cached downloads stay.";
+        }
+    }
+
+    private bool CanDeleteInstance() => !IsGameRunning;
+
+    [RelayCommand(CanExecute = nameof(CanDeleteInstance))]
+    private async Task DeleteInstance()
+    {
+        if (Selected is not { } instance) return;
+
+        ActionError = null;
+        try
+        {
+            await instance.DeleteInstance(App.Settings);
+            Tab = InstanceTab.Mods;
+        }
+        catch (Exception e)
+        {
+            ActionError = $"Couldn't delete {instance.Name}: {e.Message}";
+        }
     }
 
     [RelayCommand]
