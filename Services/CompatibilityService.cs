@@ -121,6 +121,63 @@ public class CompatibilityService(ModListService modListService)
         return problems;
     }
 
+    // Installed mods that stay must still have their depends met after the change, e.g. updating a library
+    // past the version range an installed mod needs (spec "depends", version limits). Depends that weren't met
+    // before the change aren't reported (that isn't this change's doing). As in the resolver, limits apply to a
+    // mod with that identifier and are ignored for mods that provide the name.
+    public static List<ResolutionProblem> FindBrokenDepends(IReadOnlyList<ModVersion> toInstall,
+        IReadOnlyList<ModVersion> remainingInstalled, IReadOnlyList<ModVersion> installedBefore)
+    {
+        List<ModVersion> after = [.. toInstall, .. remainingInstalled];
+        List<ResolutionProblem> problems = [];
+
+        foreach (var mod in remainingInstalled)
+        {
+            foreach (var dependency in mod.Depends ?? [])
+            {
+                if (dependency.AnyOf is null && HasInvalidVersionFields(dependency)) continue;
+                if (IsMet(dependency, after, mod) || !IsMet(dependency, installedBefore, mod)) continue;
+
+                problems.Add(new ResolutionProblem
+                {
+                    Mod = mod.Identifier,
+                    Relationship = dependency,
+                    Message = DescribeBrokenDepend(mod, dependency, toInstall)
+                });
+            }
+        }
+
+        return problems;
+    }
+
+    private static bool IsMet(Relationship dependency, IEnumerable<ModVersion> mods, ModVersion owner) =>
+        dependency.AnyOf is { Count: > 0 } anyOf
+            ? anyOf.Any(e => mods.Any(m => m.Identifier != owner.Identifier &&
+                                           MatchesModule(m, e.Name, e.Version, e.MinVersion, e.MaxVersion)))
+            : mods.Any(m => m.Identifier != owner.Identifier &&
+                            MatchesModule(m, dependency.Name, dependency.Version, dependency.MinVersion,
+                                dependency.MaxVersion));
+
+    private static string DescribeBrokenDepend(ModVersion mod, Relationship dependency,
+        IReadOnlyList<ModVersion> toInstall)
+    {
+        var names = InstalledMods.NamesIn(dependency).ToHashSet();
+        var hasLimits = dependency.Version is not null || dependency.MinVersion is not null ||
+                        dependency.MaxVersion is not null;
+        var needs = dependency.AnyOf is { Count: > 0 }
+            ? $"one of {string.Join(", ", names)}"
+            : hasLimits
+                ? $"{dependency.Name} {DependencyService.DescribeLimits(dependency)}"
+                : dependency.Name;
+        var replacement = toInstall.FirstOrDefault(m => InstalledMods.NamesOf(m).Any(names.Contains));
+
+        return replacement is not null
+            ? $"{mod.Identifier} {mod.Version} is installed and needs {needs}, but this change installs " +
+              $"{replacement.Identifier} {replacement.Version}. Pick another version, or update or remove " +
+              $"{mod.Identifier} too."
+            : $"{mod.Identifier} {mod.Version} is installed and needs {needs}, which this change removes.";
+    }
+
     private static bool ConflictsWith(ModVersion mod, ModVersion other) =>
         mod.Conflicts?.Any(conflict => conflict.AnyOf is { Count: > 0 } anyOf
             ? anyOf.Any(e => MatchesModule(other, e.Name, e.Version, e.MinVersion, e.MaxVersion))

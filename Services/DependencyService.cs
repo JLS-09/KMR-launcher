@@ -64,9 +64,11 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         installModsData.ChoosableVersions = dependencyResolutionState.Choosable;
         installModsData.ModsWithIgnoredRecommendations =
             [.. FindSuppressedRecommendations(dependencyResolutionState.Resolved)];
-        dependencyResolutionState.Problems.AddRange(CompatibilityService.FindConflicts(
-            [.. dependencyResolutionState.Resolved.Select(r => r.Version)],
-            RemainingInstalled(instance, dependencyResolutionState.Resolved, dependencyResolutionState.ToRemove)));
+        var toInstall = dependencyResolutionState.Resolved.Select(r => r.Version).ToList();
+        var remaining = RemainingInstalled(instance, dependencyResolutionState.Resolved, dependencyResolutionState.ToRemove);
+        dependencyResolutionState.Problems.AddRange(CompatibilityService.FindConflicts(toInstall, remaining));
+        dependencyResolutionState.Problems.AddRange(
+            CompatibilityService.FindBrokenDepends(toInstall, remaining, instance.Mods));
         installModsData.Problems = new ObservableCollection<ResolutionProblem>(dependencyResolutionState.Problems);
         return installModsData;
     }

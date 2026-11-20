@@ -46,4 +46,11 @@ public partial class InstancesPageView : UserControl
     }
 
     private void CloseDeleteFlyout(object? sender, RoutedEventArgs e) => DeleteButton.Flyout?.Hide();
+
+    private void ConfirmDelete(object? sender, RoutedEventArgs e)
+    {
+        DeleteButton.Flyout?.Hide();
+        if (DataContext is InstancesPageViewModel { DeleteInstanceCommand: var delete } && delete.CanExecute(null))
+            delete.Execute(null);
+    }
 }

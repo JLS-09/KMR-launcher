@@ -1011,8 +1011,9 @@
                                                        Text="{Binding DeleteText}" />
                                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
                                                 <Button Classes="ghost small" Content="Cancel" Click="CloseDeleteFlyout" />
-                                                <Button Classes="danger small" Content="Delete"
-                                                        Command="{Binding DeleteInstanceCommand}" Click="CloseDeleteFlyout" />
+                                                <!-- No Command binding here: closing the flyout first takes the button out of the
+                                                     window, its DataContext (and so its Command) goes away before the click runs it -->
+                                                <Button Classes="danger small" Content="Delete" Click="ConfirmDelete" />
                                             </StackPanel>
                                         </StackPanel>
                                     </Flyout>

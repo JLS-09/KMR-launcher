@@ -100,6 +100,18 @@ public class InstanceSettingsTests
         }
     }
 
+    // Saving the settings must not touch the instance folder: a computed InstallSize used to be serialized,
+    // which scanned every instance folder on each save and threw when one was missing
+    [Fact]
+    public void SavedInstanceHasNoComputedProperties()
+    {
+        var json = System.Text.Json.JsonSerializer.Serialize(Make("Gone", "does-not-exist", $"{Root}/gone"));
+
+        Assert.DoesNotContain("InstallSize", json);
+        Assert.DoesNotContain("Humanized", json);
+        Assert.Contains("\"PrefixPath\"", json);
+    }
+
     // Settings tab
 
     private static (InstanceSettingsViewModel vm, Instance instance, AppSettings settings) Tab()

@@ -19,12 +19,13 @@ public class Instance(string name, string rootPath, string version)
     public List<string> CompatibleKspVersions { get; set; } = [];
     public string LaunchArguments { get; set; } = "";
 
+    // The Wine prefix folder. Empty only for instances saved before Phase 5 task 6; SettingsService fills it in.
     public string PrefixPath { get; set; } = "";
     public int PlayTime { get; set; } = 0;
     public DateTime LastPlayed { get; set; }
     public bool IsPrimary { get; set; } = false;
 
-    public string PlayTimeHumanized => PlayTime <= 0
+    [JsonIgnore] public string PlayTimeHumanized => PlayTime <= 0
         ? "0s"
         : new TimeSpan(0, 0, PlayTime)
             .Humanize(precision: 2, maxUnit: TimeUnit.Hour)
@@ -35,7 +36,7 @@ public class Instance(string name, string rootPath, string version)
             .Replace(" minute", "m")
             .Replace(" second", "s");
 
-    public string LastPlayedHumanized => PlayTime <= 0
+    [JsonIgnore] public string LastPlayedHumanized => PlayTime <= 0
         ? "Never"
         : LastPlayed.Humanize()
             .Replace(" year", " yr")
@@ -45,10 +46,10 @@ public class Instance(string name, string rootPath, string version)
             .Replace(" minute", " min")
             .Replace(" second", " sec");
 
-    public string InstallSize => Helpers.BytesToString(Helpers.GetDirectorySize(RootPath));
-
     [JsonIgnore] public string CompatibleSummary => KspVersions.DescribeCompatible(this);
-    
+
+    // Deletes the instance folder and its prefix (only when the launcher made the prefix and no other
+    // instance uses it), then removes the instance from the settings.
     public async Task DeleteInstance(AppSettings settings)
     {
         var prefix = PrefixPath;
