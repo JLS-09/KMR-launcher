@@ -149,7 +149,8 @@
     </Style>
 
     <!-- Accent: no hover change in the mockups -->
-    <Style Selector="Button.accent">
+    <Style
+        Selector="Button.accent /template/ ContentPresenter, Button.accent:pointerover /template/ ContentPresenter, Button.accent:pressed /template/ ContentPresenter, Button.accent:disabled /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource Accent}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
         <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />
