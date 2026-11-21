@@ -1,126 +1,101 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Avalonia.Controls;
-using Avalonia.Platform.Storage;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
+using KMRLauncherMvvm.ViewModels.Settings;
 
 namespace KMRLauncherMvvm.ViewModels;
 
 public partial class SettingsPageViewModel : PageViewModel
 {
-    public IReadOnlyList<string> AllKspVersions => KspVersions.All;
-    private ZipService ZipService { get; set; }
-    private string ZipRelativeRootPath { get; set; }
+    private readonly ZipService? _zipService;
 
-    public AppSettings AppSettings
-    {
-        get;
-        set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    }
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(HasNoZips))]
+    private IReadOnlyList<KspZipRow> _kspZips = [];
 
-    public string ZipPath
-    {
-        get;
-        set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    }
+    [ObservableProperty] private string? _addZipError;
+    [ObservableProperty] private string _parallelDownloads = "";
 
-    public string ZipVersion
-    {
-        get;
-        set
-        {
-            if (field != value)
-            {
-                field = value;
-                OnPropertyChanged();
-            }
-        }
-    }
+    public bool HasNoZips => KspZips.Count == 0;
 
-    public decimal? MaxParallelDownloads
+    public SettingsPageViewModel(ZipService zipService) : this()
     {
-        get => AppSettings.MaxParallelDownloads;
-        set
-        {
-            var downloads = (int)Math.Clamp(value ?? AppSettings.DefaultParallelDownloads, 1,
-                AppSettings.MaxAllowedParallelDownloads);
-            if (downloads == AppSettings.MaxParallelDownloads) return;
-
-            AppSettings.MaxParallelDownloads = downloads;
-            SettingsService.Save(AppSettings);
-            OnPropertyChanged();
-        }
-    }
-    
-    public SettingsPageViewModel(ZipService zipService)
-    {
-        PageName = ApplicationPageNames.Settings;
-        AppSettings = App.Settings;
-        ZipService = zipService;
+        _zipService = zipService;
+        LoadZips();
+        ParallelDownloads = App.Settings.MaxParallelDownloads.ToString(CultureInfo.InvariantCulture);
     }
 
     public SettingsPageViewModel()
     {
+        PageName = ApplicationPageNames.Settings;
     }
 
-    [RelayCommand]
-    private async Task BrowseFolder(UserControl view)
+    public void AddKspZip(string path)
     {
-        var topLevel = TopLevel.GetTopLevel(view);
-        if (topLevel is null) return;
+        AddZipError = null;
+        var settings = App.Settings;
+        var name = Path.GetFileName(path);
 
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        if (settings.KspZips.Any(z => z.Path == path))
         {
-            Title = "Select KSP zip",
-            AllowMultiple = false,
-            FileTypeFilter = [FilePickerFileTypes.All]
-        });
-
-        if (files.Count > 0)
-        {
-            var kspZip = ZipService.GetVersionFromKspZip(files[0].Path.LocalPath);
-            ZipPath = kspZip.Path;
-            ZipRelativeRootPath = kspZip.RelativeRootPath;
-            ZipVersion = kspZip.Version;
+            AddZipError = $"{name} is already in the list.";
+            return;
         }
+
+        var zip = _zipService?.GetVersionFromKspZip(path);
+        if (zip is null || string.IsNullOrEmpty(zip.Version))
+        {
+            AddZipError = $"Couldn't read a known KSP version from {name}. Is it a KSP zip?";
+            return;
+        }
+
+        settings.KspZips.Add(zip);
+        SettingsService.Save(settings);
+        LoadZips();
     }
 
     [RelayCommand]
-    private void AddKspZip()
+    private void RemoveKspZip(KspZipRow row)
     {
-        if (string.IsNullOrWhiteSpace(ZipPath) ||
-            string.IsNullOrWhiteSpace(ZipRelativeRootPath) ||
-            string.IsNullOrWhiteSpace(ZipVersion)) return;
-
-        AppSettings.KspZips.Add(new KspZip(ZipPath, ZipRelativeRootPath, ZipVersion));
-        SettingsService.Save(AppSettings);
-
-        ZipPath = string.Empty;
-        ZipVersion = string.Empty;
+        AddZipError = null;
+        var settings = App.Settings;
+        settings.KspZips.Remove(row.Zip);
+        SettingsService.Save(settings);
+        LoadZips();
     }
 
-    [RelayCommand]
-    private void RemoveKspZip(KspZip kspZip)
+    partial void OnParallelDownloadsChanged(string value)
     {
-        AppSettings.KspZips.Remove(kspZip);
-        SettingsService.Save(AppSettings);
+        if (App.Settings is not { } settings) return;
+
+        var downloads = int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var number)
+            ? Math.Clamp(number, 1, AppSettings.MaxAllowedParallelDownloads)
+            : settings.MaxParallelDownloads;
+
+        if (downloads != settings.MaxParallelDownloads)
+        {
+            settings.MaxParallelDownloads = downloads;
+            SettingsService.Save(settings);
+        }
+
+        var text = downloads.ToString(CultureInfo.InvariantCulture);
+        if (value != text) ParallelDownloads = text;
+    }
+
+    private void LoadZips()
+    {
+        KspZips =
+        [
+            .. App.Settings.KspZips
+                .OrderByDescending(z => z.Version, Comparer<string>.Create(CkanVersion.Compare))
+                .ThenBy(z => z.Path, StringComparer.Ordinal)
+                .Select(z => new KspZipRow(z))
+        ];
     }
 }

@@ -80,52 +80,6 @@
             <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
         </Style>
 
-        <!-- Settings tab. Sections: padding 22 0 8 with a line on top (the first one 4 0 8, no line); title 16 px,
-             12 px under it. Rows: label column 220 px, gap 24, padding 14 0, a line on top. -->
-        <Style Selector="StackPanel.settingsSection">
-            <Setter Property="Margin" Value="0 22 0 8" />
-        </Style>
-        <Style Selector="StackPanel.settingsSection.first">
-            <Setter Property="Margin" Value="0 22 0 8" />
-        </Style>
-        <Style Selector="Border.sectionLine">
-            <Setter Property="Height" Value="1" />
-            <Setter Property="Background" Value="{DynamicResource Line}" />
-        </Style>
-        <Style Selector="TextBlock.sectionTitle">
-            <Setter Property="Margin" Value="0 0 0 12" />
-        </Style>
-        <Style Selector="Border.settingsRow">
-            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
-            <Setter Property="BorderThickness" Value="0 1 0 0" />
-            <Setter Property="Padding" Value="0 14" />
-        </Style>
-        <Style Selector="StackPanel.rowLabel">
-            <Setter Property="Spacing" Value="2" />
-            <Setter Property="Margin" Value="0 7 0 0" />
-        </Style>
-        <Style Selector="TextBlock.rowTitle">
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="FontWeight" Value="Medium" />
-        </Style>
-        <Style Selector="TextBlock.rowHint">
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="LineHeight" Value="17.4" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
-        </Style>
-        <Style Selector="StackPanel.rowControls">
-            <Setter Property="Orientation" Value="Horizontal" />
-            <Setter Property="Spacing" Value="8" />
-            <Setter Property="MinHeight" Value="36" />
-        </Style>
-        <!-- A switch without a label: no gap in front of it -->
-        <Style Selector="Border.settingsRow ToggleButton.switch /template/ Grid">
-            <Setter Property="ColumnSpacing" Value="0" />
-        </Style>
-        <Style Selector="StackPanel.rowControls > ToggleButton.switch">
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
         <!-- Compact page: the header's buttons go under the name, so the name and chips keep the full width -->
         <Style Selector="StackPanel#HeaderActions">
             <Setter Property="Grid.Column" Value="1" />
@@ -134,22 +88,6 @@
             <Setter Property="Grid.Column" Value="0" />
             <Setter Property="Grid.Row" Value="1" />
             <Setter Property="Margin" Value="0 14 0 0" />
-        </Style>
-        <!-- Stacked page (narrow window): each settings row puts its control under its label -->
-        <Style Selector=":is(Control).rowValue">
-            <Setter Property="Grid.Column" Value="1" />
-        </Style>
-        <Style Selector=":is(UserControl).stacked Grid.settingsGrid">
-            <Setter Property="RowSpacing" Value="8" />
-        </Style>
-        <Style Selector=":is(UserControl).stacked StackPanel.rowLabel">
-            <Setter Property="Grid.ColumnSpan" Value="2" />
-            <Setter Property="Margin" Value="0" />
-        </Style>
-        <Style Selector=":is(UserControl).stacked :is(Control).rowValue">
-            <Setter Property="Grid.Column" Value="0" />
-            <Setter Property="Grid.Row" Value="1" />
-            <Setter Property="Grid.ColumnSpan" Value="2" />
         </Style>
         <!-- Run with: 30 px segments, padding 0 12, 13 px -->
         <Style Selector="RadioButton.segment.big">
