@@ -44,6 +44,6 @@ public static class Helpers
         return Math.Sign(byteCount) * num + " " + suf[place];
     }
 
-    public static void OpenFolder(string folder) =>
-        Process.Start(new ProcessStartInfo(folder) { UseShellExecute = true });
+    public static void Open(string folderOrUrl) =>
+        Process.Start(new ProcessStartInfo(folderOrUrl) { UseShellExecute = true });
 }

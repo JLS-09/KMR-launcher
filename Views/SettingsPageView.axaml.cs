@@ -20,7 +20,7 @@ public partial class SettingsPageView : UserControl
     {
         InitializeComponent();
         _sections = [(KspNav, KspSection), (ReposNav, ReposSection), (DownloadsNav, DownloadsSection), (LaunchingNav, LaunchingSection),
-            (AppearanceNav, AppearanceSection)];
+            (AppearanceNav, AppearanceSection), (AboutNav, AboutSection)];
     }
 
     protected override void OnSizeChanged(SizeChangedEventArgs e)

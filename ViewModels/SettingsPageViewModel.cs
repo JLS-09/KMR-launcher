@@ -52,6 +52,12 @@ public partial class SettingsPageViewModel : PageViewModel
     [ObservableProperty] private string _wineDebugText = "";
     [ObservableProperty] private string _accentName = "";
 
+    [ObservableProperty] private string? _aboutError;
+
+    public string VersionText => AppInfo.VersionText;
+    public string SourceText => AppInfo.SourceUrl.Replace("https://", "");
+    public string DataFolderText => InstanceTexts.ShortPath(AppInfo.DataFolder);
+
     public IReadOnlyList<AccentSwatch> AccentSwatches { get; } =
         [.. ThemeService.AccentChoices.Select(c => new AccentSwatch(c.Name, c.Hex))];
 
@@ -154,7 +160,7 @@ public partial class SettingsPageViewModel : PageViewModel
     {
         try
         {
-            Helpers.OpenFolder(GitHelper.DefaultCkanMetaFolder);
+            Helpers.Open(GitHelper.DefaultCkanMetaFolder);
         }
         catch (Exception e)
         {
@@ -170,7 +176,7 @@ public partial class SettingsPageViewModel : PageViewModel
         try
         {
             Directory.CreateDirectory(_cache.Folder);
-            Helpers.OpenFolder(_cache.Folder);
+            Helpers.Open(_cache.Folder);
         }
         catch (Exception e)
         {
@@ -256,6 +262,25 @@ public partial class SettingsPageViewModel : PageViewModel
         var current = AccentSwatches.FirstOrDefault(s => string.Equals(s.Hex, hex, StringComparison.OrdinalIgnoreCase));
         foreach (var swatch in AccentSwatches) swatch.IsSelected = swatch == current;
         AccentName = current?.Name ?? hex;
+    }
+
+    [RelayCommand]
+    private void OpenSource() => OpenForAbout(AppInfo.SourceUrl, "the link");
+
+    [RelayCommand]
+    private void OpenDataFolder() => OpenForAbout(AppInfo.DataFolder, "the folder");
+
+    private void OpenForAbout(string target, string what)
+    {
+        AboutError = null;
+        try
+        {
+            Helpers.Open(target);
+        }
+        catch (Exception e)
+        {
+            AboutError = $"Couldn't open {what}: {e.Message}";
+        }
     }
 
     public static string DescribeWineDebug(WineDebugLevel level) => level switch
