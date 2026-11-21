@@ -2,14 +2,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Design.PreviewWith>
         <Border Padding="20">
-            <!-- Add Controls for Previewer Here -->
             <Label Classes="title" VerticalAlignment="Center">
                 Kerbal Mod Repository Launcher
             </Label>
         </Border>
     </Design.PreviewWith>
 
-    <!-- Add Styles Here -->
     <Style Selector="Button.Primary /template/ ContentPresenter">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" ></Setter>
         <Setter Property="Background" Value="{DynamicResource PrimaryRed}"></Setter>

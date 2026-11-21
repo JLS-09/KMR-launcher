@@ -5,9 +5,6 @@ using Avalonia.Media;
 
 namespace KMRLauncherMvvm.Controls;
 
-// A line icon like in the mockups: the geometry is drawn on a 24×24 grid with a round stroke.
-// The geometries are in Styles/Icons.axaml (Icon… keys). The colour follows Foreground.
-// IsFilled draws the shape filled instead (the play and stop icons in the mockups).
 public class StrokeIcon : Control
 {
     public static readonly StyledProperty<Geometry?> DataProperty =

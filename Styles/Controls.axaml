@@ -1,7 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:KMRLauncherMvvm.Controls">
-    <!-- Shared controls of the new design (Phase 9 task 2), with the sizes and colours from the mockups.
+    <!-- Shared controls of the new design, with the sizes and colours from the mockups.
          Use the classes below on the normal controls. -->
     <Design.PreviewWith>
         <Border Padding="24" Background="{DynamicResource Background}" Width="560">
@@ -27,17 +27,35 @@
                     <controls:StatusLabel Kind="Warning" Text="Not 1.12.5" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <Border Classes="chip"><TextBlock Text="tag: config" /></Border>
-                    <Border Classes="chip plain"><TextBlock Text="LGPL-3.0" /></Border>
-                    <Border Classes="chip plain"><TextBlock Classes="mono" Text="KSP 1.12.5" /></Border>
-                    <Border Classes="chip accent"><TextBlock Text="Primary" /></Border>
+                    <Border Classes="chip">
+                        <TextBlock Text="tag: config" />
+                    </Border>
+                    <Border Classes="chip plain">
+                        <TextBlock Text="LGPL-3.0" />
+                    </Border>
+                    <Border Classes="chip plain">
+                        <TextBlock Classes="mono" Text="KSP 1.12.5" />
+                    </Border>
+                    <Border Classes="chip accent">
+                        <TextBlock Text="Primary" />
+                    </Border>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <Border Classes="action new"><TextBlock Text="New" /></Border>
-                    <Border Classes="action update"><TextBlock Text="Update" /></Border>
-                    <Border Classes="badge fits"><TextBlock Text="newest fit" /></Border>
-                    <Border Classes="badge neutral"><TextBlock Text="installed" /></Border>
-                    <Border Classes="badge warning"><TextBlock Text="Not listed for 1.12.5" /></Border>
+                    <Border Classes="action new">
+                        <TextBlock Text="New" />
+                    </Border>
+                    <Border Classes="action update">
+                        <TextBlock Text="Update" />
+                    </Border>
+                    <Border Classes="badge fits">
+                        <TextBlock Text="newest fit" />
+                    </Border>
+                    <Border Classes="badge neutral">
+                        <TextBlock Text="installed" />
+                    </Border>
+                    <Border Classes="badge warning">
+                        <TextBlock Text="Not listed for 1.12.5" />
+                    </Border>
                 </StackPanel>
                 <Border Classes="segmented" HorizontalAlignment="Left">
                     <StackPanel Orientation="Horizontal" Spacing="2">
@@ -47,7 +65,8 @@
                     </StackPanel>
                 </Border>
                 <ToggleButton Classes="switch" Content="Only compatible" Width="200" HorizontalAlignment="Left" />
-                <ToggleButton Classes="switch" Content="Back up saves first" IsChecked="True" Width="200" HorizontalAlignment="Left" />
+                <ToggleButton Classes="switch" Content="Back up saves first" IsChecked="True" Width="200"
+                              HorizontalAlignment="Left" />
                 <TextBox Classes="search" PlaceholderText="Search" />
                 <Border Classes="placeholder">
                     <StackPanel Spacing="4">
@@ -136,7 +155,8 @@
         <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
-    <Style Selector="Button.accent:pointerover /template/ ContentPresenter, Button.accent:pressed /template/ ContentPresenter, Button.accent:disabled /template/ ContentPresenter">
+    <Style
+        Selector="Button.accent:pointerover /template/ ContentPresenter, Button.accent:pressed /template/ ContentPresenter, Button.accent:disabled /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource Accent}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
         <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />
@@ -153,7 +173,8 @@
         <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
     </Style>
-    <Style Selector="Button.secondary:pointerover /template/ ContentPresenter, Button.secondary:pressed /template/ ContentPresenter">
+    <Style
+        Selector="Button.secondary:pointerover /template/ ContentPresenter, Button.secondary:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource ControlHover}" />
         <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
@@ -169,7 +190,8 @@
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
     </Style>
-    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter, Button.ghost:pressed /template/ ContentPresenter">
+    <Style
+        Selector="Button.ghost:pointerover /template/ ContentPresenter, Button.ghost:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource ControlHover}" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
@@ -193,12 +215,14 @@
         <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
-    <Style Selector="Button.danger:pointerover /template/ ContentPresenter, Button.danger:pressed /template/ ContentPresenter, Button.danger:disabled /template/ ContentPresenter">
+    <Style
+        Selector="Button.danger:pointerover /template/ ContentPresenter, Button.danger:pressed /template/ ContentPresenter, Button.danger:disabled /template/ ContentPresenter">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{DynamicResource StatusErrorLine}" />
         <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
     </Style>
-    <Style Selector="Button.accentOutline:pointerover /template/ ContentPresenter, Button.accentOutline:pressed /template/ ContentPresenter, Button.accentOutline:disabled /template/ ContentPresenter">
+    <Style
+        Selector="Button.accentOutline:pointerover /template/ ContentPresenter, Button.accentOutline:pressed /template/ ContentPresenter, Button.accentOutline:disabled /template/ ContentPresenter">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{DynamicResource AccentLine}" />
         <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
@@ -219,7 +243,8 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
-    <Style Selector="Button.nav:pointerover /template/ ContentPresenter, Button.nav:pressed /template/ ContentPresenter">
+    <Style
+        Selector="Button.nav:pointerover /template/ ContentPresenter, Button.nav:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource ControlHover}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
     </Style>
@@ -227,7 +252,8 @@
         <Setter Property="Background" Value="{DynamicResource NavActive}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
     </Style>
-    <Style Selector="Button.nav.active:pointerover /template/ ContentPresenter, Button.nav.active:pressed /template/ ContentPresenter">
+    <Style
+        Selector="Button.nav.active:pointerover /template/ ContentPresenter, Button.nav.active:pressed /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource NavActive}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
     </Style>
@@ -248,7 +274,8 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
-    <Style Selector="TextBox.search:pointerover /template/ Border#PART_BorderElement, TextBox.search:focus /template/ Border#PART_BorderElement, TextBox.search:disabled /template/ Border#PART_BorderElement">
+    <Style
+        Selector="TextBox.search:pointerover /template/ Border#PART_BorderElement, TextBox.search:focus /template/ Border#PART_BorderElement, TextBox.search:disabled /template/ Border#PART_BorderElement">
         <Setter Property="Background" Value="{DynamicResource Surface}" />
         <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -256,7 +283,8 @@
     <Style Selector="TextBox.search /template/ TextBlock#PART_Placeholder">
         <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
     </Style>
-    <Style Selector="TextBox.search:pointerover /template/ TextBlock#PART_Placeholder, TextBox.search:focus /template/ TextBlock#PART_Placeholder">
+    <Style
+        Selector="TextBox.search:pointerover /template/ TextBlock#PART_Placeholder, TextBox.search:focus /template/ TextBlock#PART_Placeholder">
         <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
     </Style>
 
@@ -277,7 +305,8 @@
         <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
         <Setter Property="FontSize" Value="12" />
     </Style>
-    <Style Selector="TextBox.field:pointerover /template/ Border#PART_BorderElement, TextBox.field:disabled /template/ Border#PART_BorderElement">
+    <Style
+        Selector="TextBox.field:pointerover /template/ Border#PART_BorderElement, TextBox.field:disabled /template/ Border#PART_BorderElement">
         <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
         <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -287,7 +316,8 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AccentLine}" />
         <Setter Property="BorderThickness" Value="1" />
     </Style>
-    <Style Selector="TextBox.field /template/ TextBlock#PART_Placeholder, TextBox.field:pointerover /template/ TextBlock#PART_Placeholder, TextBox.field:focus /template/ TextBlock#PART_Placeholder">
+    <Style
+        Selector="TextBox.field /template/ TextBlock#PART_Placeholder, TextBox.field:pointerover /template/ TextBlock#PART_Placeholder, TextBox.field:focus /template/ TextBlock#PART_Placeholder">
         <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
     </Style>
 
@@ -466,13 +496,25 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
-    <Style Selector="Border.action.new"><Setter Property="Background" Value="{DynamicResource StatusFitsSoft}" /></Style>
-    <Style Selector="Border.action.new TextBlock"><Setter Property="Foreground" Value="{DynamicResource StatusFits}" /></Style>
-    <Style Selector="Border.action.update"><Setter Property="Background" Value="{DynamicResource StatusUpdateSoft}" /></Style>
-    <Style Selector="Border.action.update TextBlock"><Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" /></Style>
+    <Style Selector="Border.action.new">
+        <Setter Property="Background" Value="{DynamicResource StatusFitsSoft}" />
+    </Style>
+    <Style Selector="Border.action.new TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
+    </Style>
+    <Style Selector="Border.action.update">
+        <Setter Property="Background" Value="{DynamicResource StatusUpdateSoft}" />
+    </Style>
+    <Style Selector="Border.action.update TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
+    </Style>
     <!-- Not in the mockups yet; same idea in the error colour -->
-    <Style Selector="Border.action.remove"><Setter Property="Background" Value="{DynamicResource StatusErrorSoft}" /></Style>
-    <Style Selector="Border.action.remove TextBlock"><Setter Property="Foreground" Value="{DynamicResource StatusError}" /></Style>
+    <Style Selector="Border.action.remove">
+        <Setter Property="Background" Value="{DynamicResource StatusErrorSoft}" />
+    </Style>
+    <Style Selector="Border.action.remove TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+    </Style>
 
     <!-- Small badges: padding 1 6, radius 5, 11 px. .fits = "newest fit", .neutral = "installed",
          .warning = "Not listed for 1.12.5" / "strict" -->
@@ -490,14 +532,22 @@
         <Setter Property="Size" Value="12" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
-    <Style Selector="Border.badge.fits"><Setter Property="Background" Value="{DynamicResource StatusFitsSoft}" /></Style>
+    <Style Selector="Border.badge.fits">
+        <Setter Property="Background" Value="{DynamicResource StatusFitsSoft}" />
+    </Style>
     <Style Selector="Border.badge.fits TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
-    <Style Selector="Border.badge.neutral"><Setter Property="Background" Value="{DynamicResource BadgeNeutral}" /></Style>
-    <Style Selector="Border.badge.neutral TextBlock"><Setter Property="Foreground" Value="{DynamicResource TextSecondary}" /></Style>
-    <Style Selector="Border.badge.warning"><Setter Property="Background" Value="{DynamicResource StatusWarningSoft}" /></Style>
+    <Style Selector="Border.badge.neutral">
+        <Setter Property="Background" Value="{DynamicResource BadgeNeutral}" />
+    </Style>
+    <Style Selector="Border.badge.neutral TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+    </Style>
+    <Style Selector="Border.badge.warning">
+        <Setter Property="Background" Value="{DynamicResource StatusWarningSoft}" />
+    </Style>
     <Style Selector="Border.badge.warning TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
     </Style>
@@ -690,7 +740,8 @@
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
-    <Style Selector="Button.launchPart:pointerover /template/ ContentPresenter, Button.launchPart:pressed /template/ ContentPresenter, Button.launchPart:disabled /template/ ContentPresenter">
+    <Style
+        Selector="Button.launchPart:pointerover /template/ ContentPresenter, Button.launchPart:pressed /template/ ContentPresenter, Button.launchPart:disabled /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource Accent}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
         <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />

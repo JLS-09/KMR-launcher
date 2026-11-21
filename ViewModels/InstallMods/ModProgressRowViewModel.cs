@@ -31,14 +31,13 @@ public partial class ModProgressRowViewModel(ModInstallJob job) : ObservableObje
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsToneDone), nameof(IsToneDownloading), nameof(IsToneInstalling),
-        nameof(IsToneFailed), nameof(IsToneMuted))]
+        nameof(IsToneFailed))]
     private ProgressTone _tone = ProgressTone.Muted;
 
     public bool IsToneDone => Tone == ProgressTone.Done;
     public bool IsToneDownloading => Tone == ProgressTone.Downloading;
     public bool IsToneInstalling => Tone == ProgressTone.Installing;
     public bool IsToneFailed => Tone == ProgressTone.Failed;
-    public bool IsToneMuted => Tone == ProgressTone.Muted;
 
     public double DownloadFraction { get; private set; }
     public double InstallFraction { get; private set; }

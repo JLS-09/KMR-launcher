@@ -19,8 +19,6 @@ public record KspStripInfo(bool[] Cells, string Label)
             CompatibilityService.DescribeKspRange(version));
 }
 
-// Five cells for KSP 1.8–1.12 with the range under it ("1.8–1.12", "1.12.3 strict").
-// Drawn directly instead of with child controls, because it is in every row of long lists.
 public class KspStrip : Control
 {
     public static readonly StyledProperty<ModVersion?> VersionProperty =

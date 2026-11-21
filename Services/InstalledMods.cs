@@ -6,7 +6,9 @@ using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.Services;
 
-public record RemovalPlan(IReadOnlyList<ModVersion> Selected, IReadOnlyList<ModVersion> Dependents,
+public record RemovalPlan(
+    IReadOnlyList<ModVersion> Selected,
+    IReadOnlyList<ModVersion> Dependents,
     IReadOnlyList<ModVersion> Orphans)
 {
     public IEnumerable<ModVersion> All => Selected.Concat(Dependents).Concat(Orphans);
@@ -78,7 +80,8 @@ public static class InstalledMods
     {
         List<string> parts = [];
         if (plan.Dependents.Count > 0)
-            parts.Add($"{JoinNames(plan.Dependents)}, which {(plan.Dependents.Count == 1 ? "depends" : "depend")} on it");
+            parts.Add(
+                $"{JoinNames(plan.Dependents)}, which {(plan.Dependents.Count == 1 ? "depends" : "depend")} on it");
         if (plan.Orphans.Count > 0)
             parts.Add($"{JoinNames(plan.Orphans)}, which no other mod needs");
 
@@ -105,7 +108,7 @@ public static class InstalledMods
     public static string FormatSize(long bytes)
     {
         var mb = bytes / 1024.0 / 1024.0;
-        if (bytes > 0 && mb < 0.1) mb = 0.1; // small mods show as 0.1 MB, not 0.0
+        if (bytes > 0 && mb < 0.1) mb = 0.1;
         if (mb >= 1024) return (mb / 1024).ToString("0.0", CultureInfo.InvariantCulture) + " GB";
         return mb >= 10
             ? Math.Round(mb).ToString(CultureInfo.InvariantCulture) + " MB"

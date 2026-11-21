@@ -9,7 +9,6 @@ public static class WineLauncher
     private const string WinePath = "/usr/bin/wine";
     private const string WineServerPath = "/usr/bin/wineserver";
 
-    // prefixDir: the instance's Wine prefix (Instance.PrefixPath, see WinePrefixes)
     public static Process Launch(string prefixDir, string exePath,
         string[]? gameArgs = null)
     {

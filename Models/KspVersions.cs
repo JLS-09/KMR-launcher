@@ -31,8 +31,6 @@ public static class KspVersions
     
     public static bool IsMinorPrefix(string version) => version.Split('.').Length == 2;
 
-    // "1.12.5 · 1.8.x–1.12.x": the instance's version and the versions it also accepts.
-    // Runs of whole minor versions are joined, so the default list (1.8–1.12) stays short.
     public static string DescribeCompatible(Instance instance)
     {
         var criteria = GameVersionCriteria.FromInstance(instance);

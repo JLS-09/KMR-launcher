@@ -9,11 +9,8 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels.Instances;
 
-// The Settings tab of the Instances page (Phase 9 task 6), which replaces CompatibleKspVersionsWindow.
-// Edits stay here until Save; the page keeps one of these per instance while it has unsaved changes.
 public partial class InstanceSettingsViewModel : ObservableObject
 {
-    // The newest minor versions are always listed; older ones sit behind "Show 0.x – 1.7"
     private const int NewestGroupsShown = 5;
 
     private readonly List<KspVersionGroupViewModel> _allGroups;
@@ -55,7 +52,6 @@ public partial class InstanceSettingsViewModel : ObservableObject
         _prefix = InstanceTexts.ShortPath(instance.PrefixPath);
         _launchArguments = instance.LaunchArguments;
 
-        // Newest first like the mockup, versions inside a group from old to new
         _allGroups =
         [
             .. KspVersions.All
@@ -74,7 +70,6 @@ public partial class InstanceSettingsViewModel : ObservableObject
         var listed = _allGroups.SelectMany(g => g.Versions.Select(v => v.Version).Prepend(g.Prefix)).ToHashSet();
         _unknownEntries = [.. _saved.Compatible.Where(entry => !listed.Contains(entry))];
 
-        // Older groups with something ticked (or the game version) are listed too, so nothing ticked is hidden
         _alwaysShown =
         [
             .. _allGroups.Take(NewestGroupsShown),
@@ -117,7 +112,6 @@ public partial class InstanceSettingsViewModel : ObservableObject
 
     private List<string> CompatibleEntries() => [.. _allGroups.SelectMany(g => g.ToEntries()), .. _unknownEntries];
 
-    // An empty prefix box means the default prefix
     private string PrefixToSave => Prefix.Trim().Length == 0 ? Expanded(DefaultPrefix) : Expanded(Prefix);
 
     private void Recount()
@@ -128,7 +122,6 @@ public partial class InstanceSettingsViewModel : ObservableObject
         if (PrefixToSave != _saved.Prefix) changes++;
         if (LaunchArguments.Trim() != _saved.LaunchArguments.Trim()) changes++;
 
-        // Each ticked or unticked version counts as one change
         var compatible = CompatibleEntries().ToHashSet();
         changes += compatible.Count(e => !_saved.Compatible.Contains(e)) +
                    _saved.Compatible.Count(e => !compatible.Contains(e));
@@ -148,8 +141,6 @@ public partial class InstanceSettingsViewModel : ObservableObject
         if (Apply(App.Settings)) SettingsService.Save(App.Settings);
     }
 
-    // Writes the edits to the instance in the settings (looked up by folder, because the settings are
-    // reloaded after a game session). Doesn't save the settings file.
     public bool Apply(AppSettings settings)
     {
         var instance = settings.Instances.FirstOrDefault(i => i.RootPath == RootPath);
@@ -157,7 +148,8 @@ public partial class InstanceSettingsViewModel : ObservableObject
 
         instance.Name = Name.Trim();
         if (IsPrimary)
-            foreach (var other in settings.Instances) other.IsPrimary = other == instance;
+            foreach (var other in settings.Instances)
+                other.IsPrimary = other == instance;
         else
             instance.IsPrimary = false;
         instance.PrefixPath = PrefixToSave;
@@ -191,7 +183,6 @@ public partial class InstanceSettingsViewModel : ObservableObject
 
     private static string Expanded(string path) => path.Trim().Length == 0 ? "" : WinePrefixes.Expand(path);
 
-    // "0.x – 1.7" when the range spans major versions, "1.4 – 1.7" otherwise
     private static string RangeText(string lowest, string highest)
     {
         var lowMajor = lowest.Split('.')[0];

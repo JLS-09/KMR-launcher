@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Avalonia;
@@ -9,12 +8,8 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.Controls;
 
-// The KSP compatibility strip in Discover's details panel: a cell per minor version 1.8–1.12 with its label.
-// For a strict mod, the newest minor it supports is split into its patch versions (and is twice as wide).
-// The cell of the "Check against" instance's version is green when the mod supports it.
 public class KspDetailStrip : Control
 {
-    // Patch releases per minor version (1.8.0–1.8.1, …, 1.12.0–1.12.5)
     private static readonly (string Minor, int Patches)[] Minors =
         [("1.8", 2), ("1.9", 2), ("1.10", 2), ("1.11", 3), ("1.12", 6)];
 

@@ -21,7 +21,7 @@ public class CompatibilityService(ModListService modListService)
                    SatisfiesVersionLimits(v.Version, relationship) && IsCompatible(v, criteria))
                ?? throw new NoCompatibleVersionFoundException(relationship);
     }
-    
+
     public bool ModExists(string? identifier) => modListService.Mods?.Any(m => m.Id == identifier) == true;
 
     public bool IsVersionCompatibleWithRelation(ModVersion version, Relationship relationship)
@@ -121,10 +121,6 @@ public class CompatibilityService(ModListService modListService)
         return problems;
     }
 
-    // Installed mods that stay must still have their depends met after the change, e.g. updating a library
-    // past the version range an installed mod needs (spec "depends", version limits). Depends that weren't met
-    // before the change aren't reported (that isn't this change's doing). As in the resolver, limits apply to a
-    // mod with that identifier and are ignored for mods that provide the name.
     public static List<ResolutionProblem> FindBrokenDepends(IReadOnlyList<ModVersion> toInstall,
         IReadOnlyList<ModVersion> remainingInstalled, IReadOnlyList<ModVersion> installedBefore)
     {
@@ -213,15 +209,12 @@ public class CompatibilityService(ModListService modListService)
         return false;
     }
 
-    // True when the mod's KSP range overlaps any patch of the given minor version ("1.12").
-    // Used for the KSP strip; strictness doesn't matter here, the strip shows the range.
     public static bool CoversMinor(ModVersion version, string minorPrefix)
     {
         var (modMin, modMax) = GetKspRange(version);
         return LowerBound(minorPrefix).CompareTo(modMax) <= 0 && UpperBound(minorPrefix).CompareTo(modMin) >= 0;
     }
 
-    // Short text for a mod's KSP range: "any", "1.12", "1.8–1.12", "1.10+", "≤ 1.9", "1.12.3 strict"
     public static string DescribeKspRange(ModVersion version)
     {
         var strict = version.KspVersionStrict;
@@ -253,7 +246,6 @@ public class CompatibilityService(ModListService modListService)
         return strict ? $"{range} strict" : range;
     }
 
-    // The range as the metadata says it, for the version list: "1.12.0–1.12.5", "1.12", "1.8+", "any"
     public static string DescribeKspRangeExact(ModVersion version)
     {
         if (version.KspVersion is not null) return IsAny(version.KspVersion) ? "any" : version.KspVersion;
@@ -271,7 +263,6 @@ public class CompatibilityService(ModListService modListService)
         };
     }
 
-    // True when one exact KSP version ("1.12.3") is inside the mod's range
     public static bool CoversVersion(ModVersion version, string kspVersion)
     {
         var (modMin, modMax) = GetKspRange(version);
@@ -279,7 +270,6 @@ public class CompatibilityService(ModListService modListService)
         return point.CompareTo(modMin) >= 0 && point.CompareTo(modMax) <= 0;
     }
 
-    // Strict mods keep their patch version, the others are shown per minor version
     private static string ShortKsp(string kspVersion, bool strict) =>
         strict ? kspVersion : KspVersions.ToMinorPrefix(kspVersion);
 

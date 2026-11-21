@@ -12,7 +12,6 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
-    // Ctrl K focuses the search box in the top bar
     protected override void OnKeyDown(KeyEventArgs e)
     {
         if (e.Key == Key.K && e.KeyModifiers == KeyModifiers.Control && SearchBox.IsEnabled)

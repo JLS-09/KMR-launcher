@@ -9,7 +9,6 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels.Discover;
 
-// The details panel on the right of Discover, for the row that was clicked
 public partial class ModDetailsViewModel : ObservableObject
 {
     private readonly ModListItemViewModel _row;
@@ -51,10 +50,13 @@ public partial class ModDetailsViewModel : ObservableObject
         Description = string.IsNullOrWhiteSpace(Mod.Description) ? Mod.Abstract : Mod.Description!;
         NeededBy = neededBy.ToString("N0");
 
-        Versions = [.. Mod.Versions.Select(v => new VersionRowViewModel(v, row,
-            fits: criteria is not null && CompatibilityService.IsCompatible(v, criteria),
-            isNewestFit: v == row.Fit.NewestFit,
-            isInstalled: row.Fit.Installed?.Version == v.Version))];
+        Versions =
+        [
+            .. Mod.Versions.Select(v => new VersionRowViewModel(v, row,
+                fits: criteria is not null && CompatibilityService.IsCompatible(v, criteria),
+                isNewestFit: v == row.Fit.NewestFit,
+                isInstalled: row.Fit.Installed?.Version == v.Version))
+        ];
         VersionCount = Mod.Versions.Count.ToString("N0");
         FitsLegend = instance is null ? "" : $"Fits {instance.Name} ({instance.Version})";
 
@@ -65,7 +67,6 @@ public partial class ModDetailsViewModel : ObservableObject
         row.PropertyChanged += OnRowChanged;
     }
 
-    // Called when the panel shows another mod, so the old row doesn't keep this one alive
     public void Detach() => _row.PropertyChanged -= OnRowChanged;
 
     private void OnRowChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -81,14 +82,16 @@ public partial class ModDetailsViewModel : ObservableObject
         UpdateShownVersion();
     }
 
-    // Depends, conflicts and the KSP strip follow the version that would be installed
     private void UpdateShownVersion()
     {
         var version = ShownVersion;
         IsStrict = version.KspVersionStrict;
 
         var installed = _instance?.Mods ?? [];
-        Depends = [.. (version.Depends ?? []).Select(r => DependsRowViewModel.For(r, installed, _instance is not null))];
+        Depends =
+        [
+            .. (version.Depends ?? []).Select(r => DependsRowViewModel.For(r, installed, _instance is not null))
+        ];
         HasDepends = Depends.Count > 0;
 
         if (_instance is null)
@@ -128,7 +131,6 @@ public partial class ModDetailsViewModel : ObservableObject
     }
 }
 
-// A row in the details panel's version list: ticking it selects the mod with that version (like CKAN)
 public partial class VersionRowViewModel : ObservableObject
 {
     private readonly ModListItemViewModel _row;
@@ -172,7 +174,6 @@ public partial class VersionRowViewModel : ObservableObject
     }
 }
 
-// A depends entry with whether the "Check against" instance has it
 public record DependsRowViewModel(string Name, bool IsInstalled, bool ShowState)
 {
     public string StateText => !ShowState ? "" : IsInstalled ? "installed" : "not installed";

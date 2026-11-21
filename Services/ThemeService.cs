@@ -4,16 +4,13 @@ using Avalonia.Media;
 
 namespace KMRLauncherMvvm.Services;
 
-// The brushes that follow the accent colour. Worked out the same way as in the mockups.
 public record AccentPalette(Color Accent, Color AccentText, Color OnAccent, Color AccentSoft, Color AccentLine)
 {
     public static AccentPalette From(Color accent)
     {
         var luminance = RelativeLuminance(accent);
 
-        // A dark accent (like red) is too dark for text on the background, so text gets a lighter mix
         var text = luminance > 0.25 ? accent : MixWithWhite(accent, 0.35);
-        // Text on an accent fill: dark on light accents (orange, green, blue), white on red
         var onAccent = luminance > 0.3 ? Color.Parse("#141414") : Colors.White;
 
         return new AccentPalette(accent, text, onAccent, WithAlpha(accent, 0x24), WithAlpha(accent, 0x73));
@@ -32,7 +29,9 @@ public record AccentPalette(Color Accent, Color AccentText, Color OnAccent, Colo
 
     private static Color MixWithWhite(Color color, double amount)
     {
-        static byte Mix(byte value, double amount) => (byte)Math.Round(value + (255 - value) * amount, MidpointRounding.AwayFromZero);
+        static byte Mix(byte value, double amount) =>
+            (byte)Math.Round(value + (255 - value) * amount, MidpointRounding.AwayFromZero);
+
         return Color.FromRgb(Mix(color.R, amount), Mix(color.G, amount), Mix(color.B, amount));
     }
 
@@ -43,10 +42,8 @@ public static class ThemeService
 {
     public const string DefaultAccent = "#DF0105";
 
-    // Red, orange, green, blue (Phase 9 decisions)
     public static readonly string[] AccentChoices = ["#DF0105", "#FF7A1A", "#3FB950", "#58A6FF"];
 
-    // Replaces the accent brushes in App.axaml. Everything that uses them through DynamicResource updates.
     public static void ApplyAccent(string? hex)
     {
         if (Application.Current is not { } app) return;
@@ -61,7 +58,6 @@ public static class ThemeService
         resources["AccentSoft"] = new SolidColorBrush(palette.AccentSoft);
         resources["AccentLine"] = new SolidColorBrush(palette.AccentLine);
 
-        // Fluent controls (CheckBox, ToggleSwitch, ProgressBar, …) use these
         resources["SystemAccentColor"] = palette.Accent;
         resources["SystemAccentColorDark1"] = palette.Accent;
         resources["SystemAccentColorDark2"] = palette.Accent;

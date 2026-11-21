@@ -27,7 +27,10 @@ public class InstallRun
         {
             Instance = instance,
             Jobs = jobs,
-            ToRemove = [.. instance.Mods.Where(m => installing.Contains(m.Identifier) || removing.Contains(m.Identifier))]
+            ToRemove =
+            [
+                .. instance.Mods.Where(m => installing.Contains(m.Identifier) || removing.Contains(m.Identifier))
+            ]
         };
     }
 }
@@ -288,7 +291,7 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
 
         job.State = ModInstallState.Done;
     }
-    
+
     private static void MakeReadable(string path)
     {
         if (OperatingSystem.IsWindows()) return;

@@ -84,7 +84,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         ];
     }
 
-    // The top bar's search box
     public void ApplySearch(string text)
     {
         _search = text.Trim();
@@ -110,8 +109,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         }
     }
 
-    // Instances for "Check against" and "Install to". Settings are replaced after a launch or an install,
-    // so the picked instances are looked up again by folder.
     private void LoadInstances(AppSettings settings)
     {
         var checkPath = CheckAgainst?.RootPath;
@@ -124,7 +121,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         CheckAgainst = settings.Instances.FirstOrDefault(i => i.RootPath == checkPath) ?? primary;
         InstallTarget = settings.Instances.FirstOrDefault(i => i.RootPath == targetPath) ?? CheckAgainst;
 
-        // An install changes the instance's mods, so the statuses change too
         RefreshFits();
     }
 
@@ -133,18 +129,24 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         var modList = mods.Where(m => m.Versions.Count > 0).ToList();
         var selected = SelectedMods.ToDictionary(r => r.Mod.Id);
 
-        _allRows = [.. modList
-            .OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase)
-            .Select(m => selected.GetValueOrDefault(m.Id) ?? CreateRow(m))];
+        _allRows =
+        [
+            .. modList
+                .OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(m => selected.GetValueOrDefault(m.Id) ?? CreateRow(m))
+        ];
         _neededBy = DiscoverFilter.CountNeededBy(modList);
         _ = LoadDownloadCounts();
 
-        Tags = [.. modList
-            .SelectMany(m => m.Tags ?? [])
-            .GroupBy(t => t)
-            .OrderByDescending(g => g.Count())
-            .ThenBy(g => g.Key)
-            .Select(g => new FilterOptionViewModel(g.Key, g.Count(), ApplyFilters))];
+        Tags =
+        [
+            .. modList
+                .SelectMany(m => m.Tags ?? [])
+                .GroupBy(t => t)
+                .OrderByDescending(g => g.Count())
+                .ThenBy(g => g.Key)
+                .Select(g => new FilterOptionViewModel(g.Key, g.Count(), ApplyFilters))
+        ];
         UpdateVisibleTags();
 
         RefreshFits();
@@ -175,7 +177,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     partial void OnHideInstalledChanged(bool value) => ApplyFilters();
     partial void OnShowAllTagsChanged(bool value) => UpdateVisibleTags();
 
-    // Works out every row's status against the "Check against" instance
     private void RefreshFits()
     {
         _criteria = CheckAgainst is null ? null : GameVersionCriteria.FromInstance(CheckAgainst);
@@ -205,7 +206,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     {
         var hidden = Math.Max(0, Tags.Count - TagsShownCollapsed);
         HasMoreTags = hidden > 0;
-        // Checked tags stay visible when the list is collapsed
         VisibleTags = ShowAllTags
             ? Tags
             : [.. Tags.Where((t, i) => i < TagsShownCollapsed || t.IsChecked)];
@@ -256,12 +256,14 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         if (_installFlow is null) return;
 
         var installed = await _installFlow.InstallAsync(
-            [.. SelectedMods.Select(m => new PlannedModVersion { Version = m.SelectedVersion, IsUserRequested = true })],
+            [
+                .. SelectedMods.Select(m => new PlannedModVersion
+                    { Version = m.SelectedVersion, IsUserRequested = true })
+            ],
             InstallTarget);
         if (installed) ClearSelection();
     }
 
-    // The Instances page's "Add mods" opens Discover for one instance
     public void OnNavigatedTo(object? parameter)
     {
         if (parameter is not Instance instance) return;

@@ -162,7 +162,6 @@ public class DependencyService(ModListService modListService, CompatibilityServi
     private void ResolveDependency(Relationship dependency, string reason,
         DependencyResolutionState dependencyResolutionState)
     {
-        // Needs a user choice (any_of) or isn't a known mod
         if (dependency.AnyOf is not null || !compatibilityService.ModExists(dependency.Name))
         {
             dependencyResolutionState.Choosable.Add(dependency);

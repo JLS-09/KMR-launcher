@@ -13,10 +13,8 @@ public class GameSessionService
 
     private Process? _process;
 
-    // Raised on the UI thread when a game starts or exits
     public event Action? Changed;
 
-    // Throws when the game can't be started (e.g. wine isn't installed)
     public async Task LaunchAsync(Instance instance)
     {
         if (IsRunning) return;

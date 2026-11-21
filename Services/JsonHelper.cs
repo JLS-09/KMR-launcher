@@ -15,7 +15,7 @@ public static class JsonHelper
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
-    
+
     public static ModVersion? ParseVersion(string ckanFilePath, string json)
     {
         try

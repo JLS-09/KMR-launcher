@@ -21,30 +21,9 @@ public class Instance(string name, string rootPath, string version)
     public string LaunchArguments { get; set; } = "";
 
     public string PrefixPath { get; set; } = "";
-    public int PlayTime { get; set; } = 0;
+    public int PlayTime { get; set; }
     public DateTime LastPlayed { get; set; }
-    public bool IsPrimary { get; set; } = false;
-
-    [JsonIgnore] public string PlayTimeHumanized => PlayTime <= 0
-        ? "0s"
-        : new TimeSpan(0, 0, PlayTime)
-            .Humanize(precision: 2, maxUnit: TimeUnit.Hour)
-            .Replace(" hours", "h")
-            .Replace(" minutes", "m")
-            .Replace(" seconds", "s")
-            .Replace(" hour", "h")
-            .Replace(" minute", "m")
-            .Replace(" second", "s");
-
-    [JsonIgnore] public string LastPlayedHumanized => PlayTime <= 0
-        ? "Never"
-        : LastPlayed.Humanize()
-            .Replace(" year", " yr")
-            .Replace(" month", " mon")
-            .Replace(" day", " d")
-            .Replace(" hour", " hr")
-            .Replace(" minute", " min")
-            .Replace(" second", " sec");
+    public bool IsPrimary { get; set; }
 
     [JsonIgnore] public string CompatibleSummary => KspVersions.DescribeCompatible(this);
 

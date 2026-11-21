@@ -7,8 +7,6 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels.Discover;
 
-// How a mod fits the "Check against" instance: the status in its row and the versions the details panel marks.
-// Without an instance there is no status (Discover stays unfiltered, Phase 2 decision).
 public record ModFit(ModStatusKind? Kind, string Text, ModVersion? NewestFit, ModVersion? Installed)
 {
     public static readonly ModFit None = new(null, "", null, null);
@@ -18,7 +16,6 @@ public record ModFit(ModStatusKind? Kind, string Text, ModVersion? NewestFit, Mo
         if (instance is null || criteria is null) return None;
 
         var installed = instance.Mods.FirstOrDefault(v => v.Identifier == mod.Id);
-        // Versions are sorted newest first, so the first compatible one is the newest that fits
         var newestFit = mod.Versions.FirstOrDefault(v => CompatibilityService.IsCompatible(v, criteria));
 
         if (installed is not null)
@@ -42,8 +39,6 @@ public static class DiscoverFilter
     public const string PackageKind = "Packages";
     public const string MetapackageKind = "Metapackages";
 
-    // Search matches the name, identifier or an author. Tags: the mod has any of the ticked tags.
-    // Kinds: the newest version's kind is one of the ticked kinds. Nothing ticked = no filter.
     public static bool Matches(Mod mod, ModFit fit, string search, IReadOnlyCollection<string> tags,
         IReadOnlyCollection<string> kinds, bool onlyCompatible, bool hideInstalled)
     {
@@ -70,8 +65,6 @@ public static class DiscoverFilter
         _ => PackageKind
     };
 
-    // How many mods name each identifier in the depends of their newest version (also as an any_of option).
-    // Worked out once when the mod list is loaded.
     public static Dictionary<string, int> CountNeededBy(IEnumerable<Mod> mods)
     {
         Dictionary<string, int> counts = [];
@@ -83,7 +76,8 @@ public static class DiscoverFilter
             {
                 if (relationship.Name is not null) names.Add(relationship.Name);
                 foreach (var entry in relationship.AnyOf ?? [])
-                    if (entry.Name is not null) names.Add(entry.Name);
+                    if (entry.Name is not null)
+                        names.Add(entry.Name);
             }
 
             names.Remove(mod.Id);
@@ -94,16 +88,15 @@ public static class DiscoverFilter
         return counts;
     }
 
-    // "2.1M", "980K", "640"
     public static string FormatDownloads(long? count) => count switch
     {
         null => "–",
-        >= 1_000_000 => (count.Value / 1_000_000.0).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + "M",
+        >= 1_000_000 => (count.Value / 1_000_000.0).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) +
+                        "M",
         >= 1_000 => $"{Math.Round(count.Value / 1_000.0)}K",
         _ => count.Value.ToString()
     };
 
-    // "sarbian, Blowfish" or "R-T-B +6" (rows) / "by R-T-B and 6 others" (details)
     public static string ShortAuthors(IReadOnlyList<string> authors) => authors.Count switch
     {
         0 => "",

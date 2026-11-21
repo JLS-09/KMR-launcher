@@ -106,7 +106,6 @@ public class GitHelper(ModListService modList)
         Commands.Pull(repo, signature, options);
     }
 
-    // CKAN-meta's download_counts.json: identifier → downloads. Empty when it's missing or unreadable.
     public static Dictionary<string, long> ReadDownloadCounts(string gitCacheFolder)
     {
         try

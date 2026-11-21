@@ -30,7 +30,6 @@ public partial class InstallProgressViewModel : ViewModelBase
 
     [ObservableProperty] private double _overallProgress;
     [ObservableProperty] private string _overallText = "";
-    [ObservableProperty] private string _statusText = "STARTING";
     [ObservableProperty] private string _percentText = "0%";
     [ObservableProperty] private bool _isRunning;
     [ObservableProperty] private bool _isFinished;
@@ -57,8 +56,6 @@ public partial class InstallProgressViewModel : ViewModelBase
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(CancelCommand))]
     private bool _canCancel;
 
-    public event Action? CloseRequested;
-
     public InstallProgressViewModel(InstallService installService, InstallRun run, int maxParallelDownloads)
     {
         _installService = installService;
@@ -79,7 +76,6 @@ public partial class InstallProgressViewModel : ViewModelBase
 
         IsRunning = true;
         CanCancel = true;
-        StatusText = Rows.Count == 0 ? "REMOVING" : "INSTALLING";
         _clock.Start();
         var timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background,
             (_, _) => Refresh(_clock.Elapsed));
@@ -90,11 +86,9 @@ public partial class InstallProgressViewModel : ViewModelBase
         {
             await _installService.RunAsync(_run, _maxParallelDownloads, _cancel.Token);
             succeeded = true;
-            StatusText = "DONE";
         }
         catch (OperationCanceledException e)
         {
-            StatusText = "CANCELLED";
             WasCancelled = true;
             ShowError(e.Message.StartsWith("The install was cancelled")
                 ? e.Message + " Nothing was changed."
@@ -102,12 +96,10 @@ public partial class InstallProgressViewModel : ViewModelBase
         }
         catch (ModInstallException e)
         {
-            StatusText = "FAILED";
             ShowError(e.Message);
         }
         catch (Exception e)
         {
-            StatusText = "FAILED";
             ShowError($"Unexpected error: {e.Message}");
         }
         finally
@@ -127,12 +119,8 @@ public partial class InstallProgressViewModel : ViewModelBase
     private void Cancel()
     {
         CanCancel = false;
-        StatusText = "CANCELLING";
         _cancel.Cancel();
     }
-
-    [RelayCommand]
-    private void Close() => CloseRequested?.Invoke();
 
     private void ShowError(string message)
     {

@@ -15,6 +15,5 @@ public class ModListService
         }
     }
 
-    // Raised when a new mod list is set; can come from a background thread (the fetch runs in Task.Run)
     public event Action? ModsChanged;
 }

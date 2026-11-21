@@ -6,7 +6,6 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels.Instances;
 
-// One instance in the list on the left of the Instances page
 public class InstanceListItemViewModel(Instance instance)
 {
     public Instance Instance { get; } = instance;
@@ -17,7 +16,6 @@ public class InstanceListItemViewModel(Instance instance)
     public string LastPlayedText => InstanceTexts.LastPlayed(Instance);
 }
 
-// One installed mod on the Mods tab
 public partial class InstalledModRowViewModel : ObservableObject
 {
     public ModVersion Version { get; }
@@ -29,9 +27,11 @@ public partial class InstalledModRowViewModel : ObservableObject
     public ModVersion? Replacement { get; }
     public bool HasReplacement => Replacement is not null;
     public bool HasUpdateOrReplacement => HasUpdate || HasReplacement;
+
     public string ReplacementTip => Replacement is null
         ? ""
         : $"Replaced by {Replacement.Identifier} {Replacement.Version}. Replacing installs it and removes {Version.Identifier}.";
+
     public string ReplaceHeader => Replacement is null ? "" : $"Replace with {Replacement.Identifier}";
     public string NextText { get; }
     public bool IsNotListed { get; }
@@ -58,7 +58,6 @@ public partial class InstalledModRowViewModel : ObservableObject
         }
 
         NextText = NextVersion is null ? "" : InstalledMods.ShortNextVersion(version.Version, NextVersion.Version);
-        // Metapackages and DLC have no KSP versions worth flagging
         IsNotListed = version.Kind is null or "package" && !CompatibilityService.IsCompatible(version, criteria);
         NotListedText = $"Not listed for {instance.Version}";
     }
@@ -68,7 +67,6 @@ public partial class InstalledModRowViewModel : ObservableObject
 
 public static class InstanceTexts
 {
-    // "2 h ago", "Yesterday", "5 days ago", "3 Oct", "Never"
     public static string LastPlayed(Instance instance)
     {
         if (instance.PlayTime <= 0 || instance.LastPlayed == default) return "Never";
@@ -82,7 +80,6 @@ public static class InstanceTexts
         return instance.LastPlayed.ToString("d MMM", CultureInfo.InvariantCulture);
     }
 
-    // "Today, 19:02", "Yesterday, 21:40", "3 Oct, 19:02"
     public static string LastPlayedDetail(Instance instance)
     {
         if (instance.PlayTime <= 0 || instance.LastPlayed == default) return "Not played yet";
@@ -93,7 +90,6 @@ public static class InstanceTexts
         return $"{day}, {instance.LastPlayed:HH:mm}";
     }
 
-    // "41h 20m", "12m", "0m"
     public static string PlayTime(Instance instance)
     {
         var time = TimeSpan.FromSeconds(Math.Max(0, instance.PlayTime));
@@ -101,14 +97,12 @@ public static class InstanceTexts
         return hours > 0 ? $"{hours}h {time.Minutes}m" : $"{time.Minutes}m";
     }
 
-    // "~/KMR/instances/rp1-express"
     public static string ShortPath(string path)
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         return !string.IsNullOrEmpty(home) && path.StartsWith(home) ? "~" + path[home.Length..] : path;
     }
 
-    // "Compatible: 1.12.x" (what the instance accepts besides its own version)
     public static string Compatible(Instance instance)
     {
         var summary = KspVersions.DescribeCompatible(instance);

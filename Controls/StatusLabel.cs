@@ -13,8 +13,6 @@ public enum ModStatusKind
     Error
 }
 
-// Icon + short text in the status colour: "Fits", "Installed", "Update", "Not 1.12.5".
-// The look per kind is in Styles/Controls.axaml (:fits, :installed, :update, :warning, :error).
 public class StatusLabel : TemplatedControl
 {
     public static readonly StyledProperty<ModStatusKind> KindProperty =

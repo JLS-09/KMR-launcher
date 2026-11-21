@@ -10,7 +10,6 @@ using LibGit2Sharp;
 
 namespace KMRLauncherMvvm.ViewModels;
 
-// The status bar at the bottom of the main window (Phase 9 task 3)
 public partial class StatusBarViewModel : ObservableObject
 {
     private readonly ModListService? _modListService;
@@ -19,7 +18,6 @@ public partial class StatusBarViewModel : ObservableObject
     [ObservableProperty] private string _versionsText = "mod list not loaded";
     [ObservableProperty] private string _cacheText = "Cache –";
 
-    // Placeholder until the startup work saves the sync time (Phase 6 task 1)
     [ObservableProperty] private string _syncText = "synced –";
     [ObservableProperty] private string _syncHint = "Not built yet: the time of the last sync is saved from Phase 6 on";
 
@@ -51,7 +49,6 @@ public partial class StatusBarViewModel : ObservableObject
         VersionsText = mods is null ? "mod list not loaded" : $"{mods.Sum(m => m.Versions.Count):N0} versions";
     }
 
-    // "master @ 7d01e4b"
     private static string? ReadRepo()
     {
         try
