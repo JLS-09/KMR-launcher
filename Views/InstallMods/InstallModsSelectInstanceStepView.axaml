@@ -4,92 +4,128 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
              xmlns:models="clr-namespace:KMRLauncherMvvm.Models"
+             xmlns:controls="clr-namespace:KMRLauncherMvvm.Controls"
              x:DataType="vm:InstallModsSelectInstanceStepViewModel"
-             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
-             Background="#1F1F20"
-             Foreground="{DynamicResource PrimaryText}"
+             mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="600"
              x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsSelectInstanceStepView">
 
-    <UserControl.Styles>
-        <Style Selector="ComboBox">
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="CornerRadius" Value="0" />
-        </Style>
+    <!-- Step 1 (mockup Wiz1Instance): instance cards with a fit hint, then the changes. Styles come from
+         InstallDialogView. -->
+    <StackPanel Spacing="18">
+        <Grid ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="10">
+            <TextBlock Classes="label" Text="INSTALL INTO" />
+            <TextBlock Grid.Column="1" Classes="count" Text="{Binding InstancesCountText}" />
+            <!-- Placeholder: creating an instance from here comes with Phase 7 task 1 -->
+            <Border Grid.Column="3" Classes="soon" ToolTip.Tip="Creating an instance from here comes in Phase 7">
+                <Button Classes="ghost small">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="14" VerticalAlignment="Center" />
+                        <TextBlock Text="New instance" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Border>
+        </Grid>
 
-        <Style Selector="ComboBox:pointerover /template/ Border">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryRed}" />
-            <Setter Property="Background" Value="Black" />
-        </Style>
+        <ItemsControl ItemsSource="{Binding Cards}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="2" ColumnSpacing="10" RowSpacing="10" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:InstanceCardViewModel">
+                    <RadioButton Classes="dot card" GroupName="installTarget" IsChecked="{Binding IsSelected}">
+                        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                           Text="{Binding Name}" />
+                                <TextBlock Classes="mono" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                           Text="{Binding KspText}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="12" VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource StatusFits}" IsVisible="{Binding Fits}" />
+                                <controls:StrokeIcon Data="{StaticResource IconPackage}" Size="12" VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource TextSecondary}"
+                                                     IsVisible="{Binding IsInstalled}" />
+                                <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="12" VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource StatusWarning}"
+                                                     IsVisible="{Binding IsWarning}" />
+                                <Panel VerticalAlignment="Center">
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource StatusFits}"
+                                               Text="{Binding FitText}" IsVisible="{Binding Fits}" />
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondary}"
+                                               Text="{Binding FitText}" IsVisible="{Binding IsInstalled}" />
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource StatusWarning}"
+                                               Text="{Binding FitText}" IsVisible="{Binding IsWarning}" />
+                                </Panel>
+                            </StackPanel>
+                        </Grid>
+                    </RadioButton>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
-        <Style Selector="ComboBox:focus /template/ Border">
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="CornerRadius" Value="0" />
-            <Setter Property="Background" Value="Black" />
-        </Style>
+        <!-- No instances yet -->
+        <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"
+                   IsVisible="{Binding HasNoInstances}"
+                   Text="There are no instances yet. Make one on the Instances page first." />
 
-        <Style Selector="ComboBox:pressed /template/ Border">
-            <Setter Property="Background" Value="Black" />
-        </Style>
-    </UserControl.Styles>
-
-    <Grid Margin="32 0 32 0" RowDefinitions="Auto Auto *" RowSpacing="32">
-        <!-- Row 0 was the progress bar; it lives in InstallModsWindow now -->
-        <StackPanel Grid.Row="1" Spacing="8">
-            <TextBlock Text="TARGET INSTANCE" LetterSpacing="1" Foreground="{DynamicResource SecondaryText}"
-                       FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-            <ComboBox Background="Black" HorizontalAlignment="Stretch" Height="48"
-                      ItemsSource="{Binding Instances}"
-                      SelectedItem="{Binding InstallModsData.SelectedInstance}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name}" />
+        <StackPanel IsVisible="{Binding HasChanges}">
+            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 0 0 6">
+                <TextBlock Classes="label" Text="CHANGES" />
+                <TextBlock Classes="count" Text="{Binding Changes.Count}" />
+            </StackPanel>
+            <ItemsControl ItemsSource="{Binding Changes}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ChangeRow">
+                        <Border Classes="row" Padding="4 9">
+                            <Grid ColumnDefinitions="62, *, Auto" ColumnSpacing="12">
+                                <Border Classes="action" HorizontalAlignment="Left"
+                                        Classes.new="{Binding IsNew}" Classes.update="{Binding IsUpdate}"
+                                        Classes.remove="{Binding IsRemove}">
+                                    <TextBlock Text="{Binding KindText}" />
+                                </Border>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Classes="rowName" Text="{Binding Name}" />
+                                    <TextBlock Classes="rowHint" Text="{Binding Reason}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Classes="version" Text="{Binding ChangeText}" />
+                            </Grid>
+                        </Border>
                     </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <!-- Problems the resolver couldn't solve; they block Next. Bounded height, so the ScrollViewer is fine. -->
-            <Border IsVisible="{Binding HasProblems}" Margin="0 8 0 0" Padding="12 8"
-                    Background="{DynamicResource SideBarBackground}"
-                    BorderBrush="{DynamicResource PrimaryRed}" BorderThickness="2 0 0 0">
-                <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding InstallModsData.Problems}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="models:ResolutionProblem">
-                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Margin="0 2"
-                                           Foreground="{DynamicResource PrimaryRed}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Border Classes="row" Padding="4 10"
+                    IsVisible="{Binding ChoicesHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <controls:StrokeIcon Data="{StaticResource IconClock}" Size="14" VerticalAlignment="Center"
+                                         Foreground="{DynamicResource StatusWarning}" />
+                    <TextBlock FontSize="12" Foreground="{DynamicResource StatusWarning}" TextWrapping="Wrap"
+                               Text="{Binding ChoicesHint}" />
+                </StackPanel>
             </Border>
         </StackPanel>
-        <Grid Grid.Row="2" RowDefinitions="Auto *" RowSpacing="8">
-            <Grid Grid.Row="0" ColumnDefinitions="50 *" ColumnSpacing="24">
-                <TextBlock Grid.Column="0" Grid.Row="0" Text="CHANGE" LetterSpacing="1"
-                           Foreground="{DynamicResource SecondaryText}"
-                           FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                <TextBlock Grid.Column="1" Text="SELECTED MODS" LetterSpacing="1"
-                           Foreground="{DynamicResource SecondaryText}"
-                           FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-            </Grid>
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                <ItemsRepeater ItemsSource="{Binding InstallModsData.FinalModList}">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Spacing="8" Orientation="Vertical" />
-                    </ItemsRepeater.Layout>
-                    <ItemsRepeater.ItemTemplate>
-                        <DataTemplate>
-                            <Grid ColumnDefinitions="50 *" ColumnSpacing="24">
-                                <TextBlock Grid.Column="0" Text="Install" />
-                                <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock Text="{Binding Version.Id}" />
-                                    <TextBlock Text="{Binding ReasonForAction}" FontSize="12"
-                                               Foreground="{DynamicResource SecondaryText}" />
-                                </StackPanel>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsRepeater.ItemTemplate>
-                </ItemsRepeater>
-            </ScrollViewer>
-        </Grid>
-    </Grid>
+
+        <!-- Problems (block Next) -->
+        <Border Padding="14 10" CornerRadius="9" Background="{DynamicResource StatusErrorSoft}"
+                BorderBrush="{DynamicResource StatusErrorLine}" BorderThickness="1" IsVisible="{Binding HasProblems}">
+            <ItemsControl ItemsSource="{Binding Problems}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:ResolutionProblem">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="14" VerticalAlignment="Top"
+                                                 Margin="0 2 0 0" Foreground="{DynamicResource StatusError}" />
+                            <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" Text="{Binding Message}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+    </StackPanel>
 </UserControl>

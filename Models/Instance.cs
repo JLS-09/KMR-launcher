@@ -19,7 +19,6 @@ public class Instance(string name, string rootPath, string version)
     public List<string> CompatibleKspVersions { get; set; } = [];
     public string LaunchArguments { get; set; } = "";
 
-    // The Wine prefix folder. Empty only for instances saved before Phase 5 task 6; SettingsService fills it in.
     public string PrefixPath { get; set; } = "";
     public int PlayTime { get; set; } = 0;
     public DateTime LastPlayed { get; set; }
@@ -48,8 +47,6 @@ public class Instance(string name, string rootPath, string version)
 
     [JsonIgnore] public string CompatibleSummary => KspVersions.DescribeCompatible(this);
 
-    // Deletes the instance folder and its prefix (only when the launcher made the prefix and no other
-    // instance uses it), then removes the instance from the settings.
     public async Task DeleteInstance(AppSettings settings)
     {
         var prefix = PrefixPath;

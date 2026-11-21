@@ -6,26 +6,19 @@ using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.Services;
 
-// What a removal also takes with it (Phase 5 task 2)
 public record RemovalPlan(IReadOnlyList<ModVersion> Selected, IReadOnlyList<ModVersion> Dependents,
     IReadOnlyList<ModVersion> Orphans)
 {
     public IEnumerable<ModVersion> All => Selected.Concat(Dependents).Concat(Orphans);
 }
 
-// Logic for an instance's installed mods: reasons, removal, sizes. Only depends count, like CKAN's
-// auto-removal; version limits are ignored (a mod that is installed satisfies a name).
 public static class InstalledMods
 {
-    // Picked by the user (or ticked as a recommendation). A mod without a record (installed before records
-    // existed) counts as picked, so it is never removed as an unused dependency.
     public static bool IsUserRequested(Instance instance, string identifier) =>
         !instance.ModRecords.TryGetValue(identifier, out var record) || record.IsUserRequested;
 
-    // The names a mod can be depended on by: its identifier and what it provides
     public static IEnumerable<string> NamesOf(ModVersion mod) => [mod.Identifier, .. mod.Provides ?? []];
 
-    // All names a relationship accepts (the name, or every any_of option)
     public static IEnumerable<string> NamesIn(Relationship relationship) =>
         relationship.AnyOf?.Select(e => e.Name).OfType<string>() ??
         (relationship.Name is null ? [] : [relationship.Name]);
@@ -36,7 +29,6 @@ public static class InstalledMods
         return mods.Any(m => NamesOf(m).Any(names.Contains));
     }
 
-    // Installed mods whose depends name this mod (by identifier or a provided name)
     public static List<ModVersion> Dependents(ModVersion mod, IEnumerable<ModVersion> installed)
     {
         var names = NamesOf(mod).ToHashSet();
@@ -47,9 +39,6 @@ public static class InstalledMods
         ];
     }
 
-    // Removing the selection also removes (1) installed mods that depend on it and have nothing else left to
-    // satisfy that dependency, and (2) dependencies nobody picked that no remaining mod needs. Both repeat until
-    // nothing changes.
     public static RemovalPlan PlanRemoval(Instance instance, IReadOnlyCollection<string> selected)
     {
         var remaining = instance.Mods.Where(m => !selected.Contains(m.Identifier)).ToList();
@@ -63,8 +52,6 @@ public static class InstalledMods
 
             foreach (var mod in remaining.ToList())
             {
-                // Only depends the removal breaks count: one that wasn't satisfied before (a missing mod, a DLC)
-                // isn't a reason to remove anything
                 var others = remaining.Where(m => m != mod).ToList();
                 if ((mod.Depends ?? []).All(r => IsSatisfied(r, others) ||
                                                  !IsSatisfied(r, instance.Mods.Where(m => m != mod))))
@@ -87,7 +74,6 @@ public static class InstalledMods
         return new RemovalPlan([.. instance.Mods.Where(m => selected.Contains(m.Identifier))], dependents, orphans);
     }
 
-    // The line in the selection bar: what else goes when the selection is removed
     public static string DescribeRemoval(RemovalPlan plan)
     {
         List<string> parts = [];
@@ -101,7 +87,6 @@ public static class InstalledMods
             : $"Removing also removes {string.Join("; and ", parts)}.";
     }
 
-    // "Picked by you", "Recommended by X", "Dependency of X", "Dependency of X and 4 more", "Dependency of 31 mods"
     public static string ReasonText(Instance instance, ModVersion mod)
     {
         instance.ModRecords.TryGetValue(mod.Identifier, out var record);
@@ -117,17 +102,16 @@ public static class InstalledMods
         };
     }
 
-    // "412 MB", "1.1 MB", "0.2 MB", "6.8 GB"
     public static string FormatSize(long bytes)
     {
         var mb = bytes / 1024.0 / 1024.0;
+        if (bytes > 0 && mb < 0.1) mb = 0.1; // small mods show as 0.1 MB, not 0.0
         if (mb >= 1024) return (mb / 1024).ToString("0.0", CultureInfo.InvariantCulture) + " GB";
         return mb >= 10
             ? Math.Round(mb).ToString(CultureInfo.InvariantCulture) + " MB"
             : mb.ToString("0.0", CultureInfo.InvariantCulture) + " MB";
     }
 
-    // The update badge: long versions only show the part that changes ("release-1.12.1-200" → "-201")
     public static string ShortNextVersion(string installed, string next)
     {
         if (next.Length <= 12) return next;

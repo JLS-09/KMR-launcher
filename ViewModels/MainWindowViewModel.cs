@@ -61,19 +61,20 @@ public partial class MainWindowViewModel : ViewModelBase
     private Instance? _primaryInstance;
     public bool HasPrimaryInstance => PrimaryInstance is not null;
 
-    // While a game started from the sidebar runs. The full Running card (Log, Stop, also for games started
-    // on the Instances page) is Phase 5 task 5.
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchPrimaryCommand))]
     private bool _isRunning;
     [ObservableProperty] private string _runningInstanceName = "";
     [ObservableProperty] private string _runningTime = "00:00:00";
     [ObservableProperty] private string? _launchError;
 
+    [ObservableProperty] private object? _dialog;
+
     public StatusBarViewModel StatusBar { get; }
 
     public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar, IModApiService api,
-        GameSessionService session, NavigationService navigation)
+        GameSessionService session, NavigationService navigation, DialogService dialogs)
     {
+        dialogs.CurrentChanged += dialog => Dialog = dialog;
         _pageFactory = pageFactory;
         _api = api;
         _session = session;
@@ -142,12 +143,10 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            // e.g. wine isn't installed at /usr/bin/wine
             LaunchError = $"Couldn't launch {instance.Name}: {e.Message}";
         }
     }
 
-    // A game started here or on the Instances page
     private void OnSessionChanged()
     {
         IsRunning = _session?.IsRunning ?? false;
@@ -166,7 +165,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool CanFetch() => !IsFetching;
 
-    // Discover fetches itself so its list updates; on other pages the mod list is fetched in the background
     [RelayCommand(CanExecute = nameof(CanFetch))]
     private async Task FetchCkanMeta()
     {
@@ -180,7 +178,6 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            // e.g. no internet; offline handling is Phase 7 task 4
             StatusBar.ShowSyncFailed(e.Message);
         }
         finally

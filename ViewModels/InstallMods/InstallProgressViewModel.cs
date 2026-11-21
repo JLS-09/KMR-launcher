@@ -37,6 +37,23 @@ public partial class InstallProgressViewModel : ViewModelBase
     [ObservableProperty] private bool _hasError;
     [ObservableProperty] private string _errorMessage = "";
 
+    [ObservableProperty] private bool _wasCancelled;
+
+    [ObservableProperty] private string _modsText = "";
+    [ObservableProperty] private string _bytesText = "";
+    [ObservableProperty] private string _speedText = "";
+    [ObservableProperty] private string _parallelText = "";
+
+    public string TitleText => _run is null
+        ? ""
+        : Rows.Count == 0
+            ? $"Removing from {_run.Instance.Name}"
+            : $"Installing into {_run.Instance.Name}";
+
+    public InstallRun? Run => _run;
+    public bool HasRows => Rows.Count > 0;
+    public TimeSpan Elapsed => _clock.Elapsed;
+
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(CancelCommand))]
     private bool _canCancel;
 
@@ -47,6 +64,7 @@ public partial class InstallProgressViewModel : ViewModelBase
         _installService = installService;
         _run = run;
         _maxParallelDownloads = maxParallelDownloads;
+        ParallelText = maxParallelDownloads == 1 ? "1 download at a time" : $"{maxParallelDownloads} downloads at once";
         foreach (var job in run.Jobs) Rows.Add(new ModProgressRowViewModel(job));
         Refresh(TimeSpan.Zero);
     }
@@ -77,6 +95,7 @@ public partial class InstallProgressViewModel : ViewModelBase
         catch (OperationCanceledException e)
         {
             StatusText = "CANCELLED";
+            WasCancelled = true;
             ShowError(e.Message.StartsWith("The install was cancelled")
                 ? e.Message + " Nothing was changed."
                 : e.Message);
@@ -84,7 +103,7 @@ public partial class InstallProgressViewModel : ViewModelBase
         catch (ModInstallException e)
         {
             StatusText = "FAILED";
-            ShowError(e.Message + "\n\nNothing was changed in the instance.");
+            ShowError(e.Message);
         }
         catch (Exception e)
         {
@@ -127,11 +146,11 @@ public partial class InstallProgressViewModel : ViewModelBase
         if (Rows.Count == 0)
         {
             OverallProgress = IsFinished && !HasError ? 1 : 0;
-            // A removal (from the Instances page) has no install jobs
             var removing = _run?.ToRemove.Count ?? 0;
             OverallText = removing == 0 ? "No mods to install"
                 : IsFinished && !HasError ? $"Removed {removing} mod{(removing == 1 ? "" : "s")}"
                 : $"Removing {removing} mod{(removing == 1 ? "" : "s")}";
+            ModsText = OverallText;
             PercentText = $"{OverallProgress:0%}";
             return;
         }
@@ -140,6 +159,7 @@ public partial class InstallProgressViewModel : ViewModelBase
             ? DownloadShare * r.DownloadFraction + (1 - DownloadShare) * r.InstallFraction
             : r.IsDone ? 1 : 0);
         PercentText = $"{Math.Floor(OverallProgress * 100)}%";
+        ModsText = $"{Rows.Count(r => r.IsDone)} / {Rows.Count} mods";
 
         var downloads = Rows.Where(r => r.Job.NeedsDownload && !r.Job.IsCached).Select(r => r.Job).ToList();
         var bytesDone = downloads.Sum(j => Interlocked.Read(ref j.BytesDone));
@@ -151,6 +171,9 @@ public partial class InstallProgressViewModel : ViewModelBase
         var speed = Speed(elapsed, bytesDone);
         if (IsRunning && speed > 0) parts.Add($"{((long)speed).Bytes().Humanize("0.#")}/s");
         OverallText = string.Join(" · ", parts);
+
+        BytesText = bytesTotal > 0 ? ModProgressRowViewModel.BytePair(bytesDone, bytesTotal) : "";
+        SpeedText = IsRunning && speed > 0 ? InstalledMods.FormatSize((long)speed) + "/s" : "";
     }
 
     private double Speed(TimeSpan now, long bytes)

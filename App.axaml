@@ -49,6 +49,15 @@
             <SolidColorBrush x:Key="StatusErrorLine">#5A2A2C</SolidColorBrush>
             <SolidColorBrush x:Key="FitsRow">#16211A</SolidColorBrush>
             <SolidColorBrush x:Key="FitsRowLine">#1F3A26</SolidColorBrush>
+            <!-- Dialogs (install flow): scrim rgba(5,5,6,.74), dialog, side panel, footer; error box; "no problems" box -->
+            <SolidColorBrush x:Key="Scrim">#BD050506</SolidColorBrush>
+            <SolidColorBrush x:Key="Dialog">#141416</SolidColorBrush>
+            <SolidColorBrush x:Key="DialogAside">#111113</SolidColorBrush>
+            <SolidColorBrush x:Key="DialogFooter">#121214</SolidColorBrush>
+            <SolidColorBrush x:Key="ErrorBox">#1A0F10</SolidColorBrush>
+            <SolidColorBrush x:Key="ErrorBoxLine">#4A2224</SolidColorBrush>
+            <SolidColorBrush x:Key="ErrorBoxText">#FFD9D9</SolidColorBrush>
+            <SolidColorBrush x:Key="OkBox">#122016</SolidColorBrush>
 
             <!-- Accent: these defaults are for the designer; ThemeService.ApplyAccent replaces them at startup -->
             <SolidColorBrush x:Key="Accent">#DF0105</SolidColorBrush>

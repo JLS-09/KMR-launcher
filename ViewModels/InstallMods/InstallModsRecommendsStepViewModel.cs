@@ -180,17 +180,20 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         row.SelectedByDefault |= selectedByDefault;
     }
 
+    private int CountMissingDepends(ModVersion version) =>
+        (version.Depends ?? []).Count(d => !IsSatisfied(d));
+
     private bool IsPlannedOrInstalled(string identifier) =>
         InstallModsData.FinalModList.Any(m => m.Version.Identifier == identifier) ||
         InstallModsData.SelectedInstance?.Mods.Any(m => m.Identifier == identifier) == true;
 
-    private static List<VersionListItemViewModel> BuildRows(Dictionary<string, RowData> rows, string sourcesPrefix,
+    private List<VersionListItemViewModel> BuildRows(Dictionary<string, RowData> rows, string sourcesPrefix,
         Dictionary<string, RowState> previous) =>
         rows.Select(pair =>
         {
             var state = previous.GetValueOrDefault(pair.Key);
             return new VersionListItemViewModel(pair.Key, pair.Value.Versions, pair.Value.Sources, sourcesPrefix,
-                state?.IsSelected ?? pair.Value.SelectedByDefault, state?.VersionId);
+                state?.IsSelected ?? pair.Value.SelectedByDefault, state?.VersionId, CountMissingDepends);
         }).ToList();
 
     private static Dictionary<string, RowState> RowStates(List<VersionListItemViewModel> items) =>
@@ -268,6 +271,6 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             OptionalReason = i.SourcesText
         });
 
-    public override string Title => "Choose Recommendations";
+    public override string Title => "Extras";
     public override bool CanGoNext => true;
 }

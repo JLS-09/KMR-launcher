@@ -98,8 +98,10 @@ public class ModDownloaderTests : IDisposable
             downloader.DownloadAsync(mod, null, CancellationToken.None));
 
         Assert.Contains("Foo 1.0", error.Message);
-        Assert.Contains("missing.test: server answered 404 NotFound", error.Message);
-        Assert.Contains("wrong.test: the downloaded file doesn't match its download_hash", error.Message);
+        // One line per mirror, hosts lined up
+        Assert.StartsWith("Foo 1.0 could not be downloaded.\n", error.Message);
+        Assert.Contains("  missing.test  server answered 404 NotFound", error.Message);
+        Assert.Contains("  wrong.test    the downloaded file doesn't match its download_hash", error.Message);
         Assert.Null(downloader.FindCached(mod));
         Assert.Empty(Directory.GetFiles(_cache));
     }

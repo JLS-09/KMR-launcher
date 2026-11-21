@@ -34,8 +34,7 @@ public enum ModsFilter
     Issues
 }
 
-// The Instances page (Phase 9 task 6) with the Mods tab (Phase 5 tasks 1–3)
-public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
+public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, INavigationTarget
 {
     private readonly ZipService? _zipService;
     private readonly ModListService? _modListService;
@@ -45,14 +44,12 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
 
     private List<InstalledModRowViewModel> _allRows = [];
 
-    // Instance list
     [ObservableProperty] private IReadOnlyList<InstanceListItemViewModel> _instances = [];
     [ObservableProperty] private InstanceListItemViewModel? _selectedItem;
     [ObservableProperty] private string _instancesCountText = "0 INSTANCES";
     [ObservableProperty] private bool _sortByName;
     [ObservableProperty] private bool _hasInstances;
 
-    // Details of the selected instance
     [ObservableProperty] private Instance? _selected;
     [ObservableProperty] private string _kspText = "";
     [ObservableProperty] private string _compatibleText = "";
@@ -62,8 +59,10 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
     [ObservableProperty] private string _playTime = "";
     [ObservableProperty] private string _lastPlayed = "";
     [ObservableProperty] private string _lastPlayedDetail = "";
+
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(DeleteText))]
     private string _installSize = "–";
+
     [ObservableProperty] private string _gameDataSize = "";
     [ObservableProperty] private string _selectedName = "";
     [ObservableProperty] private bool _selectedIsPrimary;
@@ -74,13 +73,11 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand), nameof(DeleteInstanceCommand))]
     private bool _isGameRunning;
 
-    // Settings tab: one view model per instance (by folder), kept while it has unsaved changes
     private readonly Dictionary<string, InstanceSettingsViewModel> _settingsByPath = [];
     [ObservableProperty] private InstanceSettingsViewModel? _instanceSettings;
 
     [ObservableProperty] private string? _actionError;
 
-    // Mods tab
     [ObservableProperty] private ObservableCollection<InstalledModRowViewModel> _rows = [];
     [ObservableProperty] private string _modFilterText = "";
     [ObservableProperty] private ModsFilter _filter = ModsFilter.All;
@@ -92,11 +89,11 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
     [ObservableProperty] private bool _hasUpdates;
     [ObservableProperty] private string _shownText = "";
 
-    // Selection bar
     [ObservableProperty] private int _selectedCount;
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowSelectionBar))]
     private bool _hasSelection;
+
     [ObservableProperty] private string _removalNote = "";
     [ObservableProperty] private bool _selectionHasUpdates;
 
@@ -121,7 +118,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         PageName = ApplicationPageNames.Instances;
     }
 
-    // The top bar's search box filters the installed mods, like the "Filter installed mods" box
     public void ApplySearch(string text) => ModFilterText = text;
 
     private void OnSettingsChanged(object? sender, AppSettings settings) => LoadInstances(settings);
@@ -145,10 +141,8 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
                        ?? Instances.FirstOrDefault(i => i.IsPrimary)
                        ?? Instances.FirstOrDefault();
 
-        // Saving changes the same Instance object, so OnSelectedChanged doesn't run: refresh the details here
         if (Selected is not null && ReferenceEquals(Selected, previous)) ShowDetails(Selected);
 
-        // Forget the settings of deleted instances
         foreach (var path in _settingsByPath.Keys.Where(p => settings.Instances.All(i => i.RootPath != p)).ToList())
             _settingsByPath.Remove(path);
     }
@@ -158,9 +152,17 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
     [RelayCommand]
     private void SortInstances(string by) => SortByName = by == "name";
 
+    public void OnNavigatedTo(object? parameter)
+    {
+        if (parameter is not Instance instance) return;
+
+        var item = Instances.FirstOrDefault(i => i.Instance.RootPath == instance.RootPath);
+        if (item is not null) SelectedItem = item;
+        Tab = InstanceTab.Mods;
+    }
+
     partial void OnSelectedItemChanged(InstanceListItemViewModel? value)
     {
-        // Selecting nothing (the list is rebuilt) keeps the details until the new selection arrives
         if (value is null && Instances.Count > 0) return;
         Selected = value?.Instance;
     }
@@ -174,7 +176,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         _ = LoadSizes(value);
     }
 
-    // The header, stats, mods and settings of the selected instance (sizes are worked out separately)
     private void ShowDetails(Instance value)
     {
         SelectedName = value.Name;
@@ -205,7 +206,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         if (e.PropertyName == nameof(InstanceSettingsViewModel.HasChanges)) OnPropertyChanged(nameof(ShowSettingsBar));
     }
 
-    // The bottom bars: the selection bar on the Mods tab, the unsaved-changes bar on the Settings tab
     public bool ShowSelectionBar => Tab == InstanceTab.Mods && HasSelection;
     public bool ShowSettingsBar => Tab == InstanceTab.Settings && InstanceSettings is { HasChanges: true };
 
@@ -234,8 +234,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
                 : "–";
     }
 
-    // Task 1: the installed mods with their reason, update and KSP check. The check runs every time the
-    // list is built, so changing the compatible versions shows up right away.
     private void BuildRows()
     {
         if (Selected is not { } instance) return;
@@ -295,7 +293,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         ShownText = $"Showing {Rows.Count} of {_allRows.Count}";
     }
 
-    // Task 2: what else a removal takes with it
     private void OnRowSelectionChanged()
     {
         var selected = _allRows.Where(r => r.IsSelected).ToList();
@@ -328,7 +325,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         await _installFlow.RemoveAsync(instance, plan.All);
     }
 
-    // Task 3: newer compatible versions go through the wizard (resolver → conflicts → summary → install)
     [RelayCommand]
     private Task UpdateSelected() => Update([.. _allRows.Where(r => r.IsSelected && r.HasUpdate)]);
 
@@ -345,16 +341,13 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
         var requested = rows.Select(r => new PlannedModVersion
         {
             Version = r.NextVersion!,
-            // An update keeps how the mod got there: a dependency stays a dependency
             IsUserRequested = InstalledMods.IsUserRequested(instance, r.Version.Identifier),
             IsVersionPickedByUser = true,
             OptionalReason = instance.ModRecords.GetValueOrDefault(r.Version.Identifier)?.Reason
         }).ToList();
 
-        if (await _installFlow.InstallAsync(requested, instance)) ClearSelection();
+        if (await _installFlow.InstallAsync(requested, instance, InstallSource.Updates)) ClearSelection();
     }
-
-    // Header actions
 
     private bool CanLaunch() => !IsGameRunning;
 
@@ -392,7 +385,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage
     [RelayCommand]
     private void OpenSettings() => Tab = InstanceTab.Settings;
 
-    // "Removes the folder, its saves and its prefix (6.8 GB). Cached downloads stay."
     public string DeleteText
     {
         get

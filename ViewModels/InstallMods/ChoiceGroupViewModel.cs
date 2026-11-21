@@ -13,6 +13,11 @@ public partial class ChoiceGroupViewModel : ObservableObject
     public ObservableCollection<ChoiceOptionViewModel> Options { get; }
 
     public string Title { get; }
+
+    public bool IsVirtual { get; }
+
+    public string WantedText { get; }
+    public IReadOnlyList<string> Requirers { get; }
     public string RequiredByText { get; }
     public string? HelpText { get; }
     public bool HasHelpText { get; }
@@ -25,8 +30,9 @@ public partial class ChoiceGroupViewModel : ObservableObject
     [ObservableProperty] private PlannedModVersion? _selectedPlan;
 
     public ChoiceGroupViewModel(Relationship relationship, IEnumerable<ChoiceOptionViewModel> options,
-        IReadOnlyCollection<string> requiredBy)
+        IReadOnlyCollection<string> requiredBy, IReadOnlyList<string>? requirers = null)
     {
+        Requirers = requirers ?? [];
         Relationship = relationship;
         Options = new ObservableCollection<ChoiceOptionViewModel>(options);
 
@@ -37,8 +43,10 @@ public partial class ChoiceGroupViewModel : ObservableObject
             ? $"one of {string.Join(", ", anyOf.Select(a => a.Name))}"
             : $"a mod that provides {relationship.Name}";
 
-        Title = char.ToUpper(wanted[0]) + wanted[1..];
-        RequiredByText = requiredBy.Count > 0 ? $"Needed by {string.Join(", ", requiredBy)}" : "";
+        WantedText = wanted;
+        IsVirtual = relationship.AnyOf is not { Count: > 0 };
+        Title = IsVirtual ? relationship.Name ?? wanted : char.ToUpper(wanted[0]) + wanted[1..];
+        RequiredByText = requiredBy.Count > 0 ? $"Needed by {InstallChanges.JoinNames([.. requiredBy])}" : "";
 
         HelpText = relationship.ChoiceHelpText;
         HasHelpText = !string.IsNullOrWhiteSpace(HelpText);
@@ -49,10 +57,21 @@ public partial class ChoiceGroupViewModel : ObservableObject
             : "";
     }
 
-    partial void OnSelectedOptionChanged(ChoiceOptionViewModel? value) => UpdateSelectedPlan();
+    partial void OnSelectedOptionChanged(ChoiceOptionViewModel? value)
+    {
+        foreach (var option in Options) option.IsSelected = option == value;
+        UpdateSelectedPlan();
+    }
 
     private void OnOptionChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (e.PropertyName == nameof(ChoiceOptionViewModel.IsSelected) &&
+            sender is ChoiceOptionViewModel { IsSelected: true } picked)
+        {
+            SelectedOption = picked;
+            return;
+        }
+
         if (e.PropertyName != nameof(ChoiceOptionViewModel.SelectedVersion) ||
             sender is not ChoiceOptionViewModel option) return;
 

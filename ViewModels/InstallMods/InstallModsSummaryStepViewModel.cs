@@ -1,25 +1,30 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Humanizer;
 using KMRLauncherMvvm.Models;
+using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;
-
-public sealed record SummaryRow(string Identifier, string Version, string Details, string Size);
 
 public partial class InstallModsSummaryStepViewModel(InstallModsData installModsData)
     : InstallModsStepViewModel(installModsData)
 {
-    [ObservableProperty] private List<SummaryRow> _toInstall = [];
-    [ObservableProperty] private List<SummaryRow> _toRemove = [];
-    [ObservableProperty] private string _totalsText = "";
-    [ObservableProperty] private bool _hasRemovals;
+    [ObservableProperty] private IReadOnlyList<ChangeRow> _rows = [];
+    [ObservableProperty] private IReadOnlyList<ResolutionProblem> _problems = [];
+    [ObservableProperty] private string _newText = "0";
+    [ObservableProperty] private string _updatesText = "0";
+    [ObservableProperty] private string _removedText = "0";
+    [ObservableProperty] private string _toDownloadText = "0 MB";
+    [ObservableProperty] private string _okText = "";
+    [ObservableProperty] private string _rowsTitle = "TO INSTALL";
+    [ObservableProperty] private string _installText = "Install";
     [ObservableProperty] private bool _hasProblems;
     [ObservableProperty] private bool _hasNothingToDo;
     [ObservableProperty] private bool _canFinish;
 
-    public override string Title => "Summary";
+    public Func<ModVersion, bool> IsCached { get; set; } = _ => false;
+
+    public override string Title => "Review";
     public override bool CanGoNext => CanFinish;
 
     partial void OnCanFinishChanged(bool value) => OnPropertyChanged(nameof(CanGoNext));
@@ -28,50 +33,31 @@ public partial class InstallModsSummaryStepViewModel(InstallModsData installMods
 
     public override void OnEntering(bool forward) => Refresh();
 
-    private void Refresh()
+    public void Refresh()
     {
-        var install = InstallModsData.FinalModList.ToList();
-        var installed = InstallModsData.SelectedInstance?.Mods ?? [];
-        var installIdentifiers = install.Select(m => m.Version.Identifier).ToHashSet();
+        var instance = InstallModsData.SelectedInstance;
+        Rows = InstallChanges.Rows(InstallModsData, IsCached);
+        var counts = InstallChanges.Count(Rows);
 
-        ToInstall =
-        [
-            .. install
-                .OrderBy(m => m.Version.Identifier, System.StringComparer.OrdinalIgnoreCase)
-                .Select(m => new SummaryRow(m.Version.Identifier, m.Version.Version,
-                    InstallDetails(m, installed), FormatSize(m.Version.DownloadSize)))
-        ];
+        NewText = counts.New.ToString();
+        UpdatesText = counts.Updates.ToString();
+        RemovedText = counts.Removed.ToString();
+        ToDownloadText = InstalledMods.FormatSize(counts.ToDownloadBytes);
 
-        ToRemove =
-        [
-            .. InstallModsData.RequestedRemoveModVersions
-                .Where(m => !installIdentifiers.Contains(m.Version.Identifier))
-                .Select(m => new SummaryRow(m.Version.Identifier, m.Version.Version, "Removed from the instance", ""))
-        ];
+        var installs = counts.New + counts.Updates;
+        RowsTitle = installs > 0 ? "TO INSTALL" : "TO REMOVE";
+        InstallText = installs > 0
+            ? $"Install {InstallChanges.Plural(installs, "mod")}"
+            : $"Remove {InstallChanges.Plural(counts.Removed, "mod")}";
 
-        var sizes = install.Select(m => m.Version.DownloadSize).ToList();
-        var total = sizes.OfType<long>().Sum();
-        var unknown = sizes.Count(s => s is null);
+        Problems = [.. InstallModsData.Problems];
+        HasProblems = Problems.Count > 0;
+        OkText = instance is null
+            ? ""
+            : $"No problems. No conflicts with the {InstallChanges.Plural(instance.Mods.Count, "installed mod")}, " +
+              $"and everything fits KSP {instance.Version}.";
 
-        TotalsText = $"{Plural(install.Count, "mod")} to install, {FormatSize(total)} to download" +
-                     (unknown > 0 ? $" (size unknown for {Plural(unknown, "mod")})" : "") +
-                     (ToRemove.Count > 0 ? $", {Plural(ToRemove.Count, "mod")} to remove" : "");
-
-        HasRemovals = ToRemove.Count > 0;
-        HasProblems = InstallModsData.Problems.Count > 0;
-        HasNothingToDo = install.Count == 0 && ToRemove.Count == 0;
-        CanFinish = !HasProblems && !HasNothingToDo && InstallModsData.SelectedInstance is not null;
+        HasNothingToDo = Rows.Count == 0;
+        CanFinish = !HasProblems && !HasNothingToDo && instance is not null;
     }
-
-    private static string InstallDetails(PlannedModVersion mod, List<ModVersion> installed)
-    {
-        var replaced = installed.FirstOrDefault(i => i.Identifier == mod.Version.Identifier);
-        return replaced is null
-            ? mod.ReasonForAction
-            : $"{mod.ReasonForAction} · replaces {replaced.Version}";
-    }
-
-    private static string FormatSize(long? bytes) => bytes is { } b ? b.Bytes().Humanize("0.#") : "";
-
-    private static string Plural(int count, string word) => count == 1 ? $"1 {word}" : $"{count} {word}s";
 }

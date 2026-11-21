@@ -1,0 +1,580 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
+             xmlns:controls="clr-namespace:KMRLauncherMvvm.Controls"
+             mc:Ignorable="d" d:DesignWidth="1080" d:DesignHeight="860"
+             x:Class="KMRLauncherMvvm.Views.InstallMods.InstallDialogView"
+             x:DataType="vm:InstallDialogViewModel"
+             KeyboardNavigation.TabNavigation="Cycle"
+             Foreground="{DynamicResource TextPrimary}" FontSize="14">
+    <Design.DataContext>
+        <vm:InstallDialogViewModel />
+    </Design.DataContext>
+
+    <!-- The install flow as a dialog in the main window (Phase 9 task 8), from the mockups Wiz1Instance …
+         Wiz7Failed. The step views (InstallMods*StepView) sit in the body and use the styles below. -->
+    <UserControl.Styles>
+        <!-- Section label row: "INSTALL INTO  4 instances" -->
+        <Style Selector="TextBlock.count">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!-- Rows split by 1 px lines -->
+        <Style Selector="Border.row">
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="0 1 0 0" />
+        </Style>
+        <Style Selector="TextBlock.rowName">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="LineHeight" Value="20" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style Selector="TextBlock.rowHint">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="LineHeight" Value="17" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style Selector="TextBlock.version">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <!-- Stepper: 22 px accent disc for the current step, 20 px outlined circle for later steps, a soft accent
+             disc with a check for done steps; lines 1 px, accent after a done step -->
+        <Style Selector="Border.stepDot">
+            <Setter Property="Width" Value="20" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="CornerRadius" Value="11" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.stepDot.current">
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource Accent}" />
+        </Style>
+        <Style Selector="Border.stepDot.done">
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+        </Style>
+        <Style Selector="Border.stepDot TextBlock">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.stepDot.current TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="TextBlock.stepLabel">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.stepLabel.current">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="TextBlock.stepLabel.done">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="Border.stepLine">
+            <Setter Property="Height" Value="1" />
+            <Setter Property="MinWidth" Value="16" />
+            <Setter Property="Margin" Value="10 0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource LineStrong}" />
+        </Style>
+        <Style Selector="Border.stepLine.reached">
+            <Setter Property="Background" Value="{DynamicResource Accent}" />
+        </Style>
+        <!-- Side panel rows: "New  3" -->
+        <Style Selector="Grid.panelRow TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="Grid.panelRow TextBlock.value">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <!-- Stat tiles: strip of cells split by lines (Review and Done) -->
+        <Style Selector="Border.tile">
+            <Setter Property="Padding" Value="16 12" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="1 0 0 0" />
+        </Style>
+        <Style Selector="TextBlock.tileValue">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <!-- Progress bars: 6 px rows, coloured by state -->
+        <Style Selector="ProgressBar.row">
+            <Setter Property="Height" Value="6" />
+            <Setter Property="MinHeight" Value="6" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Minimum" Value="0" />
+            <Setter Property="Maximum" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource Off}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="ProgressBar.row /template/ Border#PART_Indicator">
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+        <Style Selector="ProgressBar.done">
+            <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
+        </Style>
+        <Style Selector="ProgressBar.downloading">
+            <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
+        </Style>
+        <Style Selector="ProgressBar.installing">
+            <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
+        </Style>
+        <Style Selector="ProgressBar.failed">
+            <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+        </Style>
+        <Style Selector="TextBlock.state">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.state.done">
+            <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
+        </Style>
+        <Style Selector="TextBlock.state.downloading">
+            <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
+        </Style>
+        <Style Selector="TextBlock.state.installing">
+            <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
+        </Style>
+        <Style Selector="TextBlock.state.failed">
+            <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+        </Style>
+        <!-- Placeholder: looks like the real control, can't be used, the tooltip says which phase builds it -->
+        <Style Selector="Border.soon">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.soon > :is(Control)">
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+        <Style Selector="Border.soon ToggleButton.switch /template/ Grid">
+            <Setter Property="ColumnSpacing" Value="0" />
+        </Style>
+    </UserControl.Styles>
+
+    <Border Background="{DynamicResource Dialog}" BorderBrush="{DynamicResource LineStrong}" BorderThickness="1"
+            CornerRadius="14" BoxShadow="0 24 80 0 #99000000" ClipToBounds="True">
+        <Grid RowDefinitions="Auto, Auto, *, Auto">
+            <!-- Header: title, subtitle, close -->
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="12" Margin="24 20 24 16">
+                <StackPanel>
+                    <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="20" FontWeight="SemiBold"
+                               Text="{Binding Title}" />
+                    <TextBlock FontSize="13" Foreground="{DynamicResource TextMuted}" Text="{Binding Subtitle}" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="ghost icon small" Width="32" Height="32" VerticalAlignment="Top"
+                        ToolTip.Tip="Close" IsVisible="{Binding ShowClose}" Command="{Binding CloseCommand}">
+                    <controls:StrokeIcon Data="{StaticResource IconClose}" Size="16" />
+                </Button>
+            </Grid>
+
+            <!-- Stepper (built in code-behind: steps and the lines between them) -->
+            <Grid Grid.Row="1" x:Name="Stepper" Margin="24 0 24 18" IsVisible="{Binding ShowStepper}" />
+
+            <!-- Body -->
+            <Border Grid.Row="2" BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0">
+                <Grid ColumnDefinitions="*, Auto">
+                    <!-- Wizard steps -->
+                    <ScrollViewer IsVisible="{Binding IsWizard}" HorizontalScrollBarVisibility="Disabled">
+                        <ContentControl Margin="24 22" Content="{Binding Wizard.CurrentStep}" />
+                    </ScrollViewer>
+
+                    <!-- Installing -->
+                    <ScrollViewer IsVisible="{Binding IsInstalling}" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="24 22" Spacing="18" DataContext="{Binding Progress}">
+                            <StackPanel Spacing="10" x:DataType="vm:InstallProgressViewModel">
+                                <WrapPanel ItemSpacing="16">
+                                    <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="22"
+                                               FontWeight="SemiBold" Text="{Binding TitleText}" />
+                                    <TextBlock Classes="mono" FontSize="13" VerticalAlignment="Bottom" Margin="0 0 0 3"
+                                               Foreground="{DynamicResource TextSecondary}" Text="{Binding PercentText}" />
+                                </WrapPanel>
+                                <ProgressBar Height="10" MinHeight="10" CornerRadius="5" Minimum="0" Maximum="1"
+                                             Background="{DynamicResource Off}" Foreground="{DynamicResource Accent}"
+                                             Value="{Binding OverallProgress}" />
+                                <WrapPanel ItemSpacing="18" LineSpacing="6">
+                                    <TextBlock Classes="version" Text="{Binding ModsText}" />
+                                    <TextBlock Classes="version" Text="{Binding BytesText}"
+                                               IsVisible="{Binding BytesText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    <TextBlock Classes="version" Text="{Binding SpeedText}"
+                                               IsVisible="{Binding SpeedText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    <TextBlock Classes="version" Foreground="{DynamicResource TextMuted}"
+                                               Text="{Binding ParallelText}"
+                                               IsVisible="{Binding HasRows}" />
+                                </WrapPanel>
+                            </StackPanel>
+                            <StackPanel x:DataType="vm:InstallProgressViewModel" IsVisible="{Binding HasRows}">
+                                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 0 0 6">
+                                    <TextBlock Classes="label" Text="MODS" />
+                                    <TextBlock Classes="count" Text="{Binding Rows.Count}" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding Rows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ModProgressRowViewModel">
+                                            <Border Classes="row" Padding="4 9">
+                                                <Grid ColumnDefinitions="1.3*, 104, *, 1.1*" ColumnSpacing="14">
+                                                    <TextBlock Classes="rowName" Text="{Binding Identifier}" />
+                                                    <TextBlock Grid.Column="1" Classes="state" Text="{Binding StateText}"
+                                                               Classes.done="{Binding IsToneDone}"
+                                                               Classes.downloading="{Binding IsToneDownloading}"
+                                                               Classes.installing="{Binding IsToneInstalling}"
+                                                               Classes.failed="{Binding IsToneFailed}" />
+                                                    <ProgressBar Grid.Column="2" Classes="row" Value="{Binding Progress}"
+                                                                 IsIndeterminate="{Binding IsIndeterminate}"
+                                                                 Classes.done="{Binding IsToneDone}"
+                                                                 Classes.downloading="{Binding IsToneDownloading}"
+                                                                 Classes.installing="{Binding IsToneInstalling}"
+                                                                 Classes.failed="{Binding IsToneFailed}" />
+                                                    <TextBlock Grid.Column="3" Classes="version" TextAlignment="Right"
+                                                               Foreground="{DynamicResource TextMuted}"
+                                                               Text="{Binding DetailText}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <!-- The mockup starts with "Saves were backed up first." (Phase 8 backups) -->
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
+                                <controls:StrokeIcon Data="{StaticResource IconBackup}" Size="14" VerticalAlignment="Top"
+                                                     Margin="0 2 0 0" Foreground="{DynamicResource TextMuted}" />
+                                <TextBlock Grid.Column="1" FontSize="12" LineHeight="18" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           Text="Nothing in the instance changes until every mod is in place; Cancel puts everything back." />
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Done -->
+                    <ScrollViewer IsVisible="{Binding IsDone}" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="24 38" Spacing="18" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Border Width="56" Height="56" CornerRadius="28" Background="{DynamicResource StatusFitsSoft}"
+                                    HorizontalAlignment="Center">
+                                <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="24"
+                                                     Foreground="{DynamicResource StatusFits}"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="24" FontWeight="SemiBold"
+                                           TextAlignment="Center" TextWrapping="Wrap" Text="{Binding DoneTitle}" />
+                                <TextBlock FontSize="14" TextAlignment="Center" Foreground="{DynamicResource TextSecondary}"
+                                           Text="{Binding DoneSummary}" />
+                            </StackPanel>
+                            <Border Width="560" BorderBrush="{DynamicResource Line}" BorderThickness="0 1"
+                                    ClipToBounds="True">
+                                <ItemsControl ItemsSource="{Binding DoneTiles}" Margin="-1 0 0 0">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:StatTile">
+                                            <Border Classes="tile">
+                                                <StackPanel Spacing="4">
+                                                    <TextBlock Classes="label" Text="{Binding Label}" />
+                                                    <TextBlock Classes="tileValue" FontSize="18" Text="{Binding Value}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0 6 0 0">
+                                <Button Classes="accent large" Command="{Binding LaunchCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <controls:StrokeIcon Data="{StaticResource IconPlay}" IsFilled="True" Size="16"
+                                                             VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding LaunchText}" MaxWidth="260"
+                                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="secondary large" Command="{Binding ShowModsCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <controls:StrokeIcon Data="{StaticResource IconPackage}" Size="16"
+                                                             VerticalAlignment="Center" />
+                                        <TextBlock Text="Show mods" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                            <TextBlock FontSize="12" HorizontalAlignment="Center" Foreground="{DynamicResource TextMuted}"
+                                       Text="{Binding SelectionNote}"
+                                       IsVisible="{Binding SelectionNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Failed (or cancelled) -->
+                    <ScrollViewer IsVisible="{Binding IsFailed}" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="24 22" Spacing="18">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="16">
+                                <Border Width="48" Height="48" CornerRadius="24" Background="{DynamicResource StatusErrorSoft}"
+                                        VerticalAlignment="Top">
+                                    <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="22"
+                                                         Foreground="{DynamicResource StatusError}"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="22"
+                                               FontWeight="SemiBold" Text="{Binding FailedTitle}" />
+                                    <TextBlock FontSize="14" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}"
+                                               Text="{Binding FailedSummary}" />
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Spacing="8" IsVisible="{Binding ShowError}">
+                                <TextBlock Classes="label" Text="WHAT WENT WRONG" />
+                                <Border Padding="16 14" CornerRadius="9" Background="{DynamicResource ErrorBox}"
+                                        BorderBrush="{DynamicResource ErrorBoxLine}" BorderThickness="1">
+                                    <SelectableTextBlock FontFamily="{DynamicResource Mono}" FontSize="12" LineHeight="19" TextWrapping="Wrap"
+                                                         Foreground="{DynamicResource ErrorBoxText}"
+                                                         Text="{Binding ErrorText}" />
+                                </Border>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Classes="secondary small" Content="Copy error" Click="CopyError_OnClick" />
+                                    <!-- Placeholder: the launcher's log comes with Phase 8 -->
+                                    <Border Classes="soon" ToolTip.Tip="Logs come in Phase 8">
+                                        <Button Classes="secondary small">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <controls:StrokeIcon Data="{StaticResource IconTerminal}" Size="14"
+                                                                     VerticalAlignment="Center" />
+                                                <TextBlock Text="Open log" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 0 0 6">
+                                    <TextBlock Classes="label" Text="WHERE EACH MOD GOT TO" />
+                                    <TextBlock Classes="count" Text="{Binding FailedRowsCount}" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding FailedRows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:FailedRow">
+                                            <Border Classes="row" Padding="4 9">
+                                                <Grid ColumnDefinitions="1.3*, 104, *, 1.1*" ColumnSpacing="14">
+                                                    <TextBlock Classes="rowName" Text="{Binding Name}" />
+                                                    <TextBlock Grid.Column="1" Classes="state" Text="{Binding StateText}"
+                                                               Classes.failed="{Binding IsFailed}" />
+                                                    <ProgressBar Grid.Column="2" Classes="row" Value="{Binding Progress}"
+                                                                 Classes.failed="{Binding IsFailed}" />
+                                                    <TextBlock Grid.Column="3" Classes="version" TextAlignment="Right"
+                                                               Foreground="{DynamicResource TextMuted}"
+                                                               Text="{Binding Detail}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Border Classes="row" Padding="4 9" IsVisible="{Binding HasMoreFailed}">
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                               Text="{Binding MoreFailedText}" />
+                                </Border>
+                            </StackPanel>
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8"
+                                  IsVisible="{Binding CacheHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <controls:StrokeIcon Data="{StaticResource IconDownload}" Size="14" VerticalAlignment="Top"
+                                                     Margin="0 2 0 0" Foreground="{DynamicResource TextSecondary}" />
+                                <TextBlock Grid.Column="1" FontSize="13" LineHeight="20" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextSecondary}" Text="{Binding CacheHint}" />
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Side panel: "This change" -->
+                    <Border Grid.Column="1" Width="250" Background="{DynamicResource DialogAside}"
+                            BorderBrush="{DynamicResource Line}" BorderThickness="1 0 0 0"
+                            IsVisible="{Binding ShowSidePanel}">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel Spacing="16" Margin="20">
+                                <TextBlock Classes="label" Text="THIS CHANGE" />
+                                <StackPanel Spacing="2">
+                                    <TextBlock FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                               Text="{Binding PanelInstanceName}" />
+                                    <TextBlock Classes="mono" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                               TextTrimming="CharacterEllipsis" Text="{Binding PanelKspText}" />
+                                </StackPanel>
+                                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 0">
+                                    <StackPanel Spacing="8">
+                                        <Grid Classes="panelRow" ColumnDefinitions="*, Auto">
+                                            <TextBlock Text="New" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding NewCount}" />
+                                        </Grid>
+                                        <Grid Classes="panelRow" ColumnDefinitions="*, Auto">
+                                            <TextBlock Text="Updates" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding UpdatesCount}" />
+                                        </Grid>
+                                        <Grid Classes="panelRow" ColumnDefinitions="*, Auto" IsVisible="{Binding HasRemoved}">
+                                            <TextBlock Text="Removed" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding RemovedCount}" />
+                                        </Grid>
+                                        <Grid Classes="panelRow" ColumnDefinitions="*, Auto">
+                                            <TextBlock Text="Download" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding DownloadText}" />
+                                        </Grid>
+                                        <Grid Classes="panelRow" ColumnDefinitions="*, Auto" IsVisible="{Binding HasCached}">
+                                            <TextBlock Text="Already cached" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding CachedText}" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                                <WrapPanel ItemSpacing="12" LineSpacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding !HasProblems}">
+                                        <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="12"
+                                                             Foreground="{DynamicResource StatusFits}" VerticalAlignment="Center" />
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusFits}"
+                                                   Text="{Binding ProblemsText}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding HasProblems}">
+                                        <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="12"
+                                                             Foreground="{DynamicResource StatusError}" VerticalAlignment="Center" />
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}"
+                                                   Text="{Binding ProblemsText}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding HasChoicesLeft}">
+                                        <controls:StrokeIcon Data="{StaticResource IconClock}" Size="12"
+                                                             Foreground="{DynamicResource StatusWarning}" VerticalAlignment="Center" />
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusWarning}"
+                                                   Text="{Binding ChoicesLeftText}" />
+                                    </StackPanel>
+                                </WrapPanel>
+                                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 0"
+                                        IsVisible="{Binding HasPicked}">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="label" Margin="0 0 0 2"
+                                                   Text="{Binding PickedTitle}" />
+                                        <ItemsControl ItemsSource="{Binding Picked}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Spacing="6" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:PickedRow">
+                                                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                                                        <TextBlock FontSize="12" TextTrimming="CharacterEllipsis"
+                                                                   Text="{Binding Name}" />
+                                                        <TextBlock Grid.Column="1" Classes="mono" FontSize="12"
+                                                                   Foreground="{DynamicResource TextMuted}"
+                                                                   Text="{Binding Version}" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Footer -->
+            <Border Grid.Row="3" Background="{DynamicResource DialogFooter}" BorderBrush="{DynamicResource Line}"
+                    BorderThickness="0 1 0 0" Padding="24 14">
+                <Panel>
+                    <!-- Wizard: Cancel … Back, Next (Review: backup switch, Back, Install N mods) -->
+                    <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding IsWizard}">
+                        <Button Classes="ghost" Content="Cancel" Command="{Binding CloseCommand}" />
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+                            <!-- Placeholder: backups come with Phase 8 -->
+                            <Border Classes="soon" Margin="0 0 8 0" VerticalAlignment="Center"
+                                    ToolTip.Tip="Backups come in Phase 8" IsVisible="{Binding IsReviewStep}">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <ToggleButton Classes="switch" VerticalAlignment="Center" />
+                                    <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}"
+                                               VerticalAlignment="Center" Text="Back up saves first" />
+                                </StackPanel>
+                            </Border>
+                            <Button Classes="secondary" Content="Back" IsVisible="{Binding CanGoBack}"
+                                    Command="{Binding Wizard.BackCommand}" />
+                            <Button Classes="accent" IsVisible="{Binding !IsReviewStep}"
+                                    Command="{Binding Wizard.NextCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Next" VerticalAlignment="Center" />
+                                    <controls:StrokeIcon Data="{StaticResource IconArrowRight}" Size="16"
+                                                         VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Classes="accent" IsVisible="{Binding IsReviewStep}"
+                                    Command="{Binding Wizard.FinishCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding InstallText}" />
+                                    <controls:StrokeIcon Data="{StaticResource IconDownload}" Size="16"
+                                                         VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Installing: Cancel and undo -->
+                    <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding IsInstalling}">
+                        <Button Classes="danger" Command="{Binding CancelInstallCommand}"
+                                IsEnabled="{Binding Progress.CanCancel, FallbackValue=False}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <controls:StrokeIcon Data="{StaticResource IconClose}" Size="16"
+                                                     VerticalAlignment="Center" />
+                                <TextBlock Text="Cancel and undo" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Grid.Column="2" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                   VerticalAlignment="Center" Text="You can keep using the launcher once this finishes" />
+                    </Grid>
+
+                    <!-- Done: Close -->
+                    <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding IsDone}">
+                        <Button Grid.Column="1" Classes="secondary" Content="Close" Command="{Binding CloseCommand}" />
+                    </Grid>
+
+                    <!-- Failed: Close … Back to review, Retry -->
+                    <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding IsFailed}">
+                        <Button Classes="ghost" Content="Close" Command="{Binding CloseCommand}" />
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+                            <Button Classes="secondary" Content="Back to review"
+                                    IsVisible="{Binding CanGoBackToReview}" Command="{Binding BackToReviewCommand}" />
+                            <Button Classes="accent" Command="{Binding RetryCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <controls:StrokeIcon Data="{StaticResource IconRefresh}" Size="16"
+                                                         VerticalAlignment="Center" />
+                                    <TextBlock Text="Retry" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Panel>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

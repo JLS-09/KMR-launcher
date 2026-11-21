@@ -49,7 +49,7 @@ public class ModDownloader(HttpClient http, string cacheFolder) : IModDownloader
         Directory.CreateDirectory(cacheFolder);
         var finalPath = CachePath(mod);
         var partPath = finalPath + ".part";
-        var errors = new List<string>();
+        var errors = new List<(string Host, string Reason)>();
 
         foreach (var url in urls)
         {
@@ -68,12 +68,13 @@ public class ModDownloader(HttpClient http, string cacheFolder) : IModDownloader
                                           or HashMismatchException)
             {
                 TryDelete(partPath);
-                errors.Add($"{Host(url)}: {Describe(e)}");
+                errors.Add((Host(url), Describe(e)));
             }
         }
 
-        throw new ModInstallException(
-            $"Couldn't download {mod.Identifier} {mod.Version}. {string.Join("; ", errors)}");
+        var width = errors.Max(e => e.Host.Length);
+        throw new ModInstallException($"{mod.Identifier} {mod.Version} could not be downloaded.\n" +
+                                      string.Join("\n", errors.Select(e => $"  {e.Host.PadRight(width)}  {e.Reason}")));
     }
 
     private async Task DownloadFile(string url, string partPath, ModVersion mod, Action<long, long?>? onProgress,

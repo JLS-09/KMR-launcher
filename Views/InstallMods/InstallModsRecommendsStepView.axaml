@@ -5,193 +5,97 @@
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
              xmlns:models="clr-namespace:KMRLauncherMvvm.Models"
              x:DataType="vm:InstallModsRecommendsStepViewModel"
-             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
-             Background="#1F1F20"
-             Foreground="{DynamicResource PrimaryText}"
+             mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="600"
              x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsRecommendsStepView">
 
+    <!-- Step 2 "Extras" (mockup Wiz2Extras): recommended, suggested and supporting mods with a version each.
+         Styles come from InstallDialogView. -->
     <UserControl.Styles>
-        <Style Selector="Button.selection">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
+        <Style Selector="Button.allNone">
+            <Setter Property="Height" Value="24" />
+            <Setter Property="MinHeight" Value="24" />
+            <Setter Property="Padding" Value="8 0" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Normal" />
         </Style>
-
-        <Style Selector="Button.selection:pressed /template/ ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-
-        <Style Selector="Button.selection:focus /template/ ContentPresenter">
-            <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
-        </Style>
-
-        <Style Selector="Button.select:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}" />
-        </Style>
-
-        <Style Selector="Button.unselect:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryRed}" />
-        </Style>
-
-        <Style Selector="Button.mod-row">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="16" />
-            <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="Cursor" Value="Hand" />
-        </Style>
-
-        <Style Selector="Button.mod-row:pointerover /template/ ContentPresenter">
+        <Style Selector="Border.extraRow">
+            <Setter Property="Padding" Value="6 8" />
+            <Setter Property="CornerRadius" Value="6" />
             <Setter Property="Background" Value="Transparent" />
         </Style>
-
-        <Style Selector="Button.mod-row:pressed /template/ ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-
-        <Style Selector="Border.mod-row-border">
-            <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
-            <Setter Property="BorderBrush" Value="Transparent" />
-        </Style>
-        <Style Selector="Border.mod-row-border.selected">
-            <Setter Property="Background"
-                    Value="{DynamicResource SideBarButtonActiveBackground}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
-        </Style>
-
-        <Style Selector="ListBox.mod-list">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-        <Style Selector="ListBox.mod-list > ListBoxItem">
-            <Setter Property="Padding" Value="0" />
-        </Style>
-        <Style Selector="ListBox.mod-list > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-        <Style Selector="ListBox.mod-list > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
+        <Style Selector="Border.extraRow:pointerover">
+            <Setter Property="Background" Value="{DynamicResource RowHover}" />
         </Style>
     </UserControl.Styles>
 
     <UserControl.DataTemplates>
-        <DataTemplate DataType="vm:VersionListItemViewModel">
-            <Border Padding="8 4" BorderThickness="2 0 0 0" Classes="mod-row-border"
-                    Classes.selected="{Binding IsSelected}">
-                <Grid ColumnDefinitions="* Auto" ColumnSpacing="16">
-                    <Button Grid.Column="0" Classes="mod-row" Padding="0"
-                            Command="{Binding $parent[UserControl].((vm:InstallModsRecommendsStepViewModel)DataContext).ToggleRecommendationCommand}"
-                            CommandParameter="{Binding}">
-                        <StackPanel Spacing="2">
-                            <TextBlock Text="{Binding Identifier}" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Text="{Binding SourcesText}" FontSize="12" TextTrimming="CharacterEllipsis"
-                                       Foreground="{DynamicResource SecondaryText}" />
+        <DataTemplate x:DataType="vm:VersionListItemViewModel">
+            <Border Classes="row">
+                <Border Classes="extraRow">
+                    <Grid ColumnDefinitions="24, *, Auto" ColumnSpacing="12">
+                        <CheckBox Classes="box native" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="rowName" Text="{Binding Identifier}" />
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextMuted}"
+                                           VerticalAlignment="Center" Text="{Binding ExtraDependenciesText}"
+                                           IsVisible="{Binding ExtraDependenciesText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            </StackPanel>
+                            <TextBlock Classes="rowHint" Text="{Binding SourcesText}" />
                         </StackPanel>
-                    </Button>
-                    <ComboBox Grid.Column="1" ItemsSource="{Binding Versions}"
-                              SelectedItem="{Binding SelectedVersion}"
-                              IsVisible="{Binding HasMultipleVersions}"
-                              VerticalAlignment="Center" MinWidth="120"
-                              CornerRadius="0" FontSize="13">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate x:DataType="models:ModVersion">
-                                <TextBlock Text="{Binding Version}" FontSize="13" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <TextBlock Grid.Column="1" Text="{Binding SelectedVersion.Version}"
-                               IsVisible="{Binding !HasMultipleVersions}"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource SecondaryText}" />
-                </Grid>
+                        <ComboBox Grid.Column="2" Classes="version" VerticalAlignment="Center"
+                                  ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:ModVersion">
+                                    <TextBlock Text="{Binding Version}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
+                </Border>
             </Border>
         </DataTemplate>
     </UserControl.DataTemplates>
 
-    <Grid Margin="32 0 32 0" RowDefinitions="Auto Auto Auto *">
-        <!-- Row 0 was the progress bar; it lives in InstallModsWindow now -->
-        <Grid Grid.Row="1" Margin="0 32 0 0" RowDefinitions="Auto *" RowSpacing="8"
-              IsVisible="{Binding ShowRecommendations}">
-            <Grid Grid.Row="0" ColumnDefinitions="Auto Auto" ColumnSpacing="16">
-                <TextBlock Grid.Column="0" Text="RECOMMENDED MODS" LetterSpacing="1"
-                           Foreground="{DynamicResource SecondaryText}"
-                           FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <Button Command="{Binding SelectAllCommand}"
-                            CommandParameter="{Binding Recommendations}"
-                            Classes="select selection">
-                        <TextBlock Text="Select All" LetterSpacing="1"
-                                   FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                    </Button>
-                    <TextBlock Text="/" LetterSpacing="1"
-                               Foreground="{DynamicResource SecondaryText}"
-                               FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                    <Button Command="{Binding UnselectAllCommand}"
-                            CommandParameter="{Binding Recommendations}"
-                            Classes="unselect selection">
-                        <TextBlock Text="Unselect All" LetterSpacing="1"
-                                   FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                    </Button>
-                </StackPanel>
-            </Grid>
-            <ListBox Grid.Row="1" Classes="mod-list" ItemsSource="{Binding Recommendations}" MaxHeight="200" />
-        </Grid>
-        <Grid Grid.Row="2" Margin="0 32 0 0" RowDefinitions="Auto *" RowSpacing="8"
-              IsVisible="{Binding ShowSuggestions}">
-            <Grid Grid.Row="0" ColumnDefinitions="Auto Auto" ColumnSpacing="16">
-                <TextBlock Grid.Column="0" Text="SUGGESTED MODS" LetterSpacing="1"
-                           Foreground="{DynamicResource SecondaryText}"
-                           FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <Button Command="{Binding SelectAllCommand}"
-                            CommandParameter="{Binding Suggestions}"
-                            Classes="select selection">
-                        <TextBlock Text="Select All" LetterSpacing="1"
-                                   FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                    </Button>
-                    <TextBlock Text="/" LetterSpacing="1"
-                               Foreground="{DynamicResource SecondaryText}"
-                               FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                    <Button Command="{Binding UnselectAllCommand}"
-                            CommandParameter="{Binding Suggestions}"
-                            Classes="unselect selection">
-                        <TextBlock Text="Unselect All" LetterSpacing="1"
-                                   FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                    </Button>
-                </StackPanel>
-            </Grid>
-            <ListBox Grid.Row="1" Classes="mod-list" ItemsSource="{Binding Suggestions}" MaxHeight="200" />
-        </Grid>
-        <Grid Grid.Row="3" Margin="0 32 0 0" RowDefinitions="Auto *" RowSpacing="8"
-              IsVisible="{Binding ShowSupported}">
-            <Grid Grid.Row="0" ColumnDefinitions="Auto Auto" ColumnSpacing="16">
-                <TextBlock Grid.Column="0" Text="SUPPORTED BY" LetterSpacing="1"
-                           Foreground="{DynamicResource SecondaryText}"
-                           FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <Button Command="{Binding SelectAllCommand}"
-                            CommandParameter="{Binding Supported}"
-                            Classes="select selection">
-                        <TextBlock Text="Select All" LetterSpacing="1"
-                                   FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                    </Button>
-                    <TextBlock Text="/" LetterSpacing="1"
-                               Foreground="{DynamicResource SecondaryText}"
-                               FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                    <Button Command="{Binding UnselectAllCommand}"
-                            CommandParameter="{Binding Supported}"
-                            Classes="unselect selection">
-                        <TextBlock Text="Unselect All" LetterSpacing="1"
-                                   FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-                    </Button>
-                </StackPanel>
-            </Grid>
-            <ListBox Grid.Row="1" Classes="mod-list" ItemsSource="{Binding Supported}" />
-        </Grid>
-    </Grid>
+    <StackPanel Spacing="18">
+        <TextBlock FontSize="13" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}"
+                   Text="Mods that go well with what you picked. Recommendations are ticked, suggestions are not. Anything you tick counts as picked by you." />
 
+        <StackPanel IsVisible="{Binding ShowRecommendations}">
+            <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" ColumnSpacing="10" Margin="0 0 0 6">
+                <TextBlock Classes="label" Text="RECOMMENDED" />
+                <TextBlock Grid.Column="1" Classes="count" Text="{Binding Recommendations.Count}" />
+                <Button Grid.Column="3" Classes="ghost allNone" Content="All" Margin="0 0 -8 0"
+                        Command="{Binding SelectAllCommand}" CommandParameter="{Binding Recommendations}" />
+                <Button Grid.Column="4" Classes="ghost allNone" Content="None"
+                        Command="{Binding UnselectAllCommand}" CommandParameter="{Binding Recommendations}" />
+            </Grid>
+            <ItemsControl ItemsSource="{Binding Recommendations}" />
+        </StackPanel>
+
+        <StackPanel IsVisible="{Binding ShowSuggestions}">
+            <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" ColumnSpacing="10" Margin="0 0 0 6">
+                <TextBlock Classes="label" Text="SUGGESTED" />
+                <TextBlock Grid.Column="1" Classes="count" Text="{Binding Suggestions.Count}" />
+                <Button Grid.Column="3" Classes="ghost allNone" Content="All" Margin="0 0 -8 0"
+                        Command="{Binding SelectAllCommand}" CommandParameter="{Binding Suggestions}" />
+                <Button Grid.Column="4" Classes="ghost allNone" Content="None"
+                        Command="{Binding UnselectAllCommand}" CommandParameter="{Binding Suggestions}" />
+            </Grid>
+            <ItemsControl ItemsSource="{Binding Suggestions}" />
+        </StackPanel>
+
+        <StackPanel IsVisible="{Binding ShowSupported}">
+            <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" ColumnSpacing="10" Margin="0 0 0 6">
+                <TextBlock Classes="label" Text="SUPPORTS YOUR PICKS" />
+                <TextBlock Grid.Column="1" Classes="count" Text="{Binding Supported.Count}" />
+                <Button Grid.Column="3" Classes="ghost allNone" Content="All" Margin="0 0 -8 0"
+                        Command="{Binding SelectAllCommand}" CommandParameter="{Binding Supported}" />
+                <Button Grid.Column="4" Classes="ghost allNone" Content="None"
+                        Command="{Binding UnselectAllCommand}" CommandParameter="{Binding Supported}" />
+            </Grid>
+            <ItemsControl ItemsSource="{Binding Supported}" />
+        </StackPanel>
+    </StackPanel>
 </UserControl>
