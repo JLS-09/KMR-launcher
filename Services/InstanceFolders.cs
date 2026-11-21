@@ -10,7 +10,7 @@ namespace KMRLauncherMvvm.Services;
 public static class InstanceFolders
 {
     public static readonly string DefaultParent = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "KMR", "instances");
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "kmrLauncher", "instances");
 
     public static string ParentFor(AppSettings settings) =>
         string.IsNullOrWhiteSpace(settings.InstanceParentFolder) ? DefaultParent : settings.InstanceParentFolder;
