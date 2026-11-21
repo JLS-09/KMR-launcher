@@ -52,7 +52,7 @@ public class App : Application
         collection.AddSingleton(dependencyService);
         var downloader = new ModDownloader(ModDownloader.CreateHttpClient(), ModDownloader.DefaultCacheFolder);
         collection.AddSingleton<IModDownloader>(downloader);
-        collection.AddSingleton(new InstallService(downloader, () => SettingsService.Save(App.Settings)));
+        collection.AddSingleton(new InstallService(downloader, instance => SettingsService.Save(App.Settings, instance, modsChanged: true)));
         
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<HomePageViewModel>();
@@ -96,7 +96,7 @@ public class App : Application
         var settingsFile = Path.Combine(appFolder, "settings.json");
         
         if (!File.Exists(settingsFile))
-            SettingsService.Save(new AppSettings());
+            SettingsService.Write(new AppSettings(), settingsFile);
         
         Settings = SettingsService.Load();
     }

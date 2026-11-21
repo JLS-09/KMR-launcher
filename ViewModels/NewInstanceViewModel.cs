@@ -130,18 +130,19 @@ public partial class NewInstanceViewModel : ViewModelBase
             });
             
             var fullInstancePath = Path.Combine(InstancePath, Name);
-            if (AppSettings.Instances.Any(i => i.Name == Name && i.RootPath == fullInstancePath))
+            if (AppSettings.Instances.Any(i => i.RootPath == fullInstancePath))
             {
                 throw new Exception("Cannot create new instance with the same name in the same directory");
             }
             
             Directory.CreateDirectory(fullInstancePath);
             await ZipService.ExtractFolderFromZip(SelectedZip.Path, SelectedZip.RelativeRootPath, fullInstancePath, progress);
-            AppSettings.Instances.Add(new Instance(Name, fullInstancePath, SelectedZip.Version)
+            var instance = new Instance(Name, fullInstancePath, SelectedZip.Version)
             {
                 CompatibleKspVersions = KspVersions.DefaultCompatibleVersions(SelectedZip.Version)
-            });
-            SettingsService.Save(AppSettings);
+            };
+            AppSettings.Instances.Add(instance);
+            SettingsService.Save(AppSettings, instance, modsChanged: true);
             CloseWindow(window);
         }
         catch (Exception e)

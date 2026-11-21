@@ -115,11 +115,11 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         var targetPath = InstallTarget?.RootPath;
 
         Instances.Clear();
-        foreach (var instance in settings.Instances) Instances.Add(instance);
+        foreach (var instance in settings.UsableInstances) Instances.Add(instance);
 
-        var primary = settings.Instances.FirstOrDefault(i => i.IsPrimary) ?? settings.Instances.FirstOrDefault();
-        CheckAgainst = settings.Instances.FirstOrDefault(i => i.RootPath == checkPath) ?? primary;
-        InstallTarget = settings.Instances.FirstOrDefault(i => i.RootPath == targetPath) ?? CheckAgainst;
+        var primary = Instances.FirstOrDefault(i => i.IsPrimary) ?? Instances.FirstOrDefault();
+        CheckAgainst = Instances.FirstOrDefault(i => i.RootPath == checkPath) ?? primary;
+        InstallTarget = Instances.FirstOrDefault(i => i.RootPath == targetPath) ?? CheckAgainst;
 
         RefreshFits();
     }

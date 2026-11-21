@@ -25,6 +25,9 @@ public class Instance(string name, string rootPath, string version)
     public DateTime LastPlayed { get; set; }
     public bool IsPrimary { get; set; }
 
+    [JsonIgnore] public string? LoadError { get; set; }
+    [JsonIgnore] public bool IsMissing => LoadError is not null;
+
     [JsonIgnore] public string CompatibleSummary => KspVersions.DescribeCompatible(this);
 
     public async Task DeleteInstance(AppSettings settings)
@@ -96,14 +99,17 @@ public class Instance(string name, string rootPath, string version)
 
         await kspProcess.WaitForExitAsync();
 
-        var endTime = kspProcess.ExitTime;
-        var playedSeconds = (endTime - startTime).TotalSeconds;
+        var playedSeconds = (int)(kspProcess.ExitTime - startTime).TotalSeconds;
+        var current = App.Settings.Instances.FirstOrDefault(i => i.RootPath == RootPath && !i.IsMissing) ?? this;
+        current.PlayTime += playedSeconds;
+        current.LastPlayed = kspProcess.ExitTime;
+        if (current != this)
+        {
+            PlayTime += playedSeconds;
+            LastPlayed = kspProcess.ExitTime;
+        }
 
-        PlayTime += (int)playedSeconds;
-
-        LastPlayed = kspProcess.ExitTime;
-
-        SettingsService.Save(App.Settings);
+        SettingsService.Save(App.Settings, current);
 
         SettingsService.Reload();
     }

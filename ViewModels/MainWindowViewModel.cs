@@ -67,6 +67,12 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private string _runningTime = "00:00:00";
     [ObservableProperty] private string? _launchError;
 
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(HasSettingsProblem))]
+    private string? _settingsProblem;
+
+    private string? _dismissedSettingsProblem;
+    public bool HasSettingsProblem => SettingsProblem is not null;
+
     [ObservableProperty] private object? _dialog;
 
     public StatusBarViewModel StatusBar { get; }
@@ -107,7 +113,16 @@ public partial class MainWindowViewModel : ViewModelBase
     private void LoadInstances(AppSettings settings)
     {
         InstanceCount = settings.Instances.Count;
-        PrimaryInstance = settings.Instances.FirstOrDefault(i => i.IsPrimary) ?? settings.Instances.FirstOrDefault();
+        PrimaryInstance = settings.UsableInstances.FirstOrDefault(i => i.IsPrimary) ??
+                          settings.UsableInstances.FirstOrDefault();
+        if (settings.LoadProblem != _dismissedSettingsProblem) SettingsProblem = settings.LoadProblem;
+    }
+
+    [RelayCommand]
+    private void DismissSettingsProblem()
+    {
+        _dismissedSettingsProblem = SettingsProblem;
+        SettingsProblem = null;
     }
 
     [RelayCommand]

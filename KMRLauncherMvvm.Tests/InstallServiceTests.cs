@@ -94,7 +94,7 @@ public class InstallServiceTests : IDisposable
         }
     }
 
-    private InstallService Service() => new(_downloader, () => _saves++);
+    private InstallService Service() => new(_downloader, _ => _saves++);
 
     private ModVersion Package(string identifier, string version = "1.0", params string[] files)
     {
@@ -155,6 +155,7 @@ public class InstallServiceTests : IDisposable
         Assert.False(instance.ModRecords["Lib"].IsUserRequested);
         Assert.All(run.Jobs, j => Assert.Equal(ModInstallState.Done, j.State));
         Assert.Equal(1, _saves);
+        Assert.False(Directory.Exists(Path.Combine(_root, ".kmr", "staging")));
         Assert.False(Directory.Exists(Path.Combine(_root, ".kmr-staging")));
     }
 
