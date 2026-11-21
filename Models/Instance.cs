@@ -82,7 +82,7 @@ public class Instance(string name, string rootPath, string version)
         if (string.IsNullOrWhiteSpace(PrefixPath)) PrefixPath = WinePrefixes.DefaultFor(this, App.Settings.Instances);
 
         var kspProcess = WineLauncher.Launch(PrefixPath, Path.Combine(RootPath, "KSP_x64.exe"),
-            SplitArguments(LaunchArguments));
+            SplitArguments(LaunchArguments), App.Settings.WineDebug);
         var startTime = kspProcess.StartTime;
         started?.Invoke(kspProcess);
 

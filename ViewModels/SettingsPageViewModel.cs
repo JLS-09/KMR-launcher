@@ -49,6 +49,13 @@ public partial class SettingsPageViewModel : PageViewModel
     [ObservableProperty] private string _clearAllText = "";
     [ObservableProperty] private string? _cacheError;
 
+    [ObservableProperty] private string _wineDebugText = "";
+
+    public string WinePathText { get; } = WineLauncher.FindOnPath("wine") ?? "not found";
+    public bool WineFound => WinePathText != "not found";
+    public string UmuPathText { get; } = WineLauncher.FindOnPath("umu-run") ?? "not found";
+    public bool UmuFound => UmuPathText != "not found";
+
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(RemoveUnusedCommand))]
     private bool _hasUnused;
 
@@ -79,6 +86,7 @@ public partial class SettingsPageViewModel : PageViewModel
         LoadRepoState();
         ParallelDownloads = App.Settings.MaxParallelDownloads.ToString(CultureInfo.InvariantCulture);
         FetchOnStartup = App.Settings.FetchOnStartup;
+        WineDebugText = DescribeWineDebug(App.Settings.WineDebug);
     }
 
     public SettingsPageViewModel()
@@ -214,6 +222,24 @@ public partial class SettingsPageViewModel : PageViewModel
                        $"({InstalledMods.FormatSize(usage.InUseBytes + usage.UnusedBytes)}). Installed mods stay; " +
                        "they're downloaded again when you update or reinstall them.";
     }
+
+    [RelayCommand]
+    private void SetWineDebug(WineDebugLevel level)
+    {
+        var settings = App.Settings;
+        WineDebugText = DescribeWineDebug(level);
+        if (settings.WineDebug == level) return;
+
+        settings.WineDebug = level;
+        SettingsService.Save(settings);
+    }
+
+    public static string DescribeWineDebug(WineDebugLevel level) => level switch
+    {
+        WineDebugLevel.Off => "Off",
+        WineDebugLevel.ErrorsOnly => "Errors only",
+        _ => "Errors and fixmes"
+    };
 
     private static string Plural(int count, string word) => count == 1 ? word : word + "s";
 

@@ -22,10 +22,20 @@ public class AppSettings
 
     public bool FetchOnStartup { get; set; } = true;
 
+    public WineDebugLevel WineDebug { get; set; } = WineDebugLevel.ErrorsOnly;
+
     public string AccentColor { get; set; } = "#DF0105";
 
     public const int DefaultParallelDownloads = 4;
     public const int MaxAllowedParallelDownloads = 16;
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter<WineDebugLevel>))]
+public enum WineDebugLevel
+{
+    Off,
+    ErrorsOnly,
+    WineDefault
 }
 
 public class LegacySettingsFile

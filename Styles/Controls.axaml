@@ -590,6 +590,14 @@
 
     <!-- Switch: ToggleButton.switch, the label as Content (13 px, #A1A1AA) and a 38 x 22 switch on the right.
          Fluent's own switch control requires its knob parts in the template, so a plain ToggleButton is used. -->
+    <!-- .big (Run with, Default runner): 30 px segments, padding 0 12, 13 px -->
+    <Style Selector="RadioButton.segment.big">
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="RadioButton.segment.big /template/ Border#SegmentBorder">
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="12 0" />
+    </Style>
     <Style Selector="ToggleButton.switch">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="FontSize" Value="13" />
