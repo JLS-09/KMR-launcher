@@ -113,14 +113,12 @@ On Linux:
 | `~/.local/share/kmrLauncher/cache/ckan-meta/` | Local clone of CKAN-meta |
 | `~/.local/share/kmrLauncher/cache/downloads/` | Verified mod downloads, shared by all instances |
 | `~/.local/share/KMR/instances/` | New instances, unless you pick another folder in the New instance dialog |
-| `~/.config/kmrLauncher/prefixes/<instance folder>/` | Wine prefix for each instance (the path is saved per instance and can be changed in its Settings tab; prefixes made before 2026-11 stay in `~/.config/prefixes/<instance name>/`) |
+| `~/.config/kmrLauncher/prefixes/<instance folder>/` | Wine prefix for each instance (the path is saved per instance and can be changed in its Settings tab) |
 | `~/.local/share/kmrLauncher/sync.json` | Time and commit of the last CKAN-meta fetch, and the last fetch error |
 
 An instance folder carries its own mod information, so it can be moved, copied or backed up with its mods. If a folder is moved or deleted, the instance shows as missing on the Instances page, where you can locate the folder or remove the instance from the list. Don't edit `.kmr/` by hand.
 
 During an install, files of mods that are being removed or replaced are kept in `.kmr/staging/` inside the instance folder until the install has finished.
-
-Versions from before November 2026 kept everything in `settings.json`. On the first start of a newer version, each instance's data is moved into its `.kmr/` folder and the old file is kept as `settings.json.bak`. If that fails, the launcher keeps using the old file, shows why, and tries again at the next start.
 
 ## Built with
 

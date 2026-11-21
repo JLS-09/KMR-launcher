@@ -9,7 +9,6 @@ namespace KMRLauncherMvvm.Services;
 
 public class InstanceInfoFile
 {
-    public int Format { get; set; } = InstanceStore.Format;
     public string Name { get; set; } = "";
     public string Version { get; set; } = "";
     public List<string> CompatibleKspVersions { get; set; } = [];
@@ -32,7 +31,6 @@ public class InstanceInfoFile
 
 public class InstanceModsFile
 {
-    public int Format { get; set; } = InstanceStore.Format;
     public List<ModVersion> Mods { get; set; } = [];
     public Dictionary<string, InstalledModRecord> ModRecords { get; set; } = [];
 
@@ -48,7 +46,6 @@ public static class InstanceStore
     public const string FolderName = ".kmr";
     public const string InfoFileName = "instance.json";
     public const string ModsFileName = "mods.json";
-    public const int Format = 1;
 
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -74,9 +71,6 @@ public static class InstanceStore
                        ?? throw new JsonException($"{InfoFileName} is empty.");
             var mods = JsonSerializer.Deserialize<InstanceModsFile>(File.ReadAllText(ModsPath(root)), Options)
                        ?? throw new JsonException($"{ModsFileName} is empty.");
-            if (info.Format > Format || mods.Format > Format)
-                return Missing(root, "The data was written by a newer version of the launcher.");
-
             return new Instance(info.Name.Trim().Length > 0 ? info.Name : FolderTitle(root), root, info.Version ?? "")
             {
                 CompatibleKspVersions = info.CompatibleKspVersions ?? [],
@@ -112,9 +106,6 @@ public static class InstanceStore
         SaveInfo(instance);
         SaveMods(instance);
     }
-
-    public static bool SameData(Instance a, Instance b) =>
-        InfoJson(a) == InfoJson(b) && ModsJson(a) == ModsJson(b);
 
     public static (Instance? Found, string? Error) Relocate(AppSettings settings, Instance missing, string folder)
     {

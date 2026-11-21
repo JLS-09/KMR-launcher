@@ -19,13 +19,6 @@ public static class SettingsService
 
     public static void Write(AppSettings settings, string file, Instance? changed = null, bool modsChanged = false)
     {
-        if (settings.UsesLegacyFile)
-        {
-            WinePrefixes.AssignMissing(settings.Instances);
-            AtomicFile.WriteAllText(file, JsonSerializer.Serialize(LegacySettingsFile.From(settings), Options));
-            return;
-        }
-
         if (changed is { IsMissing: false })
         {
             if (string.IsNullOrWhiteSpace(changed.PrefixPath))
@@ -48,15 +41,7 @@ public static class SettingsService
 
         try
         {
-            var json = File.ReadAllText(file);
-            using var document = JsonDocument.Parse(json);
-            var settings = JsonSerializer.Deserialize<AppSettings>(json, Options) ?? new AppSettings();
-
-            if (document.RootElement.ValueKind == JsonValueKind.Object &&
-                document.RootElement.TryGetProperty(nameof(LegacySettingsFile.Instances), out var old) &&
-                old.ValueKind == JsonValueKind.Array)
-                return Migrate(file, json, settings);
-
+            var settings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(file), Options) ?? new AppSettings();
             LoadInstances(settings);
             return settings;
         }
@@ -90,48 +75,5 @@ public static class SettingsService
             instance.IsPrimary = settings.PrimaryInstance is { } primary && instance.RootPath == primary;
 
         WinePrefixes.AssignMissing([.. settings.UsableInstances]);
-    }
-
-    private static AppSettings Migrate(string file, string json, AppSettings settings)
-    {
-        var instances = JsonSerializer.Deserialize<LegacySettingsFile>(json, Options)?.Instances ?? [];
-        WinePrefixes.AssignMissing(instances);
-
-        try
-        {
-            foreach (var instance in instances.Where(i => Directory.Exists(i.RootPath)))
-            {
-                InstanceStore.Save(instance);
-                var readBack = InstanceStore.Load(instance.RootPath);
-                if (readBack.LoadError is { } error)
-                    throw new IOException($"{instance.Name}: {error}");
-                if (!InstanceStore.SameData(instance, readBack))
-                    throw new IOException(
-                        $"{instance.Name}: {InstanceStore.FolderName} doesn't read back the same as settings.json.");
-            }
-
-            File.Copy(file, file + ".bak", true);
-
-            settings.Instances = new ObservableCollection<Instance>(instances.Select(instance =>
-            {
-                if (Directory.Exists(instance.RootPath)) return instance;
-
-                var missing = InstanceStore.Load(instance.RootPath);
-                missing.Name = instance.Name;
-                missing.IsPrimary = instance.IsPrimary;
-                return missing;
-            }));
-            Write(settings, file);
-            return settings;
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException)
-        {
-            settings.Instances = new ObservableCollection<Instance>(instances);
-            settings.UsesLegacyFile = true;
-            settings.LoadProblem = "Couldn't move the instance data into the instance folders " +
-                                   $"({e.Message}). The launcher keeps using settings.json for now and tries " +
-                                   "again at the next start.";
-            return settings;
-        }
     }
 }

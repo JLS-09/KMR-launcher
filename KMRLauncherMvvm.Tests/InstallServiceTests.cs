@@ -150,7 +150,6 @@ public class InstallServiceTests : TempFolderTest
         Assert.All(run.Jobs, j => Assert.Equal(ModInstallState.Done, j.State));
         Assert.Equal(1, _saves);
         Assert.False(Directory.Exists(Path.Combine(_root, ".kmr", "staging")));
-        Assert.False(Directory.Exists(Path.Combine(_root, ".kmr-staging")));
     }
 
     [Fact]

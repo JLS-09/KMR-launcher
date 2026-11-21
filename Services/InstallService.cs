@@ -37,7 +37,6 @@ public class InstallRun
 
 public class InstallService(IModDownloader downloader, Action<Instance> saveInstance)
 {
-    private const string LegacyStagingFolder = ".kmr-staging";
 
     private static readonly Dictionary<string, string> DlcFolders = new()
     {
@@ -419,11 +418,8 @@ public class InstallService(IModDownloader downloader, Action<Instance> saveInst
         return full;
     }
 
-    private static void DeleteEmptyStagingFolders(string root)
-    {
+    private static void DeleteEmptyStagingFolders(string root) =>
         TryDeleteEmptyFolder(InstanceStore.StagingFolder(root));
-        TryDeleteEmptyFolder(Path.Combine(root, LegacyStagingFolder));
-    }
 
     private static bool TryDeleteEmptyFolder(string path)
     {
