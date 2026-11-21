@@ -35,9 +35,9 @@ public class InstallRun
     }
 }
 
-public class InstallService(IModDownloader downloader, Action saveSettings)
+public class InstallService(IModDownloader downloader, Action<Instance> saveInstance)
 {
-    private const string StagingFolder = ".kmr-staging";
+    private const string LegacyStagingFolder = ".kmr-staging";
 
     private static readonly Dictionary<string, string> DlcFolders = new()
     {
@@ -89,14 +89,14 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
             Math.Clamp(maxParallelDownloads, 1, AppSettings.MaxAllowedParallelDownloads), cancellationToken));
 
         Commit(run);
-        saveSettings();
+        saveInstance(run.Instance);
         await Task.Run(() => Cleanup(run.Instance.RootPath, changes));
     }
 
     private async Task<RunChanges> RunCore(InstallRun run, int maxParallelDownloads,
         CancellationToken cancellationToken)
     {
-        var changes = new RunChanges(Path.Combine(run.Instance.RootPath, StagingFolder,
+        var changes = new RunChanges(Path.Combine(InstanceStore.StagingFolder(run.Instance.RootPath),
             $"{DateTime.Now:yyyyMMdd-HHmmss}-{Guid.NewGuid().ToString()[..8]}"));
         using var cancel = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         Exception? failure = null;
@@ -343,7 +343,7 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
     private static void Cleanup(string root, RunChanges changes)
     {
         TryDeleteFolder(changes.StagingPath);
-        TryDeleteEmptyFolder(Path.Combine(root, StagingFolder));
+        DeleteEmptyStagingFolders(root);
 
         var folders = changes.Staged
             .Select(file => Path.GetDirectoryName(file.Replace('/', Path.DirectorySeparatorChar)))
@@ -395,7 +395,7 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
         if (problems.Count == 0)
         {
             TryDeleteFolder(changes.StagingPath);
-            TryDeleteEmptyFolder(Path.Combine(root, StagingFolder));
+            DeleteEmptyStagingFolders(root);
         }
 
         return problems;
@@ -417,6 +417,12 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
         if (!full.StartsWith(fullRoot.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar))
             throw new ModInstallException($"\"{relativePath}\" is outside the instance folder.");
         return full;
+    }
+
+    private static void DeleteEmptyStagingFolders(string root)
+    {
+        TryDeleteEmptyFolder(InstanceStore.StagingFolder(root));
+        TryDeleteEmptyFolder(Path.Combine(root, LegacyStagingFolder));
     }
 
     private static bool TryDeleteEmptyFolder(string path)

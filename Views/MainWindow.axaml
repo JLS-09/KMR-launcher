@@ -198,7 +198,7 @@
             </Border>
 
             <!-- Top bar (padding 16 28, gap 16) + page -->
-            <Grid Grid.Column="1" RowDefinitions="Auto, *">
+            <Grid Grid.Column="1" RowDefinitions="Auto, Auto, *">
                 <Border Grid.Row="0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1" Padding="28 16">
                     <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="16">
                         <TextBlock Grid.Column="0" Classes="h1" Text="{Binding PageTitle}" VerticalAlignment="Center" />
@@ -223,7 +223,21 @@
                         </Button>
                     </Grid>
                 </Border>
-                <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" />
+                <Border Grid.Row="1" Background="{DynamicResource ErrorBox}" BorderBrush="{DynamicResource ErrorBoxLine}"
+                        BorderThickness="0 0 0 1" Padding="28 10" IsVisible="{Binding HasSettingsProblem}">
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+                        <controls:StrokeIcon Grid.Column="0" Data="{StaticResource IconWarning}" Size="16"
+                                             Foreground="{DynamicResource StatusError}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding SettingsProblem}" FontSize="13" LineHeight="19"
+                                   TextWrapping="Wrap" Foreground="{DynamicResource ErrorBoxText}"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="2" Classes="ghost icon small" VerticalAlignment="Center"
+                                Command="{Binding DismissSettingsProblemCommand}" ToolTip.Tip="Hide">
+                            <controls:StrokeIcon Data="{StaticResource IconClose}" Size="14" />
+                        </Button>
+                    </Grid>
+                </Border>
+                <ContentControl Grid.Row="2" Content="{Binding CurrentPage}" />
             </Grid>
         </Grid>
 

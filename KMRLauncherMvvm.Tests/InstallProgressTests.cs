@@ -24,7 +24,7 @@ public class InstallProgressTests
             SelectedInstance = instance,
             FinalModList = new ObservableCollection<PlannedModVersion>(mods.Select(Requested))
         });
-        return new InstallProgressViewModel(new InstallService(new NoDownloads(), () => { }), run, 4);
+        return new InstallProgressViewModel(new InstallService(new NoDownloads(), _ => { }), run, 4);
     }
 
     private static ModInstallJob Job(InstallProgressViewModel progress, string identifier) =>

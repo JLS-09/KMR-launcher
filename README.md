@@ -94,13 +94,19 @@ On Linux:
 
 | Path | Contents |
 |---|---|
-| `~/.config/kmrLauncher/settings.json` | Instances (including the files each installed mod owns) and app settings |
+| `~/.config/kmrLauncher/settings.json` | App settings, KSP zips, the list of instance folders and which one is primary |
+| `<instance>/.kmr/instance.json` | The instance's name, KSP version, compatible KSP versions, launch arguments, Wine prefix path, playtime and last played |
+| `<instance>/.kmr/mods.json` | The instance's installed mods and the files each one owns |
 | `~/.local/share/kmrLauncher/mods.json` | Cached, parsed mod list |
 | `~/.local/share/kmrLauncher/cache/ckan-meta/` | Local clone of CKAN-meta |
 | `~/.local/share/kmrLauncher/cache/downloads/` | Verified mod downloads, shared by all instances |
 | `~/.config/kmrLauncher/prefixes/<instance folder>/` | Wine prefix for each instance (the path is saved per instance and can be changed in its Settings tab; prefixes made before 2026-11 stay in `~/.config/prefixes/<instance name>/`) |
 
-During an install, files of mods that are being removed or replaced are kept in `.kmr-staging/` inside the instance folder until the install has finished.
+An instance folder carries its own mod information, so it can be moved, copied or backed up with its mods. If a folder is moved or deleted, the instance shows as missing on the Instances page, where you can locate the folder or remove the instance from the list. Don't edit `.kmr/` by hand.
+
+During an install, files of mods that are being removed or replaced are kept in `.kmr/staging/` inside the instance folder until the install has finished.
+
+Versions from before November 2026 kept everything in `settings.json`. On the first start of a newer version, each instance's data is moved into its `.kmr/` folder and the old file is kept as `settings.json.bak`. If that fails, the launcher keeps using the old file, shows why, and tries again at the next start.
 
 ## Built with
 

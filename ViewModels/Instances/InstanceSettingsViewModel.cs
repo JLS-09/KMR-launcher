@@ -138,7 +138,8 @@ public partial class InstanceSettingsViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSave))]
     private void Save()
     {
-        if (Apply(App.Settings)) SettingsService.Save(App.Settings);
+        var instance = App.Settings.Instances.FirstOrDefault(i => i.RootPath == RootPath);
+        if (Apply(App.Settings)) SettingsService.Save(App.Settings, instance);
     }
 
     public bool Apply(AppSettings settings)

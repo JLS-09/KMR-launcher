@@ -56,7 +56,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
                 Resolve();
         };
 
-        _instances = App.Settings.Instances;
+        _instances = new ObservableCollection<Instance>(App.Settings.UsableInstances);
         BuildCards();
         InstallModsData.SelectedInstance =
             Instances.FirstOrDefault(i => i.RootPath == target?.RootPath) ?? Instances.FirstOrDefault();

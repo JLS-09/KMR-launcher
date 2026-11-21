@@ -419,7 +419,15 @@
                                                                  Foreground="{DynamicResource AccentText}"
                                                                  IsVisible="{Binding IsPrimary}" />
                                         </StackPanel>
-                                        <Grid ColumnDefinitions="Auto, Auto, *" ColumnSpacing="10">
+                                        <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsMissing}">
+                                            <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="12"
+                                                                 Foreground="{DynamicResource StatusWarning}"
+                                                                 VerticalAlignment="Center" />
+                                            <TextBlock FontSize="12" Text="Missing"
+                                                       Foreground="{DynamicResource StatusWarning}" />
+                                        </StackPanel>
+                                        <Grid ColumnDefinitions="Auto, Auto, *" ColumnSpacing="10"
+                                              IsVisible="{Binding !IsMissing}">
                                             <TextBlock Grid.Column="0" Classes="mono muted" FontSize="12"
                                                        Text="{Binding Version}" />
                                             <TextBlock Grid.Column="1" Classes="muted" FontSize="12"
@@ -449,7 +457,42 @@
         </StackPanel>
 
         <!-- Selected instance: padding 20 28 28, sections 18 px apart -->
-        <Grid Grid.Column="1" RowDefinitions="Auto, Auto, Auto, *, Auto" IsVisible="{Binding HasInstances}">
+        <StackPanel Grid.Column="1" Spacing="14" Margin="28 20 28 18" MaxWidth="640"
+                    HorizontalAlignment="Left" IsVisible="{Binding ShowMissing}">
+            <TextBlock FontSize="26" LineHeight="30" FontFamily="{DynamicResource SpaceGrotesk}"
+                       FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Text="{Binding SelectedName}" />
+            <WrapPanel ItemSpacing="6" LineSpacing="6">
+                <Border Classes="badge warning">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <controls:StrokeIcon Data="{StaticResource IconWarning}" />
+                        <TextBlock Text="Missing" />
+                    </StackPanel>
+                </Border>
+                <TextBlock Classes="mono muted" FontSize="12" Text="{Binding MissingPath}"
+                           VerticalAlignment="Center" Margin="6 0 0 0" />
+            </WrapPanel>
+            <Border Padding="16 14" CornerRadius="9" Background="{DynamicResource ErrorBox}"
+                    BorderBrush="{DynamicResource ErrorBoxLine}" BorderThickness="1">
+                <TextBlock Text="{Binding MissingReason}" FontSize="13" LineHeight="19" TextWrapping="Wrap"
+                           Foreground="{DynamicResource ErrorBoxText}" />
+            </Border>
+            <TextBlock Classes="secondary" FontSize="13" LineHeight="19" TextWrapping="Wrap"
+                       Text="The instance's mods and settings are kept in its folder. If the folder was moved, locate it. Removing the instance from the list doesn't delete anything." />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Classes="secondary" Click="LocateFolder_OnClick">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="16" VerticalAlignment="Center" />
+                        <TextBlock Text="Locate folder…" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="secondary" Content="Remove from list" Command="{Binding RemoveFromListCommand}" />
+            </StackPanel>
+            <TextBlock Text="{Binding ActionError}" FontSize="12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource StatusError}"
+                       IsVisible="{Binding ActionError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+
+        <Grid Grid.Column="1" RowDefinitions="Auto, Auto, Auto, *, Auto" IsVisible="{Binding ShowInstanceDetails}">
             <!-- Header: name + star, chips, path; Open folder, More, Launch -->
             <Grid Grid.Row="0" ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto" ColumnSpacing="16"
                   Margin="28 20 28 18">

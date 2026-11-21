@@ -48,7 +48,18 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [ObservableProperty] private InstanceListItemViewModel? _selectedItem;
     [ObservableProperty] private string _instancesCountText = "0 INSTANCES";
     [ObservableProperty] private bool _sortByName;
-    [ObservableProperty] private bool _hasInstances;
+
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowInstanceDetails), nameof(ShowMissing))]
+    private bool _hasInstances;
+
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowInstanceDetails), nameof(ShowMissing))]
+    private bool _selectedIsMissing;
+
+    [ObservableProperty] private string _missingReason = "";
+    [ObservableProperty] private string _missingPath = "";
+
+    public bool ShowInstanceDetails => HasInstances && !SelectedIsMissing;
+    public bool ShowMissing => HasInstances && SelectedIsMissing;
 
     [ObservableProperty] private Instance? _selected;
     [ObservableProperty] private string _kspText = "";
@@ -141,7 +152,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
                        ?? Instances.FirstOrDefault(i => i.IsPrimary)
                        ?? Instances.FirstOrDefault();
 
-        if (Selected is not null && ReferenceEquals(Selected, previous)) ShowDetails(Selected);
+        if (Selected is { IsMissing: false } && ReferenceEquals(Selected, previous)) ShowDetails(Selected);
 
         foreach (var path in _settingsByPath.Keys.Where(p => settings.Instances.All(i => i.RootPath != p)).ToList())
             _settingsByPath.Remove(path);
@@ -170,7 +181,17 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     partial void OnSelectedChanged(Instance? value)
     {
         ActionError = null;
+        SelectedIsMissing = value?.IsMissing ?? false;
         if (value is null) return;
+
+        if (value.IsMissing)
+        {
+            SelectedName = value.Name;
+            MissingReason = value.LoadError ?? "";
+            MissingPath = value.RootPath;
+            Tab = InstanceTab.Mods;
+            return;
+        }
 
         ShowDetails(value);
         _ = LoadSizes(value);
@@ -430,6 +451,34 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         if (Selected is null) return;
         foreach (var instance in App.Settings.Instances) instance.IsPrimary = instance == Selected;
         SettingsService.Save(App.Settings);
+    }
+
+    [RelayCommand]
+    private void RemoveFromList()
+    {
+        if (Selected is not { IsMissing: true } missing) return;
+        App.Settings.Instances.Remove(missing);
+        SettingsService.Save(App.Settings);
+    }
+
+    public void LocateFolder(string folder)
+    {
+        if (Selected is not { IsMissing: true } missing) return;
+
+        ActionError = null;
+        try
+        {
+            var (found, error) = InstanceStore.Relocate(App.Settings, missing, folder);
+            ActionError = error;
+            if (found is null) return;
+
+            SettingsService.Save(App.Settings);
+            SelectedItem = Instances.FirstOrDefault(i => i.Instance == found) ?? SelectedItem;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            ActionError = $"Couldn't save the instance list: {e.Message}";
+        }
     }
 
     [RelayCommand]

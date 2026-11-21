@@ -40,6 +40,19 @@ public partial class InstancesPageView : UserControl
         if (folders.FirstOrDefault()?.TryGetLocalPath() is { } path) settings.Prefix = path;
     }
 
+    private async void LocateFolder_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not InstancesPageViewModel vm) return;
+        if (TopLevel.GetTopLevel(this)?.StorageProvider is not { } storage) return;
+
+        var folders = await storage.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Locate the instance folder",
+            AllowMultiple = false
+        });
+        if (folders.FirstOrDefault()?.TryGetLocalPath() is { } path) vm.LocateFolder(path);
+    }
+
     private void CloseDeleteFlyout(object? sender, RoutedEventArgs e) => DeleteButton.Flyout?.Hide();
 
     private void ConfirmDelete(object? sender, RoutedEventArgs e)

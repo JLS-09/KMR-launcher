@@ -14,6 +14,7 @@ public class InstanceListItemViewModel(Instance instance)
     public bool IsPrimary => Instance.IsPrimary;
     public string ModsText => $"{Instance.Mods.Count} mods";
     public string LastPlayedText => InstanceTexts.LastPlayed(Instance);
+    public bool IsMissing => Instance.IsMissing;
 }
 
 public partial class InstalledModRowViewModel : ObservableObject
