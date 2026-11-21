@@ -33,19 +33,26 @@
             <Setter Property="IsVisible" Value="True" />
         </Style>
 
-        <!-- Stat cells: padding 12 16, a line on the left -->
+        <!-- Stat cells: padding 7 16, a line on the left -->
         <Style Selector="Border.stat">
-            <Setter Property="Padding" Value="16 12" />
+            <Setter Property="Padding" Value="16 7" />
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
             <Setter Property="BorderThickness" Value="1 0 0 0" />
         </Style>
+        <Style Selector="Border.stat TextBlock.label">
+            <Setter Property="LineHeight" Value="16" />
+        </Style>
         <Style Selector="TextBlock.statValue">
             <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
-            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="LineHeight" Value="22" />
             <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
         </Style>
         <Style Selector="TextBlock.statDetail">
             <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="Margin" Value="0 0 0 3" />
             <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
@@ -498,38 +505,46 @@
             <Border Grid.Row="1" Margin="28 0" BorderBrush="{DynamicResource Line}" BorderThickness="0 1">
                 <UniformGrid x:Name="StatsGrid" ClipToBounds="True">
                     <Border Classes="stat" Margin="-1 0 0 0">
-                        <StackPanel Spacing="4">
+                        <StackPanel Spacing="1">
                             <TextBlock Classes="label" Text="MODS" />
-                            <TextBlock Classes="statValue" Text="{Binding ModsCount}" />
-                            <TextBlock Classes="statDetail" Text="{Binding ModsDetail}" />
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
+                                <TextBlock Classes="statValue" Text="{Binding ModsCount}" />
+                                <TextBlock Grid.Column="1" Classes="statDetail" Text="{Binding ModsDetail}" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                     <Border Classes="stat">
-                        <StackPanel Spacing="4">
+                        <StackPanel Spacing="1">
                             <TextBlock Classes="label" Text="PLAYTIME" />
-                            <TextBlock Classes="statValue" Text="{Binding PlayTime}" />
-                            <TextBlock Classes="statDetail" Text="in total" />
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
+                                <TextBlock Grid.Column="0" Classes="statValue" Text="{Binding PlayTime}" />
+                                <TextBlock Grid.Column="1" Classes="statDetail" Text="in total" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                     <Border x:Name="Stat3" Classes="stat">
-                        <StackPanel Spacing="4">
+                        <StackPanel Spacing="1">
                             <TextBlock Classes="label" Text="LAST PLAYED" />
-                            <TextBlock Classes="statValue" Text="{Binding LastPlayed}" />
-                            <TextBlock Classes="statDetail" Text="{Binding LastPlayedDetail}" />
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
+                                <TextBlock Grid.Column="0" Classes="statValue" Text="{Binding LastPlayed}" />
+                                <TextBlock Grid.Column="1" Classes="statDetail" Text="{Binding LastPlayedDetail}" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                     <Border x:Name="Stat4" Classes="stat">
-                        <StackPanel Spacing="4">
+                        <StackPanel Spacing="1">
                             <TextBlock Classes="label" Text="INSTALL SIZE" />
-                            <TextBlock Classes="statValue" Text="{Binding InstallSize}" />
-                            <TextBlock Classes="statDetail" Text="{Binding GameDataSize}" />
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
+                                <TextBlock Grid.Column="0" Classes="statValue" Text="{Binding InstallSize}" />
+                                <TextBlock Grid.Column="1" Classes="statDetail" Text="{Binding GameDataSize}" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                 </UniformGrid>
             </Border>
 
             <!-- Tabs -->
-            <Border Grid.Row="2" Margin="28 18 28 0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
+            <Border Grid.Row="2" Margin="28 5 28 0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
                 <StackPanel Orientation="Horizontal" Spacing="24">
                     <RadioButton Classes="tab" GroupName="instanceTab"
                                  IsChecked="{Binding Tab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Mods}}"
@@ -553,12 +568,12 @@
             </Border>
 
             <!-- Mods tab -->
-            <Grid Grid.Row="3" RowDefinitions="Auto, Auto, *, Auto" Margin="28 18 28 0"
+            <Grid Grid.Row="3" RowDefinitions="Auto, Auto, *, Auto" Margin="28 10 28 0"
                   IsVisible="{Binding Tab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Mods}}">
                 <!-- Filter, filters with counts, Update N, Add mods -->
                 <!-- The filter box shrinks from 260 to 180 px before anything else (flex: 0 1 260px in the mockup);
                      at the smallest window sizes down to 140, so Update N and Add mods still fit -->
-                <Grid Grid.Row="0" ColumnSpacing="10" RowSpacing="10" RowDefinitions="Auto, Auto" Margin="0 0 0 18">
+                <Grid Grid.Row="0" ColumnSpacing="10" RowSpacing="10" RowDefinitions="Auto, Auto" Margin="0 0 0 10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1000*" MinWidth="140" MaxWidth="260" />
                         <ColumnDefinition Width="Auto" />
