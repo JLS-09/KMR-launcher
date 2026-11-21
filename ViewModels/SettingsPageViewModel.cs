@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -21,6 +22,8 @@ public partial class SettingsPageViewModel : PageViewModel
     private readonly ZipService? _zipService;
     private readonly IModApiService? _api;
     private readonly SyncStatusService? _syncStatus;
+    private readonly DownloadCache? _cache;
+    private readonly StatusBarViewModel? _statusBar;
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(HasNoZips))]
     private IReadOnlyList<KspZipRow> _kspZips = [];
@@ -37,6 +40,21 @@ public partial class SettingsPageViewModel : PageViewModel
     [ObservableProperty] private string? _openError;
     [ObservableProperty] private bool _fetchOnStartup;
 
+    [ObservableProperty] private string _inUseText = "–";
+    [ObservableProperty] private string _unusedText = "–";
+    [ObservableProperty] private string _archivesText = "";
+    [ObservableProperty] private GridLength _inUseWidth = new(0, GridUnitType.Star);
+    [ObservableProperty] private GridLength _unusedWidth = new(0, GridUnitType.Star);
+    [ObservableProperty] private string _removeUnusedText = "";
+    [ObservableProperty] private string _clearAllText = "";
+    [ObservableProperty] private string? _cacheError;
+
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(RemoveUnusedCommand))]
+    private bool _hasUnused;
+
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(ClearCacheCommand))]
+    private bool _hasArchives;
+
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(FetchNowCommand))]
     private bool _isFetching;
 
@@ -44,12 +62,17 @@ public partial class SettingsPageViewModel : PageViewModel
     public string RepoUrlText => GitHelper.CkanMetaUrl.Replace("https://", "");
     public string BranchText => GitHelper.CkanMetaBranch;
     public string LocalCopyText => InstanceTexts.ShortPath(GitHelper.DefaultCkanMetaFolder);
+    public string CacheFolderText => _cache is null ? "" : InstanceTexts.ShortPath(_cache.Folder);
 
-    public SettingsPageViewModel(ZipService zipService, IModApiService api, SyncStatusService syncStatus) : this()
+    public SettingsPageViewModel(ZipService zipService, IModApiService api, SyncStatusService syncStatus,
+        DownloadCache cache, StatusBarViewModel statusBar) : this()
     {
         _zipService = zipService;
         _api = api;
         _syncStatus = syncStatus;
+        _cache = cache;
+        _statusBar = statusBar;
+        _ = MeasureCacheAsync();
         _syncStatus.Changed += () => Dispatcher.UIThread.Post(LoadRepoState);
 
         LoadZips();
@@ -125,6 +148,74 @@ public partial class SettingsPageViewModel : PageViewModel
             OpenError = $"Couldn't open the folder: {e.Message}";
         }
     }
+
+    [RelayCommand]
+    private void OpenCacheFolder()
+    {
+        if (_cache is null) return;
+
+        try
+        {
+            Directory.CreateDirectory(_cache.Folder);
+            Helpers.OpenFolder(_cache.Folder);
+        }
+        catch (Exception e)
+        {
+            CacheError = $"Couldn't open the folder: {e.Message}";
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(HasUnused))]
+    private async Task RemoveUnused()
+    {
+        if (_cache is null) return;
+
+        var instances = App.Settings.Instances.ToList();
+        await Cleanup(() => _cache.RemoveUnused(instances));
+    }
+
+    [RelayCommand(CanExecute = nameof(HasArchives))]
+    private async Task ClearCache()
+    {
+        if (_cache is null) return;
+
+        await Cleanup(_cache.ClearAll);
+    }
+
+    private async Task Cleanup(Func<CacheCleanup> cleanup)
+    {
+        CacheError = null;
+        var result = await Task.Run(cleanup);
+        if (result.Failed > 0)
+            CacheError = $"{result.Failed} {Plural(result.Failed, "archive")} couldn't be deleted.";
+
+        await MeasureCacheAsync();
+        if (_statusBar is not null) await _statusBar.RefreshAsync();
+    }
+
+    private async Task MeasureCacheAsync()
+    {
+        if (_cache is null) return;
+
+        var instances = App.Settings.Instances.ToList();
+        var usage = await Task.Run(() => _cache.Measure(instances));
+
+        InUseText = InstalledMods.FormatSize(usage.InUseBytes);
+        UnusedText = InstalledMods.FormatSize(usage.UnusedBytes);
+        ArchivesText = $"{usage.ArchiveCount:N0} {Plural(usage.ArchiveCount, "archive")}";
+        InUseWidth = new GridLength(usage.InUseBytes, GridUnitType.Star);
+        UnusedWidth = new GridLength(usage.UnusedBytes, GridUnitType.Star);
+        HasUnused = usage.UnusedCount > 0;
+        HasArchives = usage.ArchiveCount > 0;
+        RemoveUnusedText = $"Deletes {usage.UnusedCount:N0} {Plural(usage.UnusedCount, "archive")} " +
+                           $"({UnusedText}) that no instance has installed. They're downloaded again if an " +
+                           "install needs them.";
+        ClearAllText = $"Deletes all {usage.ArchiveCount:N0} {Plural(usage.ArchiveCount, "archive")} " +
+                       $"({InstalledMods.FormatSize(usage.InUseBytes + usage.UnusedBytes)}). Installed mods stay; " +
+                       "they're downloaded again when you update or reinstall them.";
+    }
+
+    private static string Plural(int count, string word) => count == 1 ? word : word + "s";
 
     partial void OnFetchOnStartupChanged(bool value)
     {

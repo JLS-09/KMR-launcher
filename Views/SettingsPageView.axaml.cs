@@ -77,4 +77,24 @@ public partial class SettingsPageView : UserControl
         });
         if (files.FirstOrDefault()?.TryGetLocalPath() is { } path) vm.AddKspZip(path);
     }
+
+    private void CloseCacheFlyouts(object? sender, RoutedEventArgs e)
+    {
+        RemoveUnusedButton.Flyout?.Hide();
+        ClearCacheButton.Flyout?.Hide();
+    }
+
+    private void ConfirmRemoveUnused(object? sender, RoutedEventArgs e)
+    {
+        RemoveUnusedButton.Flyout?.Hide();
+        if (DataContext is SettingsPageViewModel { RemoveUnusedCommand: var remove } && remove.CanExecute(null))
+            remove.Execute(null);
+    }
+
+    private void ConfirmClearCache(object? sender, RoutedEventArgs e)
+    {
+        ClearCacheButton.Flyout?.Hide();
+        if (DataContext is SettingsPageViewModel { ClearCacheCommand: var clear } && clear.CanExecute(null))
+            clear.Execute(null);
+    }
 }

@@ -53,6 +53,7 @@ public class App : Application
         collection.AddSingleton(dependencyService);
         var downloader = new ModDownloader(ModDownloader.CreateHttpClient(), ModDownloader.DefaultCacheFolder);
         collection.AddSingleton<IModDownloader>(downloader);
+        collection.AddSingleton(new DownloadCache(ModDownloader.DefaultCacheFolder, downloader.CachePath));
         collection.AddSingleton(new InstallService(downloader, instance => SettingsService.Save(App.Settings, instance, modsChanged: true)));
         
         collection.AddTransient<MainWindowViewModel>();

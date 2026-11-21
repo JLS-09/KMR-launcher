@@ -289,6 +289,115 @@
                                 </StackPanel>
                             </Grid>
                         </Border>
+                        <Border Classes="settingsRow">
+                            <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto"
+                                  ColumnSpacing="24">
+                                <StackPanel Classes="rowLabel">
+                                    <TextBlock Classes="rowTitle" Text="Cache folder" />
+                                    <TextBlock Classes="rowHint"
+                                               Text="Downloads are checked against their hash before they are cached." />
+                                </StackPanel>
+                                <StackPanel Classes="rowValue" Spacing="6">
+                                    <StackPanel Classes="rowControls">
+                                        <TextBlock Classes="mono secondary" FontSize="12" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" Text="{Binding CacheFolderText}" />
+                                        <Button Classes="secondary small" Command="{Binding OpenCacheFolderCommand}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="14"
+                                                                     VerticalAlignment="Center" />
+                                                <TextBlock Text="Open" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Classes="settingsRow">
+                            <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto"
+                                  ColumnSpacing="24">
+                                <StackPanel Classes="rowLabel">
+                                    <TextBlock Classes="rowTitle" Text="Cache size" />
+                                </StackPanel>
+                                <Grid Classes="rowValue">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" MaxWidth="520" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="8">
+                                        <Border Height="8" CornerRadius="4" ClipToBounds="True"
+                                                Background="{DynamicResource Off}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="{Binding InUseWidth}" />
+                                                    <ColumnDefinition Width="{Binding UnusedWidth}" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Background="{DynamicResource TextSecondary}" />
+                                                <Border Grid.Column="1" Background="{DynamicResource StatusWarning}" />
+                                            </Grid>
+                                        </Border>
+                                        <WrapPanel ItemSpacing="16" LineSpacing="6">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Border Width="8" Height="8" CornerRadius="2" VerticalAlignment="Center"
+                                                        Background="{DynamicResource TextSecondary}" />
+                                                <TextBlock Classes="secondary" FontSize="12" Text="In use" />
+                                                <TextBlock Classes="mono secondary" FontSize="12" Text="{Binding InUseText}" />
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Border Width="8" Height="8" CornerRadius="2" VerticalAlignment="Center"
+                                                        Background="{DynamicResource StatusWarning}" />
+                                                <TextBlock Classes="secondary" FontSize="12" Text="Not used by any instance" />
+                                                <TextBlock Classes="mono secondary" FontSize="12" Text="{Binding UnusedText}" />
+                                            </StackPanel>
+                                            <TextBlock Classes="mono muted" FontSize="12" Text="{Binding ArchivesText}" />
+                                        </WrapPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <Button Name="RemoveUnusedButton" Classes="secondary small"
+                                                    Content="Remove unused" IsEnabled="{Binding HasUnused}">
+                                                <Button.Flyout>
+                                                    <Flyout Placement="TopEdgeAlignedLeft">
+                                                        <StackPanel Width="300" Spacing="12">
+                                                            <TextBlock FontSize="14" FontWeight="SemiBold"
+                                                                       Text="Remove unused downloads?" />
+                                                            <TextBlock Classes="secondary" FontSize="12" TextWrapping="Wrap"
+                                                                       Text="{Binding RemoveUnusedText}" />
+                                                            <StackPanel Orientation="Horizontal" Spacing="8"
+                                                                        HorizontalAlignment="Right">
+                                                                <Button Classes="ghost small" Content="Cancel"
+                                                                        Click="CloseCacheFlyouts" />
+                                                                <Button Classes="danger small" Content="Remove"
+                                                                        Click="ConfirmRemoveUnused" />
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                            <Button Name="ClearCacheButton" Classes="ghost small" Content="Clear all"
+                                                    IsEnabled="{Binding HasArchives}">
+                                                <Button.Flyout>
+                                                    <Flyout Placement="TopEdgeAlignedLeft">
+                                                        <StackPanel Width="300" Spacing="12">
+                                                            <TextBlock FontSize="14" FontWeight="SemiBold"
+                                                                       Text="Clear the download cache?" />
+                                                            <TextBlock Classes="secondary" FontSize="12" TextWrapping="Wrap"
+                                                                       Text="{Binding ClearAllText}" />
+                                                            <StackPanel Orientation="Horizontal" Spacing="8"
+                                                                        HorizontalAlignment="Right">
+                                                                <Button Classes="ghost small" Content="Cancel"
+                                                                        Click="CloseCacheFlyouts" />
+                                                                <Button Classes="danger small" Content="Clear all"
+                                                                        Click="ConfirmClearCache" />
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                        </StackPanel>
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}"
+                                                   TextWrapping="Wrap" Text="{Binding CacheError}"
+                                                   IsVisible="{Binding CacheError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
                     </StackPanel>
                 </StackPanel>
             </Grid>
