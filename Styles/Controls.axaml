@@ -803,6 +803,17 @@
         <Setter Property="FontSize" Value="16" />
     </Style>
 
+    <!-- Placeholder: looks like the real control, can't be used, and the tooltip says which phase builds it -->
+    <Style Selector="Border.soon">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.soon > :is(Control)">
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+    </Style>
+
     <!-- Settings pages (launcher Settings and the instance Settings tab). Sections: padding 22 0 8 with a line on top
          (the first one without a line); title 16 px, 12 px under it. Rows: label column 220 px, gap 24, padding 14 0,
          a line on top. -->

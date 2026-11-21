@@ -97,16 +97,6 @@
             <Setter Property="Height" Value="30" />
             <Setter Property="Padding" Value="12 0" />
         </Style>
-        <!-- Placeholder: looks like the real control, can't be used, and the tooltip says which phase builds it -->
-        <Style Selector="Border.soon">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="HorizontalAlignment" Value="Left" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <Style Selector="Border.soon > :is(Control)">
-            <Setter Property="IsHitTestVisible" Value="False" />
-            <Setter Property="Focusable" Value="False" />
-        </Style>
         <!-- Compatible KSP versions: rows of 52 / 120 / rest, padding 8 0, a line on top -->
         <Style Selector="Border.versionRow">
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />

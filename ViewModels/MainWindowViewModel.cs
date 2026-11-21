@@ -194,9 +194,8 @@ public partial class MainWindowViewModel : ViewModelBase
             else if (_api is not null)
                 await Task.Run(() => _api.GetAllModsAsync(null, true));
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            StatusBar.ShowSyncFailed(e.Message);
         }
         finally
         {

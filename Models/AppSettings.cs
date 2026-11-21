@@ -20,6 +20,8 @@ public class AppSettings
 
     public int MaxParallelDownloads { get; set; } = DefaultParallelDownloads;
 
+    public bool FetchOnStartup { get; set; } = true;
+
     public string AccentColor { get; set; } = "#DF0105";
 
     public const int DefaultParallelDownloads = 4;

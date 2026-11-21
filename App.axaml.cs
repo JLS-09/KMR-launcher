@@ -39,6 +39,7 @@ public class App : Application
         var dependencyService = new DependencyService(modListService, compatibilityService);
         
         var collection = new ServiceCollection();
+        collection.AddSingleton<SyncStatusService>();
         collection.AddSingleton<StatusBarViewModel>();
         collection.AddSingleton<GameSessionService>();
         collection.AddSingleton<NavigationService>();

@@ -101,6 +101,7 @@ On Linux:
 | `~/.local/share/kmrLauncher/cache/ckan-meta/` | Local clone of CKAN-meta |
 | `~/.local/share/kmrLauncher/cache/downloads/` | Verified mod downloads, shared by all instances |
 | `~/.config/kmrLauncher/prefixes/<instance folder>/` | Wine prefix for each instance (the path is saved per instance and can be changed in its Settings tab; prefixes made before 2026-11 stay in `~/.config/prefixes/<instance name>/`) |
+| `~/.local/share/kmrLauncher/sync.json` | Time and commit of the last CKAN-meta fetch, and the last fetch error |
 
 An instance folder carries its own mod information, so it can be moved, copied or backed up with its mods. If a folder is moved or deleted, the instance shows as missing on the Instances page, where you can locate the folder or remove the instance from the list. Don't edit `.kmr/` by hand.
 

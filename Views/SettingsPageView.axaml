@@ -54,6 +54,35 @@
         <Style Selector="Border.zipRow:pointerover">
             <Setter Property="Background" Value="{DynamicResource RowHover}" />
         </Style>
+        <Style Selector="StackPanel.repoState Ellipse">
+            <Setter Property="Fill" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="StackPanel.repoState TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="StackPanel.repoState.fits Ellipse">
+            <Setter Property="Fill" Value="{DynamicResource StatusFits}" />
+        </Style>
+        <Style Selector="StackPanel.repoState.fits TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
+        </Style>
+        <Style Selector="StackPanel.repoState.failed Ellipse">
+            <Setter Property="Fill" Value="{DynamicResource StatusError}" />
+        </Style>
+        <Style Selector="StackPanel.repoState.failed TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+        </Style>
+        <Style Selector="TextBlock.fieldValue">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style Selector="UniformGrid.repoFields">
+            <Setter Property="Columns" Value="4" />
+        </Style>
+        <Style Selector=":is(UserControl).stacked UniformGrid.repoFields">
+            <Setter Property="Columns" Value="2" />
+        </Style>
         <Style Selector="TextBlock.missing">
             <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
         </Style>
@@ -63,6 +92,8 @@
         <Border Grid.Column="0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 1 0" Padding="12 20">
             <StackPanel Spacing="2">
                 <Button Name="KspNav" Classes="sectionNav active" Content="KSP versions"
+                        Click="SectionNav_OnClick" />
+                <Button Name="ReposNav" Classes="sectionNav" Content="Mod repositories"
                         Click="SectionNav_OnClick" />
                 <Button Name="DownloadsNav" Classes="sectionNav" Content="Downloads and cache"
                         Click="SectionNav_OnClick" />
@@ -125,6 +156,118 @@
                                            Text="{Binding AddZipError}"
                                            IsVisible="{Binding AddZipError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                             </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <Border Classes="sectionLine" />
+                    <StackPanel Name="ReposSection" Classes="settingsSection">
+                        <TextBlock Classes="h2 sectionTitle" Text="Mod repositories" />
+                        <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 16">
+                            <StackPanel Spacing="14">
+                                <Grid ColumnDefinitions="Auto, Auto, Auto, *, Auto, Auto" ColumnSpacing="10">
+                                    <TextBlock Grid.Column="0" FontSize="14" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" Text="CKAN-meta" />
+                                    <Border Grid.Column="1" Classes="chip plain" VerticalAlignment="Center"
+                                            ToolTip.Tip="Priorities matter once more repositories can be added (Phase 8)">
+                                        <TextBlock Classes="mono" Text="Priority 1" />
+                                    </Border>
+                                    <StackPanel Grid.Column="2" Classes="repoState" Orientation="Horizontal" Spacing="6"
+                                                VerticalAlignment="Center" Background="Transparent"
+                                                Classes.fits="{Binding IsUpToDate}"
+                                                Classes.failed="{Binding IsFetchFailed}"
+                                                ToolTip.Tip="{Binding RepoStateHint}">
+                                        <Ellipse Width="7" Height="7" VerticalAlignment="Center" />
+                                        <TextBlock FontSize="12" VerticalAlignment="Center"
+                                                   Text="{Binding RepoStateText}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="4" Classes="secondary small"
+                                            Command="{Binding FetchNowCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <controls:StrokeIcon Data="{StaticResource IconRefresh}" Size="14"
+                                                                 VerticalAlignment="Center" />
+                                            <TextBlock Text="Fetch now" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="5" Classes="secondary small icon" CornerRadius="8"
+                                            AutomationProperties.Name="Open local copy" ToolTip.Tip="Open local copy"
+                                            Command="{Binding OpenLocalCopyCommand}">
+                                        <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="16" />
+                                    </Button>
+                                </Grid>
+                                <UniformGrid Classes="repoFields" ColumnSpacing="12" RowSpacing="12">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Classes="label" Text="URL" />
+                                        <TextBlock Classes="fieldValue" Text="{Binding RepoUrlText}"
+                                                   ToolTip.Tip="{Binding RepoUrlText}" />
+                                    </StackPanel>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Classes="label" Text="BRANCH" />
+                                        <TextBlock Classes="fieldValue" Text="{Binding BranchText}" />
+                                    </StackPanel>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Classes="label" Text="LAST FETCH" />
+                                        <TextBlock Classes="fieldValue" Text="{Binding LastFetchText}" />
+                                    </StackPanel>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Classes="label" Text="LOCAL COPY" />
+                                        <TextBlock Classes="fieldValue" Text="{Binding LocalCopyText}"
+                                                   ToolTip.Tip="{Binding LocalCopyText}" />
+                                    </StackPanel>
+                                </UniformGrid>
+                                <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}" TextWrapping="Wrap"
+                                           Text="{Binding FetchError}"
+                                           IsVisible="{Binding FetchError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}" TextWrapping="Wrap"
+                                           Text="{Binding OpenError}"
+                                           IsVisible="{Binding OpenError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="settingsRow">
+                            <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto"
+                                  ColumnSpacing="24">
+                                <StackPanel Classes="rowLabel">
+                                    <TextBlock Classes="rowTitle" Text="Fetch on startup" />
+                                </StackPanel>
+                                <StackPanel Classes="rowValue rowControls">
+                                    <ToggleButton Classes="switch" HorizontalAlignment="Left"
+                                                  AutomationProperties.Name="Fetch on startup"
+                                                  IsChecked="{Binding FetchOnStartup}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Classes="settingsRow">
+                            <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto"
+                                  ColumnSpacing="24">
+                                <StackPanel Classes="rowLabel">
+                                    <TextBlock Classes="rowTitle" Text="Offline" />
+                                </StackPanel>
+                                <Border Classes="rowValue soon" ToolTip.Tip="Offline handling comes in Phase 7 (task 4)">
+                                    <StackPanel Classes="rowControls">
+                                        <ToggleButton Classes="switch" IsChecked="True" />
+                                        <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center"
+                                                   Text="Use the cached list when a fetch fails" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <Border Classes="settingsRow">
+                            <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto"
+                                  ColumnSpacing="24">
+                                <StackPanel Classes="rowLabel">
+                                    <TextBlock Classes="rowTitle" Text="More repositories" />
+                                    <TextBlock Classes="rowHint"
+                                               Text="Mods with the same identifier come from the repository with the highest priority." />
+                                </StackPanel>
+                                <Border Classes="rowValue soon" ToolTip.Tip="More repositories come in Phase 8">
+                                    <Button Classes="secondary">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="16"
+                                                                 VerticalAlignment="Center" />
+                                            <TextBlock Text="Add repository" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </Border>
+                            </Grid>
                         </Border>
                     </StackPanel>
 

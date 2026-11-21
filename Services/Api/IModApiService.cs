@@ -6,5 +6,5 @@ namespace KMRLauncherMvvm.Services.Api;
 
 public interface IModApiService
 {
-    Task GetAllModsAsync(IProgress<ModFetchProgress>? progress, bool isRefresh);
+    Task GetAllModsAsync(IProgress<ModFetchProgress>? progress, bool isRefresh, bool cacheOnly = false);
 }

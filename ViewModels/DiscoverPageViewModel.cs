@@ -100,7 +100,8 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         try
         {
             var progress = new Progress<ModFetchProgress>(p => LoadProgress = p);
-            await Task.Run(() => _api.GetAllModsAsync(progress, isRefresh));
+            var cacheOnly = !isRefresh && App.Settings is { FetchOnStartup: false };
+            await Task.Run(() => _api.GetAllModsAsync(progress, isRefresh, cacheOnly));
             LoadRows(_modListService.Mods ?? []);
         }
         finally

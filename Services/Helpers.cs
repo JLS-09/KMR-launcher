@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -42,4 +43,7 @@ public static class Helpers
         var num = Math.Round(bytes / Math.Pow(1024, place), 2);
         return Math.Sign(byteCount) * num + " " + suf[place];
     }
+
+    public static void OpenFolder(string folder) =>
+        Process.Start(new ProcessStartInfo(folder) { UseShellExecute = true });
 }
