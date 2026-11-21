@@ -18,6 +18,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly PageFactory _pageFactory;
     private readonly IModApiService _api;
     private readonly GameSessionService _session;
+    private readonly InstanceService _instances;
     private readonly DispatcherTimer _runningTimer;
     private DateTime _runningSince;
 
@@ -91,7 +92,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public StatusBarViewModel StatusBar { get; }
 
     public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar, IModApiService api,
-        GameSessionService session, NavigationService navigation, DialogService dialogs)
+        GameSessionService session, NavigationService navigation, DialogService dialogs, InstanceService instances)
     {
         dialogs.Changed += () => SyncDialogs(dialogs);
         _pageFactory = pageFactory;
@@ -108,8 +109,9 @@ public partial class MainWindowViewModel : ViewModelBase
         _runningTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _runningTimer.Tick += (_, _) => RunningTime = (DateTime.Now - _runningSince).ToString(@"hh\:mm\:ss");
 
-        LoadInstances(App.Settings);
-        SettingsService.SettingsChanged += (_, settings) => LoadInstances(settings);
+        _instances = instances;
+        LoadInstances();
+        instances.Changed += LoadInstances;
 
         GoToHome();
     }
@@ -118,11 +120,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     partial void OnSearchTextChanged(string value) => (CurrentPage as ISearchablePage)?.ApplySearch(value);
 
-    private void LoadInstances(AppSettings settings)
+    private void LoadInstances()
     {
+        var settings = _instances.Settings;
         InstanceCount = settings.Instances.Count;
-        PrimaryInstance = settings.UsableInstances.FirstOrDefault(i => i.IsPrimary) ??
-                          settings.UsableInstances.FirstOrDefault();
+        PrimaryInstance = _instances.Primary;
         if (settings.LoadProblem != _dismissedSettingsProblem) SettingsProblem = settings.LoadProblem;
     }
 
@@ -147,6 +149,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void ShowPage(ApplicationPageNames name)
     {
+        CurrentPage?.Dispose();
         CurrentPage = _pageFactory.GetPageViewModel(name);
         _ = StatusBar.RefreshAsync();
     }

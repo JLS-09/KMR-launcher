@@ -209,7 +209,7 @@ public class InstanceSettingsTests
         vm.LaunchArguments = "";
         vm.Versions.Groups[1].AllowAll = true;
 
-        Assert.True(vm.Apply(settings));
+        Assert.True(vm.Apply());
 
         Assert.Equal("RP-1 Express", instance.Name);
         Assert.True(instance.IsPrimary);
@@ -228,7 +228,7 @@ public class InstanceSettingsTests
         vm = new InstanceSettingsViewModel(instance, settings.Instances);
 
         vm.Prefix = "";
-        vm.Apply(settings);
+        vm.Apply();
 
         Assert.Equal(WinePrefixes.DefaultFor(instance, settings.Instances), instance.PrefixPath);
     }
@@ -241,7 +241,7 @@ public class InstanceSettingsTests
         var vm = new InstanceSettingsViewModel(instance, settings.Instances);
 
         vm.Versions.Groups[1].AllowAll = true;
-        vm.Apply(settings);
+        vm.Apply();
 
         Assert.Contains("1.13", instance.CompatibleKspVersions);
     }

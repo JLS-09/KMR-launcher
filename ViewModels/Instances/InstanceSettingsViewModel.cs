@@ -10,6 +10,8 @@ namespace KMRLauncherMvvm.ViewModels.Instances;
 
 public partial class InstanceSettingsViewModel : ObservableObject
 {
+    private readonly IReadOnlyList<Instance> _instances;
+    private readonly Action<Instance>? _save;
     private Snapshot _saved;
 
     public string RootPath { get; }
@@ -27,8 +29,11 @@ public partial class InstanceSettingsViewModel : ObservableObject
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(SaveCommand), nameof(RevertCommand))]
     private bool _hasChanges;
 
-    public InstanceSettingsViewModel(Instance instance, IEnumerable<Instance> allInstances)
+    public InstanceSettingsViewModel(Instance instance, IReadOnlyList<Instance> allInstances,
+        Action<Instance>? save = null)
     {
+        _instances = allInstances;
+        _save = save;
         RootPath = instance.RootPath;
         FolderText = InstanceTexts.ShortPath(instance.RootPath);
         DefaultPrefix = InstanceTexts.ShortPath(WinePrefixes.DefaultFor(instance, allInstances));
@@ -76,18 +81,18 @@ public partial class InstanceSettingsViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSave))]
     private void Save()
     {
-        var instance = App.Settings.Instances.FirstOrDefault(i => i.RootPath == RootPath);
-        if (Apply(App.Settings)) SettingsService.Save(App.Settings, instance);
+        var instance = _instances.FirstOrDefault(i => i.RootPath == RootPath);
+        if (instance is not null && Apply()) _save?.Invoke(instance);
     }
 
-    public bool Apply(AppSettings settings)
+    public bool Apply()
     {
-        var instance = settings.Instances.FirstOrDefault(i => i.RootPath == RootPath);
+        var instance = _instances.FirstOrDefault(i => i.RootPath == RootPath);
         if (instance is null || !CanSave()) return false;
 
         instance.Name = Name.Trim();
         if (IsPrimary)
-            foreach (var other in settings.Instances)
+            foreach (var other in _instances)
                 other.IsPrimary = other == instance;
         else
             instance.IsPrimary = false;

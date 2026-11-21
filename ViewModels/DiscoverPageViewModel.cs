@@ -21,6 +21,7 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     private readonly IModApiService _api;
     private readonly InstallFlow _installFlow;
     private readonly ModListService _modListService;
+    private readonly InstanceService _instances;
 
     private List<ModListItemViewModel> _allRows = [];
     private Dictionary<string, int> _neededBy = [];
@@ -59,7 +60,8 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     [ObservableProperty] private bool _hasSelectedMods;
     [ObservableProperty] private Instance? _installTarget;
 
-    public DiscoverPageViewModel(IModApiService api, ModListService modListService, InstallFlow installFlow)
+    public DiscoverPageViewModel(IModApiService api, ModListService modListService, InstallFlow installFlow,
+        InstanceService instances)
     {
         PageName = ApplicationPageNames.Discover;
         SelectedMods.CollectionChanged += (_, _) => HasSelectedMods = SelectedMods.Count > 0;
@@ -71,13 +73,16 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         _api = api;
         _modListService = modListService;
         _installFlow = installFlow;
+        _instances = instances;
 
-        LoadInstances(App.Settings);
-        SettingsService.SettingsChanged += (_, settings) => LoadInstances(settings);
+        LoadInstances();
+        instances.Changed += LoadInstances;
 
         if (modListService.Mods is null) _ = FetchMods();
         else LoadRows(modListService.Mods);
     }
+
+    public override void Dispose() => _instances.Changed -= LoadInstances;
 
     public void ApplySearch(string text)
     {
@@ -93,7 +98,7 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         try
         {
             var progress = new Progress<ModFetchProgress>(p => LoadProgress = p);
-            var cacheOnly = !isRefresh && App.Settings is { FetchOnStartup: false };
+            var cacheOnly = !isRefresh && !_instances.Settings.FetchOnStartup;
             await Task.Run(() => _api.GetAllModsAsync(progress, isRefresh, cacheOnly));
             LoadRows(_modListService.Mods ?? []);
         }
@@ -103,15 +108,15 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         }
     }
 
-    private void LoadInstances(AppSettings settings)
+    private void LoadInstances()
     {
         var checkPath = CheckAgainst?.RootPath;
         var targetPath = InstallTarget?.RootPath;
 
         Instances.Clear();
-        foreach (var instance in settings.UsableInstances) Instances.Add(instance);
+        foreach (var instance in _instances.Usable) Instances.Add(instance);
 
-        var primary = Instances.FirstOrDefault(i => i.IsPrimary) ?? Instances.FirstOrDefault();
+        var primary = _instances.Primary;
         CheckAgainst = Instances.FirstOrDefault(i => i.RootPath == checkPath) ?? primary;
         InstallTarget = Instances.FirstOrDefault(i => i.RootPath == targetPath) ?? CheckAgainst;
 

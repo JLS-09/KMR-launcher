@@ -17,17 +17,6 @@ public static class SettingsService
         WriteIndented = true
     };
 
-    public static event EventHandler<AppSettings>? SettingsChanged;
-
-    public static void Save(AppSettings settings, Instance? changed = null, bool modsChanged = false)
-    {
-        Write(settings, DefaultFile, changed, modsChanged);
-
-        App.Settings = settings;
-
-        SettingsChanged?.Invoke(null, settings);
-    }
-
     public static void Write(AppSettings settings, string file, Instance? changed = null, bool modsChanged = false)
     {
         if (settings.UsesLegacyFile)
@@ -88,14 +77,6 @@ public static class SettingsService
                               $"settings; the old file was copied to {Path.GetFileName(copy)}."
             };
         }
-    }
-
-    public static AppSettings Reload()
-    {
-        var settings = Load();
-        App.Settings = settings;
-        SettingsChanged?.Invoke(null, settings);
-        return settings;
     }
 
     private static void LoadInstances(AppSettings settings)

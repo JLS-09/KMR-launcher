@@ -61,7 +61,6 @@ public class ZipService
             return (null, $"Couldn't read a known KSP version from {name}. Is it a KSP zip?");
 
         settings.KspZips.Add(zip);
-        SettingsService.Save(settings);
         return (zip, null);
     }
 

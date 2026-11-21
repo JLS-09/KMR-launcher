@@ -24,6 +24,7 @@ public partial class SettingsPageViewModel : PageViewModel
     private readonly SyncStatusService _syncStatus;
     private readonly DownloadCache _cache;
     private readonly StatusBarViewModel _statusBar;
+    private readonly InstanceService _instances;
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(HasNoZips))]
     private IReadOnlyList<KspZipRow> _kspZips = [];
@@ -82,28 +83,35 @@ public partial class SettingsPageViewModel : PageViewModel
     public string CacheFolderText => InstanceTexts.ShortPath(_cache.Folder);
 
     public SettingsPageViewModel(ZipService zipService, IModApiService api, SyncStatusService syncStatus,
-        DownloadCache cache, StatusBarViewModel statusBar)
+        DownloadCache cache, StatusBarViewModel statusBar, InstanceService instances)
     {
         PageName = ApplicationPageNames.Settings;
+        _instances = instances;
         _zipService = zipService;
         _api = api;
         _syncStatus = syncStatus;
         _cache = cache;
         _statusBar = statusBar;
         _ = MeasureCacheAsync();
-        _syncStatus.Changed += () => Dispatcher.UIThread.Post(LoadRepoState);
+        _syncStatus.Changed += OnSyncChanged;
 
         LoadZips();
         LoadRepoState();
-        ParallelDownloads = App.Settings.MaxParallelDownloads.ToString(CultureInfo.InvariantCulture);
-        FetchOnStartup = App.Settings.FetchOnStartup;
-        WineDebugText = DescribeWineDebug(App.Settings.WineDebug);
-        ShowAccent(App.Settings.AccentColor);
+        var settings = instances.Settings;
+        ParallelDownloads = settings.MaxParallelDownloads.ToString(CultureInfo.InvariantCulture);
+        FetchOnStartup = settings.FetchOnStartup;
+        WineDebugText = DescribeWineDebug(settings.WineDebug);
+        ShowAccent(settings.AccentColor);
     }
+
+    public override void Dispose() => _syncStatus.Changed -= OnSyncChanged;
+
+    private void OnSyncChanged() => Dispatcher.UIThread.Post(LoadRepoState);
 
     public void AddKspZip(string path)
     {
-        (_, AddZipError) = _zipService.AddToSettings(App.Settings, path);
+        (var zip, AddZipError) = _zipService.AddToSettings(_instances.Settings, path);
+        if (zip is not null) _instances.Save();
         LoadZips();
     }
 
@@ -111,9 +119,8 @@ public partial class SettingsPageViewModel : PageViewModel
     private void RemoveKspZip(KspZipRow row)
     {
         AddZipError = null;
-        var settings = App.Settings;
-        settings.KspZips.Remove(row.Zip);
-        SettingsService.Save(settings);
+        _instances.Settings.KspZips.Remove(row.Zip);
+        _instances.Save();
         LoadZips();
     }
 
@@ -161,7 +168,7 @@ public partial class SettingsPageViewModel : PageViewModel
     [RelayCommand(CanExecute = nameof(HasUnused))]
     private async Task RemoveUnused()
     {
-        var instances = App.Settings.Instances.ToList();
+        var instances = _instances.Instances.ToList();
         await Cleanup(() => _cache.RemoveUnused(instances));
     }
 
@@ -184,7 +191,7 @@ public partial class SettingsPageViewModel : PageViewModel
 
     private async Task MeasureCacheAsync()
     {
-        var instances = App.Settings.Instances.ToList();
+        var instances = _instances.Instances.ToList();
         var usage = await Task.Run(() => _cache.Measure(instances));
 
         InUseText = InstalledMods.FormatSize(usage.InUseBytes);
@@ -205,24 +212,24 @@ public partial class SettingsPageViewModel : PageViewModel
     [RelayCommand]
     private void SetWineDebug(WineDebugLevel level)
     {
-        var settings = App.Settings;
+        var settings = _instances.Settings;
         WineDebugText = DescribeWineDebug(level);
         if (settings.WineDebug == level) return;
 
         settings.WineDebug = level;
-        SettingsService.Save(settings);
+        _instances.Save();
     }
 
     [RelayCommand]
     private void PickAccent(AccentSwatch swatch)
     {
-        var settings = App.Settings;
+        var settings = _instances.Settings;
         ShowAccent(swatch.Hex);
         if (string.Equals(settings.AccentColor, swatch.Hex, StringComparison.OrdinalIgnoreCase)) return;
 
         settings.AccentColor = swatch.Hex;
         ThemeService.ApplyAccent(swatch.Hex);
-        SettingsService.Save(settings);
+        _instances.Save();
     }
 
     private void ShowAccent(string hex)
@@ -262,15 +269,16 @@ public partial class SettingsPageViewModel : PageViewModel
 
     partial void OnFetchOnStartupChanged(bool value)
     {
-        if (App.Settings is not { } settings || settings.FetchOnStartup == value) return;
+        var settings = _instances.Settings;
+        if (settings.FetchOnStartup == value) return;
 
         settings.FetchOnStartup = value;
-        SettingsService.Save(settings);
+        _instances.Save();
     }
 
     partial void OnParallelDownloadsChanged(string value)
     {
-        if (App.Settings is not { } settings) return;
+        var settings = _instances.Settings;
 
         var downloads = int.TryParse(value.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var number)
             ? Math.Clamp(number, 1, AppSettings.MaxAllowedParallelDownloads)
@@ -279,7 +287,7 @@ public partial class SettingsPageViewModel : PageViewModel
         if (downloads != settings.MaxParallelDownloads)
         {
             settings.MaxParallelDownloads = downloads;
-            SettingsService.Save(settings);
+            _instances.Save();
         }
 
         var text = downloads.ToString(CultureInfo.InvariantCulture);
@@ -316,7 +324,7 @@ public partial class SettingsPageViewModel : PageViewModel
     {
         KspZips =
         [
-            .. App.Settings.KspZips
+            .. _instances.Settings.KspZips
                 .OrderByDescending(z => z.Version, Comparer<string>.Create(CkanVersion.Compare))
                 .ThenBy(z => z.Path, StringComparer.Ordinal)
                 .Select(z => new KspZipRow(z))

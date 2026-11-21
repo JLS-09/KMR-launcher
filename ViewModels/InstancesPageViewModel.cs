@@ -41,6 +41,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     private readonly GameSessionService _session;
     private readonly NavigationService _navigation;
     private readonly InstallFlow _installFlow;
+    private readonly InstanceService _instanceService;
 
     private List<InstalledModRowViewModel> _allRows = [];
 
@@ -109,7 +110,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [ObservableProperty] private bool _selectionHasUpdates;
 
     public InstancesPageViewModel(NewInstanceFlow newInstanceFlow, ModListService modListService, GameSessionService session,
-        NavigationService navigation, InstallFlow installFlow)
+        NavigationService navigation, InstallFlow installFlow, InstanceService instances)
     {
         PageName = ApplicationPageNames.Instances;
         _newInstanceFlow = newInstanceFlow;
@@ -117,28 +118,36 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         _session = session;
         _navigation = navigation;
         _installFlow = installFlow;
+        _instanceService = instances;
 
         IsGameRunning = session.IsRunning;
         session.Changed += OnSessionChanged;
-        SettingsService.SettingsChanged += OnSettingsChanged;
+        instances.Changed += LoadInstances;
         modListService.ModsChanged += OnModsChanged;
-        LoadInstances(App.Settings);
+        LoadInstances();
     }
 
     public void ApplySearch(string text) => ModFilterText = text;
 
-    private void OnSettingsChanged(object? sender, AppSettings settings) => LoadInstances(settings);
+    public override void Dispose()
+    {
+        _session.Changed -= OnSessionChanged;
+        _instanceService.Changed -= LoadInstances;
+        _modListService.ModsChanged -= OnModsChanged;
+    }
+
     private void OnSessionChanged() => IsGameRunning = _session.IsRunning;
     private void OnModsChanged() => Dispatcher.UIThread.Post(BuildRows);
 
-    private void LoadInstances(AppSettings settings)
+    private void LoadInstances()
     {
+        var all = _instanceService.Instances;
         var previous = Selected;
         var selectedPath = Selected?.RootPath;
 
         IEnumerable<Instance> ordered = SortByName
-            ? settings.Instances.OrderBy(i => i.Name, StringComparer.OrdinalIgnoreCase)
-            : settings.Instances.OrderByDescending(i => i.PlayTime > 0 ? i.LastPlayed : DateTime.MinValue)
+            ? all.OrderBy(i => i.Name, StringComparer.OrdinalIgnoreCase)
+            : all.OrderByDescending(i => i.PlayTime > 0 ? i.LastPlayed : DateTime.MinValue)
                 .ThenBy(i => i.Name, StringComparer.OrdinalIgnoreCase);
         Instances = [.. ordered.Select(i => new InstanceListItemViewModel(i))];
         InstancesCountText = $"{Instances.Count} INSTANCE{(Instances.Count == 1 ? "" : "S")}";
@@ -150,11 +159,11 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
         if (Selected is { IsMissing: false } && ReferenceEquals(Selected, previous)) ShowDetails(Selected);
 
-        foreach (var path in _settingsByPath.Keys.Where(p => settings.Instances.All(i => i.RootPath != p)).ToList())
+        foreach (var path in _settingsByPath.Keys.Where(p => all.All(i => i.RootPath != p)).ToList())
             _settingsByPath.Remove(path);
     }
 
-    partial void OnSortByNameChanged(bool value) => LoadInstances(App.Settings);
+    partial void OnSortByNameChanged(bool value) => LoadInstances();
 
     [RelayCommand]
     private void SortInstances(string by) => SortByName = by == "name";
@@ -208,7 +217,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         if (!_settingsByPath.TryGetValue(value.RootPath, out var settings) || !settings.HasChanges)
         {
             if (settings is not null) settings.PropertyChanged -= OnInstanceSettingsChanged;
-            settings = new InstanceSettingsViewModel(value, App.Settings.Instances);
+            settings = new InstanceSettingsViewModel(value, _instanceService.Instances, i => _instanceService.Save(i));
             settings.PropertyChanged += OnInstanceSettingsChanged;
             _settingsByPath[value.RootPath] = settings;
         }
@@ -414,10 +423,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
             if (Selected is not { } instance) return "";
 
             var size = InstallSize == "–" ? "" : $" ({InstallSize})";
-            var ownPrefix = WinePrefixes.IsManaged(instance.PrefixPath) &&
-                            !App.Settings.Instances.Any(i =>
-                                i != instance && WinePrefixes.SamePath(i.PrefixPath, instance.PrefixPath));
-            return ownPrefix
+            return _instanceService.OwnsPrefix(instance)
                 ? $"Removes the folder, its saves and its prefix{size}. Cached downloads stay."
                 : $"Removes the folder and its saves{size}. The prefix in " +
                   $"{InstanceTexts.ShortPath(instance.PrefixPath)} and cached downloads stay.";
@@ -434,7 +440,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         ActionError = null;
         try
         {
-            await instance.DeleteInstance(App.Settings);
+            await _instanceService.DeleteAsync(instance);
             Tab = InstanceTab.Mods;
         }
         catch (Exception e)
@@ -449,17 +455,14 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         if (Selected is not { } instance) return;
 
         ActionError = null;
-        var index = App.Settings.Instances.IndexOf(instance);
-        if (index < 0) return;
+        if (!_instanceService.Instances.Contains(instance)) return;
         try
         {
-            App.Settings.Instances.RemoveAt(index);
-            SettingsService.Save(App.Settings);
+            _instanceService.Forget(instance);
             Tab = InstanceTab.Mods;
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            App.Settings.Instances.Insert(index, instance);
             ActionError = $"Couldn't save the instance list: {e.Message}";
         }
     }
@@ -467,17 +470,13 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [RelayCommand]
     private void MakePrimary()
     {
-        if (Selected is null) return;
-        foreach (var instance in App.Settings.Instances) instance.IsPrimary = instance == Selected;
-        SettingsService.Save(App.Settings);
+        if (Selected is { } selected) _instanceService.MakePrimary(selected);
     }
 
     [RelayCommand]
     private void RemoveFromList()
     {
-        if (Selected is not { IsMissing: true } missing) return;
-        App.Settings.Instances.Remove(missing);
-        SettingsService.Save(App.Settings);
+        if (Selected is { IsMissing: true } missing) _instanceService.Forget(missing);
     }
 
     public void LocateFolder(string folder)
@@ -487,11 +486,10 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         ActionError = null;
         try
         {
-            var (found, error) = InstanceStore.Relocate(App.Settings, missing, folder);
+            var (found, error) = _instanceService.Relocate(missing, folder);
             ActionError = error;
             if (found is null) return;
 
-            SettingsService.Save(App.Settings);
             SelectedItem = Instances.FirstOrDefault(i => i.Instance == found) ?? SelectedItem;
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)

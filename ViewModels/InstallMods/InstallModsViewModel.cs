@@ -33,13 +33,14 @@ public partial class InstallModsViewModel : ViewModelBase
     public event Action? Cancelled;
 
     public InstallModsViewModel(List<PlannedModVersion> mods, ModListService modListService,
-        DependencyService dependencyService, CompatibilityService compatibilityService, Instance? target = null)
+        DependencyService dependencyService, CompatibilityService compatibilityService,
+        Func<IEnumerable<Instance>> usableInstances, Instance? target = null)
     {
         InstallModsData.RequestedModVersions = new ObservableCollection<PlannedModVersion>(mods);
 
         _steps =
         [
-            new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService, target),
+            new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService, usableInstances, target),
             new InstallModsRecommendsStepViewModel(InstallModsData, modListService, compatibilityService,
                 dependencyService),
             new InstallModsModulesStepViewModel(InstallModsData, compatibilityService, dependencyService),

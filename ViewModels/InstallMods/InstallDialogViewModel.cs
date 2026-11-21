@@ -45,7 +45,7 @@ public sealed record StatTile(string Label, string Value);
 
 public sealed record FailedRow(string Name, string StateText, double Progress, string Detail, bool IsFailed);
 
-public partial class InstallDialogViewModel : ViewModelBase
+public partial class InstallDialogViewModel : ViewModelBase, IDisposable
 {
     private const int ExtrasStep = 1;
     private const int ChoicesStep = 2;
@@ -58,6 +58,7 @@ public partial class InstallDialogViewModel : ViewModelBase
     private readonly GameSessionService _session;
     private readonly NavigationService _navigation;
     private readonly DialogService _dialogs;
+    private readonly InstanceService _instances;
     private readonly InstallSource _source;
     private readonly InstallModsData _data;
     private readonly TaskCompletionSource<bool> _result = new();
@@ -133,9 +134,9 @@ public partial class InstallDialogViewModel : ViewModelBase
     public InstallDialogViewModel(IReadOnlyList<PlannedModVersion> requested, Instance? target, InstallSource source,
         ModListService modListService, DependencyService dependencyService, CompatibilityService compatibilityService,
         InstallService installService, GameSessionService session, NavigationService navigation,
-        DialogService dialogs, IReadOnlyList<ModVersion>? replaced = null)
+        DialogService dialogs, InstanceService instances, IReadOnlyList<ModVersion>? replaced = null)
         : this(modListService, dependencyService, compatibilityService, installService, session, navigation, dialogs,
-            source)
+            instances, source)
     {
         Title = "Install mods";
         Subtitle = source == InstallSource.Updates
@@ -149,7 +150,7 @@ public partial class InstallDialogViewModel : ViewModelBase
         ];
 
         Wizard = new InstallModsViewModel([.. requested], modListService, dependencyService, compatibilityService,
-            target);
+            () => instances.Usable, target);
         _data = Wizard.InstallModsData;
         if (replaced is { Count: > 0 } && Wizard.Steps[0] is InstallModsSelectInstanceStepViewModel first)
         {
@@ -185,9 +186,9 @@ public partial class InstallDialogViewModel : ViewModelBase
     public InstallDialogViewModel(Instance instance, IReadOnlyList<ModVersion> removals,
         ModListService modListService, DependencyService dependencyService, CompatibilityService compatibilityService,
         InstallService installService, GameSessionService session, NavigationService navigation,
-        DialogService dialogs)
+        DialogService dialogs, InstanceService instances)
         : this(modListService, dependencyService, compatibilityService, installService, session, navigation, dialogs,
-            InstallSource.Updates)
+            instances, InstallSource.Updates)
     {
         Title = "Remove mods";
         PickedTitle = "";
@@ -202,8 +203,9 @@ public partial class InstallDialogViewModel : ViewModelBase
 
     private InstallDialogViewModel(ModListService modListService, DependencyService dependencyService,
         CompatibilityService compatibilityService, InstallService installService, GameSessionService session,
-        NavigationService navigation, DialogService dialogs, InstallSource source)
+        NavigationService navigation, DialogService dialogs, InstanceService instances, InstallSource source)
     {
+        _instances = instances;
         _modListService = modListService;
         _dependencyService = dependencyService;
         _compatibilityService = compatibilityService;
@@ -218,8 +220,12 @@ public partial class InstallDialogViewModel : ViewModelBase
         Picked = [];
 
         IsGameRunning = session.IsRunning;
-        session.Changed += () => IsGameRunning = session.IsRunning;
+        session.Changed += OnSessionChanged;
     }
+
+    public void Dispose() => _session.Changed -= OnSessionChanged;
+
+    private void OnSessionChanged() => IsGameRunning = _session.IsRunning;
 
     private bool IsCached(ModVersion version) =>
         InstallChanges.NeedsDownload(version) && _installService.FindCached(version) is not null;
@@ -396,7 +402,7 @@ public partial class InstallDialogViewModel : ViewModelBase
         _installedBefore = [.. instance.Mods.Select(m => m.Identifier)];
         _runCounts = InstallChanges.Count(InstallChanges.Rows(_data, IsCached));
         var run = InstallRun.Create(instance, _data);
-        Progress = new InstallProgressViewModel(_installService, run, App.Settings.MaxParallelDownloads);
+        Progress = new InstallProgressViewModel(_installService, run, _instances.Settings.MaxParallelDownloads);
 
         var installs = _runCounts.New + _runCounts.Updates;
         Subtitle = installs > 0
