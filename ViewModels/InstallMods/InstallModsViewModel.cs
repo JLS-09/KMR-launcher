@@ -24,19 +24,23 @@ public partial class InstallModsViewModel : ViewModelBase
     private InstallModsStepViewModel _currentStep = null!;
 
     [ObservableProperty] private bool _isFirstStep = true;
-    [ObservableProperty] private List<ProgressSegment> _progressSegments = [];
     [ObservableProperty] private bool _isLastStep;
+
+    public IReadOnlyList<InstallModsStepViewModel> Steps => _steps;
+    public int CurrentIndex => _index;
+
+    public event Action? StepChanged;
     public event Action<InstallModsData>? Finished;
     public event Action? Cancelled;
 
     public InstallModsViewModel(List<PlannedModVersion> mods, ModListService modListService,
-        DependencyService dependencyService, CompatibilityService compatibilityService)
+        DependencyService dependencyService, CompatibilityService compatibilityService, Instance? target = null)
     {
         InstallModsData.RequestedModVersions = new ObservableCollection<PlannedModVersion>(mods);
 
         _steps =
         [
-            new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService),
+            new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService, target),
             new InstallModsRecommendsStepViewModel(InstallModsData, modListService, compatibilityService,
                 dependencyService),
             new InstallModsModulesStepViewModel(InstallModsData, compatibilityService, dependencyService),
@@ -105,6 +109,13 @@ public partial class InstallModsViewModel : ViewModelBase
     [RelayCommand]
     private void Cancel() => Cancelled?.Invoke();
 
+    public void GoToLastStep()
+    {
+        var last = _steps.Count - 1;
+        _steps[last].Prepare();
+        ShowStep(last, forward: false);
+    }
+
     private void ShowStep(int index, bool forward)
     {
         _index = index;
@@ -112,19 +123,6 @@ public partial class InstallModsViewModel : ViewModelBase
         IsLastStep = index == _steps.Count - 1;
         CurrentStep = _steps[index];
         CurrentStep.OnEntering(forward);
-        UpdateProgress();
-    }
-
-    private void UpdateProgress()
-    {
-        ProgressSegments =
-        [
-            .. _steps
-                .Select((step, i) => (step, i))
-                .Where(s => s.i == _index || !s.step.ShouldSkip)
-                .Select(s => new ProgressSegment(s.i <= _index))
-        ];
+        StepChanged?.Invoke();
     }
 }
-
-public record ProgressSegment(bool IsReached);

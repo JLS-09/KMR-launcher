@@ -6,4 +6,6 @@ public class InstalledModRecord
 {
     public List<string> Files { get; set; } = [];
     public bool IsUserRequested { get; set; }
+
+    public string? Reason { get; set; }
 }

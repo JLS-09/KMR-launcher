@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace KMRLauncherMvvm.Models;
@@ -9,6 +8,8 @@ public class AppSettings
     public ObservableCollection<Instance> Instances { get; set; } = [];
     
     public int MaxParallelDownloads { get; set; } = DefaultParallelDownloads;
+
+    public string AccentColor { get; set; } = "#DF0105";
 
     public const int DefaultParallelDownloads = 4;
     public const int MaxAllowedParallelDownloads = 16;

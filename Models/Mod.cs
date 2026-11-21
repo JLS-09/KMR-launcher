@@ -33,7 +33,6 @@ public class Mod
     [JsonPropertyName("versions")] public List<ModVersion> Versions { get; set; } = [];
 
     public ModVersion? LatestVersion => Versions.FirstOrDefault();
-    public string AuthorsDisplay => string.Join(", ", Author);
 
     public override string ToString()
     {

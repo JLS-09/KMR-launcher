@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -7,15 +8,43 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;
 
+public partial class InstanceCardViewModel(Instance instance, string fitText, FitKind fitKind) : ObservableObject
+{
+    public Instance Instance { get; } = instance;
+    public string Name => Instance.Name;
+    public string KspText => $"KSP {Instance.Version}";
+    public string FitText { get; } = fitText;
+    public bool Fits => fitKind == FitKind.Fits;
+    public bool IsInstalled => fitKind == FitKind.Installed;
+    public bool IsWarning => fitKind == FitKind.Warning;
+
+    [ObservableProperty] private bool _isSelected;
+}
+
 public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepViewModel
 {
     [ObservableProperty] private ObservableCollection<Instance> _instances;
+    [ObservableProperty] private IReadOnlyList<InstanceCardViewModel> _cards = [];
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(HasChanges))]
+    private IReadOnlyList<ChangeRow> _changes = [];
+
+    public bool HasChanges => Changes.Count > 0;
+    public bool HasNoInstances => Instances.Count == 0;
+    [ObservableProperty] private IReadOnlyList<ResolutionProblem> _problems = [];
     [ObservableProperty] private bool _hasProblems;
     [ObservableProperty] private bool _canContinue;
 
-    private readonly DependencyService _dependencyService;
+    [ObservableProperty] private string? _choicesHint;
 
-    public InstallModsSelectInstanceStepViewModel(InstallModsData installModsData, DependencyService dependencyService)
+    private readonly DependencyService _dependencyService;
+    private bool _syncingCards;
+
+    public event Action? Resolved;
+
+    public string InstancesCountText => InstallChanges.Plural(Instances.Count, "instance");
+
+    public InstallModsSelectInstanceStepViewModel(InstallModsData installModsData, DependencyService dependencyService,
+        Instance? target = null)
         :
         base(installModsData)
     {
@@ -28,10 +57,37 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         };
 
         _instances = App.Settings.Instances;
-        InstallModsData.SelectedInstance = Instances.FirstOrDefault();
+        BuildCards();
+        InstallModsData.SelectedInstance =
+            Instances.FirstOrDefault(i => i.RootPath == target?.RootPath) ?? Instances.FirstOrDefault();
     }
 
-    private void Resolve()
+    private void BuildCards()
+    {
+        var requested = InstallModsData.RequestedModVersions.ToList();
+        foreach (var card in Cards) card.PropertyChanged -= OnCardChanged;
+
+        Cards =
+        [
+            .. Instances.Select(instance =>
+            {
+                var (text, kind) = InstallChanges.FitHint(instance, requested);
+                var card = new InstanceCardViewModel(instance, text, kind);
+                card.PropertyChanged += OnCardChanged;
+                return card;
+            })
+        ];
+    }
+
+    private void OnCardChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (_syncingCards || e.PropertyName != nameof(InstanceCardViewModel.IsSelected) ||
+            sender is not InstanceCardViewModel { IsSelected: true } card) return;
+
+        InstallModsData.SelectedInstance = card.Instance;
+    }
+
+    public void Resolve()
     {
         try
         {
@@ -42,8 +98,15 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
             InstallModsData.Problems = [new ResolutionProblem { Mod = "", Message = $"Unexpected error: {e.Message}" }];
         }
 
-        HasProblems = InstallModsData.Problems.Count > 0;
+        _syncingCards = true;
+        foreach (var card in Cards) card.IsSelected = card.Instance == InstallModsData.SelectedInstance;
+        _syncingCards = false;
+
+        Changes = InstallChanges.Rows(InstallModsData, _ => false);
+        Problems = [.. InstallModsData.Problems];
+        HasProblems = Problems.Count > 0;
         CanContinue = InstallModsData.SelectedInstance is not null && !HasProblems;
+        Resolved?.Invoke();
     }
 
     public override void OnEntering(bool forward)
@@ -53,6 +116,6 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
     partial void OnCanContinueChanged(bool value) => OnPropertyChanged(nameof(CanGoNext));
 
-    public override string Title => "Choose instance";
+    public override string Title => "Instance";
     public override bool CanGoNext => CanContinue;
 }

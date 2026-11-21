@@ -1,10 +1,20 @@
 using System;
+using System.Globalization;
 using System.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Humanizer;
 using KMRLauncherMvvm.Models;
+using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;
+
+public enum ProgressTone
+{
+    Muted,
+    Done,
+    Downloading,
+    Installing,
+    Failed
+}
 
 public partial class ModProgressRowViewModel(ModInstallJob job) : ObservableObject
 {
@@ -12,12 +22,22 @@ public partial class ModProgressRowViewModel(ModInstallJob job) : ObservableObje
     public string Identifier => Job.Version.Identifier;
     public string Version => Job.Version.Version;
 
-    [ObservableProperty] private string _stateText = "QUEUED";
+    [ObservableProperty] private string _stateText = "Queued";
     [ObservableProperty] private string _detailText = "";
     [ObservableProperty] private double _progress;
     [ObservableProperty] private bool _isIndeterminate;
     [ObservableProperty] private bool _isFailed;
     [ObservableProperty] private bool _isDone;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsToneDone), nameof(IsToneDownloading), nameof(IsToneInstalling),
+        nameof(IsToneFailed))]
+    private ProgressTone _tone = ProgressTone.Muted;
+
+    public bool IsToneDone => Tone == ProgressTone.Done;
+    public bool IsToneDownloading => Tone == ProgressTone.Downloading;
+    public bool IsToneInstalling => Tone == ProgressTone.Installing;
+    public bool IsToneFailed => Tone == ProgressTone.Failed;
 
     public double DownloadFraction { get; private set; }
     public double InstallFraction { get; private set; }
@@ -39,22 +59,44 @@ public partial class ModProgressRowViewModel(ModInstallJob job) : ObservableObje
         IsFailed = state == ModInstallState.Failed;
         IsIndeterminate = state == ModInstallState.Downloading && bytesTotal is null or 0;
 
-        (StateText, DetailText, Progress) = state switch
+        (StateText, DetailText, Progress, Tone) = state switch
         {
-            ModInstallState.Queued => ("QUEUED", Job.NeedsDownload ? "Waiting for a download slot" : "", 0),
-            ModInstallState.Downloading => ("DOWNLOADING",
-                bytesTotal is > 0
-                    ? $"{bytesDone.Bytes().Humanize("0.#")} / {bytesTotal.Value.Bytes().Humanize("0.#")}"
-                    : bytesDone.Bytes().Humanize("0.#"),
-                DownloadFraction),
-            ModInstallState.Downloaded => ("DOWNLOADED",
-                Job.IsCached ? "From the download cache, waiting to install" : "Waiting to install", 1),
-            ModInstallState.Installing => ("INSTALLING", $"{filesDone} / {filesTotal} files", InstallFraction),
-            ModInstallState.Done => ("DONE",
-                Job.NeedsDownload ? $"{filesTotal} files{(Job.IsCached ? " · from cache" : "")}" : "Nothing to download",
-                1),
-            ModInstallState.Failed => ("FAILED", Job.Error ?? "", Progress),
-            _ => ("CANCELLED", "", 0)
+            ModInstallState.Queued => ("Queued", Job.NeedsDownload ? "Waiting for a download slot" : "", 0,
+                ProgressTone.Muted),
+            ModInstallState.Downloading => ("Downloading",
+                bytesTotal is > 0 ? BytePair(bytesDone, bytesTotal.Value) : InstalledMods.FormatSize(bytesDone),
+                DownloadFraction, ProgressTone.Downloading),
+            ModInstallState.Downloaded => ("Downloaded",
+                Job.IsCached ? "Cached · waiting to install" : "Waiting to install", 1, ProgressTone.Downloading),
+            ModInstallState.Installing => ("Installing", $"{Count(filesDone)} / {Count(filesTotal)} files",
+                InstallFraction, ProgressTone.Installing),
+            ModInstallState.Done => ("Done", DoneText(), 1, ProgressTone.Done),
+            ModInstallState.Failed => ("Failed", FirstLine(Job.Error), Progress, ProgressTone.Failed),
+            _ => ("Cancelled", "", Progress, ProgressTone.Muted)
         };
     }
+
+    private string DoneText()
+    {
+        if (!Job.NeedsDownload) return "Nothing to download";
+
+        var files = $"{Count(Job.FilesTotal)} files";
+        if (Job.IsCached) return $"Cached · {files}";
+        return Job.BytesTotal is > 0 ? $"{InstalledMods.FormatSize(Job.BytesTotal.Value)} · {files}" : files;
+    }
+
+    public static string Count(long count) => count.ToString("N0", CultureInfo.InvariantCulture);
+
+    public static string BytePair(long done, long total)
+    {
+        if (total < 1024) return string.Create(CultureInfo.InvariantCulture, $"{done} / {total} B");
+
+        var (divisor, unit) = total >= 1L << 30 ? (1024.0 * 1024 * 1024, "GB")
+            : total >= 1L << 20 ? (1024.0 * 1024, "MB")
+            : (1024.0, "KB");
+        return string.Create(CultureInfo.InvariantCulture, $"{done / divisor:0.0} / {total / divisor:0.0} {unit}");
+    }
+
+    public static string FirstLine(string? text) =>
+        text is null ? "" : text.Split('\n', 2)[0].Trim();
 }

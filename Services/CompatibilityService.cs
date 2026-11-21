@@ -21,7 +21,7 @@ public class CompatibilityService(ModListService modListService)
                    SatisfiesVersionLimits(v.Version, relationship) && IsCompatible(v, criteria))
                ?? throw new NoCompatibleVersionFoundException(relationship);
     }
-    
+
     public bool ModExists(string? identifier) => modListService.Mods?.Any(m => m.Id == identifier) == true;
 
     public bool IsVersionCompatibleWithRelation(ModVersion version, Relationship relationship)
@@ -121,6 +121,59 @@ public class CompatibilityService(ModListService modListService)
         return problems;
     }
 
+    public static List<ResolutionProblem> FindBrokenDepends(IReadOnlyList<ModVersion> toInstall,
+        IReadOnlyList<ModVersion> remainingInstalled, IReadOnlyList<ModVersion> installedBefore)
+    {
+        List<ModVersion> after = [.. toInstall, .. remainingInstalled];
+        List<ResolutionProblem> problems = [];
+
+        foreach (var mod in remainingInstalled)
+        {
+            foreach (var dependency in mod.Depends ?? [])
+            {
+                if (dependency.AnyOf is null && HasInvalidVersionFields(dependency)) continue;
+                if (IsMet(dependency, after, mod) || !IsMet(dependency, installedBefore, mod)) continue;
+
+                problems.Add(new ResolutionProblem
+                {
+                    Mod = mod.Identifier,
+                    Relationship = dependency,
+                    Message = DescribeBrokenDepend(mod, dependency, toInstall)
+                });
+            }
+        }
+
+        return problems;
+    }
+
+    private static bool IsMet(Relationship dependency, IEnumerable<ModVersion> mods, ModVersion owner) =>
+        dependency.AnyOf is { Count: > 0 } anyOf
+            ? anyOf.Any(e => mods.Any(m => m.Identifier != owner.Identifier &&
+                                           MatchesModule(m, e.Name, e.Version, e.MinVersion, e.MaxVersion)))
+            : mods.Any(m => m.Identifier != owner.Identifier &&
+                            MatchesModule(m, dependency.Name, dependency.Version, dependency.MinVersion,
+                                dependency.MaxVersion));
+
+    private static string DescribeBrokenDepend(ModVersion mod, Relationship dependency,
+        IReadOnlyList<ModVersion> toInstall)
+    {
+        var names = InstalledMods.NamesIn(dependency).ToHashSet();
+        var hasLimits = dependency.Version is not null || dependency.MinVersion is not null ||
+                        dependency.MaxVersion is not null;
+        var needs = dependency.AnyOf is { Count: > 0 }
+            ? $"one of {string.Join(", ", names)}"
+            : hasLimits
+                ? $"{dependency.Name} {DependencyService.DescribeLimits(dependency)}"
+                : dependency.Name;
+        var replacement = toInstall.FirstOrDefault(m => InstalledMods.NamesOf(m).Any(names.Contains));
+
+        return replacement is not null
+            ? $"{mod.Identifier} {mod.Version} is installed and needs {needs}, but this change installs " +
+              $"{replacement.Identifier} {replacement.Version}. Pick another version, or update or remove " +
+              $"{mod.Identifier} too."
+            : $"{mod.Identifier} {mod.Version} is installed and needs {needs}, which this change removes.";
+    }
+
     private static bool ConflictsWith(ModVersion mod, ModVersion other) =>
         mod.Conflicts?.Any(conflict => conflict.AnyOf is { Count: > 0 } anyOf
             ? anyOf.Any(e => MatchesModule(other, e.Name, e.Version, e.MinVersion, e.MaxVersion))
@@ -155,6 +208,70 @@ public class CompatibilityService(ModListService modListService)
 
         return false;
     }
+
+    public static bool CoversMinor(ModVersion version, string minorPrefix)
+    {
+        var (modMin, modMax) = GetKspRange(version);
+        return LowerBound(minorPrefix).CompareTo(modMax) <= 0 && UpperBound(minorPrefix).CompareTo(modMin) >= 0;
+    }
+
+    public static string DescribeKspRange(ModVersion version)
+    {
+        var strict = version.KspVersionStrict;
+        string range;
+
+        if (version.KspVersion is not null)
+        {
+            range = IsAny(version.KspVersion) ? "any" : ShortKsp(version.KspVersion, strict);
+        }
+        else
+        {
+            var min = version.KspVersionMin is null || IsAny(version.KspVersionMin)
+                ? null
+                : ShortKsp(version.KspVersionMin, strict);
+            var max = version.KspVersionMax is null || IsAny(version.KspVersionMax)
+                ? null
+                : ShortKsp(version.KspVersionMax, strict);
+
+            range = (min, max) switch
+            {
+                (null, null) => "any",
+                (_, null) => $"{min}+",
+                (null, _) => $"≤ {max}",
+                _ when min == max => min!,
+                _ => $"{min}–{max}"
+            };
+        }
+
+        return strict ? $"{range} strict" : range;
+    }
+
+    public static string DescribeKspRangeExact(ModVersion version)
+    {
+        if (version.KspVersion is not null) return IsAny(version.KspVersion) ? "any" : version.KspVersion;
+
+        var min = version.KspVersionMin is null || IsAny(version.KspVersionMin) ? null : version.KspVersionMin;
+        var max = version.KspVersionMax is null || IsAny(version.KspVersionMax) ? null : version.KspVersionMax;
+
+        return (min, max) switch
+        {
+            (null, null) => "any",
+            (_, null) => $"{min}+",
+            (null, _) => $"≤ {max}",
+            _ when min == max => min!,
+            _ => $"{min}–{max}"
+        };
+    }
+
+    public static bool CoversVersion(ModVersion version, string kspVersion)
+    {
+        var (modMin, modMax) = GetKspRange(version);
+        var point = LowerBound(kspVersion);
+        return point.CompareTo(modMin) >= 0 && point.CompareTo(modMax) <= 0;
+    }
+
+    private static string ShortKsp(string kspVersion, bool strict) =>
+        strict ? kspVersion : KspVersions.ToMinorPrefix(kspVersion);
 
     private static ((int, int, int) min, (int, int, int) max) GetKspRange(ModVersion version)
     {

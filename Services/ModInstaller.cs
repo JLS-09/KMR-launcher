@@ -88,6 +88,7 @@ public static class ModInstaller
                         added++;
                         continue;
                     }
+
                     throw new ModInstallException(
                         $"{Name(mod)} would install both \"{other}\" and \"{path}\" to \"{targetPath}\".");
                 }
@@ -115,7 +116,7 @@ public static class ModInstaller
         if (AllowedTargets.Contains(target) || isSubfolder) return target;
         throw new ModInstallException($"{Name(mod)} wants to install to \"{installTo}\", which isn't allowed.");
     }
-    
+
     private static List<string> FindRoots(ModVersion mod, InstallDirective directive,
         Dictionary<string, ZipArchiveEntry> files, HashSet<string> directories)
     {
@@ -169,9 +170,12 @@ public static class ModInstaller
             description = $"{what} matching \"{directive.FindRegexp}\"";
         }
 
-        roots = [.. roots.Where(r => !roots.Any(other => r != other && r.StartsWith(other + "/")))
-            .Distinct()
-            .Order(StringComparer.Ordinal)];
+        roots =
+        [
+            .. roots.Where(r => !roots.Any(other => r != other && r.StartsWith(other + "/")))
+                .Distinct()
+                .Order(StringComparer.Ordinal)
+        ];
 
         return roots.Count > 0
             ? roots

@@ -4,82 +4,113 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
              xmlns:models="clr-namespace:KMRLauncherMvvm.Models"
+             xmlns:controls="clr-namespace:KMRLauncherMvvm.Controls"
              x:DataType="vm:InstallModsSummaryStepViewModel"
-             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
-             Background="#1F1F20"
-             Foreground="{DynamicResource PrimaryText}"
+             mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="600"
              x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsSummaryStepView">
 
-    <UserControl.Styles>
-        <!-- Read-only lists: hide the ListBox selection/hover look -->
-        <Style Selector="ListBox.summary-list">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-        <Style Selector="ListBox.summary-list > ListBoxItem">
-            <Setter Property="Padding" Value="8 4" />
-            <Setter Property="Margin" Value="0 0 0 4" />
-            <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
-        </Style>
-        <Style
-            Selector="ListBox.summary-list > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
-        </Style>
-        <Style Selector="ListBox.summary-list > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
-        </Style>
-        <Style Selector="TextBlock.header">
-            <Setter Property="LetterSpacing" Value="1" />
-            <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
-            <Setter Property="FontFamily" Value="{DynamicResource SpaceMonoBold}" />
-            <Setter Property="FontSize" Value="12" />
-        </Style>
-    </UserControl.Styles>
-
-    <UserControl.DataTemplates>
-        <DataTemplate DataType="vm:SummaryRow">
-            <Grid ColumnDefinitions="* Auto Auto" ColumnSpacing="16">
-                <StackPanel Grid.Column="0" Spacing="2">
-                    <TextBlock Text="{Binding Identifier}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Text="{Binding Details}" FontSize="12" TextTrimming="CharacterEllipsis"
-                               Foreground="{DynamicResource SecondaryText}" />
-                </StackPanel>
-                <TextBlock Grid.Column="1" Text="{Binding Version}" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="2" Text="{Binding Size}" VerticalAlignment="Center" MinWidth="64"
-                           TextAlignment="Right" Foreground="{DynamicResource SecondaryText}" />
-            </Grid>
-        </DataTemplate>
-    </UserControl.DataTemplates>
-
-    <Grid Margin="32 0 32 0" RowDefinitions="Auto Auto Auto * Auto Auto">
-        <TextBlock Grid.Row="0" Margin="0 32 0 0" Text="{Binding TotalsText}" TextWrapping="Wrap" />
-
-        <!-- Problems block Finish. Bounded height, so the ScrollViewer is fine. -->
-        <Border Grid.Row="1" IsVisible="{Binding HasProblems}" Margin="0 16 0 0" Padding="12 8"
-                Background="{DynamicResource SideBarBackground}"
-                BorderBrush="{DynamicResource PrimaryRed}" BorderThickness="2 0 0 0">
-            <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding InstallModsData.Problems}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:ResolutionProblem">
-                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Margin="0 2"
-                                       Foreground="{DynamicResource PrimaryRed}" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+    <!-- Step 4 "Review" (mockup Wiz4Review): tiles, the problems box and every change. Styles come from
+         InstallDialogView. -->
+    <StackPanel Spacing="18">
+        <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1" ClipToBounds="True">
+            <UniformGrid Rows="1" Margin="-1 0 0 0">
+                <Border Classes="tile">
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="label" Text="NEW" />
+                        <TextBlock Classes="tileValue" Text="{Binding NewText}" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="tile">
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="label" Text="UPDATES" />
+                        <TextBlock Classes="tileValue" Text="{Binding UpdatesText}" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="tile">
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="label" Text="REMOVED" />
+                        <TextBlock Classes="tileValue" Text="{Binding RemovedText}" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="tile">
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="label" Text="TO DOWNLOAD" />
+                        <TextBlock Classes="tileValue" Text="{Binding ToDownloadText}" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
         </Border>
 
-        <TextBlock Grid.Row="2" Classes="header" Margin="0 24 0 8" Text="TO INSTALL" />
-        <TextBlock Grid.Row="3" IsVisible="{Binding HasNothingToDo}" TextWrapping="Wrap"
-                   Foreground="{DynamicResource SecondaryText}"
-                   Text="Nothing to do: every selected mod is already installed in this instance." />
-        <ListBox Grid.Row="3" Classes="summary-list" ItemsSource="{Binding ToInstall}"
-                 IsVisible="{Binding !HasNothingToDo}" />
+        <!-- No problems -->
+        <Border Padding="14 10" CornerRadius="9" Background="{DynamicResource OkBox}"
+                BorderBrush="{DynamicResource FitsRowLine}" BorderThickness="1" IsVisible="{Binding !HasProblems}">
+            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="14" VerticalAlignment="Center"
+                                     Foreground="{DynamicResource StatusFits}" />
+                <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" Text="{Binding OkText}" />
+            </Grid>
+        </Border>
 
-        <TextBlock Grid.Row="4" Classes="header" Margin="0 16 0 8" Text="TO REMOVE"
-                   IsVisible="{Binding HasRemovals}" />
-        <ListBox Grid.Row="5" Classes="summary-list" ItemsSource="{Binding ToRemove}" MaxHeight="120"
-                 IsVisible="{Binding HasRemovals}" />
-    </Grid>
+        <!-- Problems (block Install) -->
+        <Border Padding="14 10" CornerRadius="9" Background="{DynamicResource StatusErrorSoft}"
+                BorderBrush="{DynamicResource StatusErrorLine}" BorderThickness="1" IsVisible="{Binding HasProblems}">
+            <ItemsControl ItemsSource="{Binding Problems}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:ResolutionProblem">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="14" VerticalAlignment="Top"
+                                                 Margin="0 2 0 0" Foreground="{DynamicResource StatusError}" />
+                            <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" Text="{Binding Message}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
 
+        <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}" IsVisible="{Binding HasNothingToDo}"
+                   Text="Nothing to install or remove: everything you picked is installed already." />
+
+        <StackPanel IsVisible="{Binding !HasNothingToDo}">
+            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 0 0 6">
+                <TextBlock Classes="label" Text="{Binding RowsTitle}" />
+                <TextBlock Classes="count" Text="{Binding Rows.Count}" />
+            </StackPanel>
+            <ItemsControl ItemsSource="{Binding Rows}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ChangeRow">
+                        <Border Classes="row" Padding="4 8">
+                            <Grid ColumnDefinitions="62, *, *, 80" ColumnSpacing="12">
+                                <Border Classes="action" HorizontalAlignment="Left"
+                                        Classes.new="{Binding IsNew}" Classes.update="{Binding IsUpdate}"
+                                        Classes.remove="{Binding IsRemove}">
+                                    <TextBlock Text="{Binding KindText}" />
+                                </Border>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Classes="rowName" Text="{Binding Name}" />
+                                    <TextBlock Classes="rowHint" Text="{Binding Reason}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Classes="version">
+                                    <Run Text="{Binding Version}" />
+                                    <Run Text="{Binding ReplacesText}" Foreground="{DynamicResource TextMuted}" />
+                                </TextBlock>
+                                <TextBlock Grid.Column="3" Classes="version" TextAlignment="Right"
+                                           Text="{Binding SizeText}" IsVisible="{Binding !ShowCached}" />
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6"
+                                            HorizontalAlignment="Right" IsVisible="{Binding ShowCached}">
+                                    <controls:StrokeIcon Data="{StaticResource IconDownload}" Size="12"
+                                                         VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" />
+                                    <TextBlock Classes="version" Foreground="{DynamicResource TextMuted}" Text="cached" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
 </UserControl>

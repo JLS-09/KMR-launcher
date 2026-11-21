@@ -13,17 +13,18 @@ public static class SettingsService
     };
 
     public static event EventHandler<AppSettings>? SettingsChanged;
-    
+
     public static void Save(AppSettings settings)
     {
         var basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var appFolder = Path.Combine(basePath, "kmrLauncher/settings.json");
-        
+
+        WinePrefixes.AssignMissing(settings.Instances);
         var json = JsonSerializer.Serialize(settings, Options);
         File.WriteAllText(appFolder, json);
-        
+
         App.Settings = settings;
-        
+
         SettingsChanged?.Invoke(null, settings);
     }
 
@@ -31,21 +32,24 @@ public static class SettingsService
     {
         var basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         var appFolder = Path.Combine(basePath, "kmrLauncher/settings.json");
-        
+
         if (!File.Exists(appFolder))
             return new AppSettings();
 
         try
         {
             var json = File.ReadAllText(appFolder);
-            return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+            var settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+
+            WinePrefixes.AssignMissing(settings.Instances);
+            return settings;
         }
         catch
         {
             return new AppSettings();
         }
     }
-    
+
     public static AppSettings Reload()
     {
         var settings = Load();

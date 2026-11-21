@@ -10,8 +10,8 @@ using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.Services.Api;
 using KMRLauncherMvvm.ViewModels;
+using KMRLauncherMvvm.ViewModels.InstallMods;
 using KMRLauncherMvvm.Views;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KMRLauncherMvvm;
@@ -31,6 +31,7 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         InitializeSettings();
+        ThemeService.ApplyAccent(Settings.AccentColor);
         
         var modListService = new ModListService();
         var jsonHelper = new GitHelper(modListService);
@@ -38,6 +39,11 @@ public class App : Application
         var dependencyService = new DependencyService(modListService, compatibilityService);
         
         var collection = new ServiceCollection();
+        collection.AddSingleton<StatusBarViewModel>();
+        collection.AddSingleton<GameSessionService>();
+        collection.AddSingleton<NavigationService>();
+        collection.AddSingleton<DialogService>();
+        collection.AddSingleton<InstallFlow>();
         collection.AddSingleton<IModApiService, ModGitService>();
         collection.AddSingleton<ZipService>();
         collection.AddSingleton(modListService);

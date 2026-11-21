@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using KMRLauncherMvvm.Models;
 using LibGit2Sharp;
@@ -10,6 +11,9 @@ namespace KMRLauncherMvvm.Services;
 
 public class GitHelper(ModListService modList)
 {
+    public static string DefaultCkanMetaFolder => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "kmrLauncher/cache/ckan-meta");
+
     public static void CloneCkanMetaRepo(string gitCacheFolder, IProgress<ModFetchProgress>? progress)
     {
         Directory.CreateDirectory(gitCacheFolder);
@@ -100,6 +104,19 @@ public class GitHelper(ModListService modList)
             new Identity("USERNAME", "PASSWORD"), DateTimeOffset.Now);
 
         Commands.Pull(repo, signature, options);
+    }
+
+    public static Dictionary<string, long> ReadDownloadCounts(string gitCacheFolder)
+    {
+        try
+        {
+            var json = File.ReadAllText(Path.Combine(gitCacheFolder, "download_counts.json"));
+            return JsonSerializer.Deserialize<Dictionary<string, long>>(json) ?? [];
+        }
+        catch (Exception)
+        {
+            return [];
+        }
     }
 
     public async Task PopulateMods(string gitCacheFolder, IProgress<ModFetchProgress>? progress)

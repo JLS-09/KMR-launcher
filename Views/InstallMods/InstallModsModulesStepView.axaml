@@ -4,131 +4,169 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.InstallMods"
              xmlns:models="clr-namespace:KMRLauncherMvvm.Models"
+             xmlns:controls="clr-namespace:KMRLauncherMvvm.Controls"
              x:DataType="vm:InstallModsModulesStepViewModel"
-             mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="500"
-             Background="#1F1F20"
-             Foreground="{DynamicResource PrimaryText}"
+             mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="600"
              x:Class="KMRLauncherMvvm.Views.InstallMods.InstallModsModulesStepView">
 
+    <!-- Step 3 "Choices" (mockup Wiz3Choices): one section per any_of / virtual module, then the choices that had
+         only one option ("Picked for you"). Styles come from InstallDialogView. -->
     <UserControl.Styles>
-        <!-- Outer list: the cards themselves aren't selectable, so hide the selection/hover look -->
-        <Style Selector="ListBox.choice-groups">
+        <Style Selector="RadioButton.dot.option">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="12 10" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
             <Setter Property="Background" Value="Transparent" />
         </Style>
-        <Style Selector="ListBox.choice-groups > ListBoxItem">
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="0 0 0 16" />
+        <Style Selector="RadioButton.dot.option:checked">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentLine}" />
+            <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
         </Style>
-        <Style
-            Selector="ListBox.choice-groups > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
+        <Style Selector="RadioButton.dot.option:pointerover:unchecked">
+            <Setter Property="Background" Value="{DynamicResource RowHover}" />
         </Style>
-        <Style
-            Selector="ListBox.choice-groups > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="Transparent" />
+        <Style Selector="Border.smallChip">
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Padding" Value="8 0" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Background" Value="{DynamicResource Control}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-
-        <!-- Inner list: one row per option, selected row gets the green bar like the recommendations step -->
-        <Style Selector="ListBox.choice-options">
-            <Setter Property="Background" Value="Transparent" />
-        </Style>
-        <Style Selector="ListBox.choice-options > ListBoxItem">
-            <Setter Property="Padding" Value="8 4" />
-            <Setter Property="BorderThickness" Value="2 0 0 0" />
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="Cursor" Value="Hand" />
-        </Style>
-        <Style Selector="ListBox.choice-options > ListBoxItem:selected">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
-        </Style>
-        <Style
-            Selector="ListBox.choice-options > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource SideBarButtonActiveBackground}" />
+        <Style Selector="Border.smallChip TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
     </UserControl.Styles>
 
-    <Grid Margin="32 0 32 0" RowDefinitions="Auto Auto *">
-        <!-- Row 0 was the progress bar; it lives in InstallModsWindow now -->
+    <StackPanel Spacing="18">
+        <TextBlock FontSize="13" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}"
+                   Text="Some mods need one of several mods. Pick one for each." />
 
-        <StackPanel Grid.Row="1" Margin="0 32 0 8">
-            <TextBlock Text="CHOOSE BETWEEN MODS" LetterSpacing="1"
-                       Foreground="{DynamicResource SecondaryText}"
-                       FontFamily="{DynamicResource SpaceMonoBold}" FontSize="12" />
-            <!-- Problems the resolver couldn't solve; they block Next. Bounded height, so the ScrollViewer is fine. -->
-            <Border IsVisible="{Binding HasProblems}" Margin="0 8 0 0" Padding="12 8"
-                    Background="{DynamicResource SideBarBackground}"
-                    BorderBrush="{DynamicResource PrimaryRed}" BorderThickness="2 0 0 0">
-                <ScrollViewer MaxHeight="140" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding InstallModsData.Problems}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="models:ResolutionProblem">
-                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Margin="0 2"
-                                           Foreground="{DynamicResource PrimaryRed}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Border>
-        </StackPanel>
-
-        <TextBlock Grid.Row="2" Text="Nothing to choose, every dependency could be resolved automatically."
-                   Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap"
-                   IsVisible="{Binding !HasChoices}" />
-
-        <!-- ListBox scrolls itself; no StackPanel inside a ScrollViewer -->
-        <ListBox Grid.Row="2" Classes="choice-groups" ItemsSource="{Binding Choices}"
-                 IsVisible="{Binding HasChoices}"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-            <ListBox.ItemTemplate>
+        <ItemsControl ItemsSource="{Binding Choices}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Spacing="18" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="vm:ChoiceGroupViewModel">
-                    <Border Background="{DynamicResource SideBarBackground}" Padding="16">
-                        <Grid RowDefinitions="Auto Auto Auto Auto Auto" RowSpacing="4">
-                            <TextBlock Grid.Row="0" Text="{Binding Title}" FontWeight="Bold" TextWrapping="Wrap" />
-                            <TextBlock Grid.Row="1" Text="{Binding RequiredByText}" FontSize="12"
-                                       Foreground="{DynamicResource SecondaryText}" TextWrapping="Wrap" />
-                            <TextBlock Grid.Row="2" Text="{Binding HelpText}" FontStyle="Italic"
-                                       TextWrapping="Wrap" Margin="0 4 0 0"
-                                       IsVisible="{Binding HasHelpText}" />
-                            <TextBlock Grid.Row="3" Text="{Binding ErrorText}" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource PrimaryRed}" Margin="0 4 0 0"
-                                       IsVisible="{Binding IsUnsatisfiable}" />
-                            <ListBox Grid.Row="4" Classes="choice-options" Margin="0 8 0 0"
-                                     ItemsSource="{Binding Options}"
-                                     SelectedItem="{Binding SelectedOption}"
-                                     SelectionMode="Single"
-                                     IsVisible="{Binding !IsUnsatisfiable}"
-                                     ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListBox.ItemTemplate>
+                    <Border Classes="row" Padding="0 18 0 4">
+                        <StackPanel Spacing="12">
+                            <StackPanel Spacing="2">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock FontSize="15" FontWeight="SemiBold" Text="{Binding Title}" />
+                                    <Border Classes="smallChip" IsVisible="{Binding IsVirtual}">
+                                        <TextBlock Text="virtual" />
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Classes="rowHint" Text="{Binding RequiredByText}" />
+                            </StackPanel>
+                            <TextBlock FontSize="13" FontStyle="Italic" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondary}"
+                                       Text="{Binding HelpText}" IsVisible="{Binding HasHelpText}" />
+                            <TextBlock FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource StatusError}"
+                                       Text="{Binding ErrorText}" IsVisible="{Binding IsUnsatisfiable}" />
+                            <ItemsControl ItemsSource="{Binding Options}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="12" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:ChoiceOptionViewModel">
-                                        <Grid ColumnDefinitions="* Auto" ColumnSpacing="16">
-                                            <TextBlock Grid.Column="0" Text="{Binding Identifier}"
-                                                       VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis" />
-                                            <ComboBox Grid.Column="1" ItemsSource="{Binding Versions}"
-                                                      SelectedItem="{Binding SelectedVersion}"
-                                                      IsVisible="{Binding HasMultipleVersions}"
-                                                      VerticalAlignment="Center" MinWidth="120"
-                                                      CornerRadius="0" FontSize="13">
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate x:DataType="models:ModVersion">
-                                                        <TextBlock Text="{Binding Version}" FontSize="13" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
-                                            <TextBlock Grid.Column="1" Text="{Binding SelectedVersion.Version}"
-                                                       IsVisible="{Binding !HasMultipleVersions}"
-                                                       VerticalAlignment="Center"
-                                                       Foreground="{DynamicResource SecondaryText}" />
-                                        </Grid>
+                                        <RadioButton Classes="dot option" IsChecked="{Binding IsSelected}"
+                                                     GroupName="{Binding $parent[ItemsControl].((vm:ChoiceGroupViewModel)DataContext).Title}">
+                                            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock Classes="rowName" Text="{Binding Identifier}" />
+                                                        <Border Classes="smallChip" IsVisible="{Binding IsCached}">
+                                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                <controls:StrokeIcon Data="{StaticResource IconDownload}"
+                                                                                     Size="11" VerticalAlignment="Center"
+                                                                                     Foreground="{DynamicResource TextSecondary}" />
+                                                                <TextBlock Text="cached" />
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Classes="rowHint" Text="{Binding DescriptionText}"
+                                                               IsVisible="{Binding DescriptionText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                </StackPanel>
+                                                <ComboBox Grid.Column="1" Classes="version" VerticalAlignment="Center"
+                                                          ItemsSource="{Binding Versions}"
+                                                          SelectedItem="{Binding SelectedVersion}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate x:DataType="models:ModVersion">
+                                                            <TextBlock Text="{Binding Version}" />
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </Grid>
+                                        </RadioButton>
                                     </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </Grid>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
                     </Border>
                 </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-    </Grid>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
 
+        <!-- Choices with one option, picked without asking -->
+        <Border Classes="row" Padding="0 18 0 4" IsVisible="{Binding HasPickedForYou}">
+            <StackPanel Spacing="10">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="14" VerticalAlignment="Center"
+                                         Foreground="{DynamicResource StatusFits}" />
+                    <TextBlock FontSize="14" FontWeight="SemiBold" Text="Picked for you" />
+                    <TextBlock Classes="count" Text="{Binding PickedForYou.Count}" />
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding PickedForYou}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="6" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PickedForYouRow">
+                            <WrapPanel ItemSpacing="8">
+                                <TextBlock Classes="mono" FontSize="12" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextSecondary}" Text="{Binding Need}" />
+                                <controls:StrokeIcon Data="{StaticResource IconArrowRight}" Size="12"
+                                                     VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" />
+                                <TextBlock Classes="mono" FontSize="12" VerticalAlignment="Center" Text="{Binding Picked}" />
+                                <TextBlock FontSize="13" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextMuted}" Text="{Binding Why}" />
+                            </WrapPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
+        <!-- Problems (block Next) -->
+        <Border Padding="14 10" CornerRadius="9" Background="{DynamicResource StatusErrorSoft}"
+                BorderBrush="{DynamicResource StatusErrorLine}" BorderThickness="1" IsVisible="{Binding HasProblems}">
+            <ItemsControl ItemsSource="{Binding InstallModsData.Problems}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:ResolutionProblem">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                            <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="14" VerticalAlignment="Top"
+                                                 Margin="0 2 0 0" Foreground="{DynamicResource StatusError}" />
+                            <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" Text="{Binding Message}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+    </StackPanel>
 </UserControl>

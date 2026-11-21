@@ -16,10 +16,15 @@ public partial class InstallModsModulesStepViewModel(
     DependencyService dependencyService)
     : InstallModsStepViewModel(installModsData)
 {
-    private sealed class RawChoice(Relationship relationship, List<string> requiredBy)
+    private sealed class RawChoice(Relationship relationship, List<string> requiredBy, List<string> requiredByNames,
+        List<string> requirers)
     {
+        public List<string> Requirers { get; } = requirers;
+
         public Relationship Relationship { get; } = relationship;
         public List<string> RequiredBy { get; } = requiredBy;
+
+        public List<string> RequiredByNames { get; } = requiredByNames;
         public List<PlannedModVersion> Options { get; } = [];
     }
 
@@ -28,6 +33,8 @@ public partial class InstallModsModulesStepViewModel(
     private List<ChoiceGroupViewModel> _baseGroups = [];
     private List<PlannedModVersion> _baseAutoAdded = [];
     private List<ResolutionProblem> _baseProblems = [];
+    private List<PickedForYouRow> _basePicked = [];
+    private List<PickedForYouRow> _picked = [];
 
     private GameVersionCriteria? _criteria;
 
@@ -37,6 +44,15 @@ public partial class InstallModsModulesStepViewModel(
     [ObservableProperty] private bool _hasChoices;
     [ObservableProperty] private bool _hasProblems;
     [ObservableProperty] private bool _allChoicesMade;
+
+    [ObservableProperty] private IReadOnlyList<PickedForYouRow> _pickedForYou = [];
+    [ObservableProperty] private bool _hasPickedForYou;
+
+    public Func<ModVersion, bool> IsCached { get; set; } = _ => false;
+
+    public Func<string, string?> AbstractOf { get; set; } = _ => null;
+
+    public int ChoicesLeft => Choices.Count(c => c.SelectedOption is null);
 
     public override bool CanGoNext => AllChoicesMade;
 
@@ -61,12 +77,14 @@ public partial class InstallModsModulesStepViewModel(
 
         var queued = InstallModsData.FinalModList.ToList();
         List<ResolutionProblem> problems = [.. InstallModsData.Problems.Where(p => !p.IsConflict)];
+        _picked = [];
         var rawChoices = BuildRawChoices(InstallModsData.ChoosableVersions, queued, problems, out var autoAdded);
 
         _baseProblems = problems;
         _baseFinalModList = queued;
         _baseRemoveList = [.. InstallModsData.RequestedRemoveModVersions];
         _baseAutoAdded = autoAdded;
+        _basePicked = _picked;
         _baseGroups = [.. rawChoices.Select(CreateGroup)];
 
         ApplySelections();
@@ -82,6 +100,7 @@ public partial class InstallModsModulesStepViewModel(
             var problems = _baseProblems.ToList();
             var desired = new List<ChoiceGroupViewModel>(_baseGroups);
             List<PlannedModVersion> pending = [.. _baseAutoAdded, .. SelectedOptions(_baseGroups)];
+            _picked = [.. _basePicked];
 
             while (pending.Count > 0)
             {
@@ -105,9 +124,11 @@ public partial class InstallModsModulesStepViewModel(
                 pending = [.. autoAdded, .. SelectedOptions(newGroups)];
             }
 
-            problems.AddRange(CompatibilityService.FindConflicts(
-                [.. queued.Select(q => q.Version)],
-                DependencyService.RemainingInstalled(InstallModsData.SelectedInstance, queued, removes)));
+            var toInstall = queued.Select(q => q.Version).ToList();
+            var remaining = DependencyService.RemainingInstalled(InstallModsData.SelectedInstance, queued, removes);
+            problems.AddRange(CompatibilityService.FindConflicts(toInstall, remaining));
+            problems.AddRange(CompatibilityService.FindBrokenDepends(toInstall, remaining,
+                InstallModsData.SelectedInstance?.Mods ?? []));
 
             InstallModsData.FinalModList = new ObservableCollection<PlannedModVersion>(queued);
             InstallModsData.RequestedRemoveModVersions = new ObservableCollection<PlannedModVersion>(removes);
@@ -131,6 +152,9 @@ public partial class InstallModsModulesStepViewModel(
         }
 
         HasChoices = Choices.Count > 0;
+        PickedForYou = [.. _picked.DistinctBy(p => p.Need)];
+        HasPickedForYou = PickedForYou.Count > 0;
+        OnPropertyChanged(nameof(ChoicesLeft));
         HasProblems = InstallModsData.Problems.Count > 0;
         AllChoicesMade = !HasProblems && Choices.All(c => !c.IsUnsatisfiable && c.SelectedOption is not null);
     }
@@ -143,8 +167,8 @@ public partial class InstallModsModulesStepViewModel(
 
     private ChoiceGroupViewModel CreateGroup(RawChoice choice) =>
         new(choice.Relationship,
-            choice.Options.Select(option => new ChoiceOptionViewModel(option, GetPickableVersions(option))),
-            choice.RequiredBy);
+            choice.Options.Select(option => new ChoiceOptionViewModel(option, GetPickableVersions(option), IsCached, AbstractOf)),
+            choice.RequiredByNames, choice.Requirers);
 
     private List<ModVersion> GetPickableVersions(PlannedModVersion option)
     {
@@ -196,7 +220,10 @@ public partial class InstallModsModulesStepViewModel(
         List<RawChoice> choices = [];
         foreach (var relationship in relationships)
         {
-            var choice = new RawChoice(relationship, FindRequiredBy(relationship, queued));
+            var requiredBy = FindRequiredBy(relationship, queued);
+            var choice = new RawChoice(relationship, requiredBy,
+                [.. requiredBy.Select(id => InstallChanges.DisplayName(id, queued, withVersion: true))],
+                [.. requiredBy.Select(id => InstallChanges.DisplayName(id, queued, withVersion: false)).Distinct()]);
 
             if (relationship.AnyOf is not null && relationship.AnyOf.Count > 0)
             {
@@ -416,7 +443,7 @@ public partial class InstallModsModulesStepViewModel(
         return swapped;
     }
 
-    private static List<PlannedModVersion> EliminateSingleChoices(List<RawChoice> choices,
+    private List<PlannedModVersion> EliminateSingleChoices(List<RawChoice> choices,
         List<PlannedModVersion> queued)
     {
         List<PlannedModVersion> autoAdded = [];
@@ -431,7 +458,10 @@ public partial class InstallModsModulesStepViewModel(
                                 autoAdded.Exists(m => m.Version.Identifier == option.Version.Identifier);
 
             if (!alreadyQueued)
+            {
                 autoAdded.Add(option);
+                _picked.Add(PickedRow(choice.Relationship, option.Version));
+            }
 
             choices.Remove(choice);
         }
@@ -466,5 +496,18 @@ public partial class InstallModsModulesStepViewModel(
                                         (d.Name == module || providers.Any(p => p.Identifier == d.Name)));
     }
 
-    public override string Title => "Choose Modules";
+    private PickedForYouRow PickedRow(Relationship relationship, ModVersion picked)
+    {
+        var need = relationship.AnyOf is { Count: > 0 } anyOf
+            ? $"one of {string.Join(", ", anyOf.Select(a => a.Name))}"
+            : relationship.Name ?? picked.Identifier;
+        var why = relationship.AnyOf is { Count: > 0 }
+            ? $"only one that fits {InstallModsData.SelectedInstance?.Version ?? "this instance"}"
+            : "only mod that provides it";
+        return new PickedForYouRow(need, $"{picked.Identifier} {picked.Version}", why);
+    }
+
+    public override string Title => "Choices";
 }
+
+public sealed record PickedForYouRow(string Need, string Picked, string Why);

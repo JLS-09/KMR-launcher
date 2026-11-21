@@ -2,247 +2,560 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             x:Name="Root"
-             mc:Ignorable="d" d:DesignWidth="1144" d:DesignHeight="720"
+             mc:Ignorable="d" d:DesignWidth="1184" d:DesignHeight="760"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
+             xmlns:discover="clr-namespace:KMRLauncherMvvm.ViewModels.Discover"
+             xmlns:controls="using:KMRLauncherMvvm.Controls"
              x:DataType="vm:DiscoverPageViewModel"
              x:Class="KMRLauncherMvvm.Views.DiscoverPageView"
-             Background="{DynamicResource PrimaryBackground}"
-             Foreground="{DynamicResource PrimaryText}">
+             Foreground="{DynamicResource TextPrimary}">
 
     <Design.DataContext>
         <vm:DiscoverPageViewModel />
     </Design.DataContext>
 
     <UserControl.Styles>
-        <Style Selector="TextBox">
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="CornerRadius" Value="0" />
-            <Setter Property="Background" Value="#1F1F20" />
-            <Setter Property="Padding" Value="16" />
+        <!-- A block in the filters column or the details panel: padding 18 20, a line under it -->
+        <Style Selector="Border.block">
+            <Setter Property="Padding" Value="20 18" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="0 0 0 1" />
+        </Style>
+        <Style Selector="Border.block.last">
+            <Setter Property="BorderThickness" Value="0" />
         </Style>
 
-        <Style Selector="TextBox:pointerover /template/ Border">
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="Background" Value="#1F1F20" />
+        <!-- List header: 11 px / 600, letter-spacing .06em -->
+        <Style Selector="TextBlock.columnHeader">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="LetterSpacing" Value="0.66" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <Style Selector="TextBox:focus /template/ Border">
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="Background" Value="#1F1F20" />
+        <!-- Mod rows: hover #18181B; the row shown in the details panel gets #1C1C20 and an accent outline -->
+        <Style Selector="ListBox.mods ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
         </Style>
-
-        <Style Selector="Button.ButtonRefresh:pointerover /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlue}" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryBlue}" />
+        <Style Selector="ListBox.mods ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource RowHover}" />
+        </Style>
+        <Style Selector="ListBox.mods ListBoxItem:selected /template/ ContentPresenter, ListBox.mods ListBoxItem:selected:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SelectedRow}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentLine}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="Transparent" />
         </Style>
 
-        <Style Selector="Button.ButtonRefresh:focus /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBlue}" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryBlue}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="Transparent" />
+        <!-- Version rows in the details panel -->
+        <Style Selector="ListBox.versions ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ListBox.versions ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource RowHover}" />
+        </Style>
+        <Style Selector="Border.versionRow.fits">
+            <Setter Property="Background" Value="{DynamicResource FitsRow}" />
+        </Style>
+        <Style Selector="Border.versionRow.checked">
+            <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+        </Style>
+        <Style Selector="TextBlock.version">
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="TextBlock.version.fits">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="TextBlock.ksp.fits">
+            <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
         </Style>
 
-        <Style Selector="Button.ButtonApply:pointerover /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="Transparent" />
+        <!-- Narrow page (below 1070 px = filters 210 + list 520 + details 340): the details panel lies over
+             the right side of the list instead of taking a column of its own (set in the code-behind) -->
+        <!-- Set in styles, not on the element: a value set on the element would win over the narrow style -->
+        <Style Selector="Border#DetailsPanel">
+            <Setter Property="Grid.Column" Value="2" />
+        </Style>
+        <Style Selector=":is(UserControl).narrow Border#DetailsPanel">
+            <!-- Only column 1 (the list): spanning the Auto column too would make the Grid widen that column -->
+            <Setter Property="Grid.Column" Value="1" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="BoxShadow" Value="-16 0 32 0 #99000000" />
         </Style>
 
-        <Style Selector="Button.ButtonApply:focus /template/ ContentPresenter">
-            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryGreen}" />
+        <!-- Selected-mod chips in the tray: 28 px, padding 0 4 0 10, radius 7, #1B1B1E -->
+        <Style Selector="Border.selectionChip">
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="10 0 4 0" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
             <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Button.chipRemove">
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="5" />
             <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.chipRemove:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHover}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         </Style>
     </UserControl.Styles>
 
-    <Grid RowDefinitions="Auto Auto Auto *" Margin="32 16" RowSpacing="16">
-        <Grid Grid.Row="0" ColumnDefinitions="*, auto" RowDefinitions="*, auto" ColumnSpacing="32">
-            <ProgressBar Grid.Column="0" Grid.Row="0" Height="21"
-                         ShowProgressText="{Binding !LoadProgress.IsCache}"
-                         Foreground="{DynamicResource PrimaryRed}" CornerRadius="0"
-                         Value="{Binding LoadProgress.ModsReceived}"
-                         Maximum="{Binding LoadProgress.TotalMods}"
-                         IsVisible="{Binding IsLoading}"
-                         IsIndeterminate="{Binding LoadProgress.IsCache}" />
-            <TextBlock Grid.Column="0" Grid.Row="1"
-                       VerticalAlignment="Center" HorizontalAlignment="Left"
-                       Text="{Binding LoadProgress.CurrentModName}"
-                       FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Regular" FontSize="14"
-                       LetterSpacing="1.4" Foreground="{DynamicResource SecondaryText}"
-                       IsVisible="{Binding IsLoading}" />
-            <TextBlock Grid.Column="0" Grid.Row="0"
-                       Text="{Binding ConnectionStatus}"
-                       FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Regular" FontSize="16"
-                       LetterSpacing="1.4" Foreground="{DynamicResource SecondaryText}"
-                       IsVisible="{Binding !IsLoading}" />
-            <TextBlock Grid.Column="1" Grid.Row="0"
-                       VerticalAlignment="Center" HorizontalAlignment="Right"
-                       Text="NETWORK STATUS"
-                       FontFamily="{DynamicResource SpaceGrotesk}"
-                       FontWeight="Regular"
-                       FontSize="14"
-                       LetterSpacing="1.4"
-                       Foreground="{DynamicResource SecondaryText}" />
-            <TextBlock Grid.Column="1" Grid.Row="1"
-                       VerticalAlignment="Center" HorizontalAlignment="Right"
-                       Text="NETWORK_SYNCHRONIZED"
-                       FontFamily="{DynamicResource SpaceGrotesk}"
-                       FontWeight="Bold"
-                       FontSize="16"
-                       LetterSpacing="1.4"
-                       Foreground="{DynamicResource PrimaryGreen}" />
-        </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="* * * * *" ColumnSpacing="4">
-            <TextBox Grid.Column="0" PlaceholderText="MOD NAME..." FontFamily="{DynamicResource SpaceGrotesk}"
-                     Text="{Binding ModFilter}">
-                <TextBox.InnerLeftContent>
-                    <Label Classes="iconBold" FontWeight="Regular" Content="&#xE30C;" FontSize="18"
-                           Foreground="{DynamicResource SecondaryText}" Padding="16 0 0 0" />
-                </TextBox.InnerLeftContent>
-            </TextBox>
-            <TextBox Grid.Column="1" PlaceholderText="AUTHOR..." FontFamily="{DynamicResource SpaceGrotesk}"
-                     Text="{Binding AuthorFilter}">
-                <TextBox.InnerLeftContent>
-                    <Label Classes="iconBold" FontWeight="Regular" Content="&#xE4C2;" FontSize="20"
-                           Foreground="{DynamicResource SecondaryText}" Padding="16 0 0 0" />
-                </TextBox.InnerLeftContent>
-            </TextBox>
-            <TextBox Grid.Column="2" />
-            <Button Grid.Column="3" Classes="ButtonRefresh" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    CornerRadius="0"
-                    BorderThickness="1" BorderBrush="{DynamicResource PrimaryBlue}"
-                    Foreground="{DynamicResource PrimaryBlue}" Background="#002D52"
-                    FontSize="20" FontFamily="{DynamicResource SpaceGrotesk}" HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center" Command="{Binding FetchModsCommand}"
-                    CommandParameter="{Binding IsEnabledFlag}">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <Label Classes="icon" FontWeight="Regular" Content="&#xE094;" FontSize="24" />
-                    <TextBlock Text="Refresh" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-            <Button Grid.Column="4" Classes="ButtonApply" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                    CornerRadius="0"
-                    BorderThickness="1" BorderBrush="{DynamicResource PrimaryGreen}"
-                    Foreground="{DynamicResource PrimaryGreen}" Background="#033A16"
-                    FontSize="20" FontFamily="{DynamicResource SpaceGrotesk}" HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center" Command="{Binding ApplyChangesCommand}"
-                    IsEnabled="{Binding HasSelectedMods}">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <Label Classes="icon" FontWeight="Regular" Content="&#xE53A;" FontSize="24" />
-                    <TextBlock Text="Apply" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-        </Grid>
-        <Grid Grid.Row="2" ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 16 24 0" ColumnSpacing="8">
-            <TextBlock Grid.Column="0" Text="MOD_NAME" Foreground="{DynamicResource SecondaryText}"
-                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
-            <TextBlock Grid.Column="1" Text="AUTHOR(S)" Foreground="{DynamicResource SecondaryText}"
-                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
-            <TextBlock Grid.Column="2" Text="VERSION" Foreground="{DynamicResource SecondaryText}"
-                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
-            <TextBlock Grid.Column="3" Text="LAST_UPDATE" Foreground="{DynamicResource SecondaryText}"
-                       FontSize="13" FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="Bold" />
-        </Grid>
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <ItemsRepeater ItemsSource="{Binding ModListFiltered}"
-                     Background="Transparent">
-                <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Vertical" Spacing="4"/>
-                </ItemsRepeater.Layout>
+    <Grid ColumnDefinitions="210, *, Auto">
 
-                <ItemsRepeater.Styles>
-                    <Style Selector="Button.mod-row">
-                        <Setter Property="Background" Value="Transparent" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="HorizontalAlignment" Value="Stretch" />
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="Cursor" Value="Hand" />
-                    </Style>
-                    <Style Selector="Button.mod-row:pointerover /template/ ContentPresenter">
-                        <Setter Property="Background" Value="Transparent" />
-                    </Style>
-                    <Style Selector="Button.mod-row:pressed /template/ ContentPresenter">
-                        <Setter Property="Background" Value="Transparent" />
-                    </Style>
-                </ItemsRepeater.Styles>
+        <!-- Filters -->
+        <Border Grid.Column="0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 1 0">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <Border Classes="block">
+                        <StackPanel Spacing="10">
+                            <TextBlock Classes="label" Text="CHECK AGAINST" />
+                            <controls:InstancePicker Instances="{Binding Instances}"
+                                                     SelectedInstance="{Binding CheckAgainst}" />
+                            <ToggleButton Classes="switch" Content="Only compatible" IsChecked="{Binding OnlyCompatible}" />
+                            <ToggleButton Classes="switch" Content="Hide installed" IsChecked="{Binding HideInstalled}" />
+                        </StackPanel>
+                    </Border>
 
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate DataType="vm:ModListItemViewModel">
-                        <Button Classes="mod-row"
-                                Command="{Binding $parent[ItemsRepeater].((vm:DiscoverPageViewModel)DataContext).ToggleModSelectionCommand}"
-                                CommandParameter="{Binding}">
-                            <Border Padding="32 16" BorderThickness="3 0 0 0"
-                                    Classes.selected="{Binding IsSelected}">
-                                <Border.Styles>
-                                    <Style Selector="Border">
-                                        <Setter Property="Background" Value="{DynamicResource SideBarBackground}" />
-                                        <Setter Property="BorderBrush" Value="Transparent" />
-                                    </Style>
-                                    <Style Selector="Border.selected">
-                                        <Setter Property="Background"
-                                                Value="{DynamicResource SideBarButtonActiveBackground}" />
-                                        <Setter Property="BorderBrush" Value="{DynamicResource PrimaryGreen}" />
-                                    </Style>
-                                </Border.Styles>
-                                <Grid ColumnDefinitions="4*, 1.5*, *, 0.75*" Margin="0 0 24 0" ColumnSpacing="12">
-                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                        <TextBlock Classes="ModListEntry" Text="{Binding Mod.Name}" FontSize="16"
-                                                   TextTrimming="CharacterEllipsis" FontWeight="Bold"
-                                                   FontFamily="{DynamicResource SpaceGrotesk}">
-                                            <ToolTip.Tip>
-                                                <TextBlock Text="{Binding Mod.Name}" FontSize="14"
-                                                           FontFamily="{DynamicResource SpaceGrotesk}" />
-                                            </ToolTip.Tip>
-                                        </TextBlock>
-                                        <TextBlock Classes="ModListEntry" Text="{Binding Mod.Abstract}" FontSize="11"
-                                                   TextTrimming="CharacterEllipsis" FontWeight="Regular"
-                                                   Foreground="{DynamicResource SecondaryText}"
-                                                   FontFamily="{DynamicResource Inter}">
-                                            <ToolTip.Tip>
-                                                <TextBlock Text="{Binding Mod.Abstract}" FontSize="12"
-                                                           FontFamily="{DynamicResource Inter}" />
-                                            </ToolTip.Tip>
-                                        </TextBlock>
+                    <Border Classes="block">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="label" Text="TAGS" Margin="0 0 0 6" />
+                            <ItemsControl ItemsSource="{Binding VisibleTags}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="discover:FilterOptionViewModel">
+                                        <CheckBox Classes="box filterRow" IsChecked="{Binding IsChecked}">
+                                            <Grid ColumnDefinitions="*, Auto">
+                                                <TextBlock Grid.Column="0" Text="{Binding Name}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="1" Classes="mono muted" FontSize="11"
+                                                           Text="{Binding CountText}" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Button Classes="ghost small" Height="30" Padding="8 0" FontSize="12"
+                                    HorizontalAlignment="Left" CornerRadius="6"
+                                    IsVisible="{Binding HasMoreTags}" Content="{Binding MoreTagsText}"
+                                    Command="{Binding ToggleMoreTagsCommand}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="block last">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="label" Text="KIND" Margin="0 0 0 6" />
+                            <ItemsControl ItemsSource="{Binding Kinds}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="discover:FilterOptionViewModel">
+                                        <CheckBox Classes="box filterRow" IsChecked="{Binding IsChecked}">
+                                            <TextBlock Text="{Binding Name}" />
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Mod list -->
+        <Grid Grid.Column="1" RowDefinitions="Auto, Auto, *, Auto">
+            <!-- Toolbar: active filters, count, sort -->
+            <Border Grid.Row="0" MinHeight="52" Padding="20 8" BorderBrush="{DynamicResource Line}"
+                    BorderThickness="0 0 0 1">
+                <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                    <WrapPanel Grid.Column="0" VerticalAlignment="Center" ItemSpacing="8" LineSpacing="8">
+                        <ItemsControl ItemsSource="{Binding ActiveFilters}" IsVisible="{Binding HasActiveFilters}"
+                                      VerticalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Border Classes="chip">
+                                        <TextBlock Text="{Binding}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Classes="ghost small" Height="24" Padding="8 0" CornerRadius="6" FontSize="12"
+                                IsVisible="{Binding HasActiveFilters}" Content="Clear filters"
+                                Command="{Binding ClearFiltersCommand}" VerticalAlignment="Center" />
+                        <TextBlock FontSize="13" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"
+                                   Margin="4 0 0 0">
+                            <Run FontFamily="{DynamicResource Mono}" Foreground="{DynamicResource TextSecondary}"
+                                 Text="{Binding ShownCount}" />
+                            <Run Text=" mods" />
+                        </TextBlock>
+                    </WrapPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="Sort" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                   VerticalAlignment="Center" />
+                        <!-- Placeholder: sorting is a Phase 8 feature; the list is sorted by name for now -->
+                        <Button Classes="secondary small" ToolTip.Tip="Not built yet: sorting comes in Phase 8">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="Name" VerticalAlignment="Center" />
+                                <controls:StrokeIcon Data="{StaticResource IconChevronDown}" Size="14"
+                                                     VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Column header -->
+            <Border Grid.Row="1" Height="38" Padding="20 0" BorderBrush="{DynamicResource Line}"
+                    BorderThickness="0 0 0 1">
+                <Grid ColumnDefinitions="28, *, 104, 76, 100" ColumnSpacing="12">
+                    <TextBlock Grid.Column="1" Classes="columnHeader" Text="MOD" />
+                    <TextBlock Grid.Column="2" Classes="columnHeader" Text="KSP" />
+                    <TextBlock Grid.Column="3" Classes="columnHeader" Text="DOWNLOADS" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="4" Classes="columnHeader" Text="STATUS" />
+                </Grid>
+            </Border>
+
+            <!-- Rows -->
+            <Panel Grid.Row="2">
+                <ListBox Classes="mods" Background="Transparent" ItemsSource="{Binding Rows}"
+                         SelectedItem="{Binding FocusedRow}" SelectionMode="Single">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="discover:ModListItemViewModel">
+                            <Border MinHeight="52" Padding="20 6" BorderBrush="{DynamicResource Line}"
+                                    BorderThickness="0 0 0 1">
+                                <Grid ColumnDefinitions="28, *, 104, 76, 100" ColumnSpacing="12">
+                                    <CheckBox Grid.Column="0" Classes="box" IsChecked="{Binding IsSelected}"
+                                              VerticalAlignment="Center"
+                                              ToolTip.Tip="{Binding Mod.Name, StringFormat='Select {0}'}" />
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Mod.Name}" FontSize="14" FontWeight="Medium"
+                                                   LineHeight="20.3" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Authors}" FontSize="12" LineHeight="17.4"
+                                                   Foreground="{DynamicResource TextMuted}"
+                                                   TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
-                                    <TextBlock Grid.Column="1" Classes="ModListEntry" Text="{Binding Mod.AuthorsDisplay}"
-                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" FontSize="13"
-                                               FontFamily="{DynamicResource SpaceGrotesk}">
-                                        <ToolTip.Tip>
-                                            <TextBlock Text="{Binding Mod.AuthorsDisplay}" FontSize="12"
-                                                       FontFamily="{DynamicResource SpaceGrotesk}" />
-                                        </ToolTip.Tip>
-                                    </TextBlock>
-                                    <ComboBox Grid.Column="2" ItemsSource="{Binding Mod.Versions}"
-                                              SelectedItem="{Binding SelectedVersion}" VerticalAlignment="Center"
-                                              CornerRadius="0" FontSize="13">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Version}" FontSize="13" />
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-                                    <TextBlock Grid.Column="3" Classes="ModListEntry" FontSize="13"
-                                               Text="{Binding Mod.LatestVersion.LastUpdatedHumanized}"
-                                               VerticalAlignment="Center"
-                                               Foreground="{DynamicResource SecondaryText}">
-                                        <ToolTip.Tip>
-                                            <TextBlock Text="{Binding Mod.LatestVersion.ReleaseDate}" FontSize="14"
-                                                       FontFamily="{DynamicResource Inter}" />
-                                        </ToolTip.Tip>
-                                    </TextBlock>
+                                    <controls:KspStrip Grid.Column="2" Version="{Binding SelectedVersion}"
+                                                       VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="3" Classes="mono" Text="{Binding Downloads}" FontSize="12"
+                                               Foreground="{DynamicResource TextSecondary}"
+                                               HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    <controls:StatusLabel Grid.Column="4" Kind="{Binding StatusKind}"
+                                                          Text="{Binding StatusText}" IsVisible="{Binding HasStatus}"
+                                                          VerticalAlignment="Center" />
                                 </Grid>
                             </Border>
-                        </Button>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
-        </ScrollViewer>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <TextBlock Text="No mods match the filters" Foreground="{DynamicResource TextMuted}" FontSize="13"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           IsVisible="{Binding HasNoRows}" />
+
+                <!-- While CKAN-meta is fetched and read (not in the mockups) -->
+                <Border Background="{DynamicResource Background}" IsVisible="{Binding IsLoading}">
+                    <StackPanel Width="360" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Classes="label" Text="LOADING THE MOD LIST" />
+                        <ProgressBar Height="4" MinHeight="4" CornerRadius="2"
+                                     Foreground="{DynamicResource Accent}" Background="{DynamicResource Off}"
+                                     Value="{Binding LoadProgress.ModsReceived}"
+                                     Maximum="{Binding LoadProgress.TotalMods}"
+                                     IsIndeterminate="{Binding LoadProgress.IsCache}" />
+                        <TextBlock Classes="mono muted" FontSize="12" Text="{Binding LoadProgress.CurrentModName}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+            </Panel>
+
+            <!-- Selection tray: 2 px accent line on top -->
+            <Border Grid.Row="3" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Accent}"
+                    BorderThickness="0 2 0 0" Padding="20 14" IsVisible="{Binding HasSelectedMods}">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="10">
+                        <Border Grid.Column="0" MinWidth="26" Height="26" Padding="6 0" CornerRadius="13"
+                                Background="{DynamicResource Accent}">
+                            <TextBlock Classes="mono" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource OnAccent}" HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" Text="{Binding SelectedMods.Count}" />
+                        </Border>
+                        <TextBlock Grid.Column="1" Text="mods selected" FontSize="14" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="3" Classes="ghost small" Content="Clear"
+                                Command="{Binding ClearSelectionCommand}" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding SelectedMods}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel ItemSpacing="6" LineSpacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="discover:ModListItemViewModel">
+                                <Border Classes="selectionChip">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Mod.Name}" FontSize="13" VerticalAlignment="Center" />
+                                        <TextBlock Classes="mono muted" FontSize="12" VerticalAlignment="Center"
+                                                   Text="{Binding SelectedVersion.Version}" />
+                                        <Button Classes="chipRemove"
+                                                Command="{Binding $parent[ItemsControl].((vm:DiscoverPageViewModel)DataContext).DeselectCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip.Tip="{Binding Mod.Name, StringFormat='Remove {0} from selection'}">
+                                            <controls:StrokeIcon Data="{StaticResource IconClose}" Size="12" />
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 0">
+                        <Grid ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="10">
+                            <TextBlock Grid.Column="0" Text="Install to" FontSize="13" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextSecondary}" />
+                            <controls:InstancePicker Grid.Column="1" IsCompact="True"
+                                                     Instances="{Binding Instances}"
+                                                     SelectedInstance="{Binding InstallTarget}" />
+                            <Button Grid.Column="3" Classes="accent" Command="{Binding ApplyChangesCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Review changes" VerticalAlignment="Center" />
+                                    <controls:StrokeIcon Data="{StaticResource IconArrowRight}" Size="16"
+                                                         Foreground="{DynamicResource OnAccent}"
+                                                         VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Details panel -->
+        <Border x:Name="DetailsPanel" Width="340" BorderBrush="{DynamicResource Line}"
+                BorderThickness="1 0 0 0" Background="{DynamicResource Background}"
+                IsVisible="{Binding Details, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" DataContext="{Binding Details}">
+                <StackPanel x:DataType="discover:ModDetailsViewModel">
+                    <!-- Name, authors, identifier, license, tags -->
+                    <Border Classes="block">
+                        <StackPanel Spacing="8">
+                            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                                <TextBlock Grid.Column="0" Text="{Binding Mod.Name}" FontSize="22" LineHeight="26.4"
+                                           FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="SemiBold"
+                                           TextWrapping="Wrap" />
+                                <Button Grid.Column="1" Classes="ghost icon" Width="32" Height="32"
+                                        VerticalAlignment="Top" ToolTip.Tip="Close details"
+                                        Command="{Binding $parent[UserControl].((vm:DiscoverPageViewModel)DataContext).CloseDetailsCommand}">
+                                    <controls:StrokeIcon Data="{StaticResource IconClose}" Size="16" />
+                                </Button>
+                            </Grid>
+                            <TextBlock Text="{Binding Authors}" FontSize="13" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextSecondary}" />
+                            <WrapPanel ItemSpacing="6" LineSpacing="6">
+                                <Border Classes="chip plain">
+                                    <TextBlock Classes="mono" Text="{Binding Mod.Id}" />
+                                </Border>
+                                <Border Classes="chip plain" IsVisible="{Binding License, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                    <TextBlock Text="{Binding License}" />
+                                </Border>
+                                <ItemsControl ItemsSource="{Binding Tags}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel ItemSpacing="6" LineSpacing="6" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Border Classes="chip plain">
+                                                <TextBlock Text="{Binding}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="block">
+                        <TextBlock Text="{Binding Description}" FontSize="13" LineHeight="20.15" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextSecondary}" />
+                    </Border>
+
+                    <!-- Versions: every version, tick one to select the mod with it -->
+                    <Border Classes="block">
+                        <StackPanel Spacing="8">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <TextBlock Grid.Column="0" Classes="label" Text="VERSIONS" VerticalAlignment="Bottom" />
+                                <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource TextMuted}">
+                                    <Run FontFamily="{DynamicResource Mono}" Text="{Binding VersionCount}" />
+                                    <Run Text=" · tick one to select" />
+                                </TextBlock>
+                            </Grid>
+                            <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1">
+                                <ListBox Classes="versions" MaxHeight="300" Background="Transparent"
+                                         ItemsSource="{Binding Versions}" SelectionMode="Single">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate x:DataType="discover:VersionRowViewModel">
+                                            <Border Classes="versionRow" Classes.fits="{Binding Fits}"
+                                                    Classes.checked="{Binding IsChecked}" Padding="10 8"
+                                                    BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
+                                                <Grid ColumnDefinitions="18, *, Auto" RowDefinitions="Auto, Auto"
+                                                      ColumnSpacing="10" RowSpacing="4">
+                                                    <CheckBox Grid.Row="0" Grid.Column="0" Classes="box"
+                                                              IsChecked="{Binding IsChecked}" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Row="0" Grid.Column="1" Classes="mono version"
+                                                               Classes.fits="{Binding Fits}" FontSize="12"
+                                                               Text="{Binding Version.Version}"
+                                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
+                                                                Spacing="4">
+                                                        <Border Classes="badge fits" IsVisible="{Binding IsNewestFit}">
+                                                            <TextBlock Text="newest fit" />
+                                                        </Border>
+                                                        <Border Classes="badge neutral" IsVisible="{Binding IsInstalled}">
+                                                            <TextBlock Text="installed" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                                                                Orientation="Horizontal" Spacing="12">
+                                                        <TextBlock Classes="mono version ksp" Classes.fits="{Binding Fits}"
+                                                                   FontSize="12" Text="{Binding KspText}" />
+                                                        <TextBlock Classes="mono muted" FontSize="12"
+                                                                   Text="{Binding DateText}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Border>
+                            <WrapPanel ItemSpacing="14" LineSpacing="6" IsVisible="{Binding HasInstance}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Border Width="8" Height="8" CornerRadius="2" Background="{DynamicResource StatusFits}"
+                                            VerticalAlignment="Center" />
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                               Text="{Binding FitsLegend}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Border Width="8" Height="8" CornerRadius="2" Background="{DynamicResource ToggleOff}"
+                                            VerticalAlignment="Center" />
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}" Text="Doesn't fit" />
+                                </StackPanel>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- KSP compatibility of the version that would be installed -->
+                    <Border Classes="block">
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Classes="label" Text="KSP COMPATIBILITY" VerticalAlignment="Center" />
+                                <Border Classes="badge warning" IsVisible="{Binding IsStrict}" Height="20"
+                                        Padding="8 0" CornerRadius="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <controls:StrokeIcon Data="{StaticResource IconLock}" Size="13" />
+                                        <TextBlock Text="strict" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            <controls:KspDetailStrip Version="{Binding ShownVersion}"
+                                                     InstanceVersion="{Binding InstanceVersion}"
+                                                     OnBrush="{DynamicResource TextSecondary}"
+                                                     OffBrush="{DynamicResource Off}"
+                                                     FitsBrush="{DynamicResource StatusFits}"
+                                                     LabelBrush="{DynamicResource TextMuted}"
+                                                     FontFamily="{DynamicResource Mono}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Depends, conflicts with the instance, reverse depends -->
+                    <Border Classes="block" Classes.last="{Binding !HasLinks}">
+                        <StackPanel Spacing="2">
+                            <TextBlock Classes="label" Text="DEPENDS ON" Margin="0 0 0 4" />
+                            <TextBlock Text="No dependencies" FontSize="13" Foreground="{DynamicResource TextMuted}"
+                                       IsVisible="{Binding !HasDepends}" />
+                            <ItemsControl ItemsSource="{Binding Depends}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="discover:DependsRowViewModel">
+                                        <Grid Height="30" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8">
+                                            <controls:StrokeIcon Grid.Column="0" Data="{StaticResource IconCheck}"
+                                                                 Size="14" VerticalAlignment="Center"
+                                                                 Foreground="{DynamicResource StatusFits}"
+                                                                 IsVisible="{Binding IsInstalled}" />
+                                            <controls:StrokeIcon Grid.Column="0" Data="{StaticResource IconPlus}"
+                                                                 Size="14" VerticalAlignment="Center"
+                                                                 Foreground="{DynamicResource TextMuted}"
+                                                                 IsVisible="{Binding !IsInstalled}" />
+                                            <TextBlock Grid.Column="1" Classes="mono" FontSize="12" Text="{Binding Name}"
+                                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" FontSize="12" Text="{Binding StateText}"
+                                                       Foreground="{DynamicResource TextMuted}"
+                                                       VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <StackPanel Orientation="Horizontal" Spacing="16" Margin="0 8 0 0">
+                                <TextBlock FontSize="12" Text="{Binding ConflictsText}"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           IsVisible="{Binding !HasConflicts}" />
+                                <TextBlock FontSize="12" Text="{Binding ConflictsText}"
+                                           Foreground="{DynamicResource StatusWarning}"
+                                           IsVisible="{Binding HasConflicts}" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}">
+                                    <Run Text="Needed by " />
+                                    <Run FontFamily="{DynamicResource Mono}" Foreground="{DynamicResource TextSecondary}"
+                                         Text="{Binding NeededBy}" />
+                                    <Run Text=" mods" />
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Links -->
+                    <Border Classes="block last" IsVisible="{Binding HasLinks}">
+                        <ItemsControl ItemsSource="{Binding Links}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel ItemSpacing="6" LineSpacing="6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="discover:LinkViewModel">
+                                    <Button Classes="secondary small" Command="{Binding OpenCommand}"
+                                            ToolTip.Tip="{Binding Url}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <controls:StrokeIcon Data="{StaticResource IconExternal}" Size="14"
+                                                                 VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
     </Grid>
 </UserControl>

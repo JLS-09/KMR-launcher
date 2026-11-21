@@ -27,7 +27,10 @@ public class InstallRun
         {
             Instance = instance,
             Jobs = jobs,
-            ToRemove = [.. instance.Mods.Where(m => installing.Contains(m.Identifier) || removing.Contains(m.Identifier))]
+            ToRemove =
+            [
+                .. instance.Mods.Where(m => installing.Contains(m.Identifier) || removing.Contains(m.Identifier))
+            ]
         };
     }
 }
@@ -41,6 +44,8 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
         ["MakingHistory-DLC"] = "GameData/SquadExpansion/MakingHistory",
         ["BreakingGround-DLC"] = "GameData/SquadExpansion/Serenity"
     };
+
+    public string? FindCached(ModVersion version) => downloader.FindCached(version);
 
     public static List<string> CheckBeforeInstall(InstallRun run)
     {
@@ -255,7 +260,6 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
             var steps = ModInstaller.BuildPlan(job.Version, zip);
             job.FilesTotal = steps.Count;
 
-            // Check every target before writing anything
             foreach (var step in steps)
             {
                 var target = FullPath(root, step.TargetPath);
@@ -277,7 +281,6 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
                 var target = FullPath(root, step.TargetPath);
                 CreateFolders(root, Path.GetDirectoryName(target)!, changes);
 
-                // Recorded before writing, so a half-written file is removed by a rollback too
                 lock (changes) changes.Written.Add(step.TargetPath);
                 job.InstalledFiles.Add(step.TargetPath);
                 step.Entry.ExtractToFile(target, overwrite: false);
@@ -288,7 +291,7 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
 
         job.State = ModInstallState.Done;
     }
-    
+
     private static void MakeReadable(string path)
     {
         if (OperatingSystem.IsWindows()) return;
@@ -314,6 +317,7 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
     private static void Commit(InstallRun run)
     {
         var instance = run.Instance;
+        var previous = new Dictionary<string, InstalledModRecord>(instance.ModRecords);
         foreach (var removed in run.ToRemove)
         {
             instance.Mods.RemoveAll(m => m.Identifier == removed.Identifier);
@@ -322,12 +326,16 @@ public class InstallService(IModDownloader downloader, Action saveSettings)
 
         foreach (var job in run.Jobs)
         {
+            previous.TryGetValue(job.Version.Identifier, out var old);
+            var isUserRequested = job.Planned.IsUserRequested || (old?.IsUserRequested ?? false);
+
             instance.Mods.RemoveAll(m => m.Identifier == job.Version.Identifier);
             instance.Mods.Add(job.Version);
             instance.ModRecords[job.Version.Identifier] = new InstalledModRecord
             {
                 Files = [.. job.InstalledFiles],
-                IsUserRequested = job.Planned.IsUserRequested
+                IsUserRequested = isUserRequested,
+                Reason = job.Planned.OptionalReason ?? (job.Planned.IsUserRequested ? null : old?.Reason)
             };
         }
     }

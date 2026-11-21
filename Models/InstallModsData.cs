@@ -13,4 +13,5 @@ public partial class InstallModsData : ObservableObject
     [ObservableProperty] private HashSet<Relationship> _choosableVersions = [];
     [ObservableProperty] private ObservableCollection<string> _modsWithIgnoredRecommendations = [];
     [ObservableProperty] private ObservableCollection<ResolutionProblem> _problems = [];
+    [ObservableProperty] private ObservableCollection<ModVersion> _replacedModVersions = [];
 }

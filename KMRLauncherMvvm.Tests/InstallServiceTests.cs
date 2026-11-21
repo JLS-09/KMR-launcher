@@ -159,6 +159,32 @@ public class InstallServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task A_picked_mod_stays_picked_when_it_comes_back_as_a_dependency()
+    {
+        var instance = Instance();
+        Installed(instance, Package("Lib"), "GameData/Lib/Lib.cfg");
+        instance.ModRecords["Lib"].Reason = "Recommended by Foo";
+
+        await Service().RunAsync(Run(instance, [Dependency(Package("Lib", "2.0"))]), 4, CancellationToken.None);
+
+        Assert.True(instance.ModRecords["Lib"].IsUserRequested);
+        Assert.Equal("Recommended by Foo", instance.ModRecords["Lib"].Reason);
+    }
+
+    [Fact]
+    public async Task A_removal_without_installs_removes_the_files_and_records()
+    {
+        var instance = Instance();
+        Installed(instance, Package("Foo"), "GameData/Foo/Foo.cfg");
+
+        await Service().RunAsync(Run(instance, [], [instance.Mods[0]]), 4, CancellationToken.None);
+
+        Assert.Empty(instance.Mods);
+        Assert.Empty(instance.ModRecords);
+        Assert.False(Exists("GameData/Foo/Foo.cfg"));
+    }
+
+    [Fact]
     public async Task Cached_mods_are_not_downloaded_again()
     {
         var instance = Instance();

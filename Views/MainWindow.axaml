@@ -1,61 +1,274 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:KMRLauncherMvvm.ViewModels"
+        xmlns:controls="using:KMRLauncherMvvm.Controls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="800"
-        Width="1400" Height="800"
+        Width="1400" Height="800" MinWidth="1000" MinHeight="600"
         x:Class="KMRLauncherMvvm.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/Images/logoSmall.png"
-        Title="KMR Launcher">
+        Title="KMR Launcher"
+        Background="{DynamicResource Background}"
+        Foreground="{DynamicResource TextPrimary}"
+        FontFamily="{DynamicResource Inter}"
+        FontSize="14">
 
     <Design.DataContext>
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid Background="{DynamicResource SideBarBackground}" ColumnDefinitions="228, *">
-        <Border Background="{DynamicResource SideBarBackground}">
-            <Grid RowDefinitions="*, Auto">
-                <StackPanel Spacing="10">
-                    <Image Source="/Assets/Images/logo-dark.png" Margin="20 10"/>
-                    <Button Classes="SideBarButton" Command="{Binding GoToHomeCommand}">
-                        <Border Classes.Active="{Binding HomePageIsActive}" Classes="SideBarBorder">
-                            <StackPanel Orientation="Horizontal" Spacing="16">
-                                <Label Classes.Active="{Binding HomePageIsActive}" Classes="iconBold SideBarIcon" FontSize="24" Content="&#xE464;" />
-                                <TextBlock Classes.Active="{Binding HomePageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Dashboard" />
-                            </StackPanel>
-                        </Border>
-                    </Button>
-                    <Button Classes="SideBarButton" Command="{Binding GoToDiscoverCommand}">
-                        <Border Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarBorder">
-                            <StackPanel Orientation="Horizontal" Spacing="16">
-                                <Label Classes.Active="{Binding DiscoverPageIsActive}" Classes="iconBold SideBarIcon" FontSize="24" Content="&#xE1C8;"/>
-                                <TextBlock Classes.Active="{Binding DiscoverPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Browse Mods" />
-                            </StackPanel>
-                        </Border>
-                    </Button>
-                    <Button Classes="SideBarButton" Command="{Binding GoToInstancesCommand}">
-                        <Border Classes.Active="{Binding InstancesPageIsActive}" Classes="SideBarBorder">
-                            <StackPanel Orientation="Horizontal" Spacing="16">
-                                <Label Classes.Active="{Binding InstancesPageIsActive}" Classes="icon SideBarIcon" FontSize="24" Content="&#xE758;"/>
-                                <TextBlock Classes.Active="{Binding InstancesPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Instances" />
-                            </StackPanel>
-                        </Border>
-                    </Button>
-                </StackPanel>
-                <Button Grid.Row="1" Classes="SideBarButton" Command="{Binding GoToSettingsCommand}">
-                    <Border Classes.Active="{Binding SettingsPageIsActive}" Classes="SideBarBorder">
-                        <StackPanel Orientation="Horizontal" Spacing="16">
-                            <Label Classes.Active="{Binding SettingsPageIsActive}" Classes="iconBold SideBarIcon" FontSize="24" Content="&#xE270;"/>
-                            <TextBlock Classes.Active="{Binding SettingsPageIsActive}" Classes="SideBarText" LetterSpacing="1" Text="Settings" />
+    <Window.Styles>
+        <Style Selector="StackPanel.status > TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="StackPanel.status > TextBlock.sep">
+            <Setter Property="Foreground" Value="{DynamicResource LineStrong}" />
+        </Style>
+        <Style Selector="StackPanel.status > controls|StrokeIcon">
+            <Setter Property="Size" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="*, Auto">
+        <Grid Grid.Row="0" ColumnDefinitions="216, *">
+
+            <!-- Sidebar: 216 px, padding 16 12, items 4 px apart -->
+            <Border Grid.Column="0" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Line}"
+                    BorderThickness="0 0 1 0" Padding="12 16">
+                <DockPanel>
+                    <!-- Logo lockup, 160 × 64 (the mockup's SVG); the flame follows the accent -->
+                    <Viewbox DockPanel.Dock="Top" Width="160" Height="64" HorizontalAlignment="Left"
+                             Margin="10 6 10 26" Stretch="Fill">
+                        <Canvas Width="502" Height="200">
+                            <Canvas RenderTransformOrigin="0,0">
+                                <Canvas.RenderTransform>
+                                    <TranslateTransform X="12" Y="-18" />
+                                </Canvas.RenderTransform>
+                                <Canvas RenderTransformOrigin="0,0">
+                                    <Canvas.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform ScaleX="1.91" ScaleY="1.91" />
+                                            <TranslateTransform X="-53.5" Y="16.72" />
+                                        </TransformGroup>
+                                    </Canvas.RenderTransform>
+                                    <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketBody}" />
+                                    <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketWindow}" />
+                                    <Path Fill="{DynamicResource Accent}" Data="{StaticResource LogoFlame}" />
+                                </Canvas>
+                                <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoKmr}" />
+                                <Path Fill="{DynamicResource TextSecondary}" Data="{StaticResource LogoLauncher}" />
+                            </Canvas>
+                        </Canvas>
+                    </Viewbox>
+
+                    <!-- Bottom: the primary instance, or the game that is running.
+                         Border-top, padding 14 4 2; 12 px + the two 4 px gaps above it -->
+                    <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0"
+                            Padding="4 14 4 2">
+                        <StackPanel Spacing="8">
+                            <Panel>
+                                <StackPanel Spacing="8" IsVisible="{Binding IsRunning}">
+                                    <Grid ColumnDefinitions="Auto, Auto, *">
+                                        <Ellipse Grid.Column="0" Width="8" Height="8" Fill="{DynamicResource StatusFits}"
+                                                 VerticalAlignment="Center" Margin="0 0 8 0" />
+                                        <TextBlock Grid.Column="1" Classes="label" Text="RUNNING" LineHeight="16"
+                                                   Foreground="{DynamicResource StatusFits}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Classes="mono secondary" FontSize="12" LineHeight="17.4"
+                                                   Text="{Binding RunningTime}" HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                    <TextBlock Text="{Binding RunningInstanceName}" FontSize="13" FontWeight="Medium"
+                                               LineHeight="18.85" TextTrimming="CharacterEllipsis" />
+                                    <Grid ColumnDefinitions="*, 6, *">
+                                        <Border Grid.Column="0" Background="Transparent"
+                                                ToolTip.Tip="Logs come in Phase 8. Until then the game's output goes to the console.">
+                                            <Button Classes="secondary small" HorizontalAlignment="Stretch"
+                                                    IsHitTestVisible="False" Focusable="False">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <controls:StrokeIcon Data="{StaticResource IconTerminal}" Size="14"
+                                                                         VerticalAlignment="Center" />
+                                                    <TextBlock Text="Log" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                        </Border>
+                                        <Button x:Name="StopButton" Grid.Column="2" Classes="secondary small"
+                                                HorizontalAlignment="Stretch">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <controls:StrokeIcon Data="{StaticResource IconStop}" Size="14"
+                                                                     IsFilled="True" VerticalAlignment="Center" />
+                                                <TextBlock Text="Stop" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                            <Button.Flyout>
+                                                <Flyout Placement="TopEdgeAlignedLeft">
+                                                    <StackPanel Width="260" Spacing="12">
+                                                        <TextBlock FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"
+                                                                   Text="{Binding RunningInstanceName, StringFormat='Stop {0}?'}" />
+                                                        <TextBlock FontSize="12" TextWrapping="Wrap"
+                                                                   Foreground="{DynamicResource TextSecondary}"
+                                                                   Text="KSP is closed right away. Anything you haven't saved in the game is lost." />
+                                                        <StackPanel Orientation="Horizontal" Spacing="8"
+                                                                    HorizontalAlignment="Right">
+                                                            <Button Classes="ghost small" Content="Cancel"
+                                                                    Click="CloseStopFlyout" />
+                                                            <Button Classes="danger small" Content="Stop"
+                                                                    Click="ConfirmStop" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+
+                                <!-- Idle: primary instance on the left, a 36 × 36 Launch button on the right -->
+                                <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10" IsVisible="{Binding !IsRunning}">
+                                    <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center"
+                                                IsVisible="{Binding HasPrimaryInstance}">
+                                        <TextBlock Classes="label" Text="PRIMARY" LineHeight="16" />
+                                        <TextBlock Text="{Binding PrimaryInstance.Name, FallbackValue=''}" FontSize="13"
+                                                   FontWeight="Medium" LineHeight="18.85" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Classes="mono muted" FontSize="11" LineHeight="16"
+                                                   Text="{Binding PrimaryInstance.Version, StringFormat='KSP {0}', FallbackValue=''}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Classes="accent icon" BorderThickness="0" CornerRadius="8"
+                                            VerticalAlignment="Center" IsVisible="{Binding HasPrimaryInstance}"
+                                            Command="{Binding LaunchPrimaryCommand}"
+                                            ToolTip.Tip="{Binding PrimaryInstance.Name, StringFormat='Launch {0}', FallbackValue=''}">
+                                        <controls:StrokeIcon Data="{StaticResource IconPlay}" Size="16" IsFilled="True"
+                                                             Foreground="{DynamicResource OnAccent}" />
+                                    </Button>
+
+                                    <!-- No instances (not in the mockups) -->
+                                    <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Spacing="8"
+                                                IsVisible="{Binding !HasPrimaryInstance}">
+                                        <TextBlock Classes="muted" FontSize="13" Text="No instances yet" />
+                                        <Button Classes="secondary small" HorizontalAlignment="Stretch"
+                                                Command="{Binding GoToInstancesCommand}" Content="Go to Instances" />
+                                    </StackPanel>
+                                </Grid>
+                            </Panel>
+                            <!-- Only when launching failed (not in the mockups) -->
+                            <TextBlock Text="{Binding LaunchError}" FontSize="12" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource StatusError}"
+                                       IsVisible="{Binding LaunchError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                         </StackPanel>
                     </Border>
-                </Button>
+
+                    <Button DockPanel.Dock="Bottom" Classes="nav" Classes.active="{Binding SettingsPageIsActive}"
+                            Command="{Binding GoToSettingsCommand}" Margin="0 28 0 20">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <controls:StrokeIcon Data="{StaticResource IconSettings}" VerticalAlignment="Center" />
+                            <TextBlock Text="Settings" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <StackPanel Spacing="4">
+                        <Button Classes="nav" Classes.active="{Binding HomePageIsActive}"
+                                Command="{Binding GoToHomeCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <controls:StrokeIcon Data="{StaticResource IconHome}" VerticalAlignment="Center" />
+                                <TextBlock Text="Home" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="nav" Classes.active="{Binding DiscoverPageIsActive}"
+                                Command="{Binding GoToDiscoverCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <controls:StrokeIcon Data="{StaticResource IconDiscover}" VerticalAlignment="Center" />
+                                <TextBlock Text="Discover" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Classes="nav" Classes.active="{Binding InstancesPageIsActive}"
+                                Command="{Binding GoToInstancesCommand}">
+                            <Grid ColumnDefinitions="Auto, *, Auto">
+                                <controls:StrokeIcon Grid.Column="0" Data="{StaticResource IconInstances}"
+                                                     VerticalAlignment="Center" Margin="0 0 12 0" />
+                                <TextBlock Grid.Column="1" Text="Instances" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="2" Classes="mono muted" FontSize="11"
+                                           Text="{Binding InstanceCount}" VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- Top bar (padding 16 28, gap 16) + page -->
+            <Grid Grid.Column="1" RowDefinitions="Auto, *">
+                <Border Grid.Row="0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1" Padding="28 16">
+                    <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="16">
+                        <TextBlock Grid.Column="0" Classes="h1" Text="{Binding PageTitle}" VerticalAlignment="Center" />
+                        <!-- Searches only the current page for now; read-only on pages it can't search yet -->
+                        <TextBox Grid.Column="1" x:Name="SearchBox" Classes="search" Width="400"
+                                 Text="{Binding SearchText}" PlaceholderText="Search mods, instances and actions"
+                                 IsReadOnly="{Binding !CanSearch}" ToolTip.Tip="{Binding SearchHint}">
+                            <TextBox.InnerLeftContent>
+                                <controls:StrokeIcon Data="{StaticResource IconSearch}" Size="16" Margin="10 0 8 0"
+                                                     Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" />
+                            </TextBox.InnerLeftContent>
+                            <TextBox.InnerRightContent>
+                                <Border Classes="kbd" Margin="8 0 10 0">
+                                    <TextBlock Text="Ctrl K" />
+                                </Border>
+                            </TextBox.InnerRightContent>
+                        </TextBox>
+                        <!-- Only on Home and Discover, like the mockups -->
+                        <Button Grid.Column="2" Classes="secondary icon" IsVisible="{Binding ShowFetchButton}"
+                                Command="{Binding FetchCkanMetaCommand}" ToolTip.Tip="Fetch CKAN-meta now">
+                            <controls:StrokeIcon Data="{StaticResource IconRefresh}" Size="16" />
+                        </Button>
+                    </Grid>
+                </Border>
+                <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" />
+            </Grid>
+        </Grid>
+
+        <!-- Status bar -->
+        <Border Grid.Row="1" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Line}"
+                BorderThickness="0 1 0 0" MinHeight="30" Padding="16 4">
+            <Grid ColumnDefinitions="*, Auto">
+                <StackPanel Grid.Column="0" Classes="status" Orientation="Horizontal" Spacing="8">
+                    <controls:StrokeIcon Data="{StaticResource IconBranch}" />
+                    <TextBlock Text="CKAN-meta" />
+                    <TextBlock Classes="mono" Text="{Binding StatusBar.RepoText}" />
+                    <TextBlock Classes="sep" Text="|" />
+                    <TextBlock Text="{Binding StatusBar.VersionsText}" />
+                    <TextBlock Classes="sep" Text="|" />
+                    <!-- Placeholder: the time of the last sync is saved by the startup work (Phase 6 task 1) -->
+                    <TextBlock Text="{Binding StatusBar.SyncText}" ToolTip.Tip="{Binding StatusBar.SyncHint}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Classes="status" Orientation="Horizontal" Spacing="8">
+                    <controls:StrokeIcon Data="{StaticResource IconDownload}" />
+                    <!-- Installs are modal for now, so nothing downloads while this is visible -->
+                    <TextBlock Text="Downloads idle" />
+                    <TextBlock Classes="sep" Text="|" />
+                    <controls:StrokeIcon Data="{StaticResource IconDrive}" />
+                    <TextBlock Text="{Binding StatusBar.CacheText}" />
+                </StackPanel>
             </Grid>
         </Border>
-        <Border Grid.Column="1" Background="{DynamicResource PrimaryBackground}" CornerRadius="0 0 0 0">
-            <ContentControl Content="{Binding CurrentPage}" ></ContentControl>
-        </Border>
+
+        <!-- Dialog over the whole window (install flow): scrim, then the dialog at most 1080 × 860, 64 px from the
+             top and at least 24 px from the edges; it shrinks with the window -->
+        <Panel Grid.Row="0" Grid.RowSpan="2" Background="{DynamicResource Scrim}"
+               IsVisible="{Binding Dialog, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="64*" MinHeight="24" MaxHeight="64" />
+                    <RowDefinition Height="860*" MaxHeight="860" />
+                    <RowDefinition Height="64*" MinHeight="24" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" MinWidth="24" />
+                    <ColumnDefinition Width="1080*" MaxWidth="1080" />
+                    <ColumnDefinition Width="*" MinWidth="24" />
+                </Grid.ColumnDefinitions>
+                <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding Dialog}" />
+            </Grid>
+        </Panel>
     </Grid>
 </Window>

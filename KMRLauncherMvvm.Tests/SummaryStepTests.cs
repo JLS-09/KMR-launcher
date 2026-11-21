@@ -38,16 +38,19 @@ public class SummaryStepTests
 
         var (summary, _) = Summarize(services, Instance(), host);
 
-        Assert.Equal(new[] { "Host", "Lib" }, summary.ToInstall.Select(r => r.Identifier));
-        Assert.Equal("Dependency of Host-1.0", summary.ToInstall.Single(r => r.Identifier == "Lib").Details);
-        Assert.Equal("1 MB", summary.ToInstall.Single(r => r.Identifier == "Host").Size);
-        Assert.Equal("2 mods to install, 1 MB to download (size unknown for 1 mod)", summary.TotalsText);
+        Assert.Equal(new[] { "Host", "Lib" }, summary.Rows.Select(r => r.Name));
+        Assert.All(summary.Rows, r => Assert.Equal(ChangeKind.New, r.Kind));
+        Assert.Equal("Picked by you", summary.Rows.Single(r => r.Name == "Host").Reason);
+        Assert.Equal("Dependency of Host", summary.Rows.Single(r => r.Name == "Lib").Reason);
+        Assert.Equal("1.0 MB", summary.Rows.Single(r => r.Name == "Host").SizeText);
+        Assert.Equal("2", summary.NewText);
+        Assert.Equal("1.0 MB", summary.ToDownloadText);
+        Assert.Equal("Install 2 mods", summary.InstallText);
         Assert.True(summary.CanFinish);
-        Assert.False(summary.HasRemovals);
     }
 
     [Fact]
-    public void Replaced_installed_version_is_shown_on_the_install_row()
+    public void Replaced_installed_version_is_an_update_row()
     {
         var host = Version("Host", "1.0", depends: [Rel("Lib", min: "2.0")]);
         var services = new TestServices(Mod(host), Mod(Version("Lib", "2.0"), Version("Lib", "1.0")));
@@ -55,8 +58,28 @@ public class SummaryStepTests
         var (summary, data) = Summarize(services, Instance("1.12.5", Version("Lib", "1.0")), host);
 
         Assert.Single(data.RequestedRemoveModVersions);
-        Assert.EndsWith("replaces 1.0", summary.ToInstall.Single(r => r.Identifier == "Lib").Details);
-        Assert.Empty(summary.ToRemove);
+        var lib = summary.Rows.Single(r => r.Name == "Lib");
+        Assert.Equal(ChangeKind.Update, lib.Kind);
+        Assert.Equal("replaces 1.0", lib.ReplacesText);
+        Assert.Equal("1.0 → 2.0", lib.ChangeText);
+        Assert.DoesNotContain(summary.Rows, r => r.IsRemove);
+        Assert.Equal("1", summary.UpdatesText);
+    }
+
+    [Fact]
+    public void Cached_downloads_are_marked_and_not_counted_to_download()
+    {
+        var host = Sized(Version("Host", "1.0"), 3 * 1024 * 1024);
+        var services = new TestServices(Mod(host));
+        var data = new InstallModsData { SelectedInstance = Instance(), RequestedModVersions = [Requested(host)] };
+        services.Dependency.ResolveDependencies(data);
+
+        var summary = new InstallModsSummaryStepViewModel(data) { IsCached = _ => true };
+        summary.Prepare();
+
+        Assert.True(summary.Rows.Single().ShowCached);
+        Assert.Equal("", summary.Rows.Single().SizeText);
+        Assert.Equal("0.0 MB", summary.ToDownloadText);
     }
 
     [Fact]
