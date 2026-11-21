@@ -171,7 +171,6 @@ public class InstanceSettingsTests
         vm.Versions.Groups[1].AllowAll = true;
         vm.Versions.Groups[0].Versions[0].IsChecked = true;
 
-        Assert.Equal(4, vm.ChangeCount);
         Assert.Equal("4 unsaved changes", vm.ChangesText);
     }
 

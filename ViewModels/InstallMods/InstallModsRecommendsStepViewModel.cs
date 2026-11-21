@@ -206,12 +206,6 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
         items.ToDictionary(i => i.Identifier, i => new RowState(i.IsSelected, i.SelectedVersion?.Id));
 
     [RelayCommand]
-    private void ToggleRecommendation(VersionListItemViewModel item)
-    {
-        item.IsSelected = !item.IsSelected;
-    }
-
-    [RelayCommand]
     private void SelectAll(List<VersionListItemViewModel> versions)
     {
         foreach (var version in versions)

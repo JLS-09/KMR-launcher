@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using System.Net.Http;
 using Avalonia.Markup.Xaml;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;

@@ -10,7 +10,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Humanizer;
 using KMRLauncherMvvm.Exceptions;
-using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.ViewModels.InstallMods;

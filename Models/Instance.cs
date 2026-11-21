@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Humanizer;
 using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.Models;

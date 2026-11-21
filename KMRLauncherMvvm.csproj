@@ -6,7 +6,6 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <UserSecretsId>3c42d6bf-ca50-41b5-ba82-f771f0c06c98</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,7 +14,6 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="12.0.2" />
-        <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="12.0.0" />
         <PackageReference Include="Avalonia.Desktop" Version="12.0.2" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.2" />
         <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.2" />
@@ -23,11 +21,7 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />    
         <PackageReference Include="Humanizer" Version="3.0.10" />
         <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.5" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
-        <PackageReference Include="System.IO.Compression" Version="4.3.0" />
-        <PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
     </ItemGroup>
 
     <PropertyGroup>

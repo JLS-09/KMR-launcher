@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,7 +36,6 @@ public sealed record StepperItem(int Number, string Label, StepState State, bool
 {
     public bool IsDone => State == StepState.Done;
     public bool IsCurrent => State == StepState.Current;
-    public bool IsUpcoming => State == StepState.Upcoming;
     public bool LineReached => IsDone;
 }
 

@@ -21,7 +21,6 @@ public partial class InstanceSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _isPrimary;
     [ObservableProperty] private string _prefix;
     [ObservableProperty] private string _launchArguments;
-    [ObservableProperty] private int _changeCount;
     [ObservableProperty] private string _changesText = "";
     [ObservableProperty] private string? _nameError;
 
@@ -66,7 +65,6 @@ public partial class InstanceSettingsViewModel : ObservableObject
         changes += compatible.Count(e => !_saved.Compatible.Contains(e)) +
                    _saved.Compatible.Count(e => !compatible.Contains(e));
 
-        ChangeCount = changes;
         HasChanges = changes > 0;
         ChangesText = changes == 1 ? "1 unsaved change" : $"{changes} unsaved changes";
         NameError = Name.Trim().Length == 0 ? "The instance needs a name." : null;

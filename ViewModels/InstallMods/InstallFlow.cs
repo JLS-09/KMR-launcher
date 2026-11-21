@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;

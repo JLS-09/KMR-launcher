@@ -67,23 +67,6 @@
             <SolidColorBrush x:Key="AccentSoft">#24DF0105</SolidColorBrush>
             <SolidColorBrush x:Key="AccentLine">#73DF0105</SolidColorBrush>
 
-            <!-- Old keys, still used by the screens that aren't redesigned yet -->
-            <SolidColorBrush x:Key="PrimaryRed">#DF0105</SolidColorBrush>
-            <SolidColorBrush x:Key="PrimaryGreen">#0CCA4A</SolidColorBrush>
-            <SolidColorBrush x:Key="PrimaryBlue">#008CFF</SolidColorBrush>
-            <SolidColorBrush x:Key="PrimaryText">#fff8f0</SolidColorBrush>
-            <!-- was #71717A: too dark for small text (about 3.9:1 on #131314) -->
-            <SolidColorBrush x:Key="SecondaryText">#8B8B94</SolidColorBrush>
-            <SolidColorBrush x:Key="PrimaryBackground">#0E0E0F</SolidColorBrush>
-            <SolidColorBrush x:Key="SideBarButtonActiveBackground">#2A2A2B</SolidColorBrush>
-            <SolidColorBrush x:Key="HoverButtonBackground">#282A29</SolidColorBrush>
-            <SolidColorBrush x:Key="SideBarBackground">#1B1B1C</SolidColorBrush>
-            <SolidColorBrush x:Key="SecondaryButtonBackgrorund">#353436</SolidColorBrush>
-
-            <FontFamily x:Key="Phosphor">/Assets/Fonts/Phosphor.ttf#Phosphor</FontFamily>
-            <FontFamily x:Key="PhosphorBold">/Assets/Fonts/Phosphor-Bold.ttf#Phosphor-Bold</FontFamily>
-            <FontFamily x:Key="SpaceMonoRegular">/Assets/Fonts/Space_Mono/SpaceMono-Regular.ttf#Space Mono Regular</FontFamily>
-            <FontFamily x:Key="SpaceMonoBold">/Assets/Fonts/Space_Mono/SpaceMono-Bold.ttf#Space Mono Bold</FontFamily>
             <!-- Static weights: Avalonia picks the default instance of a variable font (Space Grotesk would always be Light) -->
             <FontFamily x:Key="Inter">fonts:Inter#Inter</FontFamily>
             <FontFamily x:Key="SpaceGrotesk">/Assets/Fonts/Space_Grotesk/static#Space Grotesk</FontFamily>
@@ -92,7 +75,6 @@
     </Application.Resources>
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="Styles/AppDefaultStyles.axaml"></StyleInclude>
         <StyleInclude Source="Styles/Controls.axaml"></StyleInclude>
     </Application.Styles>
 </Application>

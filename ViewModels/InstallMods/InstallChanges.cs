@@ -35,7 +35,6 @@ public sealed record ChangeRow(
         ? ""
         : $"replaces {InstalledMods.ShortNextVersion(Version, OldVersion)}";
 
-    public bool HasReplaces => OldVersion is not null;
     public string SizeText => IsRemove || IsCached || Size is null ? "" : InstalledMods.FormatSize(Size.Value);
     public bool ShowCached => IsCached && !IsRemove;
 }
