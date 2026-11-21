@@ -108,7 +108,7 @@
         <Setter Property="LineHeight" Value="20.8" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
     </Style>
-    <!-- Small uppercase section labels (11 px, 600, letter-spacing .08em); write the text in capitals -->
+    <!-- Small uppercase section labels; write the text in capitals -->
     <Style Selector="TextBlock.label">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -183,7 +183,7 @@
         <Setter Property="Opacity" Value="0.45" />
     </Style>
 
-    <!-- Secondary and ghost: hover = #232327 background and light text (the mockups' .hv) -->
+    <!-- Secondary and ghost -->
     <Style Selector="Button.secondary">
         <Setter Property="Background" Value="{DynamicResource Control}" />
         <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
@@ -244,7 +244,7 @@
         <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
     </Style>
 
-    <!-- Sidebar navigation item: 40 px, radius 8, 14 px / 500, icon 18 with a 12 px gap -->
+    <!-- Sidebar navigation item -->
     <Style Selector="Button.nav">
         <Setter Property="Height" Value="40" />
         <Setter Property="Padding" Value="12 0" />

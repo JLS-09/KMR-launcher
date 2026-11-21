@@ -19,7 +19,7 @@
             <Setter Property="Grid.ColumnSpan" Value="5" />
             <Setter Property="HorizontalAlignment" Value="Left" />
         </Style>
-        <!-- Filter box on the Mods tab: 34 px, a filter icon -->
+        <!-- Filter box on the Mods tab -->
         <Style Selector="TextBox.filter">
             <Setter Property="Height" Value="34" />
             <Setter Property="MinHeight" Value="34" />
@@ -49,7 +49,7 @@
         <Style Selector="TextBlock.reason.dependency">
             <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
         </Style>
-        <!-- The update badge next to the version: 22 px, #14243A, border #23415F, mono 11 -->
+        <!-- The update badge next to the version -->
         <Style Selector="Button.updateBadge">
             <Setter Property="Height" Value="22" />
             <Setter Property="Padding" Value="6 0" />
@@ -78,7 +78,7 @@
             <Setter Property="BorderBrush" Value="{DynamicResource StatusWarning}" />
             <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
         </Style>
-        <!-- Row menu button: 28 × 28, transparent, muted icon -->
+        <!-- Row menu button -->
         <Style Selector="Button.rowMenu">
             <Setter Property="Width" Value="28" />
             <Setter Property="Height" Value="28" />
@@ -177,7 +177,7 @@
         <ScrollViewer Grid.Row="1" Grid.RowSpan="2" HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Disabled">
         <Grid RowDefinitions="Auto, *" MinWidth="620">
-        <!-- Column header: 28 | mod | 210 version | 96 KSP | 72 size | 32 menu -->
+        <!-- Column header -->
         <Border Grid.Row="0" Height="38" Padding="6 0" BorderBrush="{DynamicResource Line}"
                 BorderThickness="0 1">
             <Grid ColumnDefinitions="28, *, 210, 96, 72, 32" ColumnSpacing="12">

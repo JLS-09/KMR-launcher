@@ -34,11 +34,11 @@
     <Grid RowDefinitions="*, Auto">
         <Grid Grid.Row="0" ColumnDefinitions="216, *">
 
-            <!-- Sidebar: 216 px, padding 16 12, items 4 px apart -->
+            <!-- Sidebar -->
             <Border Grid.Column="0" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Line}"
                     BorderThickness="0 0 1 0" Padding="12 16">
                 <DockPanel>
-                    <!-- Logo lockup, 160 × 64 (the mockup's SVG); the flame follows the accent -->
+                    <!-- Logo lockup; the flame follows the accent -->
                     <Viewbox DockPanel.Dock="Top" Width="160" Height="64" HorizontalAlignment="Left"
                              Margin="10 6 10 26" Stretch="Fill">
                         <Canvas Width="502" Height="200">
@@ -63,8 +63,7 @@
                         </Canvas>
                     </Viewbox>
 
-                    <!-- Bottom: the primary instance, or the game that is running.
-                         Border-top, padding 14 4 2; 12 px + the two 4 px gaps above it -->
+                    <!-- Bottom: the primary instance, or the game that is running -->
                     <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0"
                             Padding="4 14 4 2">
                         <StackPanel Spacing="8">
@@ -121,7 +120,7 @@
                                     </Grid>
                                 </StackPanel>
 
-                                <!-- Idle: primary instance on the left, a 36 × 36 Launch button on the right -->
+                                <!-- Idle: primary instance on the left, a Launch button on the right -->
                                 <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10" IsVisible="{Binding !IsRunning}">
                                     <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center"
                                                 IsVisible="{Binding HasPrimaryInstance}">
@@ -192,7 +191,7 @@
                 </DockPanel>
             </Border>
 
-            <!-- Top bar (padding 16 28, gap 16) + page -->
+            <!-- Top bar and page -->
             <Grid Grid.Column="1" RowDefinitions="Auto, Auto, *">
                 <Border Grid.Row="0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1" Padding="28 16">
                     <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="16">
@@ -262,8 +261,7 @@
         </Border>
 
         <!-- Dialogs over the whole window (install flow, new instance), each over the one before it: scrim, then
-             the dialog at most its own size (DialogHost: 1080 × 860 by default), 64 px from the top and at least
-             24 px from the edges; it shrinks with the window -->
+             the dialog at most its own size (DialogHost); it shrinks with the window -->
         <ItemsControl Grid.Row="0" Grid.RowSpan="2" ItemsSource="{Binding Dialogs}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>

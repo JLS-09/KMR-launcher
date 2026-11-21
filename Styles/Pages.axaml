@@ -1,9 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:KMRLauncherMvvm.Controls">
-    <!-- Settings pages (launcher Settings and the instance Settings tab). Sections: padding 22 0 8 with a line on top
-         (the first one without a line); title 16 px, 12 px under it. Rows: label column 220 px, gap 24, padding 14 0,
-         a line on top. -->
+    <!-- Settings pages (launcher Settings and the instance Settings tab): sections and rows -->
     <Style Selector="StackPanel.settingsSection">
         <Setter Property="Margin" Value="0 22 0 8" />
     </Style>

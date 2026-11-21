@@ -1,7 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:KMRLauncherMvvm.Controls">
-    <!-- Status label: icon 14 + 12 px text in the status colour, gap 5 -->
+    <!-- Status label: icon and text in the status colour -->
     <Style Selector="controls|StatusLabel">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
@@ -50,9 +50,8 @@
         <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
     </Style>
 
-    <!-- Split Launch button (Home, Instances): 44 px, radius 9; Launch (padding 0 22, 15 px / 600, filled play 18,
-         gap 10) and a 40 px menu button with a dark line between them. Set MinWidth (150 + 40 on Home).
-         (Values set inside a template lose to styles, so the two parts get their own classes.) -->
+    <!-- Split Launch button (Home, Instances): Launch and a menu button. Set MinWidth (150 + 40 on Home). (Values
+         set inside a template lose to styles, so the two parts get their own classes.) -->
     <Style Selector="Button.launchPart">
         <Setter Property="Height" Value="44" />
         <Setter Property="MinWidth" Value="0" />

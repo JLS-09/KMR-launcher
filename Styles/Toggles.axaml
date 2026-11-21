@@ -34,9 +34,9 @@
         <Setter Property="Background" Value="{DynamicResource SegmentSelected}" />
     </Style>
 
-    <!-- Switch: ToggleButton.switch, the label as Content (13 px, #A1A1AA) and a 38 x 22 switch on the right.
-         Fluent's own switch control requires its knob parts in the template, so a plain ToggleButton is used. -->
-    <!-- .big (Run with, Default runner): 30 px segments, padding 0 12, 13 px -->
+    <!-- Switch: ToggleButton.switch, the label as Content and the switch on the right. Fluent's own switch
+         control requires its knob parts in the template, so a plain ToggleButton is used. -->
+    <!-- .big (Run with, Default runner) -->
     <Style Selector="RadioButton.segment.big">
         <Setter Property="FontSize" Value="13" />
     </Style>
@@ -71,8 +71,7 @@
         <Setter Property="Margin" Value="18 0 0 0" />
     </Style>
 
-    <!-- Checkbox: 16 px box (radius 4), accent fill with a check when ticked. Content (if any) 10 px to the right.
-         .filterRow = a 30 px row in the filters column (15 px box, hover background, light text when ticked). -->
+    <!-- Checkbox: accent fill with a check when ticked. .filterRow = a row in the filters column. -->
     <Style Selector="CheckBox.box">
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Padding" Value="0" />

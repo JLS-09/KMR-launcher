@@ -1,8 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:KMRLauncherMvvm.Controls">
-    <!-- Chips (24 px, radius 6, 12 px / 500): .chip = filter chip with a border; .plain = tag/info chip;
-         .accent = "Primary" chip -->
+    <!-- Chips: .chip = filter chip with a border; .plain = tag/info chip; .accent = "Primary" chip -->
     <Style Selector="Border.chip">
         <Setter Property="Height" Value="24" />
         <Setter Property="Padding" Value="8 0" />
@@ -33,7 +32,7 @@
         <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
     </Style>
 
-    <!-- Action chips in change lists: 58 × 22, radius 5, 11 px / 600 -->
+    <!-- Action chips in change lists (New / Update / Remove) -->
     <Style Selector="Border.action">
         <Setter Property="Width" Value="58" />
         <Setter Property="Height" Value="22" />
@@ -65,8 +64,7 @@
         <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
     </Style>
 
-    <!-- Small badges: padding 1 6, radius 5, 11 px. .fits = "newest fit", .neutral = "installed",
-         .warning = "Not listed for 1.12.5" / "strict" -->
+    <!-- Small badges: .fits = "newest fit", .neutral = "installed", .warning = "Not listed for 1.12.5" / "strict" -->
     <Style Selector="Border.badge">
         <Setter Property="Padding" Value="6 1" />
         <Setter Property="CornerRadius" Value="5" />

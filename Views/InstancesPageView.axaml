@@ -13,7 +13,7 @@
              Foreground="{DynamicResource TextPrimary}">
 
     <UserControl.Styles>
-        <!-- Instance list rows: padding 12 20, line under; selected = #1C1C20 with a 2 px accent line on the left -->
+        <!-- Instance list rows: the selected one has an accent line on the left -->
         <Style Selector="ListBox.instanceList ListBoxItem">
             <Setter Property="Padding" Value="0" />
             <Setter Property="Cursor" Value="Hand" />
@@ -21,7 +21,8 @@
         <Style Selector="ListBox.instanceList ListBoxItem:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource ControlHover}" />
         </Style>
-        <Style Selector="ListBox.instanceList ListBoxItem:selected /template/ ContentPresenter, ListBox.instanceList ListBoxItem:selected:pointerover /template/ ContentPresenter">
+        <Style
+            Selector="ListBox.instanceList ListBoxItem:selected /template/ ContentPresenter, ListBox.instanceList ListBoxItem:selected:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource SelectedRow}" />
         </Style>
         <Style Selector="ListBox.instanceList ListBoxItem Border.accentEdge">
@@ -31,7 +32,7 @@
             <Setter Property="IsVisible" Value="True" />
         </Style>
 
-        <!-- Stat cells: padding 7 16, a line on the left -->
+        <!-- Stat cells -->
         <Style Selector="Border.stat">
             <Setter Property="Padding" Value="16 7" />
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
@@ -55,7 +56,7 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
 
-        <!-- Tabs: 42 px, 14 px / 500, 2 px accent line under the active one -->
+        <!-- Tabs: an accent line under the active one -->
         <Style Selector="RadioButton.tab">
             <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
             <Setter Property="FontSize" Value="14" />
@@ -107,7 +108,7 @@
         </Style>
 
 
-        <!-- The small "Last played" sort button: 26 px, transparent -->
+        <!-- The small "Last played" sort button -->
         <Style Selector="Button.sort">
             <Setter Property="Height" Value="26" />
             <Setter Property="Padding" Value="6 0" />
@@ -118,7 +119,8 @@
             <Setter Property="FontSize" Value="12" />
             <Setter Property="Cursor" Value="Hand" />
         </Style>
-        <Style Selector="Button.sort:pointerover /template/ ContentPresenter, Button.sort:pressed /template/ ContentPresenter">
+        <Style
+            Selector="Button.sort:pointerover /template/ ContentPresenter, Button.sort:pressed /template/ ContentPresenter">
             <Setter Property="Background" Value="{DynamicResource ControlHover}" />
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         </Style>
@@ -138,19 +140,21 @@
                             <TextBlock Text="New instance" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <!-- Placeholder: adding an existing KSP folder is Phase 7 task 3 -->
                     <Button Grid.Column="1" Classes="secondary icon"
-                            ToolTip.Tip="Add an existing KSP install (not built yet: Phase 7 task 3)">
+                            Command="{Binding ImportInstanceCommand}"
+                            ToolTip.Tip="Add an existing KSP folder">
                         <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="16" />
                     </Button>
                 </Grid>
-                <Border DockPanel.Dock="Top" Padding="20 8" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
+                <Border DockPanel.Dock="Top" Padding="20 8" BorderBrush="{DynamicResource Line}"
+                        BorderThickness="0 0 0 1">
                     <Grid ColumnDefinitions="*, Auto">
                         <TextBlock Grid.Column="0" Classes="label" Text="{Binding InstancesCountText}"
                                    VerticalAlignment="Center" />
                         <Button Grid.Column="1" Classes="sort">
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <TextBlock VerticalAlignment="Center" Text="Last played" IsVisible="{Binding !SortByName}" />
+                                <TextBlock VerticalAlignment="Center" Text="Last played"
+                                           IsVisible="{Binding !SortByName}" />
                                 <TextBlock VerticalAlignment="Center" Text="Name" IsVisible="{Binding SortByName}" />
                                 <controls:StrokeIcon Data="{StaticResource IconChevronDown}" Size="12"
                                                      VerticalAlignment="Center" />
@@ -165,24 +169,6 @@
                             </Button.Flyout>
                         </Button>
                     </Grid>
-                </Border>
-
-                <!-- Import: the New instance dialog on its Existing KSP folder tab -->
-                <Border DockPanel.Dock="Bottom" Padding="20 16" BorderBrush="{DynamicResource Line}"
-                        BorderThickness="0 1 0 0">
-                    <StackPanel Spacing="8">
-                        <TextBlock Classes="size13 medium" Text="Import" />
-                        <TextBlock Classes="size12 muted" LineHeight="18" TextWrapping="Wrap"
-                                   Text="Add a KSP folder you already have. Mods installed by CKAN are picked up from its registry." />
-                        <Button Classes="secondary small" HorizontalAlignment="Left"
-                                Command="{Binding ImportInstanceCommand}">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="14"
-                                                     VerticalAlignment="Center" />
-                                <TextBlock Text="Choose folder" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
                 </Border>
 
                 <ListBox Classes="instanceList" Background="Transparent" ItemsSource="{Binding Instances}"
@@ -200,7 +186,8 @@
                                                                  Foreground="{DynamicResource AccentText}"
                                                                  IsVisible="{Binding IsPrimary}" />
                                         </StackPanel>
-                                        <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsMissing}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6"
+                                                    IsVisible="{Binding IsMissing}">
                                             <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="12"
                                                                  Foreground="{DynamicResource StatusWarning}"
                                                                  VerticalAlignment="Center" />
@@ -236,7 +223,7 @@
                     Command="{Binding NewInstanceCommand}" />
         </StackPanel>
 
-        <!-- Selected instance: padding 20 28 28, sections 18 px apart -->
+        <!-- Selected instance -->
         <instancesViews:MissingInstanceView Grid.Column="1" IsVisible="{Binding ShowMissing}" />
 
         <Grid Grid.Column="1" RowDefinitions="Auto, Auto, Auto, *, Auto" IsVisible="{Binding ShowInstanceDetails}">
@@ -255,10 +242,16 @@
                         </InlineUIContainer>
                     </TextBlock>
                     <WrapPanel ItemSpacing="6" LineSpacing="6">
-                        <Border Classes="chip plain"><TextBlock Classes="mono" Text="{Binding Summary.KspText, FallbackValue=''}" /></Border>
-                        <Border Classes="chip plain"><TextBlock Classes="mono" Text="{Binding Summary.CompatibleText, FallbackValue=''}" /></Border>
+                        <Border Classes="chip plain">
+                            <TextBlock Classes="mono" Text="{Binding Summary.KspText, FallbackValue=''}" />
+                        </Border>
+                        <Border Classes="chip plain">
+                            <TextBlock Classes="mono" Text="{Binding Summary.CompatibleText, FallbackValue=''}" />
+                        </Border>
                         <!-- Wine is the only runner until the Proton work (Phase 8) -->
-                        <Border Classes="chip plain"><TextBlock Text="Wine" /></Border>
+                        <Border Classes="chip plain">
+                            <TextBlock Text="Wine" />
+                        </Border>
                         <TextBlock Classes="mono muted size12" Text="{Binding Summary.PathText, FallbackValue=''}"
                                    VerticalAlignment="Center" Margin="6 0 0 0" />
                     </WrapPanel>
@@ -306,7 +299,8 @@
                         <StackPanel Spacing="1">
                             <TextBlock Classes="label" Text="PLAYTIME" />
                             <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
-                                <TextBlock Grid.Column="0" Classes="statValue" Text="{Binding Summary.PlayTime, FallbackValue=''}" />
+                                <TextBlock Grid.Column="0" Classes="statValue"
+                                           Text="{Binding Summary.PlayTime, FallbackValue=''}" />
                                 <TextBlock Grid.Column="1" Classes="statDetail" Text="in total" />
                             </Grid>
                         </StackPanel>
@@ -315,8 +309,10 @@
                         <StackPanel Spacing="1">
                             <TextBlock Classes="label" Text="LAST PLAYED" />
                             <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
-                                <TextBlock Grid.Column="0" Classes="statValue" Text="{Binding Summary.LastPlayed, FallbackValue=''}" />
-                                <TextBlock Grid.Column="1" Classes="statDetail" Text="{Binding Summary.LastPlayedDetail, FallbackValue=''}" />
+                                <TextBlock Grid.Column="0" Classes="statValue"
+                                           Text="{Binding Summary.LastPlayed, FallbackValue=''}" />
+                                <TextBlock Grid.Column="1" Classes="statDetail"
+                                           Text="{Binding Summary.LastPlayedDetail, FallbackValue=''}" />
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -346,13 +342,15 @@
                     </RadioButton>
                     <RadioButton Classes="tab" GroupName="instanceTab" Content="Settings"
                                  IsChecked="{Binding Tab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Settings}}"
-                                 Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Settings}" />
+                                 Command="{Binding ShowTabCommand}"
+                                 CommandParameter="{x:Static vm:InstanceTab.Settings}" />
                     <RadioButton Classes="tab" GroupName="instanceTab" Content="Logs"
                                  IsChecked="{Binding Tab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Logs}}"
                                  Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Logs}" />
                     <RadioButton Classes="tab" GroupName="instanceTab" Content="Backups"
                                  IsChecked="{Binding Tab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Backups}}"
-                                 Command="{Binding ShowTabCommand}" CommandParameter="{x:Static vm:InstanceTab.Backups}" />
+                                 Command="{Binding ShowTabCommand}"
+                                 CommandParameter="{x:Static vm:InstanceTab.Backups}" />
                 </StackPanel>
             </Border>
 
@@ -362,8 +360,8 @@
                 <instancesViews:InstalledModsView DataContext="{Binding Mods}" />
             </Panel>
 
-            <!-- Settings tab (replaces the instance settings window): General, Launching, Compatible KSP versions,
-                 Backups (Phase 8), Delete instance. Content column max 900 px. -->
+            <!-- Settings tab (replaces the instance settings window): General, Launching, Compatible KSP
+                 versions, Backups (Phase 8), Delete instance. -->
             <ScrollViewer Grid.Row="3" HorizontalScrollBarVisibility="Disabled"
                           IsVisible="{Binding Tab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static vm:InstanceTab.Settings}}">
                 <instancesViews:InstanceSettingsTabView />
@@ -375,7 +373,8 @@
                 <Border Classes="placeholder">
                     <StackPanel Spacing="6">
                         <TextBlock Classes="label" Text="NOT BUILT YET · PHASE 8" />
-                        <TextBlock Text="Wine's output goes to the console for now. Writing it to a log file in the instance folder comes with the Proton work." />
+                        <TextBlock
+                            Text="Wine's output goes to the console for now. Writing it to a log file in the instance folder comes with the Proton work." />
                     </StackPanel>
                 </Border>
             </StackPanel>
@@ -389,22 +388,26 @@
                 </Border>
             </StackPanel>
 
-            <!-- Selection bar: 2 px accent line, full width at the bottom -->
+            <!-- Selection bar: full width at the bottom -->
             <Border Grid.Row="4" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Accent}"
                     BorderThickness="0 2 0 0" Padding="20 12" IsVisible="{Binding ShowSelectionBar}">
-                <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto, Auto" ColumnSpacing="12" DataContext="{Binding Mods}">
+                <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto, Auto" ColumnSpacing="12"
+                      DataContext="{Binding Mods}">
                     <TextBlock Grid.Column="0" Classes="mono size13 semibold"
-                               x:DataType="instances:InstalledModsViewModel" Text="{Binding SelectedCount}" VerticalAlignment="Center" />
+                               x:DataType="instances:InstalledModsViewModel" Text="{Binding SelectedCount}"
+                               VerticalAlignment="Center" />
                     <TextBlock Classes="size13" Grid.Column="1" Text="selected" VerticalAlignment="Center" />
                     <TextBlock Classes="size12 muted" Grid.Column="2"
-                               x:DataType="instances:InstalledModsViewModel" Text="{Binding RemovalNote}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                               x:DataType="instances:InstalledModsViewModel" Text="{Binding RemovalNote}"
+                               TextWrapping="Wrap" VerticalAlignment="Center" />
                     <Button Grid.Column="3" Classes="ghost" Content="Clear"
                             x:DataType="instances:InstalledModsViewModel" Command="{Binding ClearSelectionCommand}" />
                     <Button Grid.Column="4" Classes="secondary" x:DataType="instances:InstalledModsViewModel"
                             Command="{Binding UpdateSelectedCommand}"
                             IsEnabled="{Binding SelectionHasUpdates}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <controls:StrokeIcon Data="{StaticResource IconArrowUp}" Size="16" VerticalAlignment="Center" />
+                            <controls:StrokeIcon Data="{StaticResource IconArrowUp}" Size="16"
+                                                 VerticalAlignment="Center" />
                             <TextBlock Text="Update" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
@@ -422,8 +425,10 @@
             <!-- Unsaved-changes bar of the Settings tab: same place and look as the selection bar -->
             <Border Grid.Row="4" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Accent}"
                     BorderThickness="0 2 0 0" Padding="20 12" IsVisible="{Binding ShowSettingsBar}">
-                <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="12" DataContext="{Binding InstanceSettings}">
-                    <Ellipse Grid.Column="0" Width="8" Height="8" Fill="{DynamicResource Accent}" VerticalAlignment="Center" />
+                <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="12"
+                      DataContext="{Binding InstanceSettings}">
+                    <Ellipse Grid.Column="0" Width="8" Height="8" Fill="{DynamicResource Accent}"
+                             VerticalAlignment="Center" />
                     <TextBlock Classes="size13" Grid.Column="1" VerticalAlignment="Center"
                                x:DataType="instances:InstanceSettingsViewModel" Text="{Binding ChangesText}" />
                     <Button Grid.Column="2" Classes="ghost" Content="Revert"

@@ -11,7 +11,7 @@
              Foreground="{DynamicResource TextPrimary}">
 
     <UserControl.Styles>
-        <!-- A block in the filters column or the details panel: padding 18 20, a line under it -->
+        <!-- A block in the filters column or the details panel -->
         <Style Selector="Border.block">
             <Setter Property="Padding" Value="20 18" />
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
@@ -21,7 +21,7 @@
             <Setter Property="BorderThickness" Value="0" />
         </Style>
 
-        <!-- List header: 11 px / 600, letter-spacing .06em -->
+        <!-- List header -->
         <Style Selector="TextBlock.columnHeader">
             <Setter Property="FontSize" Value="11" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -30,7 +30,7 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <!-- Mod rows: hover #18181B; the row shown in the details panel gets #1C1C20 and an accent outline -->
+        <!-- Mod rows: the row shown in the details panel gets an accent outline -->
         <Style Selector="ListBox.mods ListBoxItem">
             <Setter Property="Padding" Value="0" />
             <Setter Property="Cursor" Value="Hand" />
@@ -80,7 +80,7 @@
             <Setter Property="BoxShadow" Value="-16 0 32 0 #99000000" />
         </Style>
 
-        <!-- Selected-mod chips in the tray: 28 px, padding 0 4 0 10, radius 7, #1B1B1E -->
+        <!-- Selected-mod chips in the tray -->
         <Style Selector="Border.selectionChip">
             <Setter Property="Height" Value="28" />
             <Setter Property="Padding" Value="10 0 4 0" />
@@ -283,7 +283,7 @@
                 </Border>
             </Panel>
 
-            <!-- Selection tray: 2 px accent line on top -->
+            <!-- Selection tray -->
             <Border Grid.Row="3" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Accent}"
                     BorderThickness="0 2 0 0" Padding="20 14" IsVisible="{Binding HasSelectedMods}">
                 <StackPanel Spacing="12">

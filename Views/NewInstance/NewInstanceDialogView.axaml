@@ -52,7 +52,7 @@
             <Setter Property="CornerRadius" Value="5" />
             <Setter Property="FontSize" Value="12" />
         </Style>
-        <!-- Creating checklist: rows split by lines; a 24 px disc per state (22 px ring while pending) -->
+        <!-- Creating checklist: one row per step, a disc per state -->
         <Style Selector="Border.stepRow">
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
             <Setter Property="BorderThickness" Value="0 1 0 0" />

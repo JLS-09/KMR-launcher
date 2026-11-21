@@ -23,7 +23,7 @@
         <Style Selector="TextBlock.label">
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-        <!-- Rows split by 1 px lines -->
+        <!-- Rows split by lines -->
         <Style Selector="Border.row">
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
             <Setter Property="BorderThickness" Value="0 1 0 0" />
@@ -47,8 +47,8 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
-        <!-- Stepper: 22 px accent disc for the current step, 20 px outlined circle for later steps, a soft accent
-             disc with a check for done steps; lines 1 px, accent after a done step -->
+        <!-- Stepper: an accent disc for the current step, an outlined circle for later steps, a check for done
+             steps; the line after a done step is accent -->
         <Style Selector="Border.stepDot">
             <Setter Property="Width" Value="20" />
             <Setter Property="Height" Value="20" />
@@ -102,7 +102,7 @@
         <Style Selector="Border.stepLine.reached">
             <Setter Property="Background" Value="{DynamicResource Accent}" />
         </Style>
-        <!-- Stat tiles: strip of cells split by lines (Review and Done) -->
+        <!-- Stat tiles (Review and Done) -->
         <Style Selector="Border.tile">
             <Setter Property="Padding" Value="16 12" />
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
@@ -113,7 +113,7 @@
             <Setter Property="FontSize" Value="20" />
             <Setter Property="FontWeight" Value="Medium" />
         </Style>
-        <!-- Progress bars: 6 px rows, coloured by state -->
+        <!-- Progress bars, coloured by state -->
         <Style Selector="ProgressBar.row">
             <Setter Property="Height" Value="6" />
             <Setter Property="MinHeight" Value="6" />

@@ -1,7 +1,7 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="using:KMRLauncherMvvm.Controls">
-    <!-- Search box: 36 px, padding 0 10, gap 8, border #2E2E32, background #151517, 13 px text -->
+    <!-- Search box -->
     <Style Selector="TextBox.search">
         <Setter Property="Height" Value="36" />
         <Setter Property="MinHeight" Value="36" />
@@ -28,7 +28,7 @@
         <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
     </Style>
 
-    <!-- Text field (settings): 36 px, padding 0 10, border #2E2E32, background #1B1B1E, 13 px text; .mono = 12 px mono -->
+    <!-- Text field (settings); .mono for mono text -->
     <Style Selector="TextBox.field">
         <Setter Property="Height" Value="36" />
         <Setter Property="MinHeight" Value="36" />
@@ -116,7 +116,7 @@
         <Setter Property="Background" Value="{DynamicResource RowHover}" />
     </Style>
 
-    <!-- White checkbox like the mockup's (install dialog): white square, accent with a white check when ticked -->
+    <!-- White checkbox (install dialog) -->
     <Style Selector="CheckBox.box.native /template/ Border#Box">
         <Setter Property="CornerRadius" Value="3" />
         <Setter Property="BorderThickness" Value="1" />
@@ -128,7 +128,7 @@
         <Setter Property="Background" Value="{DynamicResource Accent}" />
     </Style>
 
-    <!-- Version picker (install dialog): 28 px, padding 0 8, border #2E2E32, background #1B1B1E, mono 12, chevron -->
+    <!-- Version picker (install dialog) -->
     <Style Selector="ComboBox.version">
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Height" Value="28" />
