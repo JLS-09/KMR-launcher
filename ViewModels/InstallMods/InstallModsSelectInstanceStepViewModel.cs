@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 
@@ -30,6 +32,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
     public bool HasChanges => Changes.Count > 0;
     public bool HasNoInstances => Instances.Count == 0;
+    public Func<Task<Instance?>>? CreateInstance { get; set; }
     [ObservableProperty] private IReadOnlyList<ResolutionProblem> _problems = [];
     [ObservableProperty] private bool _hasProblems;
     [ObservableProperty] private bool _canContinue;
@@ -107,6 +110,20 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
         HasProblems = Problems.Count > 0;
         CanContinue = InstallModsData.SelectedInstance is not null && !HasProblems;
         Resolved?.Invoke();
+    }
+
+    [RelayCommand]
+    private async Task NewInstance()
+    {
+        if (CreateInstance is null || await CreateInstance() is not { } created) return;
+
+        Instances = new ObservableCollection<Instance>(App.Settings.UsableInstances);
+        BuildCards();
+        OnPropertyChanged(nameof(HasNoInstances));
+        OnPropertyChanged(nameof(InstancesCountText));
+        var select = Instances.FirstOrDefault(i => i.RootPath == created.RootPath);
+        if (select is not null && select != InstallModsData.SelectedInstance) InstallModsData.SelectedInstance = select;
+        else Resolve();
     }
 
     public override void OnEntering(bool forward)

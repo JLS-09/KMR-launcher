@@ -1,5 +1,5 @@
 ﻿using System;
-using System.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -74,25 +74,18 @@ public partial class MainWindowViewModel : ViewModelBase
     private string? _dismissedSettingsProblem;
     public bool HasSettingsProblem => SettingsProblem is not null;
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(DialogWidth), nameof(DialogHeight))]
-    private object? _dialog;
+    public ObservableCollection<DialogHost> Dialogs { get; } = [];
 
-    public double DialogWidth => (Dialog as IDialogSize)?.DialogWidth ?? 1080;
-    public double DialogHeight => (Dialog as IDialogSize)?.DialogHeight ?? 860;
-
-    partial void OnDialogChanged(object? oldValue, object? newValue)
+    private void SyncDialogs(DialogService dialogs)
     {
-        if (oldValue is INotifyPropertyChanged old) old.PropertyChanged -= OnDialogPropertyChanged;
-        if (newValue is INotifyPropertyChanged now) now.PropertyChanged += OnDialogPropertyChanged;
-    }
-
-    private void OnDialogPropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName is nameof(IDialogSize.DialogWidth) or nameof(IDialogSize.DialogHeight))
+        foreach (var host in Dialogs.Where(h => !dialogs.Open.Contains(h.Content)).ToList())
         {
-            OnPropertyChanged(nameof(DialogWidth));
-            OnPropertyChanged(nameof(DialogHeight));
+            host.Detach();
+            Dialogs.Remove(host);
         }
+
+        foreach (var dialog in dialogs.Open.Where(d => Dialogs.All(h => h.Content != d)))
+            Dialogs.Add(new DialogHost(dialog));
     }
 
     public StatusBarViewModel StatusBar { get; }
@@ -100,7 +93,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar, IModApiService api,
         GameSessionService session, NavigationService navigation, DialogService dialogs)
     {
-        dialogs.CurrentChanged += dialog => Dialog = dialog;
+        dialogs.Changed += () => SyncDialogs(dialogs);
         _pageFactory = pageFactory;
         _api = api;
         _session = session;

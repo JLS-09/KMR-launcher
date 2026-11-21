@@ -12,15 +12,23 @@ public class NewInstanceFlow(ZipService zips, InstanceCreator creator, DialogSer
     {
         if (dialogs.IsOpen) return Task.FromResult<Instance?>(null);
 
+        return Run(openInInstances: true);
+    }
+
+    public Task<Instance?> CreateOverAsync() => Run(openInInstances: false);
+
+    private Task<Instance?> Run(bool openInInstances)
+    {
         var done = new TaskCompletionSource<Instance?>();
         NewInstanceDialogViewModel? dialog = null;
         dialog = new NewInstanceDialogViewModel(App.Settings, zips, creator, instance =>
         {
             dialogs.Close(dialog!);
-            if (instance is not null) navigation.NavigateTo(ApplicationPageNames.Instances, instance);
+            if (instance is not null && openInInstances)
+                navigation.NavigateTo(ApplicationPageNames.Instances, instance);
             done.TrySetResult(instance);
         });
-        dialogs.Show(dialog);
+        dialogs.ShowOver(dialog);
         return done.Task;
     }
 }

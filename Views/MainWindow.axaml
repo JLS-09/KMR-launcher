@@ -266,24 +266,34 @@
             </Grid>
         </Border>
 
-        <!-- Dialog over the whole window (install flow, new instance): scrim, then the dialog at most its own size
-             (DialogWidth × DialogHeight, 1080 × 860 by default), 64 px from the top and at least 24 px from the
-             edges; it shrinks with the window -->
-        <Panel Grid.Row="0" Grid.RowSpan="2" Background="{DynamicResource Scrim}"
-               IsVisible="{Binding Dialog, Converter={x:Static ObjectConverters.IsNotNull}}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="64*" MinHeight="24" MaxHeight="64" />
-                    <RowDefinition Height="860*" MaxHeight="{Binding DialogHeight}" />
-                    <RowDefinition Height="64*" MinHeight="24" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" MinWidth="24" />
-                    <ColumnDefinition Width="1080*" MaxWidth="{Binding DialogWidth}" />
-                    <ColumnDefinition Width="*" MinWidth="24" />
-                </Grid.ColumnDefinitions>
-                <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding Dialog}" />
-            </Grid>
-        </Panel>
+        <!-- Dialogs over the whole window (install flow, new instance), each over the one before it: scrim, then
+             the dialog at most its own size (DialogHost: 1080 × 860 by default), 64 px from the top and at least
+             24 px from the edges; it shrinks with the window -->
+        <ItemsControl Grid.Row="0" Grid.RowSpan="2" ItemsSource="{Binding Dialogs}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Panel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:DialogHost">
+                    <Panel Background="{DynamicResource Scrim}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="64*" MinHeight="24" MaxHeight="64" />
+                                <RowDefinition Height="860*" MaxHeight="{Binding Height}" />
+                                <RowDefinition Height="64*" MinHeight="24" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" MinWidth="24" />
+                                <ColumnDefinition Width="1080*" MaxWidth="{Binding Width}" />
+                                <ColumnDefinition Width="*" MinWidth="24" />
+                            </Grid.ColumnDefinitions>
+                            <ContentControl Grid.Row="1" Grid.Column="1" Content="{Binding Content}" />
+                        </Grid>
+                    </Panel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </Window>
