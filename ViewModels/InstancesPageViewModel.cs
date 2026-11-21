@@ -259,6 +259,8 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     {
         if (Selected is not { } instance) return;
 
+        UnmanagedDlls.Refresh(instance);
+
         var criteria = GameVersionCriteria.FromInstance(instance);
         var mods = _modListService?.Mods?.ToDictionary(m => m.Id) ?? [];
         var sizes = _allRows.ToDictionary(r => r.Version.Identifier, r => r.SizeText);

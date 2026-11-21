@@ -9,9 +9,10 @@ namespace KMRLauncherMvvm.Services;
 
 public class DependencyService(ModListService modListService, CompatibilityService compatibilityService)
 {
-    private sealed class DependencyResolutionState(Instance? instance)
+    private sealed class DependencyResolutionState(Instance? instance, IReadOnlyDictionary<string, string> dlls)
     {
         public Instance? Instance { get; } = instance;
+        public IReadOnlyDictionary<string, string> Dlls { get; } = dlls;
 
         public GameVersionCriteria? Criteria { get; } =
             instance is null ? null : GameVersionCriteria.FromInstance(instance);
@@ -33,7 +34,8 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         var instance = installModsData.SelectedInstance;
         if (modListService.Mods is null || instance is null) return installModsData;
 
-        var dependencyResolutionState = new DependencyResolutionState(instance);
+        var dependencyResolutionState = new DependencyResolutionState(instance,
+            UnmanagedDlls.Active(instance, installModsData.RequestedModVersions));
         dependencyResolutionState.ToRemove.AddRange(installModsData.ReplacedModVersions
             .Where(v => instance.Mods.Exists(m => m.Id == v.Id))
             .Select(v => new PlannedModVersion { Version = v }));
@@ -69,9 +71,10 @@ public class DependencyService(ModListService modListService, CompatibilityServi
             [.. FindSuppressedRecommendations(dependencyResolutionState.Resolved)];
         var toInstall = dependencyResolutionState.Resolved.Select(r => r.Version).ToList();
         var remaining = RemainingInstalled(instance, dependencyResolutionState.Resolved, dependencyResolutionState.ToRemove);
-        dependencyResolutionState.Problems.AddRange(CompatibilityService.FindConflicts(toInstall, remaining));
         dependencyResolutionState.Problems.AddRange(
-            CompatibilityService.FindBrokenDepends(toInstall, remaining, instance.Mods));
+            CompatibilityService.FindConflicts(toInstall, remaining, dependencyResolutionState.Dlls));
+        dependencyResolutionState.Problems.AddRange(
+            CompatibilityService.FindBrokenDepends(toInstall, remaining, instance.Mods, dependencyResolutionState.Dlls));
         installModsData.Problems = new ObservableCollection<ResolutionProblem>(dependencyResolutionState.Problems);
         return installModsData;
     }
@@ -87,8 +90,9 @@ public class DependencyService(ModListService modListService, CompatibilityServi
     public AdditionalResolution ResolveAdditional(Instance? instance,
         IEnumerable<PlannedModVersion> alreadyResolved, IEnumerable<PlannedModVersion> additions)
     {
-        var state = new DependencyResolutionState(instance);
-        state.Resolved.AddRange(alreadyResolved.Select(Copy));
+        var resolved = alreadyResolved.ToList();
+        var state = new DependencyResolutionState(instance, UnmanagedDlls.Active(instance, resolved));
+        state.Resolved.AddRange(resolved.Select(Copy));
 
         if (modListService.Mods is not null)
         {
@@ -162,6 +166,8 @@ public class DependencyService(ModListService modListService, CompatibilityServi
     private void ResolveDependency(Relationship dependency, string reason,
         DependencyResolutionState dependencyResolutionState)
     {
+        if (InstalledMods.NamesIn(dependency).Any(dependencyResolutionState.Dlls.ContainsKey)) return;
+
         if (dependency.AnyOf is not null || !compatibilityService.ModExists(dependency.Name))
         {
             dependencyResolutionState.Choosable.Add(dependency);

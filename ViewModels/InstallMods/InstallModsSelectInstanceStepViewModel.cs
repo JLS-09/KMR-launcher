@@ -41,6 +41,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
     private readonly DependencyService _dependencyService;
     private bool _syncingCards;
+    private readonly HashSet<Instance> _scanned = [];
 
     public event Action? Resolved;
 
@@ -55,8 +56,9 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
 
         InstallModsData.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName == nameof(Models.InstallModsData.SelectedInstance))
-                Resolve();
+            if (e.PropertyName != nameof(Models.InstallModsData.SelectedInstance)) return;
+            if (InstallModsData.SelectedInstance is { } selected && _scanned.Add(selected)) UnmanagedDlls.Refresh(selected);
+            Resolve();
         };
 
         _instances = new ObservableCollection<Instance>(App.Settings.UsableInstances);

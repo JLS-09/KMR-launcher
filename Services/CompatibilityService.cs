@@ -83,10 +83,23 @@ public class CompatibilityService(ModListService modListService)
     }
 
     public static List<ResolutionProblem> FindConflicts(IReadOnlyList<ModVersion> toInstall,
-        IReadOnlyList<ModVersion> installed)
+        IReadOnlyList<ModVersion> installed, IReadOnlyDictionary<string, string>? dlls = null)
     {
         List<ResolutionProblem> problems = [];
         HashSet<string> reported = [];
+
+        foreach (var mod in toInstall)
+        foreach (var name in (mod.Conflicts ?? []).SelectMany(InstalledMods.NamesIn).Distinct())
+        {
+            if (dlls?.TryGetValue(name, out var path) != true || !reported.Add($"{mod.Identifier}|{name}")) continue;
+
+            problems.Add(new ResolutionProblem
+            {
+                Mod = mod.Identifier,
+                IsConflict = true,
+                Message = $"{mod.Identifier} {mod.Version} conflicts with {name}, which was installed by hand ({path})."
+            });
+        }
 
         for (var i = 0; i < toInstall.Count; i++)
         {
@@ -122,7 +135,8 @@ public class CompatibilityService(ModListService modListService)
     }
 
     public static List<ResolutionProblem> FindBrokenDepends(IReadOnlyList<ModVersion> toInstall,
-        IReadOnlyList<ModVersion> remainingInstalled, IReadOnlyList<ModVersion> installedBefore)
+        IReadOnlyList<ModVersion> remainingInstalled, IReadOnlyList<ModVersion> installedBefore,
+        IReadOnlyDictionary<string, string>? dlls = null)
     {
         List<ModVersion> after = [.. toInstall, .. remainingInstalled];
         List<ResolutionProblem> problems = [];
@@ -132,6 +146,7 @@ public class CompatibilityService(ModListService modListService)
             foreach (var dependency in mod.Depends ?? [])
             {
                 if (dependency.AnyOf is null && HasInvalidVersionFields(dependency)) continue;
+                if (dlls is not null && InstalledMods.NamesIn(dependency).Any(dlls.ContainsKey)) continue;
                 if (IsMet(dependency, after, mod) || !IsMet(dependency, installedBefore, mod)) continue;
 
                 problems.Add(new ResolutionProblem

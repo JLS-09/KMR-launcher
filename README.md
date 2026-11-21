@@ -35,6 +35,7 @@ A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalon
   - KSP compatibility (`ksp_version`, `ksp_version_min`/`max`, `ksp_version_strict`) against the instance's compatible versions
   - conflicts with new and installed mods, `provides` and `suppress_recommendations`
   - installed mods keep their own dependencies: an update that would break one is flagged
+  - mods installed by hand count as installed, like in CKAN: a `.dll` in GameData that no mod owns (outside `Squad`) stands for the mod it's named after (`ModuleManager.4.2.3.dll` → `ModuleManager`), at any version. It isn't installed again as a dependency, it can be a conflict, and a mod you pick yourself is installed over it
   - problems are shown in the dialog and block the next step, instead of crashing
 - Recommendations (ticked by default), suggestions and supported mods, each with a version picker; choices between alternatives (`any_of` and virtual modules); steps with nothing to show are skipped
 - Installing works like CKAN:

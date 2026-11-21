@@ -126,9 +126,10 @@ public partial class InstallModsModulesStepViewModel(
 
             var toInstall = queued.Select(q => q.Version).ToList();
             var remaining = DependencyService.RemainingInstalled(InstallModsData.SelectedInstance, queued, removes);
-            problems.AddRange(CompatibilityService.FindConflicts(toInstall, remaining));
+            var dlls = UnmanagedDlls.Active(InstallModsData.SelectedInstance, InstallModsData.RequestedModVersions);
+            problems.AddRange(CompatibilityService.FindConflicts(toInstall, remaining, dlls));
             problems.AddRange(CompatibilityService.FindBrokenDepends(toInstall, remaining,
-                InstallModsData.SelectedInstance?.Mods ?? []));
+                InstallModsData.SelectedInstance?.Mods ?? [], dlls));
 
             InstallModsData.FinalModList = new ObservableCollection<PlannedModVersion>(queued);
             InstallModsData.RequestedRemoveModVersions = new ObservableCollection<PlannedModVersion>(removes);
