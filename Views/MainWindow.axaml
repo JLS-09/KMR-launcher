@@ -15,10 +15,6 @@
         FontFamily="{DynamicResource Inter}"
         FontSize="14">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel />
-    </Design.DataContext>
-
     <Window.Styles>
         <Style Selector="StackPanel.status > TextBlock">
             <Setter Property="FontSize" Value="12" />

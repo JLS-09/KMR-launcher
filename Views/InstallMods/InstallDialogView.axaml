@@ -9,9 +9,6 @@
              x:DataType="vm:InstallDialogViewModel"
              KeyboardNavigation.TabNavigation="Cycle"
              Foreground="{DynamicResource TextPrimary}" FontSize="14">
-    <Design.DataContext>
-        <vm:InstallDialogViewModel />
-    </Design.DataContext>
 
     <!-- The install flow as a dialog in the main window (Phase 9 task 8), from the mockups Wiz1Instance …
          Wiz7Failed. The step views (InstallMods*StepView) sit in the body and use the styles below. -->

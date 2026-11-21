@@ -48,10 +48,6 @@ public partial class InstallModsViewModel : ViewModelBase
         ShowStep(0, forward: true);
     }
 
-    public InstallModsViewModel()
-    {
-    }
-
     partial void OnCurrentStepChanged(InstallModsStepViewModel? oldValue, InstallModsStepViewModel newValue)
     {
         if (oldValue is not null)

@@ -10,10 +10,6 @@
              x:Class="KMRLauncherMvvm.Views.DiscoverPageView"
              Foreground="{DynamicResource TextPrimary}">
 
-    <Design.DataContext>
-        <vm:DiscoverPageViewModel />
-    </Design.DataContext>
-
     <UserControl.Styles>
         <!-- A block in the filters column or the details panel: padding 18 20, a line under it -->
         <Style Selector="Border.block">

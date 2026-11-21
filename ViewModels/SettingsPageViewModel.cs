@@ -19,11 +19,11 @@ namespace KMRLauncherMvvm.ViewModels;
 
 public partial class SettingsPageViewModel : PageViewModel
 {
-    private readonly ZipService? _zipService;
-    private readonly IModApiService? _api;
-    private readonly SyncStatusService? _syncStatus;
-    private readonly DownloadCache? _cache;
-    private readonly StatusBarViewModel? _statusBar;
+    private readonly ZipService _zipService;
+    private readonly IModApiService _api;
+    private readonly SyncStatusService _syncStatus;
+    private readonly DownloadCache _cache;
+    private readonly StatusBarViewModel _statusBar;
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(HasNoZips))]
     private IReadOnlyList<KspZipRow> _kspZips = [];
@@ -79,11 +79,12 @@ public partial class SettingsPageViewModel : PageViewModel
     public string RepoUrlText => GitHelper.CkanMetaUrl.Replace("https://", "");
     public string BranchText => GitHelper.CkanMetaBranch;
     public string LocalCopyText => InstanceTexts.ShortPath(GitHelper.DefaultCkanMetaFolder);
-    public string CacheFolderText => _cache is null ? "" : InstanceTexts.ShortPath(_cache.Folder);
+    public string CacheFolderText => InstanceTexts.ShortPath(_cache.Folder);
 
     public SettingsPageViewModel(ZipService zipService, IModApiService api, SyncStatusService syncStatus,
-        DownloadCache cache, StatusBarViewModel statusBar) : this()
+        DownloadCache cache, StatusBarViewModel statusBar)
     {
+        PageName = ApplicationPageNames.Settings;
         _zipService = zipService;
         _api = api;
         _syncStatus = syncStatus;
@@ -100,14 +101,8 @@ public partial class SettingsPageViewModel : PageViewModel
         ShowAccent(App.Settings.AccentColor);
     }
 
-    public SettingsPageViewModel()
-    {
-        PageName = ApplicationPageNames.Settings;
-    }
-
     public void AddKspZip(string path)
     {
-        if (_zipService is null) return;
         (_, AddZipError) = _zipService.AddToSettings(App.Settings, path);
         LoadZips();
     }
@@ -127,8 +122,6 @@ public partial class SettingsPageViewModel : PageViewModel
     [RelayCommand(CanExecute = nameof(CanFetchNow))]
     private async Task FetchNow()
     {
-        if (_api is null) return;
-
         try
         {
             await Task.Run(() => _api.GetAllModsAsync(null, true));
@@ -154,8 +147,6 @@ public partial class SettingsPageViewModel : PageViewModel
     [RelayCommand]
     private void OpenCacheFolder()
     {
-        if (_cache is null) return;
-
         try
         {
             Directory.CreateDirectory(_cache.Folder);
@@ -170,8 +161,6 @@ public partial class SettingsPageViewModel : PageViewModel
     [RelayCommand(CanExecute = nameof(HasUnused))]
     private async Task RemoveUnused()
     {
-        if (_cache is null) return;
-
         var instances = App.Settings.Instances.ToList();
         await Cleanup(() => _cache.RemoveUnused(instances));
     }
@@ -179,8 +168,6 @@ public partial class SettingsPageViewModel : PageViewModel
     [RelayCommand(CanExecute = nameof(HasArchives))]
     private async Task ClearCache()
     {
-        if (_cache is null) return;
-
         await Cleanup(_cache.ClearAll);
     }
 
@@ -192,13 +179,11 @@ public partial class SettingsPageViewModel : PageViewModel
             CacheError = $"{result.Failed} {Plural(result.Failed, "archive")} couldn't be deleted.";
 
         await MeasureCacheAsync();
-        if (_statusBar is not null) await _statusBar.RefreshAsync();
+        await _statusBar.RefreshAsync();
     }
 
     private async Task MeasureCacheAsync()
     {
-        if (_cache is null) return;
-
         var instances = App.Settings.Instances.ToList();
         var usage = await Task.Run(() => _cache.Measure(instances));
 
@@ -303,8 +288,6 @@ public partial class SettingsPageViewModel : PageViewModel
 
     private void LoadRepoState()
     {
-        if (_syncStatus is null) return;
-
         var status = _syncStatus.Status;
         var commit = status.LastCommit ?? GitHelper.ReadHeadSha(GitHelper.DefaultCkanMetaFolder);
         var shortCommit = commit is { Length: >= 7 } ? commit[..7] : null;

@@ -18,8 +18,8 @@ public partial class InstallProgressViewModel : ViewModelBase
 {
     private const double DownloadShare = 0.75;
 
-    private readonly InstallService? _installService;
-    private readonly InstallRun? _run;
+    private readonly InstallService _installService;
+    private readonly InstallRun _run;
     private readonly int _maxParallelDownloads;
     private readonly CancellationTokenSource _cancel = new();
     private readonly Stopwatch _clock = new();
@@ -42,13 +42,11 @@ public partial class InstallProgressViewModel : ViewModelBase
     [ObservableProperty] private string _speedText = "";
     [ObservableProperty] private string _parallelText = "";
 
-    public string TitleText => _run is null
-        ? ""
-        : Rows.Count == 0
-            ? $"Removing from {_run.Instance.Name}"
-            : $"Installing into {_run.Instance.Name}";
+    public string TitleText => Rows.Count == 0
+        ? $"Removing from {_run.Instance.Name}"
+        : $"Installing into {_run.Instance.Name}";
 
-    public InstallRun? Run => _run;
+    public InstallRun Run => _run;
     public bool HasRows => Rows.Count > 0;
     public TimeSpan Elapsed => _clock.Elapsed;
 
@@ -65,14 +63,8 @@ public partial class InstallProgressViewModel : ViewModelBase
         Refresh(TimeSpan.Zero);
     }
 
-    public InstallProgressViewModel()
-    {
-    }
-
     public async Task<bool> RunAsync()
     {
-        if (_installService is null || _run is null) return false;
-
         IsRunning = true;
         CanCancel = true;
         _clock.Start();
@@ -133,7 +125,7 @@ public partial class InstallProgressViewModel : ViewModelBase
         if (Rows.Count == 0)
         {
             OverallProgress = IsFinished && !HasError ? 1 : 0;
-            var removing = _run?.ToRemove.Count ?? 0;
+            var removing = _run.ToRemove.Count;
             OverallText = removing == 0 ? "No mods to install"
                 : IsFinished && !HasError ? $"Removed {removing} mod{(removing == 1 ? "" : "s")}"
                 : $"Removing {removing} mod{(removing == 1 ? "" : "s")}";

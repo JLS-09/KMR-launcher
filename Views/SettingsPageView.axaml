@@ -11,10 +11,6 @@
              x:Class="KMRLauncherMvvm.Views.SettingsPageView"
              Foreground="{DynamicResource TextPrimary}">
 
-    <Design.DataContext>
-        <vm:SettingsPageViewModel />
-    </Design.DataContext>
-
     <UserControl.Styles>
         <Style Selector="Button.sectionNav">
             <Setter Property="Height" Value="34" />

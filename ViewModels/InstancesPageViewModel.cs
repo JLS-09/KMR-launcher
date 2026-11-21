@@ -36,11 +36,11 @@ public enum ModsFilter
 
 public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, INavigationTarget
 {
-    private readonly NewInstanceFlow? _newInstanceFlow;
-    private readonly ModListService? _modListService;
-    private readonly GameSessionService? _session;
-    private readonly NavigationService? _navigation;
-    private readonly InstallFlow? _installFlow;
+    private readonly NewInstanceFlow _newInstanceFlow;
+    private readonly ModListService _modListService;
+    private readonly GameSessionService _session;
+    private readonly NavigationService _navigation;
+    private readonly InstallFlow _installFlow;
 
     private List<InstalledModRowViewModel> _allRows = [];
 
@@ -109,8 +109,9 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [ObservableProperty] private bool _selectionHasUpdates;
 
     public InstancesPageViewModel(NewInstanceFlow newInstanceFlow, ModListService modListService, GameSessionService session,
-        NavigationService navigation, InstallFlow installFlow) : this()
+        NavigationService navigation, InstallFlow installFlow)
     {
+        PageName = ApplicationPageNames.Instances;
         _newInstanceFlow = newInstanceFlow;
         _modListService = modListService;
         _session = session;
@@ -124,15 +125,10 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         LoadInstances(App.Settings);
     }
 
-    public InstancesPageViewModel()
-    {
-        PageName = ApplicationPageNames.Instances;
-    }
-
     public void ApplySearch(string text) => ModFilterText = text;
 
     private void OnSettingsChanged(object? sender, AppSettings settings) => LoadInstances(settings);
-    private void OnSessionChanged() => IsGameRunning = _session?.IsRunning ?? false;
+    private void OnSessionChanged() => IsGameRunning = _session.IsRunning;
     private void OnModsChanged() => Dispatcher.UIThread.Post(BuildRows);
 
     private void LoadInstances(AppSettings settings)
@@ -262,7 +258,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         UnmanagedDlls.Refresh(instance);
 
         var criteria = GameVersionCriteria.FromInstance(instance);
-        var mods = _modListService?.Mods?.ToDictionary(m => m.Id) ?? [];
+        var mods = _modListService.Mods?.ToDictionary(m => m.Id) ?? [];
         var sizes = _allRows.ToDictionary(r => r.Version.Identifier, r => r.SizeText);
 
         foreach (var row in _allRows) row.SelectionChanged -= OnRowSelectionChanged;
@@ -343,7 +339,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
     private async Task Remove(IReadOnlyList<InstalledModRowViewModel> rows)
     {
-        if (Selected is not { } instance || _installFlow is null || rows.Count == 0) return;
+        if (Selected is not { } instance || rows.Count == 0) return;
 
         var plan = InstalledMods.PlanRemoval(instance, [.. rows.Select(r => r.Version.Identifier)]);
         await _installFlow.RemoveAsync(instance, plan.All);
@@ -360,7 +356,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
     private async Task Update(IReadOnlyList<InstalledModRowViewModel> rows)
     {
-        if (Selected is not { } instance || _installFlow is null || rows.Count == 0) return;
+        if (Selected is not { } instance || rows.Count == 0) return;
 
         var requested = rows.Select(r => new PlannedModVersion
         {
@@ -380,7 +376,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [RelayCommand(CanExecute = nameof(CanLaunch))]
     private async Task Launch()
     {
-        if (Selected is not { } instance || _session is null) return;
+        if (Selected is not { } instance) return;
 
         ActionError = null;
         try
@@ -505,15 +501,15 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     }
 
     [RelayCommand]
-    private void NewInstance() => _newInstanceFlow?.CreateAsync();
+    private void NewInstance() => _newInstanceFlow.CreateAsync();
 
     [RelayCommand]
-    private void ImportInstance() => _newInstanceFlow?.CreateAsync(existingFolder: true);
+    private void ImportInstance() => _newInstanceFlow.CreateAsync(existingFolder: true);
 
     [RelayCommand]
     private void AddMods()
     {
-        if (Selected is not null) _navigation?.NavigateTo(ApplicationPageNames.Discover, Selected);
+        if (Selected is not null) _navigation.NavigateTo(ApplicationPageNames.Discover, Selected);
     }
 
     [RelayCommand]

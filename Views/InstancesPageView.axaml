@@ -11,10 +11,6 @@
              x:Class="KMRLauncherMvvm.Views.InstancesPageView"
              Foreground="{DynamicResource TextPrimary}">
 
-    <Design.DataContext>
-        <vm:InstancesPageViewModel />
-    </Design.DataContext>
-
     <UserControl.Styles>
         <!-- Instance list rows: padding 12 20, line under; selected = #1C1C20 with a 2 px accent line on the left -->
         <Style Selector="ListBox.instanceList ListBoxItem">

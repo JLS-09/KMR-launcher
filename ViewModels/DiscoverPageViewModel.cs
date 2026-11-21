@@ -18,9 +18,9 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
 {
     private const int TagsShownCollapsed = 11;
 
-    private readonly IModApiService? _api;
-    private readonly InstallFlow? _installFlow;
-    private readonly ModListService? _modListService;
+    private readonly IModApiService _api;
+    private readonly InstallFlow _installFlow;
+    private readonly ModListService _modListService;
 
     private List<ModListItemViewModel> _allRows = [];
     private Dictionary<string, int> _neededBy = [];
@@ -60,8 +60,14 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     [ObservableProperty] private Instance? _installTarget;
 
     public DiscoverPageViewModel(IModApiService api, ModListService modListService, InstallFlow installFlow)
-        : this()
     {
+        PageName = ApplicationPageNames.Discover;
+        SelectedMods.CollectionChanged += (_, _) => HasSelectedMods = SelectedMods.Count > 0;
+        Kinds =
+        [
+            new FilterOptionViewModel(DiscoverFilter.PackageKind, 0, ApplyFilters),
+            new FilterOptionViewModel(DiscoverFilter.MetapackageKind, 0, ApplyFilters)
+        ];
         _api = api;
         _modListService = modListService;
         _installFlow = installFlow;
@@ -73,17 +79,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         else LoadRows(modListService.Mods);
     }
 
-    public DiscoverPageViewModel()
-    {
-        PageName = ApplicationPageNames.Discover;
-        SelectedMods.CollectionChanged += (_, _) => HasSelectedMods = SelectedMods.Count > 0;
-        Kinds =
-        [
-            new FilterOptionViewModel(DiscoverFilter.PackageKind, 0, ApplyFilters),
-            new FilterOptionViewModel(DiscoverFilter.MetapackageKind, 0, ApplyFilters)
-        ];
-    }
-
     public void ApplySearch(string text)
     {
         _search = text.Trim();
@@ -93,8 +88,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     [RelayCommand]
     private async Task FetchMods(bool isRefresh = false)
     {
-        if (_api is null || _modListService is null) return;
-
         LoadProgress = new ModFetchProgress { ModsReceived = 0, TotalMods = 1 };
         IsLoading = true;
         try
@@ -254,8 +247,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     [RelayCommand]
     private async Task ApplyChanges()
     {
-        if (_installFlow is null) return;
-
         var installed = await _installFlow.InstallAsync(
             [
                 .. SelectedMods.Select(m => new PlannedModVersion

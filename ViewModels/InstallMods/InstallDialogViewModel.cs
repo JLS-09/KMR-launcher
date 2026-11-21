@@ -128,7 +128,7 @@ public partial class InstallDialogViewModel : ViewModelBase
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand))]
     private bool _isGameRunning;
 
-    public Instance? Instance => Progress?.Run?.Instance ?? _data.SelectedInstance;
+    public Instance? Instance => Progress?.Run.Instance ?? _data.SelectedInstance;
 
     public InstallDialogViewModel(IReadOnlyList<PlannedModVersion> requested, Instance? target, InstallSource source,
         ModListService modListService, DependencyService dependencyService, CompatibilityService compatibilityService,
@@ -219,22 +219,6 @@ public partial class InstallDialogViewModel : ViewModelBase
 
         IsGameRunning = session.IsRunning;
         session.Changed += () => IsGameRunning = session.IsRunning;
-    }
-
-    // Design-time
-    public InstallDialogViewModel()
-    {
-        _modListService = null!;
-        _dependencyService = null!;
-        _compatibilityService = null!;
-        _installService = null!;
-        _session = null!;
-        _navigation = null!;
-        _dialogs = null!;
-        _data = new InstallModsData();
-        Title = "Install mods";
-        PickedTitle = "Picked in Discover";
-        Picked = [];
     }
 
     private bool IsCached(ModVersion version) =>
@@ -434,7 +418,7 @@ public partial class InstallDialogViewModel : ViewModelBase
 
     private void ShowDone(Instance instance, InstallProgressViewModel progress)
     {
-        var jobs = progress.Run?.Jobs ?? [];
+        var jobs = progress.Run.Jobs;
         var installs = _runCounts.New + _runCounts.Updates;
         var took = $"took {InstallChanges.Duration(progress.Elapsed)}";
 
@@ -476,7 +460,7 @@ public partial class InstallDialogViewModel : ViewModelBase
 
     private void ShowFailed(Instance instance, InstallProgressViewModel progress)
     {
-        var jobs = progress.Run?.Jobs ?? [];
+        var jobs = progress.Run.Jobs;
         var removing = jobs.Count == 0;
         var notUndone = progress.ErrorMessage.Contains("couldn't be undone");
 

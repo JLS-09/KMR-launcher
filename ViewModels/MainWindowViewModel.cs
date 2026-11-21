@@ -15,10 +15,10 @@ namespace KMRLauncherMvvm.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private readonly PageFactory? _pageFactory;
-    private readonly IModApiService? _api;
-    private readonly GameSessionService? _session;
-    private readonly DispatcherTimer? _runningTimer;
+    private readonly PageFactory _pageFactory;
+    private readonly IModApiService _api;
+    private readonly GameSessionService _session;
+    private readonly DispatcherTimer _runningTimer;
     private DateTime _runningSince;
 
     [ObservableProperty]
@@ -114,11 +114,6 @@ public partial class MainWindowViewModel : ViewModelBase
         GoToHome();
     }
 
-    public MainWindowViewModel()
-    {
-        StatusBar = new StatusBarViewModel();
-    }
-
     partial void OnCurrentPageChanged(PageViewModel? value) => SearchText = "";
 
     partial void OnSearchTextChanged(string value) => (CurrentPage as ISearchablePage)?.ApplySearch(value);
@@ -152,7 +147,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void ShowPage(ApplicationPageNames name)
     {
-        if (_pageFactory is null) return;
         CurrentPage = _pageFactory.GetPageViewModel(name);
         _ = StatusBar.RefreshAsync();
     }
@@ -160,12 +154,12 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool CanLaunchPrimary() => PrimaryInstance is not null && !IsRunning;
 
     [RelayCommand]
-    private void StopGame() => _session?.Stop();
+    private void StopGame() => _session.Stop();
 
     [RelayCommand(CanExecute = nameof(CanLaunchPrimary))]
     private async Task LaunchPrimary()
     {
-        if (PrimaryInstance is not { } instance || _session is null) return;
+        if (PrimaryInstance is not { } instance) return;
 
         LaunchError = null;
         try
@@ -180,17 +174,17 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnSessionChanged()
     {
-        IsRunning = _session?.IsRunning ?? false;
-        if (_session?.Running is { } running)
+        IsRunning = _session.IsRunning;
+        if (_session.Running is { } running)
         {
             RunningInstanceName = running.Name;
             RunningTime = "00:00:00";
             _runningSince = _session.StartedAt;
-            _runningTimer?.Start();
+            _runningTimer.Start();
         }
         else
         {
-            _runningTimer?.Stop();
+            _runningTimer.Stop();
         }
     }
 
@@ -204,7 +198,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             if (CurrentPage is DiscoverPageViewModel discover)
                 await discover.FetchModsCommand.ExecuteAsync(true);
-            else if (_api is not null)
+            else
                 await Task.Run(() => _api.GetAllModsAsync(null, true));
         }
         catch (Exception)
