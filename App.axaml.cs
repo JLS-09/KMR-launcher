@@ -8,6 +8,7 @@ using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
+using KMRLauncherMvvm.ViewModels.NewInstance;
 using KMRLauncherMvvm.Services.Api;
 using KMRLauncherMvvm.ViewModels;
 using KMRLauncherMvvm.ViewModels.InstallMods;
@@ -47,6 +48,9 @@ public class App : Application
         collection.AddSingleton<InstallFlow>();
         collection.AddSingleton<IModApiService, ModGitService>();
         collection.AddSingleton<ZipService>();
+        collection.AddSingleton(sp => new InstanceCreator(sp.GetRequiredService<ZipService>(),
+            (settings, instance) => SettingsService.Save(settings, instance, modsChanged: true)));
+        collection.AddSingleton<NewInstanceFlow>();
         collection.AddSingleton(modListService);
         collection.AddSingleton(jsonHelper);
         collection.AddSingleton(compatibilityService);

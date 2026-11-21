@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using KMRLauncherMvvm.Models;
 
@@ -15,6 +17,26 @@ public static class JsonHelper
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
+
+    public static ModVersion? ParseModule(JsonElement module)
+    {
+        try
+        {
+            if (JsonNode.Parse(module.GetRawText()) is not JsonObject node) return null;
+            if (node["install"] is JsonArray directives)
+                foreach (var directive in directives.OfType<JsonObject>())
+                    if (!directive.ContainsKey("install_to"))
+                        directive["install_to"] = "GameData";
+
+            var v = node.Deserialize<ModVersion>(JsonOptions);
+            if (v is not null) v.Id = $"{v.Identifier}-{v.Version.Replace(':', '-')}";
+            return v;
+        }
+        catch (Exception e) when (e is JsonException or NotSupportedException or InvalidOperationException)
+        {
+            return null;
+        }
+    }
 
     public static ModVersion? ParseVersion(string ckanFilePath, string json)
     {

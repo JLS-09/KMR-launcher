@@ -25,10 +25,11 @@ public static class InstalledMods
         relationship.AnyOf?.Select(e => e.Name).OfType<string>() ??
         (relationship.Name is null ? [] : [relationship.Name]);
 
-    public static bool IsSatisfied(Relationship relationship, IEnumerable<ModVersion> mods)
+    public static bool IsSatisfied(Relationship relationship, IEnumerable<ModVersion> mods,
+        IReadOnlyDictionary<string, string>? dlls = null)
     {
         var names = NamesIn(relationship).ToHashSet();
-        return mods.Any(m => NamesOf(m).Any(names.Contains));
+        return dlls?.Keys.Any(names.Contains) == true || mods.Any(m => NamesOf(m).Any(names.Contains));
     }
 
     public static List<ModVersion> Dependents(ModVersion mod, IEnumerable<ModVersion> installed)
@@ -55,7 +56,7 @@ public static class InstalledMods
             foreach (var mod in remaining.ToList())
             {
                 var others = remaining.Where(m => m != mod).ToList();
-                if ((mod.Depends ?? []).All(r => IsSatisfied(r, others) ||
+                if ((mod.Depends ?? []).All(r => IsSatisfied(r, others, instance.UnmanagedDlls) ||
                                                  !IsSatisfied(r, instance.Mods.Where(m => m != mod))))
                     continue;
                 remaining.Remove(mod);

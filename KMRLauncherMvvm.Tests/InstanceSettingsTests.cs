@@ -139,15 +139,15 @@ public class InstanceSettingsTests
     {
         var (vm, _, _) = Tab();
 
-        Assert.Equal(["1.12", "1.11", "1.10", "1.9", "1.8"], vm.Groups.Select(g => g.Prefix));
-        Assert.Equal("1.12.0", vm.Groups[0].Versions[0].Version);
-        Assert.True(vm.Groups[0].Versions.Single(v => v.Version == "1.12.5").IsInstanceVersion);
-        Assert.True(vm.Groups[0].AllowAll);
-        Assert.True(vm.HasOlderGroups);
-        Assert.StartsWith("Show 0.", vm.OlderToggleText);
+        Assert.Equal(["1.12", "1.11", "1.10", "1.9", "1.8"], vm.Versions.Groups.Select(g => g.Prefix));
+        Assert.Equal("1.12.0", vm.Versions.Groups[0].Versions[0].Version);
+        Assert.True(vm.Versions.Groups[0].Versions.Single(v => v.Version == "1.12.5").IsInstanceVersion);
+        Assert.True(vm.Versions.Groups[0].AllowAll);
+        Assert.True(vm.Versions.HasOlderGroups);
+        Assert.StartsWith("Show 0.", vm.Versions.OlderToggleText);
 
-        vm.ToggleOlderCommand.Execute(null);
-        Assert.Contains(vm.Groups, g => g.Prefix == "1.7");
+        vm.Versions.ToggleOlderCommand.Execute(null);
+        Assert.Contains(vm.Versions.Groups, g => g.Prefix == "1.7");
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public class InstanceSettingsTests
 
         var vm = new InstanceSettingsViewModel(instance, [instance]);
 
-        Assert.Contains(vm.Groups, g => g.Prefix == "1.7");
+        Assert.Contains(vm.Versions.Groups, g => g.Prefix == "1.7");
     }
 
     [Fact]
@@ -168,8 +168,8 @@ public class InstanceSettingsTests
 
         vm.Name = "RP-1 Express";
         vm.IsPrimary = true;
-        vm.Groups[1].AllowAll = true;
-        vm.Groups[0].Versions[0].IsChecked = true;
+        vm.Versions.Groups[1].AllowAll = true;
+        vm.Versions.Groups[0].Versions[0].IsChecked = true;
 
         Assert.Equal(4, vm.ChangeCount);
         Assert.Equal("4 unsaved changes", vm.ChangesText);
@@ -180,8 +180,8 @@ public class InstanceSettingsTests
     {
         var (vm, _, _) = Tab();
 
-        vm.Groups[1].AllowAll = true;
-        vm.Groups[1].AllowAll = false;
+        vm.Versions.Groups[1].AllowAll = true;
+        vm.Versions.Groups[1].AllowAll = false;
         vm.LaunchArguments = "-force-glcore ";
 
         Assert.False(vm.HasChanges);
@@ -208,7 +208,7 @@ public class InstanceSettingsTests
         vm.IsPrimary = true;
         vm.Prefix = "/custom/prefix";
         vm.LaunchArguments = "";
-        vm.Groups[1].AllowAll = true;
+        vm.Versions.Groups[1].AllowAll = true;
 
         Assert.True(vm.Apply(settings));
 
@@ -241,7 +241,7 @@ public class InstanceSettingsTests
         instance.CompatibleKspVersions = ["1.12", "1.13"];
         var vm = new InstanceSettingsViewModel(instance, settings.Instances);
 
-        vm.Groups[1].AllowAll = true;
+        vm.Versions.Groups[1].AllowAll = true;
         vm.Apply(settings);
 
         Assert.Contains("1.13", instance.CompatibleKspVersions);
@@ -254,13 +254,13 @@ public class InstanceSettingsTests
 
         vm.Name = "Other";
         vm.Prefix = "/x";
-        vm.Groups[0].AllowAll = false;
-        vm.Groups[0].Versions[2].IsChecked = true;
+        vm.Versions.Groups[0].AllowAll = false;
+        vm.Versions.Groups[0].Versions[2].IsChecked = true;
         vm.RevertCommand.Execute(null);
 
         Assert.False(vm.HasChanges);
         Assert.Equal("RP-1", vm.Name);
-        Assert.True(vm.Groups[0].AllowAll);
-        Assert.False(vm.Groups[0].Versions[2].IsChecked);
+        Assert.True(vm.Versions.Groups[0].AllowAll);
+        Assert.False(vm.Versions.Groups[0].Versions[2].IsChecked);
     }
 }

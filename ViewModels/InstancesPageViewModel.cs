@@ -13,7 +13,7 @@ using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.ViewModels.InstallMods;
 using KMRLauncherMvvm.ViewModels.Instances;
-using KMRLauncherMvvm.Views;
+using KMRLauncherMvvm.ViewModels.NewInstance;
 
 namespace KMRLauncherMvvm.ViewModels;
 
@@ -36,7 +36,7 @@ public enum ModsFilter
 
 public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, INavigationTarget
 {
-    private readonly ZipService? _zipService;
+    private readonly NewInstanceFlow? _newInstanceFlow;
     private readonly ModListService? _modListService;
     private readonly GameSessionService? _session;
     private readonly NavigationService? _navigation;
@@ -81,7 +81,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowSelectionBar), nameof(ShowSettingsBar))]
     private InstanceTab _tab = InstanceTab.Mods;
 
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand), nameof(DeleteInstanceCommand))]
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand), nameof(DeleteInstanceCommand), nameof(ForgetInstanceCommand))]
     private bool _isGameRunning;
 
     private readonly Dictionary<string, InstanceSettingsViewModel> _settingsByPath = [];
@@ -108,10 +108,10 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [ObservableProperty] private string _removalNote = "";
     [ObservableProperty] private bool _selectionHasUpdates;
 
-    public InstancesPageViewModel(ZipService zipService, ModListService modListService, GameSessionService session,
+    public InstancesPageViewModel(NewInstanceFlow newInstanceFlow, ModListService modListService, GameSessionService session,
         NavigationService navigation, InstallFlow installFlow) : this()
     {
-        _zipService = zipService;
+        _newInstanceFlow = newInstanceFlow;
         _modListService = modListService;
         _session = session;
         _navigation = navigation;
@@ -258,6 +258,8 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     private void BuildRows()
     {
         if (Selected is not { } instance) return;
+
+        UnmanagedDlls.Refresh(instance);
 
         var criteria = GameVersionCriteria.FromInstance(instance);
         var mods = _modListService?.Mods?.ToDictionary(m => m.Id) ?? [];
@@ -445,6 +447,27 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         }
     }
 
+    [RelayCommand(CanExecute = nameof(CanDeleteInstance))]
+    private void ForgetInstance()
+    {
+        if (Selected is not { } instance) return;
+
+        ActionError = null;
+        var index = App.Settings.Instances.IndexOf(instance);
+        if (index < 0) return;
+        try
+        {
+            App.Settings.Instances.RemoveAt(index);
+            SettingsService.Save(App.Settings);
+            Tab = InstanceTab.Mods;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            App.Settings.Instances.Insert(index, instance);
+            ActionError = $"Couldn't save the instance list: {e.Message}";
+        }
+    }
+
     [RelayCommand]
     private void MakePrimary()
     {
@@ -482,11 +505,10 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     }
 
     [RelayCommand]
-    private void NewInstance()
-    {
-        if (_zipService is null) return;
-        new NewInstanceWindow { DataContext = new NewInstanceViewModel(_zipService) }.Show();
-    }
+    private void NewInstance() => _newInstanceFlow?.CreateAsync();
+
+    [RelayCommand]
+    private void ImportInstance() => _newInstanceFlow?.CreateAsync(existingFolder: true);
 
     [RelayCommand]
     private void AddMods()

@@ -26,6 +26,7 @@ public class Instance(string name, string rootPath, string version)
     public bool IsPrimary { get; set; }
 
     [JsonIgnore] public string? LoadError { get; set; }
+    [JsonIgnore] public Dictionary<string, string> UnmanagedDlls { get; set; } = [];
     [JsonIgnore] public bool IsMissing => LoadError is not null;
 
     [JsonIgnore] public string CompatibleSummary => KspVersions.DescribeCompatible(this);

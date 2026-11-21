@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -73,14 +74,26 @@ public partial class MainWindowViewModel : ViewModelBase
     private string? _dismissedSettingsProblem;
     public bool HasSettingsProblem => SettingsProblem is not null;
 
-    [ObservableProperty] private object? _dialog;
+    public ObservableCollection<DialogHost> Dialogs { get; } = [];
+
+    private void SyncDialogs(DialogService dialogs)
+    {
+        foreach (var host in Dialogs.Where(h => !dialogs.Open.Contains(h.Content)).ToList())
+        {
+            host.Detach();
+            Dialogs.Remove(host);
+        }
+
+        foreach (var dialog in dialogs.Open.Where(d => Dialogs.All(h => h.Content != d)))
+            Dialogs.Add(new DialogHost(dialog));
+    }
 
     public StatusBarViewModel StatusBar { get; }
 
     public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar, IModApiService api,
         GameSessionService session, NavigationService navigation, DialogService dialogs)
     {
-        dialogs.CurrentChanged += dialog => Dialog = dialog;
+        dialogs.Changed += () => SyncDialogs(dialogs);
         _pageFactory = pageFactory;
         _api = api;
         _session = session;

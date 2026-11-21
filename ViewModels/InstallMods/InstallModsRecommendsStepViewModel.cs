@@ -137,9 +137,10 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             ? [.. anyOf.Select(e => e.Name).OfType<string>()]
             : [.. new[] { relationship.Name }.OfType<string>()];
 
-        return InstallModsData.FinalModList.Select(m => m.Version)
-            .Concat(InstallModsData.SelectedInstance?.Mods ?? [])
-            .Any(m => names.Contains(m.Identifier) || m.Provides?.Any(names.Contains) == true);
+        return names.Any(IsInstalledByHand) ||
+               InstallModsData.FinalModList.Select(m => m.Version)
+                   .Concat(InstallModsData.SelectedInstance?.Mods ?? [])
+                   .Any(m => names.Contains(m.Identifier) || m.Provides?.Any(names.Contains) == true);
     }
 
     private void AddSupporting(Dictionary<string, RowData> rows, string supportedMod, GameVersionCriteria? criteria)
@@ -183,7 +184,12 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
     private int CountMissingDepends(ModVersion version) =>
         (version.Depends ?? []).Count(d => !IsSatisfied(d));
 
+    private bool IsInstalledByHand(string identifier) =>
+        UnmanagedDlls.Active(InstallModsData.SelectedInstance, InstallModsData.RequestedModVersions)
+            .ContainsKey(identifier);
+
     private bool IsPlannedOrInstalled(string identifier) =>
+        IsInstalledByHand(identifier) ||
         InstallModsData.FinalModList.Any(m => m.Version.Identifier == identifier) ||
         InstallModsData.SelectedInstance?.Mods.Any(m => m.Identifier == identifier) == true;
 

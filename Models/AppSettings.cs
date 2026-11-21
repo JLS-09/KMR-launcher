@@ -11,6 +11,7 @@ public class AppSettings
 
     public List<string> InstanceFolders { get; set; } = [];
     public string? PrimaryInstance { get; set; }
+    public string? InstanceParentFolder { get; set; }
 
     [JsonIgnore] public ObservableCollection<Instance> Instances { get; set; } = [];
     [JsonIgnore] public IEnumerable<Instance> UsableInstances => Instances.Where(i => !i.IsMissing);

@@ -1,28 +1,44 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace KMRLauncherMvvm.Services;
 
 public class DialogService
 {
-    public object? Current { get; private set; }
+    private readonly List<object> _open = [];
 
-    public event Action<object?>? CurrentChanged;
+    public IReadOnlyList<object> Open => _open;
+    public object? Current => _open.LastOrDefault();
+    public bool IsOpen => _open.Count > 0;
 
-    public bool IsOpen => Current is not null;
+    public event Action? Changed;
 
     public void Show(object dialog)
     {
-        if (Current is not null) throw new InvalidOperationException("A dialog is already open.");
+        if (IsOpen) throw new InvalidOperationException("A dialog is already open.");
 
-        Current = dialog;
-        CurrentChanged?.Invoke(dialog);
+        ShowOver(dialog);
+    }
+
+    public void ShowOver(object dialog)
+    {
+        if (_open.Contains(dialog)) return;
+
+        _open.Add(dialog);
+        Changed?.Invoke();
     }
 
     public void Close(object dialog)
     {
-        if (!ReferenceEquals(Current, dialog)) return;
+        if (!_open.Remove(dialog)) return;
 
-        Current = null;
-        CurrentChanged?.Invoke(null);
+        Changed?.Invoke();
     }
+}
+
+public interface IDialogSize
+{
+    double DialogWidth { get; }
+    double DialogHeight { get; }
 }

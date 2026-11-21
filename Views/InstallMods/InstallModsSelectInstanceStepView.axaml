@@ -15,15 +15,12 @@
         <Grid ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="10">
             <TextBlock Classes="label" Text="INSTALL INTO" />
             <TextBlock Grid.Column="1" Classes="count" Text="{Binding InstancesCountText}" />
-            <!-- Placeholder: creating an instance from here comes with Phase 7 task 1 -->
-            <Border Grid.Column="3" Classes="soon" ToolTip.Tip="Creating an instance from here comes in Phase 7">
-                <Button Classes="ghost small">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="14" VerticalAlignment="Center" />
-                        <TextBlock Text="New instance" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-            </Border>
+            <Button Grid.Column="3" Classes="ghost small" Command="{Binding NewInstanceCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="14" VerticalAlignment="Center" />
+                    <TextBlock Text="New instance" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
         </Grid>
 
         <ItemsControl ItemsSource="{Binding Cards}">
@@ -69,7 +66,7 @@
         <!-- No instances yet -->
         <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"
                    IsVisible="{Binding HasNoInstances}"
-                   Text="There are no instances yet. Make one on the Instances page first." />
+                   Text="There are no instances yet. Create one with New instance to install into it." />
 
         <StackPanel IsVisible="{Binding HasChanges}">
             <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 0 0 6">
