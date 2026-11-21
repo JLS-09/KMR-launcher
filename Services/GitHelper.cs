@@ -11,8 +11,27 @@ namespace KMRLauncherMvvm.Services;
 
 public class GitHelper(ModListService modList)
 {
+    public const string CkanMetaUrl = "https://github.com/KSP-CKAN/CKAN-meta.git";
+    public const string CkanMetaBranch = "master";
+
     public static string DefaultCkanMetaFolder => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "kmrLauncher/cache/ckan-meta");
+
+    public static string? ReadHeadSha(string folder)
+    {
+        try
+        {
+            if (!Repository.IsValid(folder)) return null;
+
+            using var repo = new Repository(folder);
+            var branch = repo.Branches[CkanMetaBranch] ?? repo.Head;
+            return branch.Tip?.Sha;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
 
     public static void CloneCkanMetaRepo(string gitCacheFolder, IProgress<ModFetchProgress>? progress)
     {
@@ -57,7 +76,7 @@ public class GitHelper(ModListService modList)
             }
         };
 
-        Repository.Clone("https://github.com/KSP-CKAN/CKAN-meta.git", gitCacheFolder, cloneOptions);
+        Repository.Clone(CkanMetaUrl, gitCacheFolder, cloneOptions);
     }
 
     public static void PullCkanMetaRepo(string gitCacheFolder, IProgress<ModFetchProgress>? progress)

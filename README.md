@@ -48,6 +48,14 @@ A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalon
   - mods that CKAN marks as replaced (`replaced_by`) can be replaced in one step
   - removing a mod also removes the mods that need it and dependencies nothing uses anymore, and says so first
 
+### Launcher settings
+- KSP zips that new instances are created from, with their version and size
+- CKAN-meta: when it was last fetched and at which commit, fetch now, and whether to fetch when the launcher starts (with it off, the cached mod list is used)
+- Downloads: how many run at the same time, and the download cache with how much of it installed mods use; remove unused downloads or clear the cache
+- Launching: where `wine` (and `umu-run`) were found, and how much Wine prints (`WINEDEBUG`: off, errors only, or Wine's default)
+- Accent colour (red, orange, green or blue), applied right away
+- Version and commit of the build
+
 ## Roadmap
 
 The full plan is split into milestones:
@@ -58,8 +66,9 @@ The full plan is split into milestones:
 | **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | ✅ Done |
 | **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | ✅ Done |
 | **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | ✅ Done |
-| **M5** | First usable release, in a new design:<br>• ✅ new design for Discover, Instances and the install flow<br>• ✅ remove and update mods, `replaced_by`<br>• ✅ currently-playing card<br>• Home page and startup window<br>• create an instance from inside the install flow<br>• import an existing KSP install (with CKAN registry)<br>• offline mode | 🚧 In progress |
-| **M6** | Extras:<br>• sorting the mod list<br>• instance export/import (`.ckan` metapackage)<br>• backup & restore<br>• extra metadata repos<br>• launching through Proton<br>• Windows and macOS support | ⏳ Planned |
+| **M5** | First public release, in a new design:<br>• ✅ new design for Discover, Instances and the install flow<br>• ✅ remove and update mods, `replaced_by`<br>• ✅ currently-playing card<br>• ✅ launcher Settings page<br>• new instance dialog, also from inside the install flow<br>• import an existing KSP install (with CKAN registry)<br>• code clean-up | 🚧 In progress |
+| **M6** | Home page, startup window and offline mode | ⏳ Planned |
+| **M7** | Extras:<br>• sorting the mod list<br>• instance export/import (`.ckan` metapackage)<br>• backup & restore<br>• extra metadata repos<br>• launching through Proton<br>• Windows and macOS support | ⏳ Planned |
 
 ## Building from source
 
@@ -101,6 +110,7 @@ On Linux:
 | `~/.local/share/kmrLauncher/cache/ckan-meta/` | Local clone of CKAN-meta |
 | `~/.local/share/kmrLauncher/cache/downloads/` | Verified mod downloads, shared by all instances |
 | `~/.config/kmrLauncher/prefixes/<instance folder>/` | Wine prefix for each instance (the path is saved per instance and can be changed in its Settings tab; prefixes made before 2026-11 stay in `~/.config/prefixes/<instance name>/`) |
+| `~/.local/share/kmrLauncher/sync.json` | Time and commit of the last CKAN-meta fetch, and the last fetch error |
 
 An instance folder carries its own mod information, so it can be moved, copied or backed up with its mods. If a folder is moved or deleted, the instance shows as missing on the Instances page, where you can locate the folder or remove the instance from the list. Don't edit `.kmr/` by hand.
 
