@@ -47,7 +47,7 @@
             <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                 <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="14" VerticalAlignment="Center"
                                      Foreground="{DynamicResource StatusFits}" />
-                <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" Text="{Binding OkText}" />
+                <TextBlock Classes="size13" Grid.Column="1" TextWrapping="Wrap" Text="{Binding OkText}" />
             </Grid>
         </Border>
 
@@ -65,14 +65,14 @@
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                             <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="14" VerticalAlignment="Top"
                                                  Margin="0 2 0 0" Foreground="{DynamicResource StatusError}" />
-                            <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" Text="{Binding Message}" />
+                            <TextBlock Classes="size13" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Message}" />
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Border>
 
-        <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}" IsVisible="{Binding HasNothingToDo}"
+        <TextBlock Classes="size13 secondary" IsVisible="{Binding HasNothingToDo}"
                    Text="Nothing to install or remove: everything you picked is installed already." />
 
         <StackPanel IsVisible="{Binding !HasNothingToDo}">

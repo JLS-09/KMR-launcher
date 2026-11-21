@@ -1,0 +1,34 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:KMRLauncherMvvm.Controls">
+    <!-- Text sizes, weights and colours as classes ("mono muted size12"). This file is included last (App.axaml), so
+         they win over the other shared styles, like a value set on the element did. Styles in a view still win
+         over them. -->
+    <Style Selector="TextBlock.size11">
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="TextBlock.size12">
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="TextBlock.size13">
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="TextBlock.size14">
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+    <Style Selector="TextBlock.medium">
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="TextBlock.semibold">
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.errorText">
+        <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+    </Style>
+    <Style Selector="TextBlock.warningText">
+        <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
+    </Style>
+    <Style Selector="TextBlock.fitsText">
+        <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
+    </Style>
+</Styles>

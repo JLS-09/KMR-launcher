@@ -1,0 +1,281 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
+             xmlns:instances="clr-namespace:KMRLauncherMvvm.ViewModels.Instances"
+             xmlns:controls="using:KMRLauncherMvvm.Controls"
+             xmlns:views="using:KMRLauncherMvvm.Views"
+             x:DataType="instances:InstalledModsViewModel"
+             x:Class="KMRLauncherMvvm.Views.Instances.InstalledModsView">
+
+    <UserControl.Styles>
+        <!-- Narrow page: the Mods tab's filters go on their own row (class set in the page's code-behind) -->
+        <!-- The defaults are set here, not on the elements: a value set on an element would win over the styles -->
+        <Style Selector="Border#ModsFilters">
+            <Setter Property="Grid.Column" Value="1" />
+        </Style>
+        <Style Selector=":is(UserControl).narrow Border#ModsFilters">
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Grid.ColumnSpan" Value="5" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <!-- Filter box on the Mods tab: 34 px, a filter icon -->
+        <Style Selector="TextBox.filter">
+            <Setter Property="Height" Value="34" />
+            <Setter Property="MinHeight" Value="34" />
+        </Style>
+        <!-- Installed mod rows -->
+        <Style Selector="ListBox.installed ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ListBox.installed ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource RowHover}" />
+        </Style>
+        <Style Selector="ListBox.installed ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.modRow.checked">
+            <Setter Property="Background" Value="#1A1A1E" />
+        </Style>
+        <Style Selector="TextBlock.installedVersion">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="TextBlock.installedVersion.outdated">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.reason">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.reason.dependency">
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <!-- The update badge next to the version: 22 px, #14243A, border #23415F, mono 11 -->
+        <Style Selector="Button.updateBadge">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Padding" Value="6 0" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StatusUpdateLine}" />
+            <Setter Property="Background" Value="{DynamicResource StatusUpdateSoft}" />
+            <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.updateBadge:pointerover /template/ ContentPresenter, Button.updateBadge:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource StatusUpdateSoft}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StatusUpdate}" />
+            <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
+        </Style>
+        <Style Selector="Button.updateBadge.replaced">
+            <Setter Property="BorderBrush" Value="{DynamicResource StatusWarningLine}" />
+            <Setter Property="Background" Value="{DynamicResource StatusWarningSoft}" />
+            <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
+        </Style>
+        <Style Selector="Button.updateBadge.replaced:pointerover /template/ ContentPresenter, Button.updateBadge.replaced:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource StatusWarningSoft}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StatusWarning}" />
+            <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
+        </Style>
+        <!-- Row menu button: 28 × 28, transparent, muted icon -->
+        <Style Selector="Button.rowMenu">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.rowMenu:pointerover /template/ ContentPresenter, Button.rowMenu:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHover}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Margin="28 10 28 0">
+        <!-- Filter, filters with counts, Update N, Add mods -->
+        <!-- The filter box shrinks from 260 to 180 px before anything else (flex: 0 1 260px in the mockup);
+             at the smallest window sizes down to 140, so Update N and Add mods still fit -->
+        <Grid Grid.Row="0" ColumnSpacing="10" RowSpacing="10" RowDefinitions="Auto, Auto" Margin="0 0 0 10"
+             >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1000*" MinWidth="140" MaxWidth="260" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Classes="search filter" PlaceholderText="Filter installed mods"
+                     Text="{Binding ModFilterText}">
+                <TextBox.InnerLeftContent>
+                    <controls:StrokeIcon Data="{StaticResource IconFilter}" Size="14" Margin="10 0 8 0"
+                                         Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" />
+                </TextBox.InnerLeftContent>
+            </TextBox>
+            <Border x:Name="ModsFilters" Classes="segmented">
+                <StackPanel Orientation="Horizontal" Spacing="2">
+                    <RadioButton Classes="segment" GroupName="modsFilter" IsChecked="True"
+                                 Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.All}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="All" />
+                            <TextBlock Classes="mono muted size11" Text="{Binding AllCount}" />
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Classes="segment" GroupName="modsFilter"
+                                 Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.Picked}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="Picked" />
+                            <TextBlock Classes="mono muted size11" Text="{Binding PickedCount}" />
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Classes="segment" GroupName="modsFilter"
+                                 Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.Dependencies}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="Dependencies" />
+                            <TextBlock Classes="mono muted size11" Text="{Binding DependenciesCount}" />
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Classes="segment" GroupName="modsFilter"
+                                 Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.Updates}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="Updates" />
+                            <TextBlock Classes="mono muted size11" Text="{Binding UpdatesCount}" />
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Classes="segment" GroupName="modsFilter"
+                                 Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:ModsFilter.Issues}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="Issues" />
+                            <TextBlock Classes="mono size11 warningText" Text="{Binding IssuesCount}" />
+                        </StackPanel>
+                    </RadioButton>
+                </StackPanel>
+            </Border>
+            <Button Grid.Column="3" Classes="secondary" Command="{Binding UpdateAllCommand}"
+                    IsVisible="{Binding HasUpdates}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <controls:StrokeIcon Data="{StaticResource IconArrowUp}" Size="16" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding UpdatesCount, StringFormat='Update {0}'}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Grid.Column="4" Classes="accentOutline"
+                    Command="{Binding $parent[views:InstancesPageView].((vm:InstancesPageViewModel)DataContext).AddModsCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="16"
+                                         Foreground="{DynamicResource AccentText}" VerticalAlignment="Center" />
+                    <TextBlock Text="Add mods" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- The table scrolls sideways when it gets narrower than 620 px (like the mockup) -->
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="2" HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled">
+        <Grid RowDefinitions="Auto, *" MinWidth="620">
+        <!-- Column header: 28 | mod | 210 version | 96 KSP | 72 size | 32 menu -->
+        <Border Grid.Row="0" Height="38" Padding="6 0" BorderBrush="{DynamicResource Line}"
+                BorderThickness="0 1">
+            <Grid ColumnDefinitions="28, *, 210, 96, 72, 32" ColumnSpacing="12">
+                <TextBlock Grid.Column="1" Classes="label" LetterSpacing="0.66" Text="MOD" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" Classes="label" LetterSpacing="0.66" Text="VERSION" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="3" Classes="label" LetterSpacing="0.66" Text="KSP" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="4" Classes="label" LetterSpacing="0.66" Text="SIZE"
+                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <ListBox Grid.Row="1" Classes="installed" Background="Transparent" ItemsSource="{Binding Rows}">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="instances:InstalledModRowViewModel">
+                    <Border Classes="modRow" Classes.checked="{Binding IsSelected}" MinHeight="50"
+                            Padding="6" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1">
+                        <Grid ColumnDefinitions="28, *, 210, 96, 72, 32" ColumnSpacing="12">
+                            <CheckBox Grid.Column="0" Classes="box" IsChecked="{Binding IsSelected}"
+                                      VerticalAlignment="Center"
+                                      ToolTip.Tip="{Binding Name, StringFormat='Select {0}'}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Classes="size14 medium" Text="{Binding Name}"
+                                               LineHeight="20.3" TextTrimming="CharacterEllipsis" />
+                                    <Border Classes="badge warning" IsVisible="{Binding IsNotListed}">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <controls:StrokeIcon Data="{StaticResource IconWarning}" />
+                                            <TextBlock Text="{Binding NotListedText}" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                                <TextBlock Classes="reason" Classes.dependency="{Binding IsDependency}"
+                                           FontSize="12" LineHeight="17.4" Text="{Binding Reason}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6"
+                                        VerticalAlignment="Center">
+                                <TextBlock Classes="mono installedVersion" Classes.outdated="{Binding HasUpdateOrReplacement}"
+                                           FontSize="12" Text="{Binding Version.Version}"
+                                           TextTrimming="CharacterEllipsis" MaxWidth="130"
+                                           VerticalAlignment="Center" />
+                                <Button Classes="updateBadge" IsVisible="{Binding HasUpdate}"
+                                        Command="{Binding $parent[UserControl].((instances:InstalledModsViewModel)DataContext).UpdateRowCommand}"
+                                        CommandParameter="{Binding}"
+                                        ToolTip.Tip="{Binding NextVersion.Version, StringFormat='Update to {0}', FallbackValue=''}">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <controls:StrokeIcon Data="{StaticResource IconArrowUp}" Size="11"
+                                                             Foreground="{DynamicResource StatusUpdate}"
+                                                             VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding NextText}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Classes="updateBadge replaced" IsVisible="{Binding HasReplacement}"
+                                        Command="{Binding $parent[UserControl].((instances:InstalledModsViewModel)DataContext).UpdateRowCommand}"
+                                        CommandParameter="{Binding}" ToolTip.Tip="{Binding ReplacementTip}">
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <controls:StrokeIcon Data="{StaticResource IconArrowRight}" Size="11"
+                                                             Foreground="{DynamicResource StatusWarning}"
+                                                             VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Replacement.Identifier, FallbackValue=''}"
+                                                   MaxWidth="110" TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                            <controls:KspStrip Grid.Column="3" Version="{Binding Version}"
+                                               VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="4" Classes="mono secondary size12"
+                                       Text="{Binding SizeText}" HorizontalAlignment="Right"
+                                       VerticalAlignment="Center" />
+                            <Button Grid.Column="5" Classes="rowMenu" VerticalAlignment="Center"
+                                    ToolTip.Tip="{Binding Name, StringFormat='More actions for {0}'}">
+                                <controls:StrokeIcon Data="{StaticResource IconMore}" Size="16" IsFilled="True" />
+                                <Button.Flyout>
+                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                        <MenuItem Header="Update"
+                                                  IsVisible="{Binding HasUpdate}"
+                                                  Command="{Binding $parent[UserControl].((instances:InstalledModsViewModel)DataContext).UpdateRowCommand}"
+                                                  CommandParameter="{Binding}" />
+                                        <MenuItem Header="{Binding ReplaceHeader}"
+                                                  IsVisible="{Binding HasReplacement}"
+                                                  Command="{Binding $parent[UserControl].((instances:InstalledModsViewModel)DataContext).UpdateRowCommand}"
+                                                  CommandParameter="{Binding}" />
+                                        <MenuItem Header="Remove"
+                                                  Command="{Binding $parent[UserControl].((instances:InstalledModsViewModel)DataContext).RemoveRowCommand}"
+                                                  CommandParameter="{Binding}" />
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        </Grid>
+        </ScrollViewer>
+
+        <TextBlock Classes="size12 muted" Grid.Row="3" Margin="6 10"
+                   Text="{Binding ShownText}" />
+    </Grid>
+</UserControl>

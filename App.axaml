@@ -76,5 +76,11 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="Styles/Controls.axaml"></StyleInclude>
+        <StyleInclude Source="Styles/Inputs.axaml"></StyleInclude>
+        <StyleInclude Source="Styles/Chips.axaml"></StyleInclude>
+        <StyleInclude Source="Styles/Toggles.axaml"></StyleInclude>
+        <StyleInclude Source="Styles/Status.axaml"></StyleInclude>
+        <StyleInclude Source="Styles/Pages.axaml"></StyleInclude>
+        <StyleInclude Source="Styles/TextClasses.axaml"></StyleInclude>
     </Application.Styles>
 </Application>

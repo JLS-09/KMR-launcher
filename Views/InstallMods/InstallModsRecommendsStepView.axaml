@@ -38,7 +38,7 @@
                         <StackPanel Grid.Column="1">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Classes="rowName" Text="{Binding Identifier}" />
-                                <TextBlock FontSize="11" Foreground="{DynamicResource TextMuted}"
+                                <TextBlock Classes="size11 muted"
                                            VerticalAlignment="Center" Text="{Binding ExtraDependenciesText}"
                                            IsVisible="{Binding ExtraDependenciesText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                             </StackPanel>
@@ -59,7 +59,7 @@
     </UserControl.DataTemplates>
 
     <StackPanel Spacing="18">
-        <TextBlock FontSize="13" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}"
+        <TextBlock Classes="size13 secondary" LineHeight="20" TextWrapping="Wrap"
                    Text="Mods that go well with what you picked. Recommendations are ticked, suggestions are not. Anything you tick counts as picked by you." />
 
         <StackPanel IsVisible="{Binding ShowRecommendations}">

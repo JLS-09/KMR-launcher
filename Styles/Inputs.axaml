@@ -1,0 +1,194 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:KMRLauncherMvvm.Controls">
+    <!-- Search box: 36 px, padding 0 10, gap 8, border #2E2E32, background #151517, 13 px text -->
+    <Style Selector="TextBox.search">
+        <Setter Property="Height" Value="36" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="Background" Value="{DynamicResource Surface}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style
+        Selector="TextBox.search:pointerover /template/ Border#PART_BorderElement, TextBox.search:focus /template/ Border#PART_BorderElement, TextBox.search:disabled /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource Surface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox.search /template/ TextBlock#PART_Placeholder">
+        <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+    </Style>
+    <Style
+        Selector="TextBox.search:pointerover /template/ TextBlock#PART_Placeholder, TextBox.search:focus /template/ TextBlock#PART_Placeholder">
+        <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+    </Style>
+
+    <!-- Text field (settings): 36 px, padding 0 10, border #2E2E32, background #1B1B1E, 13 px text; .mono = 12 px mono -->
+    <Style Selector="TextBox.field">
+        <Setter Property="Height" Value="36" />
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="10 0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBox.field.mono">
+        <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style
+        Selector="TextBox.field:pointerover /template/ Border#PART_BorderElement, TextBox.field:disabled /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="TextBox.field:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentLine}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style
+        Selector="TextBox.field /template/ TextBlock#PART_Placeholder, TextBox.field:pointerover /template/ TextBlock#PART_Placeholder, TextBox.field:focus /template/ TextBlock#PART_Placeholder">
+        <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+    </Style>
+
+    <!-- Radio with an accent dot (install dialog): unchecked a white disc, checked an accent ring, a white gap and
+         an accent dot. The whole control (dot + content) sits in Border#Card, so .card makes a clickable card. -->
+    <Style Selector="RadioButton.dot">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Name="Card" Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <Panel Width="16" Height="16" VerticalAlignment="Center">
+                            <Ellipse Name="Outer" Width="16" Height="16" Fill="{DynamicResource TextPrimary}" />
+                            <Ellipse Name="Gap" Width="11" Height="11" Fill="{DynamicResource TextPrimary}"
+                                     IsVisible="False" />
+                            <Ellipse Name="Dot" Width="7" Height="7" Fill="{DynamicResource Accent}" IsVisible="False" />
+                        </Panel>
+                        <ContentPresenter Grid.Column="1" Name="PART_ContentPresenter" Margin="12 0 0 0"
+                                          Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          Foreground="{TemplateBinding Foreground}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="RadioButton.dot:checked /template/ Ellipse#Outer">
+        <Setter Property="Fill" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="RadioButton.dot:checked /template/ Ellipse#Gap, RadioButton.dot:checked /template/ Ellipse#Dot">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="RadioButton.dot.card">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="14 12" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="Background" Value="{DynamicResource Surface}" />
+    </Style>
+    <Style Selector="RadioButton.dot.card:checked">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentLine}" />
+        <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+    </Style>
+    <Style Selector="RadioButton.dot.card:pointerover:unchecked">
+        <Setter Property="Background" Value="{DynamicResource RowHover}" />
+    </Style>
+
+    <!-- White checkbox like the mockup's (install dialog): white square, accent with a white check when ticked -->
+    <Style Selector="CheckBox.box.native /template/ Border#Box">
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="#767676" />
+        <Setter Property="Background" Value="{DynamicResource TextPrimary}" />
+    </Style>
+    <Style Selector="CheckBox.box.native:checked /template/ Border#Box">
+        <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+        <Setter Property="Background" Value="{DynamicResource Accent}" />
+    </Style>
+
+    <!-- Version picker (install dialog): 28 px, padding 0 8, border #2E2E32, background #1B1B1E, mono 12, chevron -->
+    <Style Selector="ComboBox.version">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="MinHeight" Value="28" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="Padding" Value="8 0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="MaxDropDownHeight" Value="300" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border Name="Background" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <ContentControl Content="{TemplateBinding SelectionBoxItem}"
+                                            ContentTemplate="{TemplateBinding ItemTemplate}"
+                                            VerticalAlignment="Center" />
+                            <controls:StrokeIcon Data="{DynamicResource IconChevronDown}" Size="12"
+                                                 Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Popup Name="PART_Popup" WindowManagerAddShadowHint="False"
+                           IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                           MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                           MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                           PlacementTarget="Background" IsLightDismissEnabled="True" InheritsTransform="True">
+                        <Border Background="{DynamicResource SurfaceRaised}" BorderBrush="{DynamicResource LineStrong}"
+                                BorderThickness="1" CornerRadius="8" Padding="4">
+                            <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                                <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ComboBox.version:pointerover /template/ Border#Background">
+        <Setter Property="Background" Value="{DynamicResource ControlHover}" />
+    </Style>
+
+    <!-- Keyboard shortcut hint ("Ctrl K") -->
+    <Style Selector="Border.kbd">
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="6 1" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.kbd > TextBlock">
+        <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+    </Style>
+</Styles>

@@ -138,7 +138,7 @@
                                             <Grid ColumnDefinitions="*, Auto">
                                                 <TextBlock Grid.Column="0" Text="{Binding Name}"
                                                            TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="1" Classes="mono muted" FontSize="11"
+                                                <TextBlock Grid.Column="1" Classes="mono muted size11"
                                                            Text="{Binding CountText}" VerticalAlignment="Center" />
                                             </Grid>
                                         </CheckBox>
@@ -200,7 +200,7 @@
                         <Button Classes="ghost small" Height="24" Padding="8 0" CornerRadius="6" FontSize="12"
                                 IsVisible="{Binding HasActiveFilters}" Content="Clear filters"
                                 Command="{Binding ClearFiltersCommand}" VerticalAlignment="Center" />
-                        <TextBlock FontSize="13" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"
+                        <TextBlock Classes="size13 muted" VerticalAlignment="Center"
                                    Margin="4 0 0 0">
                             <Run FontFamily="{DynamicResource Mono}" Foreground="{DynamicResource TextSecondary}"
                                  Text="{Binding ShownCount}" />
@@ -208,7 +208,7 @@
                         </TextBlock>
                     </WrapPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                        <TextBlock Text="Sort" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                        <TextBlock Classes="size12 muted" Text="Sort"
                                    VerticalAlignment="Center" />
                         <!-- Placeholder: sorting is a Phase 8 feature; the list is sorted by name for now -->
                         <Button Classes="secondary small" ToolTip.Tip="Not built yet: sorting comes in Phase 8">
@@ -246,16 +246,14 @@
                                               VerticalAlignment="Center"
                                               ToolTip.Tip="{Binding Mod.Name, StringFormat='Select {0}'}" />
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Mod.Name}" FontSize="14" FontWeight="Medium"
+                                        <TextBlock Classes="size14 medium" Text="{Binding Mod.Name}"
                                                    LineHeight="20.3" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{Binding Authors}" FontSize="12" LineHeight="17.4"
-                                                   Foreground="{DynamicResource TextMuted}"
+                                        <TextBlock Classes="size12 muted" Text="{Binding Authors}" LineHeight="17.4"
                                                    TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
                                     <controls:KspStrip Grid.Column="2" Version="{Binding SelectedVersion}"
                                                        VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="3" Classes="mono" Text="{Binding Downloads}" FontSize="12"
-                                               Foreground="{DynamicResource TextSecondary}"
+                                    <TextBlock Grid.Column="3" Classes="mono size12 secondary" Text="{Binding Downloads}"
                                                HorizontalAlignment="Right" VerticalAlignment="Center" />
                                     <controls:StatusLabel Grid.Column="4" Kind="{Binding StatusKind}"
                                                           Text="{Binding StatusText}" IsVisible="{Binding HasStatus}"
@@ -266,7 +264,7 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <TextBlock Text="No mods match the filters" Foreground="{DynamicResource TextMuted}" FontSize="13"
+                <TextBlock Classes="size13 muted" Text="No mods match the filters"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            IsVisible="{Binding HasNoRows}" />
 
@@ -279,7 +277,7 @@
                                      Value="{Binding LoadProgress.ModsReceived}"
                                      Maximum="{Binding LoadProgress.TotalMods}"
                                      IsIndeterminate="{Binding LoadProgress.IsCache}" />
-                        <TextBlock Classes="mono muted" FontSize="12" Text="{Binding LoadProgress.CurrentModName}"
+                        <TextBlock Classes="mono muted size12" Text="{Binding LoadProgress.CurrentModName}"
                                    TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
@@ -292,11 +290,11 @@
                     <Grid ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="10">
                         <Border Grid.Column="0" MinWidth="26" Height="26" Padding="6 0" CornerRadius="13"
                                 Background="{DynamicResource Accent}">
-                            <TextBlock Classes="mono" FontSize="12" FontWeight="SemiBold"
+                            <TextBlock Classes="mono size12 semibold"
                                        Foreground="{DynamicResource OnAccent}" HorizontalAlignment="Center"
                                        VerticalAlignment="Center" Text="{Binding SelectedMods.Count}" />
                         </Border>
-                        <TextBlock Grid.Column="1" Text="mods selected" FontSize="14" FontWeight="SemiBold"
+                        <TextBlock Classes="size14 semibold" Grid.Column="1" Text="mods selected"
                                    VerticalAlignment="Center" />
                         <Button Grid.Column="3" Classes="ghost small" Content="Clear"
                                 Command="{Binding ClearSelectionCommand}" />
@@ -311,8 +309,8 @@
                             <DataTemplate x:DataType="discover:ModListItemViewModel">
                                 <Border Classes="selectionChip">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <TextBlock Text="{Binding Mod.Name}" FontSize="13" VerticalAlignment="Center" />
-                                        <TextBlock Classes="mono muted" FontSize="12" VerticalAlignment="Center"
+                                        <TextBlock Classes="size13" Text="{Binding Mod.Name}" VerticalAlignment="Center" />
+                                        <TextBlock Classes="mono muted size12" VerticalAlignment="Center"
                                                    Text="{Binding SelectedVersion.Version}" />
                                         <Button Classes="chipRemove"
                                                 Command="{Binding $parent[ItemsControl].((vm:DiscoverPageViewModel)DataContext).DeselectCommand}"
@@ -327,8 +325,7 @@
                     </ItemsControl>
                     <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 0">
                         <Grid ColumnDefinitions="Auto, Auto, *, Auto" ColumnSpacing="10">
-                            <TextBlock Grid.Column="0" Text="Install to" FontSize="13" VerticalAlignment="Center"
-                                       Foreground="{DynamicResource TextSecondary}" />
+                            <TextBlock Classes="size13 secondary" Grid.Column="0" Text="Install to" VerticalAlignment="Center" />
                             <controls:InstancePicker Grid.Column="1" IsCompact="True"
                                                      Instances="{Binding Instances}"
                                                      SelectedInstance="{Binding InstallTarget}" />
@@ -356,8 +353,9 @@
                     <Border Classes="block">
                         <StackPanel Spacing="8">
                             <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
-                                <TextBlock Grid.Column="0" Text="{Binding Mod.Name}" FontSize="22" LineHeight="26.4"
-                                           FontFamily="{DynamicResource SpaceGrotesk}" FontWeight="SemiBold"
+                                <TextBlock Classes="semibold" Grid.Column="0" Text="{Binding Mod.Name}"
+                                           FontSize="22" LineHeight="26.4"
+                                           FontFamily="{DynamicResource SpaceGrotesk}"
                                            TextWrapping="Wrap" />
                                 <Button Grid.Column="1" Classes="ghost icon" Width="32" Height="32"
                                         VerticalAlignment="Top" ToolTip.Tip="Close details"
@@ -365,8 +363,7 @@
                                     <controls:StrokeIcon Data="{StaticResource IconClose}" Size="16" />
                                 </Button>
                             </Grid>
-                            <TextBlock Text="{Binding Authors}" FontSize="13" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource TextSecondary}" />
+                            <TextBlock Classes="size13 secondary" Text="{Binding Authors}" TextWrapping="Wrap" />
                             <WrapPanel ItemSpacing="6" LineSpacing="6">
                                 <Border Classes="chip plain">
                                     <TextBlock Classes="mono" Text="{Binding Mod.Id}" />
@@ -393,8 +390,8 @@
                     </Border>
 
                     <Border Classes="block">
-                        <TextBlock Text="{Binding Description}" FontSize="13" LineHeight="20.15" TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextSecondary}" />
+                        <TextBlock Classes="size13 secondary" Text="{Binding Description}" LineHeight="20.15"
+                                   TextWrapping="Wrap" />
                     </Border>
 
                     <!-- Versions: every version, tick one to select the mod with it -->
@@ -402,7 +399,7 @@
                         <StackPanel Spacing="8">
                             <Grid ColumnDefinitions="*, Auto">
                                 <TextBlock Grid.Column="0" Classes="label" Text="VERSIONS" VerticalAlignment="Bottom" />
-                                <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource TextMuted}">
+                                <TextBlock Classes="size12 muted" Grid.Column="1">
                                     <Run FontFamily="{DynamicResource Mono}" Text="{Binding VersionCount}" />
                                     <Run Text=" · tick one to select" />
                                 </TextBlock>
@@ -436,7 +433,7 @@
                                                                 Orientation="Horizontal" Spacing="12">
                                                         <TextBlock Classes="mono version ksp" Classes.fits="{Binding Fits}"
                                                                    FontSize="12" Text="{Binding KspText}" />
-                                                        <TextBlock Classes="mono muted" FontSize="12"
+                                                        <TextBlock Classes="mono muted size12"
                                                                    Text="{Binding DateText}" />
                                                     </StackPanel>
                                                 </Grid>
@@ -449,13 +446,13 @@
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <Border Width="8" Height="8" CornerRadius="2" Background="{DynamicResource StatusFits}"
                                             VerticalAlignment="Center" />
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                    <TextBlock Classes="size12 muted"
                                                Text="{Binding FitsLegend}" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <Border Width="8" Height="8" CornerRadius="2" Background="{DynamicResource ToggleOff}"
                                             VerticalAlignment="Center" />
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}" Text="Doesn't fit" />
+                                    <TextBlock Classes="size12 muted" Text="Doesn't fit" />
                                 </StackPanel>
                             </WrapPanel>
                         </StackPanel>
@@ -488,7 +485,7 @@
                     <Border Classes="block" Classes.last="{Binding !HasLinks}">
                         <StackPanel Spacing="2">
                             <TextBlock Classes="label" Text="DEPENDS ON" Margin="0 0 0 4" />
-                            <TextBlock Text="No dependencies" FontSize="13" Foreground="{DynamicResource TextMuted}"
+                            <TextBlock Classes="size13 muted" Text="No dependencies"
                                        IsVisible="{Binding !HasDepends}" />
                             <ItemsControl ItemsSource="{Binding Depends}">
                                 <ItemsControl.ItemTemplate>
@@ -502,23 +499,20 @@
                                                                  Size="14" VerticalAlignment="Center"
                                                                  Foreground="{DynamicResource TextMuted}"
                                                                  IsVisible="{Binding !IsInstalled}" />
-                                            <TextBlock Grid.Column="1" Classes="mono" FontSize="12" Text="{Binding Name}"
+                                            <TextBlock Grid.Column="1" Classes="mono size12" Text="{Binding Name}"
                                                        TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="2" FontSize="12" Text="{Binding StateText}"
-                                                       Foreground="{DynamicResource TextMuted}"
+                                            <TextBlock Classes="size12 muted" Grid.Column="2" Text="{Binding StateText}"
                                                        VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                             <StackPanel Orientation="Horizontal" Spacing="16" Margin="0 8 0 0">
-                                <TextBlock FontSize="12" Text="{Binding ConflictsText}"
-                                           Foreground="{DynamicResource TextMuted}"
+                                <TextBlock Classes="size12 muted" Text="{Binding ConflictsText}"
                                            IsVisible="{Binding !HasConflicts}" />
-                                <TextBlock FontSize="12" Text="{Binding ConflictsText}"
-                                           Foreground="{DynamicResource StatusWarning}"
+                                <TextBlock Classes="size12 warningText" Text="{Binding ConflictsText}"
                                            IsVisible="{Binding HasConflicts}" />
-                                <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}">
+                                <TextBlock Classes="size12 muted">
                                     <Run Text="Needed by " />
                                     <Run FontFamily="{DynamicResource Mono}" Foreground="{DynamicResource TextSecondary}"
                                          Text="{Binding NeededBy}" />

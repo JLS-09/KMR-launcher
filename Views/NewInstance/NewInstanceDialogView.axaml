@@ -52,19 +52,6 @@
             <Setter Property="CornerRadius" Value="5" />
             <Setter Property="FontSize" Value="12" />
         </Style>
-        <!-- Side panel rows: "KSP  1.12.5" -->
-        <Style Selector="Grid.panelRow TextBlock">
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
-        </Style>
-        <Style Selector="Grid.panelRow TextBlock.value">
-            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-        </Style>
         <!-- Creating checklist: rows split by lines; a 24 px disc per state (22 px ring while pending) -->
         <Style Selector="Border.stepRow">
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
@@ -114,7 +101,7 @@
         <Grid RowDefinitions="Auto, *, Auto">
             <!-- Header: title, source tabs, close -->
             <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="16" Margin="24 20">
-                <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="20" FontWeight="SemiBold"
+                <TextBlock Classes="semibold" FontFamily="{DynamicResource SpaceGrotesk}" FontSize="20"
                            VerticalAlignment="Center" Text="New instance" />
                 <Border Grid.Column="1" Classes="segmented tabs" IsVisible="{Binding IsForm}">
                     <StackPanel Orientation="Horizontal" Spacing="2">
@@ -154,8 +141,8 @@
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="13" VerticalAlignment="Center"
                                                          Foreground="{DynamicResource TextMuted}" />
-                                    <TextBlock Classes="mono" FontSize="12" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource TextMuted}" TextTrimming="CharacterEllipsis"
+                                    <TextBlock Classes="mono size12 muted" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
                                                Text="{Binding FolderText}" />
                                     <Button Classes="ghost tiny" Content="Change" Click="ChangeFolder_OnClick"
                                             ToolTip.Tip="Pick the folder the instance goes in" />
@@ -185,15 +172,14 @@
                                             <RadioButton Classes="dot card zip" GroupName="newInstanceZip"
                                                          IsChecked="{Binding IsSelected}">
                                                 <Grid ColumnDefinitions="64, *, Auto" ColumnSpacing="12">
-                                                    <TextBlock Classes="mono" FontSize="14" FontWeight="Medium"
+                                                    <TextBlock Classes="mono size14 medium"
                                                                VerticalAlignment="Center" Text="{Binding Version}" />
-                                                    <TextBlock Grid.Column="1" Classes="mono" FontSize="12"
-                                                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
-                                                               Foreground="{DynamicResource TextMuted}" Text="{Binding PathText}" />
+                                                    <TextBlock Grid.Column="1" Classes="mono size12 muted"
+                                                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding PathText}" />
                                                     <Panel Grid.Column="2" VerticalAlignment="Center">
-                                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                                        <TextBlock Classes="size12 muted"
                                                                    Text="{Binding SizeText}" IsVisible="{Binding !IsMissing}" />
-                                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusWarning}"
+                                                        <TextBlock Classes="size12 warningText"
                                                                    Text="{Binding SizeText}" IsVisible="{Binding IsMissing}" />
                                                     </Panel>
                                                 </Grid>
@@ -296,7 +282,7 @@
                                         <ToggleButton Classes="switch" HorizontalAlignment="Left" VerticalAlignment="Center"
                                                       IsChecked="{Binding IsPrimary}"
                                                       AutomationProperties.Name="Make primary" />
-                                        <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}"
+                                        <TextBlock Classes="size13 secondary"
                                                    VerticalAlignment="Center" Text="Show in the sidebar for quick launch" />
                                     </StackPanel>
                                 </StackPanel>
@@ -413,8 +399,8 @@
                                 <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsCopy}">
                                     <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="13" VerticalAlignment="Center"
                                                          Foreground="{DynamicResource TextMuted}" />
-                                    <TextBlock Classes="mono" FontSize="12" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource TextMuted}" TextTrimming="CharacterEllipsis"
+                                    <TextBlock Classes="mono size12 muted" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"
                                                Text="{Binding ImportFolderText}" />
                                     <Button Classes="ghost tiny" Content="Change" Click="ChangeFolder_OnClick"
                                             ToolTip.Tip="Pick the folder the copy goes in" />
@@ -427,9 +413,9 @@
                     <ScrollViewer IsVisible="{Binding IsCreating}" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Margin="24 22" Spacing="22">
                             <StackPanel Spacing="4">
-                                <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="22" FontWeight="SemiBold"
+                                <TextBlock Classes="semibold" FontFamily="{DynamicResource SpaceGrotesk}" FontSize="22"
                                            TextTrimming="CharacterEllipsis" Text="{Binding CreatingTitle}" />
-                                <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}"
+                                <TextBlock Classes="size13 secondary"
                                            TextTrimming="CharacterEllipsis" Text="{Binding CreatingSubtitle}" />
                             </StackPanel>
                             <ItemsControl ItemsSource="{Binding Steps}">
@@ -457,9 +443,8 @@
                                                         <TextBlock Classes="stepTitle" Classes.done="{Binding IsDone}"
                                                                    Classes.current="{Binding IsCurrent}"
                                                                    Classes.failed="{Binding IsFailed}" Text="{Binding Title}" />
-                                                        <TextBlock Grid.Column="1" Classes="mono" FontSize="12"
-                                                                   VerticalAlignment="Center"
-                                                                   Foreground="{DynamicResource TextMuted}" Text="{Binding Detail}" />
+                                                        <TextBlock Grid.Column="1" Classes="mono size12 muted"
+                                                                   VerticalAlignment="Center" Text="{Binding Detail}" />
                                                     </Grid>
                                                     <ProgressBar Height="8" MinHeight="8" CornerRadius="4" Margin="0 8 0 0"
                                                                  Minimum="0" Maximum="1" Background="{DynamicResource Off}"
@@ -485,8 +470,7 @@
                             <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8" IsVisible="{Binding IsRunning}">
                                 <controls:StrokeIcon Data="{StaticResource IconTrash}" Size="14" VerticalAlignment="Top"
                                                      Margin="0 2 0 0" Foreground="{DynamicResource TextMuted}" />
-                                <TextBlock Grid.Column="1" FontSize="12" LineHeight="18" TextWrapping="Wrap"
-                                           Foreground="{DynamicResource TextMuted}"
+                                <TextBlock Classes="size12 muted" Grid.Column="1" LineHeight="18" TextWrapping="Wrap"
                                            Text="Cancel deletes the half-made folder. Nothing else is touched." />
                             </Grid>
                         </StackPanel>
@@ -514,8 +498,8 @@
                             </ItemsControl>
                             <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 0"
                                     IsVisible="{Binding SummaryNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                                <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap"
-                                           Foreground="{DynamicResource TextMuted}" Text="{Binding SummaryNote}" />
+                                <TextBlock Classes="size12 muted" LineHeight="18" TextWrapping="Wrap"
+                                           Text="{Binding SummaryNote}" />
                             </Border>
                         </StackPanel>
                     </Border>
@@ -545,7 +529,7 @@
                                 <TextBlock Text="Cancel" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <TextBlock Grid.Column="2" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                        <TextBlock Classes="size12 muted" Grid.Column="2"
                                    VerticalAlignment="Center" Text="It opens in Instances when it's ready" />
                     </Grid>
 

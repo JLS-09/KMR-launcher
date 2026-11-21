@@ -1,0 +1,106 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:KMRLauncherMvvm.Controls">
+    <!-- Chips (24 px, radius 6, 12 px / 500): .chip = filter chip with a border; .plain = tag/info chip;
+         .accent = "Primary" chip -->
+    <Style Selector="Border.chip">
+        <Setter Property="Height" Value="24" />
+        <Setter Property="Padding" Value="8 0" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Background" Value="{DynamicResource Control}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.chip TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+    </Style>
+    <Style Selector="Border.chip.plain, Border.chip.accent">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Border.chip.plain TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+    </Style>
+    <Style Selector="Border.chip.accent">
+        <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+    </Style>
+    <Style Selector="Border.chip.accent TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
+    </Style>
+    <Style Selector="Border.chip.accent controls|StrokeIcon">
+        <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
+    </Style>
+
+    <!-- Action chips in change lists: 58 × 22, radius 5, 11 px / 600 -->
+    <Style Selector="Border.action">
+        <Setter Property="Width" Value="58" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="CornerRadius" Value="5" />
+    </Style>
+    <Style Selector="Border.action TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.action.new">
+        <Setter Property="Background" Value="{DynamicResource StatusFitsSoft}" />
+    </Style>
+    <Style Selector="Border.action.new TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
+    </Style>
+    <Style Selector="Border.action.update">
+        <Setter Property="Background" Value="{DynamicResource StatusUpdateSoft}" />
+    </Style>
+    <Style Selector="Border.action.update TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
+    </Style>
+    <!-- Not in the mockups yet; same idea in the error colour -->
+    <Style Selector="Border.action.remove">
+        <Setter Property="Background" Value="{DynamicResource StatusErrorSoft}" />
+    </Style>
+    <Style Selector="Border.action.remove TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+    </Style>
+
+    <!-- Small badges: padding 1 6, radius 5, 11 px. .fits = "newest fit", .neutral = "installed",
+         .warning = "Not listed for 1.12.5" / "strict" -->
+    <Style Selector="Border.badge">
+        <Setter Property="Padding" Value="6 1" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.badge TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="LineHeight" Value="16" />
+    </Style>
+    <Style Selector="Border.badge controls|StrokeIcon">
+        <Setter Property="Size" Value="12" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.badge.fits">
+        <Setter Property="Background" Value="{DynamicResource StatusFitsSoft}" />
+    </Style>
+    <Style Selector="Border.badge.fits TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Border.badge.neutral">
+        <Setter Property="Background" Value="{DynamicResource BadgeNeutral}" />
+    </Style>
+    <Style Selector="Border.badge.neutral TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+    </Style>
+    <Style Selector="Border.badge.warning">
+        <Setter Property="Background" Value="{DynamicResource StatusWarningSoft}" />
+    </Style>
+    <Style Selector="Border.badge.warning TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
+    </Style>
+    <Style Selector="Border.badge.warning controls|StrokeIcon">
+        <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
+    </Style>
+</Styles>

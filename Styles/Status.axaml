@@ -1,0 +1,142 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:KMRLauncherMvvm.Controls">
+    <!-- Status label: icon 14 + 12 px text in the status colour, gap 5 -->
+    <Style Selector="controls|StatusLabel">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <controls:StrokeIcon Name="PART_Icon" Size="14" VerticalAlignment="Center"
+                                         Data="{DynamicResource IconCheck}"
+                                         Foreground="{TemplateBinding Foreground}" />
+                    <TextBlock Text="{TemplateBinding Text}" FontSize="{TemplateBinding FontSize}"
+                               VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" />
+                </StackPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="controls|StatusLabel:installed">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+    </Style>
+    <Style Selector="controls|StatusLabel:installed /template/ controls|StrokeIcon#PART_Icon">
+        <Setter Property="Data" Value="{DynamicResource IconPackage}" />
+    </Style>
+    <Style Selector="controls|StatusLabel:update">
+        <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
+    </Style>
+    <Style Selector="controls|StatusLabel:update /template/ controls|StrokeIcon#PART_Icon">
+        <Setter Property="Data" Value="{DynamicResource IconArrowUp}" />
+    </Style>
+    <Style Selector="controls|StatusLabel:warning">
+        <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
+    </Style>
+    <Style Selector="controls|StatusLabel:warning /template/ controls|StrokeIcon#PART_Icon">
+        <Setter Property="Data" Value="{DynamicResource IconWarning}" />
+    </Style>
+    <Style Selector="controls|StatusLabel:error">
+        <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+    </Style>
+    <Style Selector="controls|StatusLabel:error /template/ controls|StrokeIcon#PART_Icon">
+        <Setter Property="Data" Value="{DynamicResource IconClose}" />
+    </Style>
+
+    <!-- KSP strip colours -->
+    <Style Selector="controls|KspStrip">
+        <Setter Property="OnBrush" Value="{DynamicResource TextSecondary}" />
+        <Setter Property="OffBrush" Value="{DynamicResource Off}" />
+        <Setter Property="LabelBrush" Value="{DynamicResource TextMuted}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+    </Style>
+
+    <!-- Split Launch button (Home, Instances): 44 px, radius 9; Launch (padding 0 22, 15 px / 600, filled play 18,
+         gap 10) and a 40 px menu button with a dark line between them. Set MinWidth (150 + 40 on Home).
+         (Values set inside a template lose to styles, so the two parts get their own classes.) -->
+    <Style Selector="Button.launchPart">
+        <Setter Property="Height" Value="44" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource Accent}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+        <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style
+        Selector="Button.launchPart:pointerover /template/ ContentPresenter, Button.launchPart:pressed /template/ ContentPresenter, Button.launchPart:disabled /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource Accent}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+        <Setter Property="Foreground" Value="{DynamicResource OnAccent}" />
+    </Style>
+    <Style Selector="Button.launchPart.main">
+        <Setter Property="Padding" Value="22 0" />
+        <Setter Property="CornerRadius" Value="9 0 0 9" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button.launchPart.menu">
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="0 9 9 0" />
+        <Setter Property="BorderThickness" Value="0 1 1 1" />
+    </Style>
+    <Style Selector="controls|LaunchButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid ColumnDefinitions="*, Auto">
+                    <Button Grid.Column="0" Classes="launchPart main"
+                            Command="{TemplateBinding Command}"
+                            CommandParameter="{TemplateBinding CommandParameter}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <controls:StrokeIcon Data="{DynamicResource IconPlay}" Size="18" IsFilled="True"
+                                                 Foreground="{DynamicResource OnAccent}" VerticalAlignment="Center" />
+                            <TextBlock Text="{TemplateBinding Text}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1" Classes="launchPart menu"
+                            ToolTip.Tip="Launch options" Flyout="{TemplateBinding Menu}">
+                        <controls:StrokeIcon Data="{DynamicResource IconChevronDown}" Size="16"
+                                             Foreground="{DynamicResource OnAccent}" />
+                    </Button>
+                    <Rectangle Grid.Column="1" Width="1" HorizontalAlignment="Left" Fill="{DynamicResource SplitLine}" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!-- Placeholder for UI whose feature isn't built yet (not in the mockups) -->
+    <Style Selector="Border.placeholder">
+        <Setter Property="Background" Value="{DynamicResource Surface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="16 14" />
+    </Style>
+    <Style Selector="Border.placeholder TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="Border.placeholder TextBlock.label">
+        <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="Border.placeholder TextBlock.h2">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <!-- Placeholder: looks like the real control, can't be used, and the tooltip says which phase builds it -->
+    <Style Selector="Border.soon">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.soon > :is(Control)">
+        <Setter Property="IsHitTestVisible" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+    </Style>
+</Styles>
