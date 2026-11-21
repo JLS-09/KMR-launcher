@@ -111,3 +111,14 @@ public static class InstanceTexts
         return separator < 0 ? $"Compatible: {instance.Version} only" : $"Compatible: {summary[(separator + 3)..]}";
     }
 }
+public sealed class InstanceSummary(Instance instance)
+{
+    public string Name { get; } = instance.Name;
+    public bool IsPrimary { get; } = instance.IsPrimary;
+    public string KspText { get; } = $"KSP {instance.Version}";
+    public string CompatibleText { get; } = InstanceTexts.Compatible(instance);
+    public string PathText { get; } = InstanceTexts.ShortPath(instance.RootPath);
+    public string PlayTime { get; } = InstanceTexts.PlayTime(instance);
+    public string LastPlayed { get; } = InstanceTexts.LastPlayed(instance);
+    public string LastPlayedDetail { get; } = InstanceTexts.LastPlayedDetail(instance);
+}

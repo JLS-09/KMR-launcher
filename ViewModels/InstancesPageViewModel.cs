@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -40,10 +39,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     private readonly ModListService _modListService;
     private readonly GameSessionService _session;
     private readonly NavigationService _navigation;
-    private readonly InstallFlow _installFlow;
     private readonly InstanceService _instanceService;
-
-    private List<InstalledModRowViewModel> _allRows = [];
 
     [ObservableProperty] private IReadOnlyList<InstanceListItemViewModel> _instances = [];
     [ObservableProperty] private InstanceListItemViewModel? _selectedItem;
@@ -56,28 +52,17 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowInstanceDetails), nameof(ShowMissing))]
     private bool _selectedIsMissing;
 
-    [ObservableProperty] private string _missingReason = "";
-    [ObservableProperty] private string _missingPath = "";
-
     public bool ShowInstanceDetails => HasInstances && !SelectedIsMissing;
     public bool ShowMissing => HasInstances && SelectedIsMissing;
 
     [ObservableProperty] private Instance? _selected;
-    [ObservableProperty] private string _kspText = "";
-    [ObservableProperty] private string _compatibleText = "";
-    [ObservableProperty] private string _pathText = "";
-    [ObservableProperty] private string _modsCount = "0";
-    [ObservableProperty] private string _modsDetail = "";
-    [ObservableProperty] private string _playTime = "";
-    [ObservableProperty] private string _lastPlayed = "";
-    [ObservableProperty] private string _lastPlayedDetail = "";
+    [ObservableProperty] private InstanceSummary? _summary;
+    public InstalledModsViewModel Mods { get; }
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(DeleteText))]
     private string _installSize = "–";
 
     [ObservableProperty] private string _gameDataSize = "";
-    [ObservableProperty] private string _selectedName = "";
-    [ObservableProperty] private bool _selectedIsPrimary;
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowSelectionBar), nameof(ShowSettingsBar))]
     private InstanceTab _tab = InstanceTab.Mods;
@@ -90,24 +75,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
     [ObservableProperty] private string? _actionError;
 
-    [ObservableProperty] private ObservableCollection<InstalledModRowViewModel> _rows = [];
-    [ObservableProperty] private string _modFilterText = "";
-    [ObservableProperty] private ModsFilter _filter = ModsFilter.All;
-    [ObservableProperty] private string _allCount = "0";
-    [ObservableProperty] private string _pickedCount = "0";
-    [ObservableProperty] private string _dependenciesCount = "0";
-    [ObservableProperty] private string _updatesCount = "0";
-    [ObservableProperty] private string _issuesCount = "0";
-    [ObservableProperty] private bool _hasUpdates;
-    [ObservableProperty] private string _shownText = "";
-
-    [ObservableProperty] private int _selectedCount;
-
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowSelectionBar))]
-    private bool _hasSelection;
-
-    [ObservableProperty] private string _removalNote = "";
-    [ObservableProperty] private bool _selectionHasUpdates;
 
     public InstancesPageViewModel(NewInstanceFlow newInstanceFlow, ModListService modListService, GameSessionService session,
         NavigationService navigation, InstallFlow installFlow, InstanceService instances)
@@ -117,8 +84,12 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         _modListService = modListService;
         _session = session;
         _navigation = navigation;
-        _installFlow = installFlow;
         _instanceService = instances;
+        Mods = new InstalledModsViewModel(modListService, installFlow);
+        Mods.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(InstalledModsViewModel.HasSelection)) OnPropertyChanged(nameof(ShowSelectionBar));
+        };
 
         IsGameRunning = session.IsRunning;
         session.Changed += OnSessionChanged;
@@ -127,7 +98,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         LoadInstances();
     }
 
-    public void ApplySearch(string text) => ModFilterText = text;
+    public void ApplySearch(string text) => Mods.ModFilterText = text;
 
     public override void Dispose()
     {
@@ -137,7 +108,10 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     }
 
     private void OnSessionChanged() => IsGameRunning = _session.IsRunning;
-    private void OnModsChanged() => Dispatcher.UIThread.Post(BuildRows);
+    private void OnModsChanged() => Dispatcher.UIThread.Post(() =>
+    {
+        if (Selected is { } selected) Mods.Show(selected);
+    });
 
     private void LoadInstances()
     {
@@ -191,9 +165,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
         if (value.IsMissing)
         {
-            SelectedName = value.Name;
-            MissingReason = value.LoadError ?? "";
-            MissingPath = value.RootPath;
             Tab = InstanceTab.Mods;
             return;
         }
@@ -204,15 +175,8 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
     private void ShowDetails(Instance value)
     {
-        SelectedName = value.Name;
-        SelectedIsPrimary = value.IsPrimary;
-        KspText = $"KSP {value.Version}";
-        CompatibleText = InstanceTexts.Compatible(value);
-        PathText = InstanceTexts.ShortPath(value.RootPath);
-        PlayTime = InstanceTexts.PlayTime(value);
-        LastPlayed = InstanceTexts.LastPlayed(value);
-        LastPlayedDetail = InstanceTexts.LastPlayedDetail(value);
-        BuildRows();
+        Summary = new InstanceSummary(value);
+        Mods.Show(value);
 
         if (!_settingsByPath.TryGetValue(value.RootPath, out var settings) || !settings.HasChanges)
         {
@@ -232,7 +196,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         if (e.PropertyName == nameof(InstanceSettingsViewModel.HasChanges)) OnPropertyChanged(nameof(ShowSettingsBar));
     }
 
-    public bool ShowSelectionBar => Tab == InstanceTab.Mods && HasSelection;
+    public bool ShowSelectionBar => Tab == InstanceTab.Mods && Mods.HasSelection;
     public bool ShowSettingsBar => Tab == InstanceTab.Settings && InstanceSettings is { HasChanges: true };
 
     private async Task LoadSizes(Instance instance)
@@ -254,130 +218,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         if (Selected != instance) return;
         InstallSize = InstalledMods.FormatSize(total);
         GameDataSize = $"GameData {InstalledMods.FormatSize(gameData)}";
-        foreach (var row in _allRows)
-            row.SizeText = modSizes.TryGetValue(row.Version.Identifier, out var size) && size > 0
-                ? InstalledMods.FormatSize(size)
-                : "–";
-    }
-
-    private void BuildRows()
-    {
-        if (Selected is not { } instance) return;
-
-        UnmanagedDlls.Refresh(instance);
-
-        var criteria = GameVersionCriteria.FromInstance(instance);
-        var mods = _modListService.Mods?.ToDictionary(m => m.Id) ?? [];
-        var sizes = _allRows.ToDictionary(r => r.Version.Identifier, r => r.SizeText);
-
-        foreach (var row in _allRows) row.SelectionChanged -= OnRowSelectionChanged;
-        _allRows =
-        [
-            .. instance.Mods
-                .Select(v => new InstalledModRowViewModel(instance, v, mods.GetValueOrDefault(v.Identifier), criteria,
-                    InstalledMods.FindReplacement(instance, v, mods, criteria)))
-                .OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
-        ];
-        foreach (var row in _allRows)
-        {
-            row.SizeText = sizes.GetValueOrDefault(row.Version.Identifier, "");
-            row.SelectionChanged += OnRowSelectionChanged;
-        }
-
-        var picked = _allRows.Count(r => !r.IsDependency);
-        var updates = _allRows.Count(r => r.HasUpdateOrReplacement);
-        ModsCount = _allRows.Count.ToString();
-        ModsDetail = $"{picked} picked · {_allRows.Count - picked} dependencies";
-        AllCount = _allRows.Count.ToString();
-        PickedCount = picked.ToString();
-        DependenciesCount = (_allRows.Count - picked).ToString();
-        UpdatesCount = updates.ToString();
-        IssuesCount = _allRows.Count(r => r.IsNotListed).ToString();
-        HasUpdates = updates > 0;
-
-        ApplyModFilter();
-        OnRowSelectionChanged();
-    }
-
-    partial void OnModFilterTextChanged(string value) => ApplyModFilter();
-    partial void OnFilterChanged(ModsFilter value) => ApplyModFilter();
-
-    [RelayCommand]
-    private void SetFilter(ModsFilter filter) => Filter = filter;
-
-    private void ApplyModFilter()
-    {
-        var text = ModFilterText.Trim();
-        Rows = new ObservableCollection<InstalledModRowViewModel>(_allRows.Where(r =>
-            (text.Length == 0 || r.Name.Contains(text, StringComparison.OrdinalIgnoreCase) ||
-             r.Version.Identifier.Contains(text, StringComparison.OrdinalIgnoreCase)) &&
-            Filter switch
-            {
-                ModsFilter.Picked => !r.IsDependency,
-                ModsFilter.Dependencies => r.IsDependency,
-                ModsFilter.Updates => r.HasUpdateOrReplacement,
-                ModsFilter.Issues => r.IsNotListed,
-                _ => true
-            }));
-        ShownText = $"Showing {Rows.Count} of {_allRows.Count}";
-    }
-
-    private void OnRowSelectionChanged()
-    {
-        var selected = _allRows.Where(r => r.IsSelected).ToList();
-        SelectedCount = selected.Count;
-        HasSelection = selected.Count > 0;
-        SelectionHasUpdates = selected.Any(r => r.HasUpdateOrReplacement);
-        RemovalNote = Selected is null || selected.Count == 0
-            ? ""
-            : InstalledMods.DescribeRemoval(InstalledMods.PlanRemoval(Selected,
-                [.. selected.Select(r => r.Version.Identifier)]));
-    }
-
-    [RelayCommand]
-    private void ClearSelection()
-    {
-        foreach (var row in _allRows) row.IsSelected = false;
-    }
-
-    [RelayCommand]
-    private Task RemoveSelected() => Remove([.. _allRows.Where(r => r.IsSelected)]);
-
-    [RelayCommand]
-    private Task RemoveRow(InstalledModRowViewModel row) => Remove([row]);
-
-    private async Task Remove(IReadOnlyList<InstalledModRowViewModel> rows)
-    {
-        if (Selected is not { } instance || rows.Count == 0) return;
-
-        var plan = InstalledMods.PlanRemoval(instance, [.. rows.Select(r => r.Version.Identifier)]);
-        await _installFlow.RemoveAsync(instance, plan.All);
-    }
-
-    [RelayCommand]
-    private Task UpdateSelected() => Update([.. _allRows.Where(r => r.IsSelected && r.HasUpdateOrReplacement)]);
-
-    [RelayCommand]
-    private Task UpdateAll() => Update([.. _allRows.Where(r => r.HasUpdateOrReplacement)]);
-
-    [RelayCommand]
-    private Task UpdateRow(InstalledModRowViewModel row) => Update([row]);
-
-    private async Task Update(IReadOnlyList<InstalledModRowViewModel> rows)
-    {
-        if (Selected is not { } instance || rows.Count == 0) return;
-
-        var requested = rows.Select(r => new PlannedModVersion
-        {
-            Version = r.Replacement ?? r.NextVersion!,
-            IsUserRequested = InstalledMods.IsUserRequested(instance, r.Version.Identifier),
-            IsVersionPickedByUser = true,
-            OptionalReason = instance.ModRecords.GetValueOrDefault(r.Version.Identifier)?.Reason,
-            Replaces = r.HasReplacement ? r.Version.Identifier : null
-        }).ToList();
-        List<ModVersion> replaced = [.. rows.Where(r => r.HasReplacement).Select(r => r.Version)];
-
-        if (await _installFlow.InstallAsync(requested, instance, InstallSource.Updates, replaced)) ClearSelection();
+        Mods.ShowSizes(modSizes);
     }
 
     private bool CanLaunch() => !IsGameRunning;

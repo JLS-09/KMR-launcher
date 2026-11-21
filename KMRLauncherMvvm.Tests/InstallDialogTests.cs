@@ -94,9 +94,9 @@ public class InstallDialogTests
                                   "  spacedock.info  HTTP 503 Service Unavailable";
         const string oneMirror = "A 1.0 could not be downloaded.\n  github.com  server answered 404 NotFound";
 
-        Assert.Equal("All mirrors failed", InstallDialogViewModel.ShortError(twoMirrors));
-        Assert.Equal("server answered 404 NotFound", InstallDialogViewModel.ShortError(oneMirror));
-        Assert.Equal("Installing A failed: disk full", InstallDialogViewModel.ShortError("Installing A failed: disk full"));
+        Assert.Equal("All mirrors failed", InstallResultViewModel.ShortError(twoMirrors));
+        Assert.Equal("server answered 404 NotFound", InstallResultViewModel.ShortError(oneMirror));
+        Assert.Equal("Installing A failed: disk full", InstallResultViewModel.ShortError("Installing A failed: disk full"));
     }
 
     [Fact]
