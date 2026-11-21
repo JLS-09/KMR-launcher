@@ -39,7 +39,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
             .Select(v => new PlannedModVersion { Version = v }));
 
         foreach (var requested in installModsData.RequestedModVersions.Where(r =>
-                     r.Version.Id is null || !instance.Mods.Exists(m => m.Id == r.Version.Id)))
+                     !instance.Mods.Exists(m => m.Identifier == r.Version.Identifier && m.Version == r.Version.Version)))
         {
             dependencyResolutionState.Resolved.Add(requested);
 

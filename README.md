@@ -3,12 +3,14 @@
 A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalonia. It manages separate KSP instances and installs mods from the official [CKAN](https://github.com/KSP-CKAN/CKAN) metadata, following the [CKAN spec](https://github.com/KSP-CKAN/CKAN/blob/master/Spec.md).
 
 > [!WARNING]
-> **Early development.** KMR-launcher is developed by one person (JLS-09) on Linux. Mods can be installed, updated and removed per instance, but the Home page, importing an existing KSP install and offline mode aren't there yet, and Windows and macOS are not supported for now. See the [roadmap](#roadmap) below.
+> **Early development.** KMR-launcher is developed by one person (JLS-09) on Linux. Mods can be installed, updated and removed per instance, but the Home page and offline mode aren't there yet, and Windows and macOS are not supported for now. See the [roadmap](#roadmap) below.
 
 ## Features
 
 ### Instances
-- Add a KSP zip and have an instance created automatically, with the KSP version detected from the build
+- New instance dialog (also from inside the install flow when you have no instance yet):
+  - from a KSP zip: name, KSP version (with the version detected from the build), primary instance and compatible KSP versions; the zip is unpacked into `~/.local/share/KMR/instances/<name>` (or a folder you pick, which is remembered), with progress, and Cancel removes the half-made folder
+  - from a KSP folder you already have (for example Steam's): copy it into KMR or use it in place. Mods installed by CKAN are read from its registry (picked mods and dependencies, the files each one owns) and CKAN's compatible KSP versions are taken over, so they can be updated and removed like any other mod. Folders in GameData that no mod owns are left alone and never overwritten. A folder that was already a KMR instance comes back with its own data.
 - Instances page: every instance with its KSP version, mod count and when it was last played; sort by last played or name
 - Instance stats: mods (picked / dependencies), playtime, last played and install size
 - Launch an instance through Wine (Linux only), from the Instances page or the primary instance in the sidebar
@@ -17,7 +19,7 @@ A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalon
   - name, primary instance, and the Wine prefix folder (a separate prefix per instance)
   - launch arguments (e.g. `-force-glcore`)
   - which KSP versions count as compatible (like CKAN), including "all 1.12.x"; the game's own version is always included
-  - delete the instance, together with its prefix
+  - forget the instance (it's taken off the list and nothing on disk changes; add it again with Import), or delete it together with its prefix
 
 ### Finding mods (Discover)
 - Mod list built from [CKAN-meta](https://github.com/KSP-CKAN/CKAN-meta), cloned and cached locally with git, with a refresh on demand
@@ -66,7 +68,7 @@ The full plan is split into milestones:
 | **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | ✅ Done |
 | **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | ✅ Done |
 | **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | ✅ Done |
-| **M5** | First public release, in a new design:<br>• ✅ new design for Discover, Instances and the install flow<br>• ✅ remove and update mods, `replaced_by`<br>• ✅ currently-playing card<br>• ✅ launcher Settings page<br>• new instance dialog, also from inside the install flow<br>• import an existing KSP install (with CKAN registry)<br>• code clean-up | 🚧 In progress |
+| **M5** | First public release, in a new design:<br>• ✅ new design for Discover, Instances and the install flow<br>• ✅ remove and update mods, `replaced_by`<br>• ✅ currently-playing card<br>• ✅ launcher Settings page<br>• ✅ new instance dialog, also from inside the install flow<br>• ✅ import an existing KSP install (with CKAN registry)<br>• code clean-up | 🚧 In progress |
 | **M6** | Home page, startup window and offline mode | ⏳ Planned |
 | **M7** | Extras:<br>• sorting the mod list<br>• instance export/import (`.ckan` metapackage)<br>• backup & restore<br>• extra metadata repos<br>• launching through Proton<br>• Windows and macOS support | ⏳ Planned |
 
@@ -91,7 +93,7 @@ If the app still shows an old screen after pulling changes, run `dotnet clean` a
 
 **Running the tests**
 
-The resolver logic (version ordering, KSP compatibility, conflicts, `provides`, `suppress_recommendations`, `replaced_by`), the install flow (recommendations, choices, review, progress and failure texts), the install pipeline (install directives, downloads with mirrors and hash checks, installing and rollback) and instance management (removal plans, updates, settings, Wine prefixes) are covered by xUnit tests in `KMRLauncherMvvm.Tests`:
+The resolver logic (version ordering, KSP compatibility, conflicts, `provides`, `suppress_recommendations`, `replaced_by`), the install flow (recommendations, choices, review, progress and failure texts), the install pipeline (install directives, downloads with mirrors and hash checks, installing and rollback) and instance management (new instances from a zip, importing a folder with a CKAN registry, removal plans, updates, settings, Wine prefixes) are covered by xUnit tests in `KMRLauncherMvvm.Tests`:
 
 ```bash
 dotnet test
@@ -103,12 +105,13 @@ On Linux:
 
 | Path | Contents |
 |---|---|
-| `~/.config/kmrLauncher/settings.json` | App settings, KSP zips, the list of instance folders and which one is primary |
+| `~/.config/kmrLauncher/settings.json` | App settings, KSP zips, the list of instance folders, which one is primary, and the folder new instances go in |
 | `<instance>/.kmr/instance.json` | The instance's name, KSP version, compatible KSP versions, launch arguments, Wine prefix path, playtime and last played |
 | `<instance>/.kmr/mods.json` | The instance's installed mods and the files each one owns |
 | `~/.local/share/kmrLauncher/mods.json` | Cached, parsed mod list |
 | `~/.local/share/kmrLauncher/cache/ckan-meta/` | Local clone of CKAN-meta |
 | `~/.local/share/kmrLauncher/cache/downloads/` | Verified mod downloads, shared by all instances |
+| `~/.local/share/KMR/instances/` | New instances, unless you pick another folder in the New instance dialog |
 | `~/.config/kmrLauncher/prefixes/<instance folder>/` | Wine prefix for each instance (the path is saved per instance and can be changed in its Settings tab; prefixes made before 2026-11 stay in `~/.config/prefixes/<instance name>/`) |
 | `~/.local/share/kmrLauncher/sync.json` | Time and commit of the last CKAN-meta fetch, and the last fetch error |
 

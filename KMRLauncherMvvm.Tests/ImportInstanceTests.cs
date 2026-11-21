@@ -1,6 +1,7 @@
 using System.Text.Json;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
+using KMRLauncherMvvm.ViewModels.Discover;
 using KMRLauncherMvvm.ViewModels.NewInstance;
 
 namespace KMRLauncherMvvm.Tests;
@@ -151,6 +152,83 @@ public class ImportInstanceTests : IDisposable
         Assert.Equal(["Broken"], scan.Unreadable);
         Assert.Contains("couldn't be read and stay unmanaged: Broken.",
             NewInstanceDialogViewModel.DescribeScan(scan).Single(r => r.Title.StartsWith("CKAN registry")).Hint);
+    }
+
+    private string RegistryWith(params (string Id, string Version, bool Auto, string[] Depends)[] mods)
+    {
+        var modules = mods.ToDictionary(m => m.Id, m => (object)new
+        {
+            source_module = new Dictionary<string, object?>
+            {
+                ["spec_version"] = "v1.4",
+                ["identifier"] = m.Id,
+                ["version"] = m.Version,
+                ["license"] = "MIT",
+                ["ksp_version"] = "1.12",
+                ["depends"] = m.Depends.Select(d => new { name = d }).ToArray()
+            },
+            auto_installed = m.Auto,
+            installed_files = new Dictionary<string, object> { [$"GameData/{m.Id}/{m.Id}.dll"] = new { } }
+        });
+        return Write("registry/registry.json", JsonSerializer.Serialize(new { installed_modules = modules }));
+    }
+
+    private static Instance ImportedInstance(List<ImportedMod> mods) => new("Imported", "/ksp", "1.12.5")
+    {
+        CompatibleKspVersions = ["1.12"],
+        Mods = [.. mods.Select(m => m.Version)],
+        ModRecords = mods.ToDictionary(m => m.Version.Identifier, m => m.Record)
+    };
+
+    [Fact]
+    public void FallbackIdsFollowCkanMetaFileNames()
+    {
+        var (mods, _, _) = KspFolderScanner.ReadRegistry(RegistryWith(("Kopernicus", "2:release-1.12.1-200", false, [])), null);
+
+        Assert.Equal("Kopernicus-2-release-1.12.1-200", Assert.Single(mods).Version.Id);
+    }
+
+    [Fact]
+    public void ImportedModsGetUpdatesFromCkanMeta()
+    {
+        var (mods, _, _) = KspFolderScanner.ReadRegistry(RegistryWith(("Parallax", "2.0.7", false, [])), null);
+        var instance = ImportedInstance(mods);
+        var listed = TestData.Mod(TestData.Version("Parallax", "2.0.8"), TestData.Version("Parallax", "2.0.7"));
+
+        var fit = ModFit.For(listed, instance, GameVersionCriteria.FromInstance(instance));
+
+        Assert.Equal(KMRLauncherMvvm.Controls.ModStatusKind.Update, fit.Kind);
+        Assert.Equal("2.0.8", fit.NewestFit!.Version);
+    }
+
+    [Fact]
+    public void RemovingAnImportedModAlsoRemovesItsAutoInstalledDependency()
+    {
+        var (mods, _, _) = KspFolderScanner.ReadRegistry(RegistryWith(
+            ("Parallax", "2.0.8", false, ["Kopernicus"]),
+            ("Kopernicus", "release-1.12.1-200", true, []),
+            ("Waterfall", "0.10.4", false, [])), null);
+        var instance = ImportedInstance(mods);
+
+        var plan = InstalledMods.PlanRemoval(instance, ["Parallax"]);
+
+        Assert.Equal(["Parallax", "Kopernicus"], plan.All.Select(m => m.Identifier));
+    }
+
+    [Fact]
+    public void RequestingTheInstalledVersionOfAnImportedModChangesNothing()
+    {
+        var (mods, _, _) = KspFolderScanner.ReadRegistry(RegistryWith(("Kopernicus", "2:release-1.12.1-200", false, [])), null);
+        var instance = ImportedInstance(mods);
+        var listed = TestData.Version("Kopernicus", "2:release-1.12.1-200");
+        listed.Id = "Kopernicus-2-release-1.12.1-200-from-ckan-meta";
+        var services = new TestData.TestServices(TestData.Mod(listed));
+        var data = new InstallModsData { SelectedInstance = instance, RequestedModVersions = [TestData.Requested(listed)] };
+
+        services.Dependency.ResolveDependencies(data);
+
+        Assert.Empty(data.Problems);
+        Assert.DoesNotContain(data.FinalModList, m => m.Version.Identifier == "Kopernicus");
     }
 
     [Fact]

@@ -29,7 +29,7 @@ public static class JsonHelper
                         directive["install_to"] = "GameData";
 
             var v = node.Deserialize<ModVersion>(JsonOptions);
-            if (v is not null) v.Id = $"{v.Identifier}-{v.Version}";
+            if (v is not null) v.Id = $"{v.Identifier}-{v.Version.Replace(':', '-')}";
             return v;
         }
         catch (Exception e) when (e is JsonException or NotSupportedException or InvalidOperationException)
