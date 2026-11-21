@@ -59,7 +59,7 @@ public partial class InstalledModRowViewModel : ObservableObject
         }
 
         NextText = NextVersion is null ? "" : InstalledMods.ShortNextVersion(version.Version, NextVersion.Version);
-        IsNotListed = version.Kind is null or "package" && !CompatibilityService.IsCompatible(version, criteria);
+        IsNotListed = version.Kind is null or "package" && !KspCompatibility.IsCompatible(version, criteria);
         NotListedText = $"Not listed for {instance.Version}";
     }
 

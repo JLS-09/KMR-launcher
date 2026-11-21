@@ -150,7 +150,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             if (IsPlannedOrInstalled(mod.Id)) continue;
 
             var versions = mod.Versions
-                .Where(v => Supports(v, supportedMod) && CompatibilityService.IsCompatible(v, criteria))
+                .Where(v => Supports(v, supportedMod) && KspCompatibility.IsCompatible(v, criteria))
                 .ToList();
             if (versions.Count == 0) continue;
 

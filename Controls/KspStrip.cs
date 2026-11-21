@@ -15,8 +15,8 @@ public record KspStripInfo(bool[] Cells, string Label)
     public static KspStripInfo For(ModVersion? version) => version is null
         ? new KspStripInfo(new bool[Minors.Length], "")
         : new KspStripInfo(
-            [.. Minors.Select(minor => CompatibilityService.CoversMinor(version, minor))],
-            CompatibilityService.DescribeKspRange(version));
+            [.. Minors.Select(minor => KspCompatibility.CoversMinor(version, minor))],
+            KspCompatibility.DescribeKspRange(version));
 }
 
 public class KspStrip : Control

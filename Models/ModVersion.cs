@@ -48,7 +48,7 @@ public class ModVersion
     public double? InstallSize { get; set; }
 
     [JsonPropertyName("release_date")]
-    [JsonConverter(typeof(MongoDateConverter))]
+    [JsonConverter(typeof(ReleaseDateConverter))]
     public DateTime? ReleaseDate { get; set; }
 
     [JsonPropertyName("kind")] public string? Kind { get; set; }
@@ -313,7 +313,7 @@ public class InstallSizeConverter : JsonConverter<double?>
     }
 }
 
-public class MongoDateConverter : JsonConverter<DateTime?>
+public class ReleaseDateConverter : JsonConverter<DateTime?>
 {
     public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

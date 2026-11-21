@@ -130,7 +130,7 @@ public static class InstallChanges
     public static (string Text, FitKind Kind) FitHint(Instance instance, IReadOnlyList<PlannedModVersion> requested)
     {
         var criteria = GameVersionCriteria.FromInstance(instance);
-        var notFitting = requested.Where(r => !CompatibilityService.IsCompatible(r.Version, criteria)).ToList();
+        var notFitting = requested.Where(r => !KspCompatibility.IsCompatible(r.Version, criteria)).ToList();
         if (notFitting.Count > 0)
         {
             var more = notFitting.Count > 1 ? $" and {notFitting.Count - 1} more" : "";

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -246,7 +245,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
         try
         {
-            Process.Start(new ProcessStartInfo(Selected.RootPath) { UseShellExecute = true });
+            Helpers.Open(Selected.RootPath);
         }
         catch (Exception e)
         {

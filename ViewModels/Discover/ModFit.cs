@@ -16,7 +16,7 @@ public record ModFit(ModStatusKind? Kind, string Text, ModVersion? NewestFit, Mo
         if (instance is null || criteria is null) return None;
 
         var installed = instance.Mods.FirstOrDefault(v => v.Identifier == mod.Id);
-        var newestFit = mod.Versions.FirstOrDefault(v => CompatibilityService.IsCompatible(v, criteria));
+        var newestFit = mod.Versions.FirstOrDefault(v => KspCompatibility.IsCompatible(v, criteria));
 
         if (installed is not null)
         {

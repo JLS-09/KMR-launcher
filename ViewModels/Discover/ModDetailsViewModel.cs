@@ -53,7 +53,7 @@ public partial class ModDetailsViewModel : ObservableObject
         Versions =
         [
             .. Mod.Versions.Select(v => new VersionRowViewModel(v, row,
-                fits: criteria is not null && CompatibilityService.IsCompatible(v, criteria),
+                fits: criteria is not null && KspCompatibility.IsCompatible(v, criteria),
                 isNewestFit: v == row.Fit.NewestFit,
                 isInstalled: row.Fit.Installed?.Version == v.Version))
         ];
@@ -153,7 +153,7 @@ public partial class VersionRowViewModel : ObservableObject
         Fits = fits;
         IsNewestFit = isNewestFit;
         IsInstalled = isInstalled;
-        KspText = $"KSP {CompatibilityService.DescribeKspRangeExact(version)}";
+        KspText = $"KSP {KspCompatibility.DescribeKspRangeExact(version)}";
         DateText = version.ReleaseDate?.ToString("yyyy-MM-dd") ?? "";
         Refresh();
     }

@@ -97,7 +97,7 @@ public class KspDetailStrip : Control
         if (version is null) return;
 
         var instance = InstanceVersion is null ? null : KspVersions.ToFullVersion(InstanceVersion);
-        var covered = Minors.Select(m => CompatibilityService.CoversMinor(version, m.Minor)).ToArray();
+        var covered = Minors.Select(m => KspCompatibility.CoversMinor(version, m.Minor)).ToArray();
         var expanded = version.KspVersionStrict ? System.Array.LastIndexOf(covered, true) : -1;
 
         var weights = Minors.Select((_, i) => i == expanded ? 2.0 : 1.0).ToArray();
@@ -115,7 +115,7 @@ public class KspDetailStrip : Control
                 for (var p = 0; p < patches; p++)
                 {
                     var patch = $"{minor}.{p}";
-                    var on = CompatibilityService.CoversVersion(version, patch);
+                    var on = KspCompatibility.CoversVersion(version, patch);
                     var brush = on ? patch == instance ? FitsBrush : OnBrush : OffBrush;
                     Fill(context, brush, new Rect(x + p * (patchWidth + PatchGap), 0, patchWidth, CellHeight));
                 }
@@ -128,7 +128,7 @@ public class KspDetailStrip : Control
             else
             {
                 var fits = covered[i] && instance is not null && KspVersions.ToMinorPrefix(instance) == minor &&
-                           CompatibilityService.CoversVersion(version, instance);
+                           KspCompatibility.CoversVersion(version, instance);
                 Fill(context, covered[i] ? fits ? FitsBrush : OnBrush : OffBrush, new Rect(x, 0, width, CellHeight));
                 DrawLabel(context, minor, x, fits, alignRight: false);
             }

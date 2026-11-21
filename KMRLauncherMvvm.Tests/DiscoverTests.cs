@@ -156,16 +156,16 @@ public class DiscoverTests
     [InlineData(null, "1.8", null, "1.8+")]
     [InlineData(null, null, null, "any")]
     public void Exact_ksp_range_for_the_version_list(string? ksp, string? min, string? max, string text) =>
-        Assert.Equal(text, CompatibilityService.DescribeKspRangeExact(Version("A", "1.0", ksp, min, max)));
+        Assert.Equal(text, KspCompatibility.DescribeKspRangeExact(Version("A", "1.0", ksp, min, max)));
 
     [Fact]
     public void Covers_version_checks_one_patch()
     {
         var mod = Version("A", "1.0", ksp: null, kspMin: "1.12.2", kspMax: "1.12.5", strict: true);
 
-        Assert.False(CompatibilityService.CoversVersion(mod, "1.12.1"));
-        Assert.True(CompatibilityService.CoversVersion(mod, "1.12.2"));
-        Assert.True(CompatibilityService.CoversVersion(mod, "1.12.5"));
+        Assert.False(KspCompatibility.CoversVersion(mod, "1.12.1"));
+        Assert.True(KspCompatibility.CoversVersion(mod, "1.12.2"));
+        Assert.True(KspCompatibility.CoversVersion(mod, "1.12.5"));
     }
 
     [Fact]
