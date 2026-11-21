@@ -13,7 +13,7 @@ using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.ViewModels.InstallMods;
 using KMRLauncherMvvm.ViewModels.Instances;
-using KMRLauncherMvvm.Views;
+using KMRLauncherMvvm.ViewModels.NewInstance;
 
 namespace KMRLauncherMvvm.ViewModels;
 
@@ -36,7 +36,7 @@ public enum ModsFilter
 
 public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, INavigationTarget
 {
-    private readonly ZipService? _zipService;
+    private readonly NewInstanceFlow? _newInstanceFlow;
     private readonly ModListService? _modListService;
     private readonly GameSessionService? _session;
     private readonly NavigationService? _navigation;
@@ -108,10 +108,10 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [ObservableProperty] private string _removalNote = "";
     [ObservableProperty] private bool _selectionHasUpdates;
 
-    public InstancesPageViewModel(ZipService zipService, ModListService modListService, GameSessionService session,
+    public InstancesPageViewModel(NewInstanceFlow newInstanceFlow, ModListService modListService, GameSessionService session,
         NavigationService navigation, InstallFlow installFlow) : this()
     {
-        _zipService = zipService;
+        _newInstanceFlow = newInstanceFlow;
         _modListService = modListService;
         _session = session;
         _navigation = navigation;
@@ -482,11 +482,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     }
 
     [RelayCommand]
-    private void NewInstance()
-    {
-        if (_zipService is null) return;
-        new NewInstanceWindow { DataContext = new NewInstanceViewModel(_zipService) }.Show();
-    }
+    private void NewInstance() => _newInstanceFlow?.CreateAsync();
 
     [RelayCommand]
     private void AddMods()

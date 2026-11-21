@@ -26,3 +26,9 @@ public class DialogService
         CurrentChanged?.Invoke(null);
     }
 }
+
+public interface IDialogSize
+{
+    double DialogWidth { get; }
+    double DialogHeight { get; }
+}

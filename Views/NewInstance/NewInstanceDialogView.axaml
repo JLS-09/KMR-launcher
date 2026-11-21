@@ -1,0 +1,491 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels.NewInstance"
+             xmlns:views="using:KMRLauncherMvvm.Views"
+             xmlns:controls="clr-namespace:KMRLauncherMvvm.Controls"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="1100"
+             x:Class="KMRLauncherMvvm.Views.NewInstance.NewInstanceDialogView"
+             x:DataType="vm:NewInstanceDialogViewModel"
+             KeyboardNavigation.TabNavigation="Cycle"
+             Foreground="{DynamicResource TextPrimary}" FontSize="14">
+
+    <!-- New instance dialog (Phase 9 task 9), from the mockups NewInstance and NewInstanceCreating -->
+    <UserControl.Styles>
+        <Style Selector="Border.tabs">
+            <Setter Property="CornerRadius" Value="9" />
+        </Style>
+        <Style Selector="RadioButton.segment.tab">
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+        <Style Selector="RadioButton.segment.tab /template/ Border#SegmentBorder">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="12 0" />
+            <Setter Property="CornerRadius" Value="7" />
+        </Style>
+        <Style Selector="RadioButton.dot.option">
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Padding" Value="14 12" />
+        </Style>
+        <Style Selector="RadioButton.dot.zip">
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Padding" Value="14 10" />
+        </Style>
+        <Style Selector="TextBlock.optionTitle">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <Style Selector="TextBlock.hint">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="TextBlock.error">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Button.tiny">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Padding" Value="6 0" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <!-- Side panel rows: "KSP  1.12.5" -->
+        <Style Selector="Grid.panelRow TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="Grid.panelRow TextBlock.value">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <!-- Creating checklist: rows split by lines; a 24 px disc per state (22 px ring while pending) -->
+        <Style Selector="Border.stepRow">
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="0 1 0 0" />
+            <Setter Property="Padding" Value="0 14" />
+        </Style>
+        <Style Selector="Border.stepDisc">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+        </Style>
+        <Style Selector="Border.stepDisc.pending">
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Margin" Value="1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+        </Style>
+        <Style Selector="Border.stepDisc.done">
+            <Setter Property="Background" Value="{DynamicResource StatusFitsSoft}" />
+        </Style>
+        <Style Selector="Border.stepDisc.current">
+            <Setter Property="Background" Value="{DynamicResource Accent}" />
+        </Style>
+        <Style Selector="Border.stepDisc.failed">
+            <Setter Property="Background" Value="{DynamicResource StatusErrorSoft}" />
+        </Style>
+        <Style Selector="TextBlock.stepTitle">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="TextBlock.stepTitle.done">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="TextBlock.stepTitle.current">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="TextBlock.stepTitle.failed">
+            <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Border Background="{DynamicResource Dialog}" BorderBrush="{DynamicResource LineStrong}" BorderThickness="1"
+            CornerRadius="14" BoxShadow="0 24 80 0 #99000000" ClipToBounds="True">
+        <Grid RowDefinitions="Auto, *, Auto">
+            <!-- Header: title, source tabs, close -->
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto, Auto" ColumnSpacing="16" Margin="24 20">
+                <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="20" FontWeight="SemiBold"
+                           VerticalAlignment="Center" Text="New instance" />
+                <Border Grid.Column="1" Classes="segmented tabs" IsVisible="{Binding IsForm}">
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <RadioButton Classes="segment tab" GroupName="newInstanceSource" IsChecked="True">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <controls:StrokeIcon Data="{StaticResource IconArchive}" Size="15" VerticalAlignment="Center" />
+                                <TextBlock Text="From a KSP zip" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </RadioButton>
+                        <!-- Placeholder: adding an existing folder comes later in Phase 7 (task 3) -->
+                        <Border Classes="soon" ToolTip.Tip="Adding an existing KSP folder comes later in Phase 7">
+                            <RadioButton Classes="segment tab" GroupName="newInstanceSource">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="15" VerticalAlignment="Center" />
+                                    <TextBlock Text="Existing KSP folder" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </RadioButton>
+                        </Border>
+                    </StackPanel>
+                </Border>
+                <Button Grid.Column="2" Classes="ghost icon small" Width="32" Height="32" ToolTip.Tip="Close"
+                        Command="{Binding CloseCommand}">
+                    <controls:StrokeIcon Data="{StaticResource IconClose}" Size="16" />
+                </Button>
+            </Grid>
+
+            <!-- Body: form or checklist, and the summary on the right -->
+            <Border Grid.Row="1" BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0">
+                <Grid ColumnDefinitions="*, 250">
+                    <ScrollViewer IsVisible="{Binding IsForm}" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="24 22" Spacing="22">
+                            <!-- Name and folder -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="label" Text="NAME" />
+                                <TextBox Classes="field" Height="36" Text="{Binding Name}" MaxLength="80"
+                                         AutomationProperties.Name="Instance name" />
+                                <TextBlock Classes="error" Text="{Binding NameError}"
+                                           IsVisible="{Binding NameError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="13" VerticalAlignment="Center"
+                                                         Foreground="{DynamicResource TextMuted}" />
+                                    <TextBlock Classes="mono" FontSize="12" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextMuted}" TextTrimming="CharacterEllipsis"
+                                               Text="{Binding FolderText}" />
+                                    <Button Classes="ghost tiny" Content="Change" Click="ChangeFolder_OnClick"
+                                            ToolTip.Tip="Pick the folder the instance goes in" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- KSP version: the zips, or an empty state with Add a KSP zip -->
+                            <StackPanel Spacing="8">
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <TextBlock Classes="label" VerticalAlignment="Center" Text="KSP VERSION" />
+                                    <Button Grid.Column="1" Classes="ghost small" Click="AddZip_OnClick"
+                                            IsVisible="{Binding !HasNoZips}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="14" VerticalAlignment="Center" />
+                                            <TextBlock Text="Add a KSP zip" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding ZipOptions}" IsVisible="{Binding !HasNoZips}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="8" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ZipOptionViewModel">
+                                            <RadioButton Classes="dot card zip" GroupName="newInstanceZip"
+                                                         IsChecked="{Binding IsSelected}">
+                                                <Grid ColumnDefinitions="64, *, Auto" ColumnSpacing="12">
+                                                    <TextBlock Classes="mono" FontSize="14" FontWeight="Medium"
+                                                               VerticalAlignment="Center" Text="{Binding Version}" />
+                                                    <TextBlock Grid.Column="1" Classes="mono" FontSize="12"
+                                                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                               Foreground="{DynamicResource TextMuted}" Text="{Binding PathText}" />
+                                                    <Panel Grid.Column="2" VerticalAlignment="Center">
+                                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                                                   Text="{Binding SizeText}" IsVisible="{Binding !IsMissing}" />
+                                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusWarning}"
+                                                                   Text="{Binding SizeText}" IsVisible="{Binding IsMissing}" />
+                                                    </Panel>
+                                                </Grid>
+                                            </RadioButton>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <!-- No zips yet (Phase 7 task 2; not in the mockups) -->
+                                <Border CornerRadius="9" BorderThickness="1" BorderBrush="{DynamicResource LineStrong}"
+                                        Background="{DynamicResource Surface}" Padding="16 14"
+                                        IsVisible="{Binding HasNoZips}">
+                                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="14">
+                                        <controls:StrokeIcon Data="{StaticResource IconArchive}" Size="18" VerticalAlignment="Top"
+                                                             Margin="0 1 0 0" Foreground="{DynamicResource TextSecondary}" />
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock Classes="optionTitle" Text="No KSP versions added yet" />
+                                            <TextBlock Classes="hint"
+                                                       Text="Add a KSP zip to create an instance from it. The zip stays where it is; the instance gets an unpacked copy." />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Classes="secondary small" VerticalAlignment="Center"
+                                                Click="AddZip_OnClick">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="14" VerticalAlignment="Center" />
+                                                <TextBlock Text="Add a KSP zip" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                                <TextBlock Classes="error" Text="{Binding AddZipError}"
+                                           IsVisible="{Binding AddZipError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            </StackPanel>
+
+                            <!-- Start with: only "No mods" for now -->
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="label" Text="START WITH" />
+                                <RadioButton Classes="dot card option" GroupName="newInstanceStart" IsChecked="True">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Classes="optionTitle" Text="No mods" />
+                                        <TextBlock Classes="hint" Text="A clean KSP install" />
+                                    </StackPanel>
+                                </RadioButton>
+                                <!-- Placeholders: "Mods from another instance" and modpacks come with Phase 8 -->
+                                <Border Classes="soon" HorizontalAlignment="Stretch" ToolTip.Tip="Starting with mods from another instance comes in Phase 8">
+                                    <RadioButton Classes="dot card option" GroupName="newInstanceStart" Background="Transparent">
+                                        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Classes="optionTitle" Text="Mods from another instance" />
+                                                <TextBlock Classes="hint"
+                                                           Text="Installs the same picked mods; dependencies are resolved again" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1" Classes="secondary small" VerticalAlignment="Top">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <TextBlock VerticalAlignment="Center"
+                                                               Text="{Binding StartInstanceName, FallbackValue=Instance, TargetNullValue=Instance}" />
+                                                    <controls:StrokeIcon Data="{StaticResource IconChevronDown}" Size="14"
+                                                                         VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </RadioButton>
+                                </Border>
+                                <Border Classes="soon" HorizontalAlignment="Stretch" ToolTip.Tip="Modpacks (.ckan metapackages) come in Phase 8">
+                                    <RadioButton Classes="dot card option" GroupName="newInstanceStart" Background="Transparent">
+                                        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Classes="optionTitle" Text="A .ckan modpack" />
+                                                <TextBlock Classes="hint" Text="A metapackage exported from KMR or CKAN" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1" Classes="secondary small" VerticalAlignment="Top">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="14"
+                                                                         VerticalAlignment="Center" />
+                                                    <TextBlock Text="Choose file" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                        </Grid>
+                                    </RadioButton>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Run with, primary -->
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="22">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Classes="label" Text="RUN WITH" />
+                                    <Border Classes="segmented" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                            <RadioButton Classes="segment big" GroupName="newInstanceRunner"
+                                                         IsChecked="True" Content="Wine" />
+                                            <!-- Placeholder: Proton comes with Phase 8 -->
+                                            <Border Classes="soon" ToolTip.Tip="Proton (umu-run) comes in Phase 8">
+                                                <RadioButton Classes="segment big" GroupName="newInstanceRunner"
+                                                             Content="Proton (umu-run)" />
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="8">
+                                    <TextBlock Classes="label" Text="PRIMARY INSTANCE" />
+                                    <StackPanel Orientation="Horizontal" Spacing="10" Height="38">
+                                        <ToggleButton Classes="switch" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                                      IsChecked="{Binding IsPrimary}"
+                                                      AutomationProperties.Name="Make primary" />
+                                        <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}"
+                                                   VerticalAlignment="Center" Text="Show in the sidebar for quick launch" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Compatible KSP versions: chips with Edit, or the checklist while editing -->
+                            <StackPanel Spacing="8" IsVisible="{Binding Versions, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <TextBlock Classes="label" Text="COMPATIBLE KSP VERSIONS" />
+                                <WrapPanel ItemSpacing="8" LineSpacing="8" IsVisible="{Binding !IsEditingVersions}">
+                                    <ItemsControl ItemsSource="{Binding VersionChips}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel ItemSpacing="8" LineSpacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Border Classes="chip plain" VerticalAlignment="Center">
+                                                    <TextBlock Classes="mono" Text="{Binding}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Button Classes="ghost small" Command="{Binding ToggleEditVersionsCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <controls:StrokeIcon Data="{StaticResource IconEdit}" Size="14" VerticalAlignment="Center" />
+                                            <TextBlock Text="Edit" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </WrapPanel>
+                                <StackPanel IsVisible="{Binding IsEditingVersions}">
+                                    <views:CompatibleVersionsView DataContext="{Binding Versions}" />
+                                    <Button Classes="secondary small" HorizontalAlignment="Left" Content="Done"
+                                            Command="{Binding ToggleEditVersionsCommand}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Creating: checklist with progress -->
+                    <ScrollViewer IsVisible="{Binding IsCreating}" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="24 22" Spacing="22">
+                            <StackPanel Spacing="4">
+                                <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="22" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" Text="{Binding CreatingTitle}" />
+                                <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}"
+                                           TextTrimming="CharacterEllipsis" Text="{Binding CreatingSubtitle}" />
+                            </StackPanel>
+                            <ItemsControl ItemsSource="{Binding Steps}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:CreateStepRowViewModel">
+                                        <Border Classes="stepRow">
+                                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="14">
+                                                <Border Classes="stepDisc" Classes.pending="{Binding IsPending}"
+                                                        Classes.done="{Binding IsDone}" Classes.current="{Binding IsCurrent}"
+                                                        Classes.failed="{Binding IsFailed}">
+                                                    <Panel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="14"
+                                                                             Foreground="{DynamicResource StatusFits}"
+                                                                             IsVisible="{Binding IsDone}" />
+                                                        <controls:StrokeIcon Data="{StaticResource IconRefresh}" Size="14"
+                                                                             Foreground="{DynamicResource OnAccent}"
+                                                                             IsVisible="{Binding IsCurrent}" />
+                                                        <controls:StrokeIcon Data="{StaticResource IconClose}" Size="14"
+                                                                             Foreground="{DynamicResource StatusError}"
+                                                                             IsVisible="{Binding IsFailed}" />
+                                                    </Panel>
+                                                </Border>
+                                                <StackPanel Grid.Column="1">
+                                                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
+                                                        <TextBlock Classes="stepTitle" Classes.done="{Binding IsDone}"
+                                                                   Classes.current="{Binding IsCurrent}"
+                                                                   Classes.failed="{Binding IsFailed}" Text="{Binding Title}" />
+                                                        <TextBlock Grid.Column="1" Classes="mono" FontSize="12"
+                                                                   VerticalAlignment="Center"
+                                                                   Foreground="{DynamicResource TextMuted}" Text="{Binding Detail}" />
+                                                    </Grid>
+                                                    <ProgressBar Height="8" MinHeight="8" CornerRadius="4" Margin="0 8 0 0"
+                                                                 Minimum="0" Maximum="1" Background="{DynamicResource Off}"
+                                                                 Foreground="{DynamicResource StatusFits}"
+                                                                 Value="{Binding Progress}" IsVisible="{Binding ShowProgress}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Border Padding="16 14" CornerRadius="9" Background="{DynamicResource ErrorBox}"
+                                    BorderBrush="{DynamicResource ErrorBoxLine}" BorderThickness="1"
+                                    IsVisible="{Binding CreateError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
+                                    <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="16" VerticalAlignment="Top"
+                                                         Foreground="{DynamicResource ErrorBoxText}" />
+                                    <SelectableTextBlock Grid.Column="1" FontSize="13" LineHeight="20" TextWrapping="Wrap"
+                                                         Foreground="{DynamicResource ErrorBoxText}"
+                                                         Text="{Binding CreateError}" />
+                                </Grid>
+                            </Border>
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8" IsVisible="{Binding IsRunning}">
+                                <controls:StrokeIcon Data="{StaticResource IconTrash}" Size="14" VerticalAlignment="Top"
+                                                     Margin="0 2 0 0" Foreground="{DynamicResource TextMuted}" />
+                                <TextBlock Grid.Column="1" FontSize="12" LineHeight="18" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           Text="Cancel deletes the half-made folder. Nothing else is touched." />
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Summary -->
+                    <Border Grid.Column="1" Background="{DynamicResource DialogAside}" BorderBrush="{DynamicResource Line}"
+                            BorderThickness="1 0 0 0">
+                        <StackPanel Margin="20" Spacing="14">
+                            <TextBlock Classes="label" Text="WILL BE CREATED" />
+                            <StackPanel Spacing="9">
+                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12">
+                                    <TextBlock Text="KSP" />
+                                    <TextBlock Grid.Column="1" Classes="value" Text="{Binding KspText}" />
+                                </Grid>
+                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12">
+                                    <TextBlock Text="Folder" />
+                                    <TextBlock Grid.Column="1" Classes="value" Text="{Binding FolderName}" />
+                                </Grid>
+                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12"
+                                      IsVisible="{Binding IsForm}">
+                                    <TextBlock Text="Disk" />
+                                    <TextBlock Grid.Column="1" Classes="value" Text="{Binding DiskText}" />
+                                </Grid>
+                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12"
+                                      IsVisible="{Binding IsCreating}">
+                                    <TextBlock Text="Written" />
+                                    <TextBlock Grid.Column="1" Classes="value" Text="{Binding WrittenText}" />
+                                </Grid>
+                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12">
+                                    <TextBlock Text="Runner" />
+                                    <TextBlock Grid.Column="1" Classes="value" Text="Wine" />
+                                </Grid>
+                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12">
+                                    <TextBlock Text="Mods" />
+                                    <TextBlock Grid.Column="1" Classes="value" Text="0" />
+                                </Grid>
+                            </StackPanel>
+                            <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 0"
+                                    IsVisible="{Binding IsForm}">
+                                <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           Text="The zip is unpacked into the folder. The zip itself stays where it is." />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Footer -->
+            <Border Grid.Row="2" Background="{DynamicResource DialogFooter}" BorderBrush="{DynamicResource Line}"
+                    BorderThickness="0 1 0 0" Padding="24 14">
+                <Panel>
+                    <!-- Form: Cancel … Create instance -->
+                    <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding IsForm}">
+                        <Button Classes="ghost" Content="Cancel" Command="{Binding CloseCommand}" />
+                        <Button Grid.Column="2" Classes="accent" Command="{Binding CreateCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="16" VerticalAlignment="Center" />
+                                <TextBlock Text="Create instance" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Creating: Cancel (deletes the folder) -->
+                    <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding IsRunning}">
+                        <Button Classes="danger" Command="{Binding CancelCreateCommand}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <controls:StrokeIcon Data="{StaticResource IconClose}" Size="16" VerticalAlignment="Center" />
+                                <TextBlock Text="Cancel" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Grid.Column="2" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                   VerticalAlignment="Center" Text="It opens in Instances when it's ready" />
+                    </Grid>
+
+                    <!-- Failed: Close … Back -->
+                    <Grid ColumnDefinitions="Auto, *, Auto"
+                          IsVisible="{Binding CreateError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                        <Button Classes="ghost" Content="Close" Command="{Binding CloseCommand}" />
+                        <Button Grid.Column="2" Classes="secondary" Content="Back" Command="{Binding BackToFormCommand}" />
+                    </Grid>
+                </Panel>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

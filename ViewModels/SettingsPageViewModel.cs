@@ -107,25 +107,8 @@ public partial class SettingsPageViewModel : PageViewModel
 
     public void AddKspZip(string path)
     {
-        AddZipError = null;
-        var settings = App.Settings;
-        var name = Path.GetFileName(path);
-
-        if (settings.KspZips.Any(z => z.Path == path))
-        {
-            AddZipError = $"{name} is already in the list.";
-            return;
-        }
-
-        var zip = _zipService?.GetVersionFromKspZip(path);
-        if (zip is null || string.IsNullOrEmpty(zip.Version))
-        {
-            AddZipError = $"Couldn't read a known KSP version from {name}. Is it a KSP zip?";
-            return;
-        }
-
-        settings.KspZips.Add(zip);
-        SettingsService.Save(settings);
+        if (_zipService is null) return;
+        (_, AddZipError) = _zipService.AddToSettings(App.Settings, path);
         LoadZips();
     }
 
