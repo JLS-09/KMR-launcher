@@ -44,6 +44,7 @@
             <SolidColorBrush x:Key="StatusUpdateLine">#23415F</SolidColorBrush>
             <SolidColorBrush x:Key="StatusWarning">#D9B526</SolidColorBrush>
             <SolidColorBrush x:Key="StatusWarningSoft">#2A2410</SolidColorBrush>
+            <SolidColorBrush x:Key="StatusWarningLine">#4F4318</SolidColorBrush>
             <SolidColorBrush x:Key="StatusError">#FF6B6B</SolidColorBrush>
             <SolidColorBrush x:Key="StatusErrorSoft">#2D1416</SolidColorBrush>
             <SolidColorBrush x:Key="StatusErrorLine">#5A2A2C</SolidColorBrush>

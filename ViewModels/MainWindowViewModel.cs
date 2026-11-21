@@ -131,6 +131,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private bool CanLaunchPrimary() => PrimaryInstance is not null && !IsRunning;
 
+    [RelayCommand]
+    private void StopGame() => _session?.Stop();
+
     [RelayCommand(CanExecute = nameof(CanLaunchPrimary))]
     private async Task LaunchPrimary()
     {

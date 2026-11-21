@@ -73,7 +73,6 @@
                             Padding="4 14 4 2">
                         <StackPanel Spacing="8">
                             <Panel>
-                                <!-- Running (started from the sidebar). Log and Stop do nothing yet: Phase 5 task 5. -->
                                 <StackPanel Spacing="8" IsVisible="{Binding IsRunning}">
                                     <Grid ColumnDefinitions="Auto, Auto, *">
                                         <Ellipse Grid.Column="0" Width="8" Height="8" Fill="{DynamicResource StatusFits}"
@@ -87,21 +86,42 @@
                                     <TextBlock Text="{Binding RunningInstanceName}" FontSize="13" FontWeight="Medium"
                                                LineHeight="18.85" TextTrimming="CharacterEllipsis" />
                                     <Grid ColumnDefinitions="*, 6, *">
-                                        <Button Grid.Column="0" Classes="secondary small" HorizontalAlignment="Stretch"
-                                                ToolTip.Tip="Not built yet (Phase 5 task 5). Wine's output still goes to the console.">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <controls:StrokeIcon Data="{StaticResource IconTerminal}" Size="14"
-                                                                     VerticalAlignment="Center" />
-                                                <TextBlock Text="Log" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                        <Button Grid.Column="2" Classes="secondary small" HorizontalAlignment="Stretch"
-                                                ToolTip.Tip="Not built yet (Phase 5 task 5)">
+                                        <Border Grid.Column="0" Background="Transparent"
+                                                ToolTip.Tip="Logs come in Phase 8. Until then the game's output goes to the console.">
+                                            <Button Classes="secondary small" HorizontalAlignment="Stretch"
+                                                    IsHitTestVisible="False" Focusable="False">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <controls:StrokeIcon Data="{StaticResource IconTerminal}" Size="14"
+                                                                         VerticalAlignment="Center" />
+                                                    <TextBlock Text="Log" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                        </Border>
+                                        <Button x:Name="StopButton" Grid.Column="2" Classes="secondary small"
+                                                HorizontalAlignment="Stretch">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <controls:StrokeIcon Data="{StaticResource IconStop}" Size="14"
                                                                      IsFilled="True" VerticalAlignment="Center" />
                                                 <TextBlock Text="Stop" VerticalAlignment="Center" />
                                             </StackPanel>
+                                            <Button.Flyout>
+                                                <Flyout Placement="TopEdgeAlignedLeft">
+                                                    <StackPanel Width="260" Spacing="12">
+                                                        <TextBlock FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"
+                                                                   Text="{Binding RunningInstanceName, StringFormat='Stop {0}?'}" />
+                                                        <TextBlock FontSize="12" TextWrapping="Wrap"
+                                                                   Foreground="{DynamicResource TextSecondary}"
+                                                                   Text="KSP is closed right away. Anything you haven't saved in the game is lost." />
+                                                        <StackPanel Orientation="Horizontal" Spacing="8"
+                                                                    HorizontalAlignment="Right">
+                                                            <Button Classes="ghost small" Content="Cancel"
+                                                                    Click="CloseStopFlyout" />
+                                                            <Button Classes="danger small" Content="Stop"
+                                                                    Click="ConfirmStop" />
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Flyout>
+                                            </Button.Flyout>
                                         </Button>
                                     </Grid>
                                 </StackPanel>

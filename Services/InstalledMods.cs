@@ -129,4 +129,22 @@ public static class InstalledMods
         <= 4 => $"{string.Join(", ", mods.Take(mods.Count - 1).Select(m => m.Identifier))} and {mods[^1].Identifier}",
         _ => $"{mods[0].Identifier}, {mods[1].Identifier} and {mods.Count - 2} more"
     };
+
+    public static ModVersion? FindReplacement(Instance instance, ModVersion installed,
+        IReadOnlyDictionary<string, Mod> mods, GameVersionCriteria criteria)
+    {
+        if (!mods.TryGetValue(installed.Identifier, out var mod) || mod.Versions.Count == 0) return null;
+
+        var newest = mod.Versions.Aggregate((a, b) => CkanVersion.Compare(a.Version, b.Version) >= 0 ? a : b);
+        if (newest.ReplacedBy is not { Name: { } name } replacedBy) return null;
+        if (instance.Mods.Exists(m => m.Identifier == name)) return null;
+        if (!mods.TryGetValue(name, out var replacement)) return null;
+
+        return replacement.Versions
+            .Where(v => CompatibilityService.IsCompatible(v, criteria))
+            .Where(v => replacedBy.Version is null || CkanVersion.Compare(v.Version, replacedBy.Version) == 0)
+            .Where(v => replacedBy.MinVersion is null || CkanVersion.Compare(v.Version, replacedBy.MinVersion) >= 0)
+            .OrderByDescending(v => v.Version, Comparer<string>.Create(CkanVersion.Compare))
+            .FirstOrDefault();
+    }
 }

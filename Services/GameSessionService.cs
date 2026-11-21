@@ -1,16 +1,17 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using KMRLauncherMvvm.Models;
 
 namespace KMRLauncherMvvm.Services;
 
-// The one place that launches KSP, so the sidebar and the Instances page agree on whether a game runs.
-// Log and Stop come with the Running card (Phase 5 task 5).
 public class GameSessionService
 {
     public Instance? Running { get; private set; }
     public DateTime StartedAt { get; private set; }
     public bool IsRunning => Running is not null;
+
+    private Process? _process;
 
     // Raised on the UI thread when a game starts or exits
     public event Action? Changed;
@@ -26,12 +27,19 @@ public class GameSessionService
 
         try
         {
-            await instance.LaunchInstanceWithWine();
+            await instance.LaunchInstanceWithWine(process => _process = process);
         }
         finally
         {
+            _process = null;
             Running = null;
             Changed?.Invoke();
         }
+    }
+
+    public void Stop()
+    {
+        if (_process is { } process && Running is { } instance)
+            WineLauncher.Stop(process, instance.PrefixPath);
     }
 }

@@ -135,7 +135,7 @@ public partial class InstallDialogViewModel : ViewModelBase
     public InstallDialogViewModel(IReadOnlyList<PlannedModVersion> requested, Instance? target, InstallSource source,
         ModListService modListService, DependencyService dependencyService, CompatibilityService compatibilityService,
         InstallService installService, GameSessionService session, NavigationService navigation,
-        DialogService dialogs)
+        DialogService dialogs, IReadOnlyList<ModVersion>? replaced = null)
         : this(modListService, dependencyService, compatibilityService, installService, session, navigation, dialogs,
             source)
     {
@@ -153,6 +153,11 @@ public partial class InstallDialogViewModel : ViewModelBase
         Wizard = new InstallModsViewModel([.. requested], modListService, dependencyService, compatibilityService,
             target);
         _data = Wizard.InstallModsData;
+        if (replaced is { Count: > 0 } && Wizard.Steps[0] is InstallModsSelectInstanceStepViewModel first)
+        {
+            _data.ReplacedModVersions = [.. replaced];
+            first.Resolve();
+        }
 
         foreach (var step in Wizard.Steps)
         {
@@ -295,6 +300,7 @@ public partial class InstallDialogViewModel : ViewModelBase
             RequestedModVersions = [.. _data.RequestedModVersions],
             FinalModList = [.. _data.FinalModList],
             RequestedRemoveModVersions = [.. _data.RequestedRemoveModVersions],
+            ReplacedModVersions = [.. _data.ReplacedModVersions],
             ChoosableVersions = [.. _data.ChoosableVersions],
             ModsWithIgnoredRecommendations = [.. _data.ModsWithIgnoredRecommendations],
             Problems = [.. _data.Problems]

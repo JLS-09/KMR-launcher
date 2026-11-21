@@ -71,7 +71,10 @@ public static class InstallChanges
 
         rows.AddRange(data.RequestedRemoveModVersions
             .Where(r => !installIdentifiers.Contains(r.Version.Identifier))
-            .Select(r => new ChangeRow(ChangeKind.Remove, r.Version.Identifier, "Removed from the instance",
+            .Select(r => new ChangeRow(ChangeKind.Remove, r.Version.Identifier,
+                planned.FirstOrDefault(p => p.Replaces == r.Version.Identifier) is { } by
+                    ? $"Replaced by {by.Version.Identifier}"
+                    : "Removed from the instance",
                 r.Version.Version, null, null, false)));
 
         return
@@ -90,6 +93,7 @@ public static class InstallChanges
 
     public static string Reason(PlannedModVersion planned, Instance? instance, IReadOnlyList<PlannedModVersion> all)
     {
+        if (planned.Replaces is { } replaces) return $"Replaces {replaces}";
         if (planned.OptionalReason is { } reason) return reason;
         if (planned.IsUserRequested) return "Picked by you";
 

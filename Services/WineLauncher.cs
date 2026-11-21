@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -6,6 +7,7 @@ namespace KMRLauncherMvvm.Services;
 public static class WineLauncher
 {
     private const string WinePath = "/usr/bin/wine";
+    private const string WineServerPath = "/usr/bin/wineserver";
 
     // prefixDir: the instance's Wine prefix (Instance.PrefixPath, see WinePrefixes)
     public static Process Launch(string prefixDir, string exePath,
@@ -35,5 +37,23 @@ public static class WineLauncher
         foreach (var arg in gameArgs) psi.ArgumentList.Add(arg);
 
         return Process.Start(psi)!;
+    }
+
+    public static void Stop(Process process, string prefixDir)
+    {
+        try
+        {
+            if (!process.HasExited) process.Kill(entireProcessTree: true);
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        if (!File.Exists(WineServerPath) || !Directory.Exists(prefixDir)) return;
+
+        var psi = new ProcessStartInfo { FileName = WineServerPath, UseShellExecute = false };
+        psi.ArgumentList.Add("-k");
+        psi.Environment["WINEPREFIX"] = prefixDir;
+        Process.Start(psi)?.WaitForExit(5000);
     }
 }

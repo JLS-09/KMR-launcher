@@ -291,6 +291,16 @@
             <Setter Property="BorderBrush" Value="{DynamicResource StatusUpdate}" />
             <Setter Property="Foreground" Value="{DynamicResource StatusUpdate}" />
         </Style>
+        <Style Selector="Button.updateBadge.replaced">
+            <Setter Property="BorderBrush" Value="{DynamicResource StatusWarningLine}" />
+            <Setter Property="Background" Value="{DynamicResource StatusWarningSoft}" />
+            <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
+        </Style>
+        <Style Selector="Button.updateBadge.replaced:pointerover /template/ ContentPresenter, Button.updateBadge.replaced:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource StatusWarningSoft}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource StatusWarning}" />
+            <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
+        </Style>
         <!-- Row menu button: 28 × 28, transparent, muted icon -->
         <Style Selector="Button.rowMenu">
             <Setter Property="Width" Value="28" />
@@ -661,7 +671,7 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6"
                                                 VerticalAlignment="Center">
-                                        <TextBlock Classes="mono installedVersion" Classes.outdated="{Binding HasUpdate}"
+                                        <TextBlock Classes="mono installedVersion" Classes.outdated="{Binding HasUpdateOrReplacement}"
                                                    FontSize="12" Text="{Binding Version.Version}"
                                                    TextTrimming="CharacterEllipsis" MaxWidth="130"
                                                    VerticalAlignment="Center" />
@@ -674,6 +684,18 @@
                                                                      Foreground="{DynamicResource StatusUpdate}"
                                                                      VerticalAlignment="Center" />
                                                 <TextBlock Text="{Binding NextText}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Classes="updateBadge replaced" IsVisible="{Binding HasReplacement}"
+                                                Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).UpdateRowCommand}"
+                                                CommandParameter="{Binding}" ToolTip.Tip="{Binding ReplacementTip}">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <controls:StrokeIcon Data="{StaticResource IconArrowRight}" Size="11"
+                                                                     Foreground="{DynamicResource StatusWarning}"
+                                                                     VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding Replacement.Identifier, FallbackValue=''}"
+                                                           MaxWidth="110" TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Center" />
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
@@ -689,6 +711,10 @@
                                             <MenuFlyout Placement="BottomEdgeAlignedRight">
                                                 <MenuItem Header="Update"
                                                           IsVisible="{Binding HasUpdate}"
+                                                          Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).UpdateRowCommand}"
+                                                          CommandParameter="{Binding}" />
+                                                <MenuItem Header="{Binding ReplaceHeader}"
+                                                          IsVisible="{Binding HasReplacement}"
                                                           Command="{Binding $parent[UserControl].((vm:InstancesPageViewModel)DataContext).UpdateRowCommand}"
                                                           CommandParameter="{Binding}" />
                                                 <MenuItem Header="Remove"

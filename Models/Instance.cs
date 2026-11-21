@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -94,13 +95,14 @@ public class Instance(string name, string rootPath, string version)
         return [.. result];
     }
 
-    public async Task LaunchInstanceWithWine()
+    public async Task LaunchInstanceWithWine(Action<Process>? started = null)
     {
         if (string.IsNullOrWhiteSpace(PrefixPath)) PrefixPath = WinePrefixes.DefaultFor(this, App.Settings.Instances);
 
         var kspProcess = WineLauncher.Launch(PrefixPath, Path.Combine(RootPath, "KSP_x64.exe"),
             SplitArguments(LaunchArguments));
         var startTime = kspProcess.StartTime;
+        started?.Invoke(kspProcess);
 
         kspProcess.OutputDataReceived += (_, e) =>
         {

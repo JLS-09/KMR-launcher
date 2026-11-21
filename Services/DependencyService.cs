@@ -34,6 +34,9 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         if (modListService.Mods is null || instance is null) return installModsData;
 
         var dependencyResolutionState = new DependencyResolutionState(instance);
+        dependencyResolutionState.ToRemove.AddRange(installModsData.ReplacedModVersions
+            .Where(v => instance.Mods.Exists(m => m.Id == v.Id))
+            .Select(v => new PlannedModVersion { Version = v }));
 
         foreach (var requested in installModsData.RequestedModVersions.Where(r =>
                      r.Version.Id is null || !instance.Mods.Exists(m => m.Id == r.Version.Id)))
@@ -121,6 +124,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         IsVersionPickedByUser = wrapper.IsVersionPickedByUser,
         Relationship = wrapper.Relationship,
         OptionalReason = wrapper.OptionalReason,
+        Replaces = wrapper.Replaces,
         RequiredBy = [.. wrapper.RequiredBy]
     };
 
@@ -215,7 +219,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         }
 
         var installed = dependencyResolutionState.Instance?.Mods.FirstOrDefault(v => v.Identifier == dependency.Name);
-        if (installed is not null)
+        if (installed is not null && !dependencyResolutionState.ToRemove.Exists(w => w.Version.Id == installed.Id))
         {
             if (compatibilityService.IsVersionCompatibleWithRelation(installed, dependency)) return;
 
@@ -235,9 +239,10 @@ public class DependencyService(ModListService modListService, CompatibilityServi
             return;
         }
 
-        if (dependencyResolutionState.Instance?.Mods.Any(m => m.Provides?.Contains(dependency.Name!) == true) == true)
+        if (dependencyResolutionState.Instance?.Mods.Any(m => m.Provides?.Contains(dependency.Name!) == true &&
+                !dependencyResolutionState.ToRemove.Exists(w => w.Version.Id == m.Id)) == true)
             return;
-        
+
         var version = compatibilityService.GetCompatibleVersionFromRelation(dependency,
             dependencyResolutionState.Criteria);
         AddDependency(dependency, version, [reason], dependencyResolutionState);

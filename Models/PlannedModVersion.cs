@@ -10,6 +10,7 @@ public class PlannedModVersion
     public bool IsVersionPickedByUser { get; set; }
     public Relationship? Relationship { get; set; }
     public string? OptionalReason { get; set; }
+    public string? Replaces { get; set; }
 
     public string ReasonForAction
     {

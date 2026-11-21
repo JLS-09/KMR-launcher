@@ -246,7 +246,8 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         _allRows =
         [
             .. instance.Mods
-                .Select(v => new InstalledModRowViewModel(instance, v, mods.GetValueOrDefault(v.Identifier), criteria))
+                .Select(v => new InstalledModRowViewModel(instance, v, mods.GetValueOrDefault(v.Identifier), criteria,
+                    InstalledMods.FindReplacement(instance, v, mods, criteria)))
                 .OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
         ];
         foreach (var row in _allRows)
@@ -256,7 +257,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         }
 
         var picked = _allRows.Count(r => !r.IsDependency);
-        var updates = _allRows.Count(r => r.HasUpdate);
+        var updates = _allRows.Count(r => r.HasUpdateOrReplacement);
         ModsCount = _allRows.Count.ToString();
         ModsDetail = $"{picked} picked · {_allRows.Count - picked} dependencies";
         AllCount = _allRows.Count.ToString();
@@ -286,7 +287,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
             {
                 ModsFilter.Picked => !r.IsDependency,
                 ModsFilter.Dependencies => r.IsDependency,
-                ModsFilter.Updates => r.HasUpdate,
+                ModsFilter.Updates => r.HasUpdateOrReplacement,
                 ModsFilter.Issues => r.IsNotListed,
                 _ => true
             }));
@@ -298,7 +299,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         var selected = _allRows.Where(r => r.IsSelected).ToList();
         SelectedCount = selected.Count;
         HasSelection = selected.Count > 0;
-        SelectionHasUpdates = selected.Any(r => r.HasUpdate);
+        SelectionHasUpdates = selected.Any(r => r.HasUpdateOrReplacement);
         RemovalNote = Selected is null || selected.Count == 0
             ? ""
             : InstalledMods.DescribeRemoval(InstalledMods.PlanRemoval(Selected,
@@ -326,10 +327,10 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     }
 
     [RelayCommand]
-    private Task UpdateSelected() => Update([.. _allRows.Where(r => r.IsSelected && r.HasUpdate)]);
+    private Task UpdateSelected() => Update([.. _allRows.Where(r => r.IsSelected && r.HasUpdateOrReplacement)]);
 
     [RelayCommand]
-    private Task UpdateAll() => Update([.. _allRows.Where(r => r.HasUpdate)]);
+    private Task UpdateAll() => Update([.. _allRows.Where(r => r.HasUpdateOrReplacement)]);
 
     [RelayCommand]
     private Task UpdateRow(InstalledModRowViewModel row) => Update([row]);
@@ -340,13 +341,15 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
         var requested = rows.Select(r => new PlannedModVersion
         {
-            Version = r.NextVersion!,
+            Version = r.Replacement ?? r.NextVersion!,
             IsUserRequested = InstalledMods.IsUserRequested(instance, r.Version.Identifier),
             IsVersionPickedByUser = true,
-            OptionalReason = instance.ModRecords.GetValueOrDefault(r.Version.Identifier)?.Reason
+            OptionalReason = instance.ModRecords.GetValueOrDefault(r.Version.Identifier)?.Reason,
+            Replaces = r.HasReplacement ? r.Version.Identifier : null
         }).ToList();
+        List<ModVersion> replaced = [.. rows.Where(r => r.HasReplacement).Select(r => r.Version)];
 
-        if (await _installFlow.InstallAsync(requested, instance, InstallSource.Updates)) ClearSelection();
+        if (await _installFlow.InstallAsync(requested, instance, InstallSource.Updates, replaced)) ClearSelection();
     }
 
     private bool CanLaunch() => !IsGameRunning;

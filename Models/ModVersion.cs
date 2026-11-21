@@ -61,7 +61,7 @@ public class ModVersion
     [JsonPropertyName("suggests")] public List<Relationship>? Suggests { get; set; }
     [JsonPropertyName("supports")] public List<Relationship>? Supports { get; set; }
     [JsonPropertyName("conflicts")] public List<Relationship>? Conflicts { get; set; }
-    [JsonPropertyName("replaced_by")] public JsonElement? ReplacedBy { get; set; }
+    [JsonPropertyName("replaced_by")] public Relationship? ReplacedBy { get; set; }
 
     [JsonIgnore] public string LastUpdatedHumanized => ReleaseDate is null ? "" : ReleaseDate.Humanize();
 

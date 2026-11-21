@@ -11,12 +11,12 @@ public class InstallFlow(ModListService modListService, DependencyService depend
     NavigationService navigation, DialogService dialogs)
 {
     public Task<bool> InstallAsync(IReadOnlyList<PlannedModVersion> requested, Instance? target,
-        InstallSource source = InstallSource.Discover)
+        InstallSource source = InstallSource.Discover, IReadOnlyList<ModVersion>? replaced = null)
     {
         if (dialogs.IsOpen) return Task.FromResult(false);
 
         var dialog = new InstallDialogViewModel(requested, target, source, modListService, dependencyService,
-            compatibilityService, installService, session, navigation, dialogs);
+            compatibilityService, installService, session, navigation, dialogs, replaced);
         dialogs.Show(dialog);
         return dialog.Result;
     }

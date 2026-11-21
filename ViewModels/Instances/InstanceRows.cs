@@ -26,6 +26,13 @@ public partial class InstalledModRowViewModel : ObservableObject
     public bool IsDependency { get; }
     public ModVersion? NextVersion { get; }
     public bool HasUpdate => NextVersion is not null;
+    public ModVersion? Replacement { get; }
+    public bool HasReplacement => Replacement is not null;
+    public bool HasUpdateOrReplacement => HasUpdate || HasReplacement;
+    public string ReplacementTip => Replacement is null
+        ? ""
+        : $"Replaced by {Replacement.Identifier} {Replacement.Version}. Replacing installs it and removes {Version.Identifier}.";
+    public string ReplaceHeader => Replacement is null ? "" : $"Replace with {Replacement.Identifier}";
     public string NextText { get; }
     public bool IsNotListed { get; }
     public string NotListedText { get; }
@@ -35,14 +42,16 @@ public partial class InstalledModRowViewModel : ObservableObject
 
     public event Action? SelectionChanged;
 
-    public InstalledModRowViewModel(Instance instance, ModVersion version, Mod? mod, GameVersionCriteria criteria)
+    public InstalledModRowViewModel(Instance instance, ModVersion version, Mod? mod, GameVersionCriteria criteria,
+        ModVersion? replacement = null)
     {
+        Replacement = replacement;
         Version = version;
         Name = mod?.Name ?? version.Identifier;
         Reason = InstalledMods.ReasonText(instance, version);
         IsDependency = !InstalledMods.IsUserRequested(instance, version.Identifier);
 
-        if (mod is not null)
+        if (mod is not null && replacement is null)
         {
             var fit = Discover.ModFit.For(mod, instance, criteria);
             if (fit.Kind == Controls.ModStatusKind.Update) NextVersion = fit.NewestFit;
