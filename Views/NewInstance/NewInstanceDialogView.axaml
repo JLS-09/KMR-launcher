@@ -118,21 +118,19 @@
                            VerticalAlignment="Center" Text="New instance" />
                 <Border Grid.Column="1" Classes="segmented tabs" IsVisible="{Binding IsForm}">
                     <StackPanel Orientation="Horizontal" Spacing="2">
-                        <RadioButton Classes="segment tab" GroupName="newInstanceSource" IsChecked="True">
+                        <RadioButton Classes="segment tab" GroupName="newInstanceSource"
+                                     IsChecked="{Binding IsZipTab, Mode=OneWay}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <controls:StrokeIcon Data="{StaticResource IconArchive}" Size="15" VerticalAlignment="Center" />
                                 <TextBlock Text="From a KSP zip" VerticalAlignment="Center" />
                             </StackPanel>
                         </RadioButton>
-                        <!-- Placeholder: adding an existing folder comes later in Phase 7 (task 3) -->
-                        <Border Classes="soon" ToolTip.Tip="Adding an existing KSP folder comes later in Phase 7">
-                            <RadioButton Classes="segment tab" GroupName="newInstanceSource">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="15" VerticalAlignment="Center" />
-                                    <TextBlock Text="Existing KSP folder" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </RadioButton>
-                        </Border>
+                        <RadioButton Classes="segment tab" GroupName="newInstanceSource" IsChecked="{Binding IsFolderTab}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="15" VerticalAlignment="Center" />
+                                <TextBlock Text="Existing KSP folder" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </RadioButton>
                     </StackPanel>
                 </Border>
                 <Button Grid.Column="2" Classes="ghost icon small" Width="32" Height="32" ToolTip.Tip="Close"
@@ -144,7 +142,7 @@
             <!-- Body: form or checklist, and the summary on the right -->
             <Border Grid.Row="1" BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0">
                 <Grid ColumnDefinitions="*, 250">
-                    <ScrollViewer IsVisible="{Binding IsForm}" HorizontalScrollBarVisibility="Disabled">
+                    <ScrollViewer IsVisible="{Binding IsZipForm}" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Margin="24 22" Spacing="22">
                             <!-- Name and folder -->
                             <StackPanel Spacing="8">
@@ -338,6 +336,93 @@
                         </StackPanel>
                     </ScrollViewer>
 
+                    <!-- Existing KSP folder (mockup NewInstanceImport) -->
+                    <ScrollViewer IsVisible="{Binding IsFolderForm}" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="24 22" Spacing="22">
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="label" Text="KSP FOLDER" />
+                                <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                                    <TextBox Classes="field mono" Height="36" AutomationProperties.Name="KSP folder"
+                                             Text="{Binding FolderInput, UpdateSourceTrigger=LostFocus}"
+                                             PlaceholderText="~/.local/share/Steam/steamapps/common/Kerbal Space Program"
+                                             KeyDown="FolderInput_OnKeyDown" />
+                                    <Button Grid.Column="1" Classes="secondary" Height="36" Click="BrowseKspFolder_OnClick">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="16" VerticalAlignment="Center" />
+                                            <TextBlock Text="Browse" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                                <TextBlock Classes="hint" Text="Looking at the folder…" IsVisible="{Binding IsScanning}" />
+                            </StackPanel>
+
+                            <StackPanel IsVisible="{Binding HasFoundRows}">
+                                <TextBlock Classes="label" Margin="0 0 0 6" Text="FOUND IN THIS FOLDER" />
+                                <ItemsControl ItemsSource="{Binding FoundRows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:FoundRow">
+                                            <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12">
+                                                <Grid ColumnDefinitions="Auto, *" ColumnSpacing="12">
+                                                    <Panel VerticalAlignment="Top" Margin="0 2 0 0">
+                                                        <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="16"
+                                                                             Foreground="{DynamicResource StatusFits}"
+                                                                             IsVisible="{Binding IsOk}" />
+                                                        <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="16"
+                                                                             Foreground="{DynamicResource StatusWarning}"
+                                                                             IsVisible="{Binding IsWarning}" />
+                                                        <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="16"
+                                                                             Foreground="{DynamicResource StatusError}"
+                                                                             IsVisible="{Binding IsError}" />
+                                                    </Panel>
+                                                    <StackPanel Grid.Column="1">
+                                                        <TextBlock Classes="optionTitle" Text="{Binding Title}" />
+                                                        <TextBlock Classes="hint" LineHeight="17" Text="{Binding Hint}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="label" Text="HOW TO ADD IT" />
+                                <RadioButton Classes="dot card option" GroupName="newInstanceImportMode"
+                                             IsChecked="{Binding IsCopy}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Classes="optionTitle" Text="Copy into KMR" />
+                                        <TextBlock Classes="hint" Text="{Binding CopyHint}" />
+                                    </StackPanel>
+                                </RadioButton>
+                                <RadioButton Classes="dot card option" GroupName="newInstanceImportMode"
+                                             IsChecked="{Binding IsInPlace, Mode=OneWay}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Classes="optionTitle" Text="Use in place" />
+                                        <TextBlock Classes="hint" Text="{Binding InPlaceHint}" />
+                                    </StackPanel>
+                                </RadioButton>
+                            </StackPanel>
+
+                            <StackPanel Spacing="8">
+                                <TextBlock Classes="label" Text="NAME" />
+                                <TextBox Classes="field" Height="36" Text="{Binding ImportName}" MaxLength="80"
+                                         AutomationProperties.Name="Instance name" />
+                                <TextBlock Classes="error" Text="{Binding ImportNameError}"
+                                           IsVisible="{Binding ImportNameError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                <!-- Where the copy goes (not in the mockup) -->
+                                <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsCopy}">
+                                    <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="13" VerticalAlignment="Center"
+                                                         Foreground="{DynamicResource TextMuted}" />
+                                    <TextBlock Classes="mono" FontSize="12" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextMuted}" TextTrimming="CharacterEllipsis"
+                                               Text="{Binding ImportFolderText}" />
+                                    <Button Classes="ghost tiny" Content="Change" Click="ChangeFolder_OnClick"
+                                            ToolTip.Tip="Pick the folder the copy goes in" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+
                     <!-- Creating: checklist with progress -->
                     <ScrollViewer IsVisible="{Binding IsCreating}" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel Margin="24 22" Spacing="22">
@@ -412,39 +497,25 @@
                             BorderThickness="1 0 0 0">
                         <StackPanel Margin="20" Spacing="14">
                             <TextBlock Classes="label" Text="WILL BE CREATED" />
-                            <StackPanel Spacing="9">
-                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12">
-                                    <TextBlock Text="KSP" />
-                                    <TextBlock Grid.Column="1" Classes="value" Text="{Binding KspText}" />
-                                </Grid>
-                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12">
-                                    <TextBlock Text="Folder" />
-                                    <TextBlock Grid.Column="1" Classes="value" Text="{Binding FolderName}" />
-                                </Grid>
-                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12"
-                                      IsVisible="{Binding IsForm}">
-                                    <TextBlock Text="Disk" />
-                                    <TextBlock Grid.Column="1" Classes="value" Text="{Binding DiskText}" />
-                                </Grid>
-                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12"
-                                      IsVisible="{Binding IsCreating}">
-                                    <TextBlock Text="Written" />
-                                    <TextBlock Grid.Column="1" Classes="value" Text="{Binding WrittenText}" />
-                                </Grid>
-                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12">
-                                    <TextBlock Text="Runner" />
-                                    <TextBlock Grid.Column="1" Classes="value" Text="Wine" />
-                                </Grid>
-                                <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12">
-                                    <TextBlock Text="Mods" />
-                                    <TextBlock Grid.Column="1" Classes="value" Text="0" />
-                                </Grid>
-                            </StackPanel>
+                            <ItemsControl ItemsSource="{Binding Summary}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="9" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:SummaryRow">
+                                        <Grid Classes="panelRow" ColumnDefinitions="Auto, *" ColumnSpacing="12">
+                                            <TextBlock Text="{Binding Label}" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding Value}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                             <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 0"
-                                    IsVisible="{Binding IsForm}">
+                                    IsVisible="{Binding SummaryNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                                 <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap"
-                                           Foreground="{DynamicResource TextMuted}"
-                                           Text="The zip is unpacked into the folder. The zip itself stays where it is." />
+                                           Foreground="{DynamicResource TextMuted}" Text="{Binding SummaryNote}" />
                             </Border>
                         </StackPanel>
                     </Border>
@@ -461,7 +532,7 @@
                         <Button Grid.Column="2" Classes="accent" Command="{Binding CreateCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="16" VerticalAlignment="Center" />
-                                <TextBlock Text="Create instance" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding CreateText}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </Grid>

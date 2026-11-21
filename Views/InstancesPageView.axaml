@@ -256,7 +256,7 @@
                     </Grid>
                 </Border>
 
-                <!-- Import: placeholder until Phase 7 task 3 -->
+                <!-- Import: the New instance dialog on its Existing KSP folder tab -->
                 <Border DockPanel.Dock="Bottom" Padding="20 16" BorderBrush="{DynamicResource Line}"
                         BorderThickness="0 1 0 0">
                     <StackPanel Spacing="8">
@@ -265,7 +265,7 @@
                                    Foreground="{DynamicResource TextMuted}"
                                    Text="Add a KSP folder you already have. Mods installed by CKAN are picked up from its registry." />
                         <Button Classes="secondary small" HorizontalAlignment="Left"
-                                ToolTip.Tip="Not built yet: Phase 7 task 3">
+                                Command="{Binding ImportInstanceCommand}">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="14"
                                                      VerticalAlignment="Center" />
@@ -887,8 +887,26 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- Forget instance: off the list, nothing on disk changes (not in the mockups) -->
+                    <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 22 0 0">
+                        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="16">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock FontSize="14" FontWeight="SemiBold" Text="Forget instance" />
+                                <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                                           Text="Takes it off the list. The folder, its saves and its prefix stay; add it again later with Import." />
+                            </StackPanel>
+                            <Button Grid.Column="1" Classes="secondary" VerticalAlignment="Center"
+                                    Command="{Binding ForgetInstanceCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <controls:StrokeIcon Data="{StaticResource IconClose}" Size="16" VerticalAlignment="Center" />
+                                    <TextBlock Text="Forget instance" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Border>
+
                     <!-- Delete instance (asks first) -->
-                    <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 22 0 28">
+                    <Border Padding="0 22 0 28">
                         <Grid ColumnDefinitions="*, Auto" ColumnSpacing="16">
                             <StackPanel VerticalAlignment="Center">
                                 <TextBlock FontSize="14" FontWeight="SemiBold" Text="Delete instance" />

@@ -1,5 +1,6 @@
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using KMRLauncherMvvm.ViewModels.NewInstance;
@@ -38,5 +39,24 @@ public partial class NewInstanceDialogView : UserControl
             FileTypeFilter = [new FilePickerFileType("Zip files") { Patterns = ["*.zip"] }, FilePickerFileTypes.All]
         });
         if (files.FirstOrDefault()?.TryGetLocalPath() is { } path) vm.AddZip(path);
+    }
+
+    private async void BrowseKspFolder_OnClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not NewInstanceDialogViewModel vm) return;
+        if (TopLevel.GetTopLevel(this)?.StorageProvider is not { } storage) return;
+
+        var folders = await storage.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "KSP folder to add",
+            AllowMultiple = false
+        });
+        if (folders.FirstOrDefault()?.TryGetLocalPath() is { } path) vm.FolderInput = path;
+    }
+
+    private void FolderInput_OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && sender is TextBox { Text: { } text } && DataContext is NewInstanceDialogViewModel vm)
+            vm.FolderInput = text;
     }
 }

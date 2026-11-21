@@ -100,7 +100,7 @@ public class NewInstanceTests : IDisposable
         Assert.Same(instance, Assert.Single(settings.Instances));
         Assert.Same(instance, Assert.Single(_saved));
         Assert.Equal(Path.Combine(_root, "instances"), settings.InstanceParentFolder);
-        Assert.Equal([CreateStep.CheckZip, CreateStep.Unpack, CreateStep.Prefix, CreateStep.Save, CreateStep.Done],
+        Assert.Equal([CreateStep.Check, CreateStep.Files, CreateStep.Prefix, CreateStep.Save, CreateStep.Done],
             steps.Distinct());
     }
 

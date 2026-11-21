@@ -81,7 +81,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(ShowSelectionBar), nameof(ShowSettingsBar))]
     private InstanceTab _tab = InstanceTab.Mods;
 
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand), nameof(DeleteInstanceCommand))]
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand), nameof(DeleteInstanceCommand), nameof(ForgetInstanceCommand))]
     private bool _isGameRunning;
 
     private readonly Dictionary<string, InstanceSettingsViewModel> _settingsByPath = [];
@@ -445,6 +445,27 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         }
     }
 
+    [RelayCommand(CanExecute = nameof(CanDeleteInstance))]
+    private void ForgetInstance()
+    {
+        if (Selected is not { } instance) return;
+
+        ActionError = null;
+        var index = App.Settings.Instances.IndexOf(instance);
+        if (index < 0) return;
+        try
+        {
+            App.Settings.Instances.RemoveAt(index);
+            SettingsService.Save(App.Settings);
+            Tab = InstanceTab.Mods;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            App.Settings.Instances.Insert(index, instance);
+            ActionError = $"Couldn't save the instance list: {e.Message}";
+        }
+    }
+
     [RelayCommand]
     private void MakePrimary()
     {
@@ -483,6 +504,9 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
     [RelayCommand]
     private void NewInstance() => _newInstanceFlow?.CreateAsync();
+
+    [RelayCommand]
+    private void ImportInstance() => _newInstanceFlow?.CreateAsync(existingFolder: true);
 
     [RelayCommand]
     private void AddMods()
