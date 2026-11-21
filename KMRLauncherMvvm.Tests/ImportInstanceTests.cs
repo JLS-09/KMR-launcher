@@ -6,19 +6,13 @@ using KMRLauncherMvvm.ViewModels.NewInstance;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class ImportInstanceTests : IDisposable
+public class ImportInstanceTests : TempFolderTest
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "kmr-import-" + Guid.NewGuid().ToString("N"));
     private readonly List<Instance> _saved = [];
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_root)) Directory.Delete(_root, true);
-    }
 
     private string Write(string relative, string text = "x")
     {
-        var path = Path.Combine(_root, relative);
+        var path = Path.Combine(Temp, relative);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, text);
         return path;
@@ -36,7 +30,7 @@ public class ImportInstanceTests : IDisposable
     private string KspFolder(string name = "Kerbal Space Program", string buildId = "03190", bool registry = true,
         string? compatible = """{"GameVersionWhenWritten":"1.12.5","Versions":["1.12.5","1.12","1.11.2.3047"]}""")
     {
-        var folder = Path.Combine(_root, name);
+        var folder = Path.Combine(Temp, name);
         Write($"{name}/buildID64.txt", $"build id = {buildId}\n");
         Write($"{name}/GameData/Squad/parts.cfg");
         Write($"{name}/GameData/Kopernicus/Plugins/Kopernicus.dll");
@@ -265,11 +259,11 @@ public class ImportInstanceTests : IDisposable
     [Fact]
     public void FoldersThatAreNotKspOrAlreadyListedAreRefused()
     {
-        Directory.CreateDirectory(Path.Combine(_root, "empty"));
+        Directory.CreateDirectory(Path.Combine(Temp, "empty"));
         var ksp = KspFolder();
 
-        Assert.False(KspFolderScanner.Scan(Path.Combine(_root, "empty"), []).CanAdd);
-        Assert.False(KspFolderScanner.Scan(Path.Combine(_root, "nowhere"), []).CanAdd);
+        Assert.False(KspFolderScanner.Scan(Path.Combine(Temp, "empty"), []).CanAdd);
+        Assert.False(KspFolderScanner.Scan(Path.Combine(Temp, "nowhere"), []).CanAdd);
         Assert.False(KspFolderScanner.Scan(KspFolder("odd", buildId: "99999"), []).CanAdd);
         Assert.Contains("already",
             KspFolderScanner.Scan(ksp, [new Instance("Old", ksp, "1.12.5")]).Error);
@@ -299,7 +293,7 @@ public class ImportInstanceTests : IDisposable
     {
         var folder = KspFolder();
         Write("Kerbal Space Program/.kmr/staging/old/leftover.txt");
-        var target = Path.Combine(_root, "instances", "steam-1.12.5");
+        var target = Path.Combine(Temp, "instances", "steam-1.12.5");
         var scan = KspFolderScanner.Scan(folder, []);
 
         var instance = await Creator().ImportAsync(new AppSettings(),
@@ -318,7 +312,7 @@ public class ImportInstanceTests : IDisposable
     {
         var folder = KspFolder();
         for (var i = 0; i < 100; i++) Write($"Kerbal Space Program/GameData/Squad/f{i}.cfg");
-        var target = Path.Combine(_root, "instances", "copy");
+        var target = Path.Combine(Temp, "instances", "copy");
         using var cancel = new CancellationTokenSource();
         var progress = new SyncProgress<CreateProgress>(p =>
         {
@@ -360,7 +354,7 @@ public class ImportInstanceTests : IDisposable
         Assert.NotNull(scan.KmrData);
 
         var copy = await Creator().ImportAsync(new AppSettings(),
-            new ImportRequest("New name", scan, ImportMode.Copy, Path.Combine(_root, "copy"), false));
+            new ImportRequest("New name", scan, ImportMode.Copy, Path.Combine(Temp, "copy"), false));
 
         Assert.Equal("New name", copy.Name);
         Assert.Equal(42, copy.PlayTime);
@@ -393,7 +387,7 @@ public class ImportInstanceTests : IDisposable
     public async Task DialogScansAndAddsInPlace()
     {
         var folder = KspFolder();
-        var settings = new AppSettings { InstanceParentFolder = Path.Combine(_root, "instances") };
+        var settings = new AppSettings { InstanceParentFolder = Path.Combine(Temp, "instances") };
         Instance? finished = null;
         var vm = new NewInstanceDialogViewModel(settings, new ZipService(), Creator(), i => finished = i)
         {
@@ -419,20 +413,15 @@ public class ImportInstanceTests : IDisposable
     [Fact]
     public async Task DialogBlocksAddingAFolderThatIsNoKspInstall()
     {
-        Directory.CreateDirectory(Path.Combine(_root, "empty"));
+        Directory.CreateDirectory(Path.Combine(Temp, "empty"));
         var vm = new NewInstanceDialogViewModel(new AppSettings(), new ZipService(), Creator(), _ => { })
         {
             IsFolderTab = true
         };
 
-        await vm.ScanAsync(Path.Combine(_root, "empty"));
+        await vm.ScanAsync(Path.Combine(Temp, "empty"));
 
         Assert.Equal(FoundKind.Error, Assert.Single(vm.FoundRows).Kind);
         Assert.False(vm.CreateCommand.CanExecute(null));
-    }
-
-    private sealed class SyncProgress<T>(Action<T> report) : IProgress<T>
-    {
-        public void Report(T value) => report(value);
     }
 }

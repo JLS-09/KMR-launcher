@@ -5,24 +5,18 @@ using static KMRLauncherMvvm.Tests.TestData;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class InstanceServiceTests : IDisposable
+public class InstanceServiceTests : TempFolderTest
 {
-    private readonly string _temp = Path.Combine(Path.GetTempPath(), "kmr-service-" + Guid.NewGuid());
     private readonly string _file;
 
     public InstanceServiceTests()
     {
-        _file = Path.Combine(_temp, "config", "settings.json");
-    }
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_temp)) Directory.Delete(_temp, true);
+        _file = Path.Combine(Temp, "config", "settings.json");
     }
 
     private Instance Add(InstanceService service, string name)
     {
-        var root = Path.Combine(_temp, name);
+        var root = Path.Combine(Temp, name);
         Directory.CreateDirectory(root);
         var instance = new Instance(name, root, "1.12.5") { PrefixPath = root + "-prefix" };
         service.Instances.Add(instance);
@@ -128,7 +122,7 @@ public class InstanceServiceTests : IDisposable
         b.PrefixPath = a.PrefixPath;
         Assert.False(service.OwnsPrefix(a));
 
-        a.PrefixPath = Path.Combine(_temp, "own-prefix");
+        a.PrefixPath = Path.Combine(Temp, "own-prefix");
         Assert.False(service.OwnsPrefix(a));
     }
 
@@ -161,8 +155,8 @@ public class InstanceServiceTests : IDisposable
     [Fact]
     public async Task NewInstanceInTheInstanceStepSelectsTheCreatedInstance()
     {
-        var a = new Instance("A", Path.Combine(_temp, "a"), "1.12.5");
-        var b = new Instance("B", Path.Combine(_temp, "b"), "1.12.5");
+        var a = new Instance("A", Path.Combine(Temp, "a"), "1.12.5");
+        var b = new Instance("B", Path.Combine(Temp, "b"), "1.12.5");
         var usable = new List<Instance> { a };
         var data = new InstallModsData { RequestedModVersions = [Requested(Version("Foo", "1.0"))] };
         var step = new InstallModsSelectInstanceStepViewModel(data, new TestServices().Dependency, () => usable)

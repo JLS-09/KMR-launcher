@@ -5,25 +5,19 @@ using static KMRLauncherMvvm.Tests.TestData;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class InstanceDataTests : IDisposable
+public class InstanceDataTests : TempFolderTest
 {
-    private readonly string _temp = Path.Combine(Path.GetTempPath(), "kmr-data-" + Guid.NewGuid());
     private readonly string _settingsFile;
 
     public InstanceDataTests()
     {
-        Directory.CreateDirectory(_temp);
-        _settingsFile = Path.Combine(_temp, "settings.json");
-    }
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_temp)) Directory.Delete(_temp, true);
+        Directory.CreateDirectory(Temp);
+        _settingsFile = Path.Combine(Temp, "settings.json");
     }
 
     private string Folder(string name, bool create = true)
     {
-        var path = Path.Combine(_temp, name);
+        var path = Path.Combine(Temp, name);
         if (create) Directory.CreateDirectory(path);
         return path;
     }
@@ -91,7 +85,7 @@ public class InstanceDataTests : IDisposable
         Assert.True(reloaded.Instances[1].IsPrimary);
         Assert.False(reloaded.Instances[0].IsPrimary);
         Assert.Single(reloaded.KspZips);
-        Assert.Empty(Directory.GetFiles(_temp, "*.tmp", SearchOption.AllDirectories));
+        Assert.Empty(Directory.GetFiles(Temp, "*.tmp", SearchOption.AllDirectories));
     }
 
     [Fact]

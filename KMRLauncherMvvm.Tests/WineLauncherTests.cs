@@ -4,18 +4,11 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class WineLauncherTests : IDisposable
+public class WineLauncherTests : TempFolderTest
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "kmr-path-" + Guid.NewGuid().ToString("N"));
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_folder)) Directory.Delete(_folder, true);
-    }
-
     private string MakeFile(string folder, string name, bool executable)
     {
-        var dir = Path.Combine(_folder, folder);
+        var dir = Path.Combine(Temp, folder);
         Directory.CreateDirectory(dir);
         var path = Path.Combine(dir, name);
         File.WriteAllText(path, "#!/bin/sh\n");
@@ -39,7 +32,7 @@ public class WineLauncherTests : IDisposable
         MakeFile("a", "wine", executable: false);
         var expected = MakeFile("b", "wine", executable: true);
         MakeFile("c", "wine", executable: true);
-        var path = string.Join(':', Path.Combine(_folder, "a"), Path.Combine(_folder, "b"), Path.Combine(_folder, "c"));
+        var path = string.Join(':', Path.Combine(Temp, "a"), Path.Combine(Temp, "b"), Path.Combine(Temp, "c"));
 
         Assert.Equal(expected, WineLauncher.FindOnPath("wine", path));
     }
@@ -49,7 +42,7 @@ public class WineLauncherTests : IDisposable
     {
         MakeFile("a", "wine", executable: true);
 
-        Assert.Null(WineLauncher.FindOnPath("umu-run", Path.Combine(_folder, "a")));
+        Assert.Null(WineLauncher.FindOnPath("umu-run", Path.Combine(Temp, "a")));
         Assert.Null(WineLauncher.FindOnPath("wine", ""));
     }
 
