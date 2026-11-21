@@ -34,7 +34,7 @@ public class UiFoundationTests
     [Fact]
     public void Text_on_every_accent_fill_is_readable()
     {
-        foreach (var hex in ThemeService.AccentChoices)
+        foreach (var (_, hex) in ThemeService.AccentChoices)
         {
             var palette = AccentPalette.From(Color.Parse(hex));
             var a = AccentPalette.RelativeLuminance(palette.Accent);

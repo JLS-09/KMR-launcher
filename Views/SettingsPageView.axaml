@@ -95,6 +95,20 @@
         <Style Selector="StackPanel.found controls|StrokeIcon">
             <Setter Property="Foreground" Value="{DynamicResource StatusFits}" />
         </Style>
+        <Style Selector="RadioButton.swatch">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="Ring" Width="36" Height="36" CornerRadius="18" BorderThickness="2"
+                            BorderBrush="Transparent" Background="Transparent" Padding="3">
+                        <Ellipse Fill="{TemplateBinding Background}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="RadioButton.swatch:checked /template/ Border#Ring">
+            <Setter Property="BorderBrush" Value="{DynamicResource TextPrimary}" />
+        </Style>
         <Style Selector="TextBlock.missing">
             <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
         </Style>
@@ -110,6 +124,8 @@
                 <Button Name="DownloadsNav" Classes="sectionNav" Content="Downloads and cache"
                         Click="SectionNav_OnClick" />
                 <Button Name="LaunchingNav" Classes="sectionNav" Content="Launching"
+                        Click="SectionNav_OnClick" />
+                <Button Name="AppearanceNav" Classes="sectionNav" Content="Appearance"
                         Click="SectionNav_OnClick" />
             </StackPanel>
         </Border>
@@ -528,6 +544,63 @@
                                         </Button.Flyout>
                                     </Button>
                                 </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <Border Classes="sectionLine" />
+                    <StackPanel Name="AppearanceSection" Classes="settingsSection">
+                        <TextBlock Classes="h2 sectionTitle" Text="Appearance" />
+                        <Border Classes="settingsRow">
+                            <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto"
+                                  ColumnSpacing="24">
+                                <StackPanel Classes="rowLabel">
+                                    <TextBlock Classes="rowTitle" Text="Accent color" />
+                                    <TextBlock Classes="rowHint" Text="Try them: this page follows your pick." />
+                                </StackPanel>
+                                <StackPanel Classes="rowValue rowControls">
+                                    <ItemsControl ItemsSource="{Binding AccentSwatches}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="10" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="settings:AccentSwatch">
+                                                <RadioButton Classes="swatch" GroupName="accent"
+                                                             Background="{Binding Brush}"
+                                                             IsChecked="{Binding IsSelected, Mode=OneWay}"
+                                                             AutomationProperties.Name="{Binding Name}"
+                                                             ToolTip.Tip="{Binding Name}"
+                                                             Command="{Binding $parent[UserControl].((vm:SettingsPageViewModel)DataContext).PickAccentCommand}"
+                                                             CommandParameter="{Binding}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center"
+                                               Text="{Binding AccentName}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <Border Classes="settingsRow">
+                            <Grid Classes="settingsGrid" ColumnDefinitions="220, *" RowDefinitions="Auto, Auto"
+                                  ColumnSpacing="24">
+                                <StackPanel Classes="rowLabel">
+                                    <TextBlock Classes="rowTitle" Text="Density" />
+                                    <TextBlock Classes="rowHint" Text="Compact fits more rows in the mod lists." />
+                                </StackPanel>
+                                <WrapPanel Classes="rowValue">
+                                    <Border Classes="soon" ToolTip.Tip="Compact density comes later (Phase 9)">
+                                        <Border Classes="segmented raised">
+                                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                                <RadioButton Classes="segment big" GroupName="density"
+                                                             Content="Comfortable" IsChecked="True" />
+                                                <RadioButton Classes="segment big" GroupName="density"
+                                                             Content="Compact" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Border>
+                                </WrapPanel>
                             </Grid>
                         </Border>
                     </StackPanel>

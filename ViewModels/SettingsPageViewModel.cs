@@ -50,6 +50,10 @@ public partial class SettingsPageViewModel : PageViewModel
     [ObservableProperty] private string? _cacheError;
 
     [ObservableProperty] private string _wineDebugText = "";
+    [ObservableProperty] private string _accentName = "";
+
+    public IReadOnlyList<AccentSwatch> AccentSwatches { get; } =
+        [.. ThemeService.AccentChoices.Select(c => new AccentSwatch(c.Name, c.Hex))];
 
     public string WinePathText { get; } = WineLauncher.FindOnPath("wine") ?? "not found";
     public bool WineFound => WinePathText != "not found";
@@ -87,6 +91,7 @@ public partial class SettingsPageViewModel : PageViewModel
         ParallelDownloads = App.Settings.MaxParallelDownloads.ToString(CultureInfo.InvariantCulture);
         FetchOnStartup = App.Settings.FetchOnStartup;
         WineDebugText = DescribeWineDebug(App.Settings.WineDebug);
+        ShowAccent(App.Settings.AccentColor);
     }
 
     public SettingsPageViewModel()
@@ -232,6 +237,25 @@ public partial class SettingsPageViewModel : PageViewModel
 
         settings.WineDebug = level;
         SettingsService.Save(settings);
+    }
+
+    [RelayCommand]
+    private void PickAccent(AccentSwatch swatch)
+    {
+        var settings = App.Settings;
+        ShowAccent(swatch.Hex);
+        if (string.Equals(settings.AccentColor, swatch.Hex, StringComparison.OrdinalIgnoreCase)) return;
+
+        settings.AccentColor = swatch.Hex;
+        ThemeService.ApplyAccent(swatch.Hex);
+        SettingsService.Save(settings);
+    }
+
+    private void ShowAccent(string hex)
+    {
+        var current = AccentSwatches.FirstOrDefault(s => string.Equals(s.Hex, hex, StringComparison.OrdinalIgnoreCase));
+        foreach (var swatch in AccentSwatches) swatch.IsSelected = swatch == current;
+        AccentName = current?.Name ?? hex;
     }
 
     public static string DescribeWineDebug(WineDebugLevel level) => level switch

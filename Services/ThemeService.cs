@@ -42,7 +42,8 @@ public static class ThemeService
 {
     public const string DefaultAccent = "#DF0105";
 
-    public static readonly string[] AccentChoices = ["#DF0105", "#FF7A1A", "#3FB950", "#58A6FF"];
+    public static readonly (string Name, string Hex)[] AccentChoices =
+        [("Red", "#DF0105"), ("Orange", "#FF7A1A"), ("Green", "#3FB950"), ("Blue", "#58A6FF")];
 
     public static void ApplyAccent(string? hex)
     {
