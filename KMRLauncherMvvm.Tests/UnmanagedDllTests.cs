@@ -4,15 +4,8 @@ using static KMRLauncherMvvm.Tests.TestData;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class UnmanagedDllTests : IDisposable
+public class UnmanagedDllTests : TempFolderTest
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "kmr-dlls-" + Guid.NewGuid().ToString("N"));
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_root)) Directory.Delete(_root, true);
-    }
-
     private static Instance WithDlls(Instance instance, params string[] identifiers)
     {
         instance.UnmanagedDlls = identifiers.ToDictionary(i => i, i => $"GameData/{i}.dll");
@@ -58,9 +51,9 @@ public class UnmanagedDllTests : IDisposable
     [Fact]
     public void ScanReadsGameData()
     {
-        var instance = new Instance("Disk", _root, "1.12.5");
-        Directory.CreateDirectory(Path.Combine(_root, "GameData", "Hand"));
-        File.WriteAllText(Path.Combine(_root, "GameData", "Hand", "HandMade.dll"), "x");
+        var instance = new Instance("Disk", Temp, "1.12.5");
+        Directory.CreateDirectory(Path.Combine(Temp, "GameData", "Hand"));
+        File.WriteAllText(Path.Combine(Temp, "GameData", "Hand", "HandMade.dll"), "x");
 
         UnmanagedDlls.Refresh(instance);
 

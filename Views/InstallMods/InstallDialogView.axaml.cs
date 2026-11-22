@@ -111,6 +111,6 @@ public partial class InstallDialogView : UserControl
     private async void CopyError_OnClick(object? sender, RoutedEventArgs e)
     {
         if (_viewModel is null || TopLevel.GetTopLevel(this)?.Clipboard is not { } clipboard) return;
-        await clipboard.SetTextAsync(_viewModel.ErrorText);
+        await clipboard.SetTextAsync(_viewModel.Outcome.ErrorText);
     }
 }

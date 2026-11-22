@@ -43,7 +43,7 @@
     </UserControl.Styles>
 
     <StackPanel Spacing="18">
-        <TextBlock FontSize="13" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}"
+        <TextBlock Classes="size13 secondary" LineHeight="20" TextWrapping="Wrap"
                    Text="Some mods need one of several mods. Pick one for each." />
 
         <ItemsControl ItemsSource="{Binding Choices}">
@@ -58,17 +58,16 @@
                         <StackPanel Spacing="12">
                             <StackPanel Spacing="2">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock FontSize="15" FontWeight="SemiBold" Text="{Binding Title}" />
+                                    <TextBlock Classes="semibold" FontSize="15" Text="{Binding Title}" />
                                     <Border Classes="smallChip" IsVisible="{Binding IsVirtual}">
                                         <TextBlock Text="virtual" />
                                     </Border>
                                 </StackPanel>
                                 <TextBlock Classes="rowHint" Text="{Binding RequiredByText}" />
                             </StackPanel>
-                            <TextBlock FontSize="13" FontStyle="Italic" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource TextSecondary}"
+                            <TextBlock Classes="size13 secondary" FontStyle="Italic" TextWrapping="Wrap"
                                        Text="{Binding HelpText}" IsVisible="{Binding HasHelpText}" />
-                            <TextBlock FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource StatusError}"
+                            <TextBlock Classes="size13 errorText" TextWrapping="Wrap"
                                        Text="{Binding ErrorText}" IsVisible="{Binding IsUnsatisfiable}" />
                             <ItemsControl ItemsSource="{Binding Options}">
                                 <ItemsControl.ItemsPanel>
@@ -122,7 +121,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="14" VerticalAlignment="Center"
                                          Foreground="{DynamicResource StatusFits}" />
-                    <TextBlock FontSize="14" FontWeight="SemiBold" Text="Picked for you" />
+                    <TextBlock Classes="size14 semibold" Text="Picked for you" />
                     <TextBlock Classes="count" Text="{Binding PickedForYou.Count}" />
                 </StackPanel>
                 <ItemsControl ItemsSource="{Binding PickedForYou}">
@@ -134,13 +133,11 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:PickedForYouRow">
                             <WrapPanel ItemSpacing="8">
-                                <TextBlock Classes="mono" FontSize="12" VerticalAlignment="Center"
-                                           Foreground="{DynamicResource TextSecondary}" Text="{Binding Need}" />
+                                <TextBlock Classes="mono size12 secondary" VerticalAlignment="Center" Text="{Binding Need}" />
                                 <controls:StrokeIcon Data="{StaticResource IconArrowRight}" Size="12"
                                                      VerticalAlignment="Center" Foreground="{DynamicResource TextMuted}" />
-                                <TextBlock Classes="mono" FontSize="12" VerticalAlignment="Center" Text="{Binding Picked}" />
-                                <TextBlock FontSize="13" VerticalAlignment="Center"
-                                           Foreground="{DynamicResource TextMuted}" Text="{Binding Why}" />
+                                <TextBlock Classes="mono size12" VerticalAlignment="Center" Text="{Binding Picked}" />
+                                <TextBlock Classes="size13 muted" VerticalAlignment="Center" Text="{Binding Why}" />
                             </WrapPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
@@ -162,7 +159,7 @@
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                             <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="14" VerticalAlignment="Top"
                                                  Margin="0 2 0 0" Foreground="{DynamicResource StatusError}" />
-                            <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" Text="{Binding Message}" />
+                            <TextBlock Classes="size13" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Message}" />
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

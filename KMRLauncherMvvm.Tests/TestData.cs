@@ -66,3 +66,19 @@ public static class TestData
         public DependencyService Dependency => new(ModList, Compatibility);
     }
 }
+
+public abstract class TempFolderTest : IDisposable
+{
+    protected string Temp { get; } = Path.Combine(Path.GetTempPath(), "kmr-test-" + Guid.NewGuid().ToString("N"));
+
+    public void Dispose()
+    {
+        if (Directory.Exists(Temp)) Directory.Delete(Temp, true);
+        GC.SuppressFinalize(this);
+    }
+}
+
+public sealed class SyncProgress<T>(Action<T> report) : IProgress<T>
+{
+    public void Report(T value) => report(value);
+}

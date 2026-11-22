@@ -5,7 +5,7 @@
              x:DataType="vm:CompatibleVersionsViewModel"
              x:Class="KMRLauncherMvvm.Views.CompatibleVersionsView">
     <UserControl.Styles>
-        <!-- Compatible KSP versions: rows of 52 / 120 / rest, padding 8 0, a line on top -->
+        <!-- Compatible KSP versions: one row per minor version -->
         <Style Selector="Border.versionRow">
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
             <Setter Property="BorderThickness" Value="0 1 0 0" />
@@ -24,7 +24,7 @@
         <Style Selector="CheckBox.box.allVersions:checked">
             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
         </Style>
-        <!-- Version chips: 30 px, padding 0 10, radius 7, 12 px mono; the game version is an accent chip with a lock -->
+        <!-- Version chips; the game version is an accent chip with a lock -->
         <Style Selector="Border.versionChip">
             <Setter Property="Height" Value="30" />
             <Setter Property="Padding" Value="10 0" />
@@ -63,7 +63,7 @@
                 <DataTemplate x:DataType="vm:KspVersionGroupViewModel">
                     <Border Classes="versionRow">
                         <Grid ColumnDefinitions="52, 120, *" ColumnSpacing="12">
-                            <TextBlock Classes="mono" FontSize="13" FontWeight="Medium"
+                            <TextBlock Classes="mono size13 medium"
                                        VerticalAlignment="Center" Text="{Binding Prefix}" />
                             <CheckBox Grid.Column="1" Classes="box allVersions"
                                       VerticalAlignment="Center"
@@ -89,7 +89,7 @@
                                                     <controls:StrokeIcon Data="{StaticResource IconLock}"
                                                                          Size="12" VerticalAlignment="Center"
                                                                          Foreground="{DynamicResource TextSecondary}" />
-                                                    <TextBlock Classes="mono" FontSize="12"
+                                                    <TextBlock Classes="mono size12"
                                                                VerticalAlignment="Center"
                                                                Text="{Binding Version}" />
                                                 </StackPanel>

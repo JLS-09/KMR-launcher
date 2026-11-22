@@ -12,36 +12,16 @@ public static class WinePrefixes
 
     public static readonly string Root = Path.Combine(ConfigDir, "kmrLauncher", "prefixes");
 
-    public static readonly string LegacyRoot = Path.Combine(ConfigDir, "prefixes");
-
-    public static bool AssignMissing(IList<Instance> instances) =>
-        AssignMissing(instances, Root, LegacyRoot, Directory.Exists);
-
-    public static bool AssignMissing(IList<Instance> instances, string root, string legacyRoot,
-        Func<string, bool> directoryExists)
+    public static void AssignMissing(IList<Instance> instances, string? root = null)
     {
-        var changed = false;
         foreach (var instance in instances.Where(i => string.IsNullOrWhiteSpace(i.PrefixPath)))
-        {
-            instance.PrefixPath = DefaultFor(instance, instances, root, legacyRoot, directoryExists);
-            changed = true;
-        }
-
-        return changed;
+            instance.PrefixPath = DefaultFor(instance, instances, root ?? Root);
     }
 
-    public static string DefaultFor(Instance instance, IEnumerable<Instance> all) =>
-        DefaultFor(instance, all, Root, LegacyRoot, Directory.Exists);
+    public static string DefaultFor(Instance instance, IEnumerable<Instance> all) => DefaultFor(instance, all, Root);
 
-    public static string DefaultFor(Instance instance, IEnumerable<Instance> all, string root, string legacyRoot,
-        Func<string, bool> directoryExists)
+    public static string DefaultFor(Instance instance, IEnumerable<Instance> all, string root)
     {
-        if (instance.Name.Trim().Length > 0)
-        {
-            var legacy = Path.Combine(legacyRoot, instance.Name);
-            if (directoryExists(legacy)) return legacy;
-        }
-
         var taken = all.Where(i => i != instance)
             .Select(i => i.PrefixPath)
             .Where(p => !string.IsNullOrWhiteSpace(p))
@@ -59,15 +39,11 @@ public static class WinePrefixes
         return candidate;
     }
 
-    public static bool IsManaged(string prefixPath) => IsManaged(prefixPath, Root, LegacyRoot);
+    public static bool IsManaged(string prefixPath) => IsManaged(prefixPath, Root);
 
-    public static bool IsManaged(string prefixPath, string root, string legacyRoot)
-    {
-        if (string.IsNullOrWhiteSpace(prefixPath)) return false;
-
-        var parent = Path.GetDirectoryName(Normalize(prefixPath));
-        return parent == Normalize(root) || parent == Normalize(legacyRoot);
-    }
+    public static bool IsManaged(string prefixPath, string root) =>
+        !string.IsNullOrWhiteSpace(prefixPath) &&
+        Path.GetDirectoryName(Normalize(prefixPath)) == Normalize(root);
 
     public static string Expand(string path)
     {

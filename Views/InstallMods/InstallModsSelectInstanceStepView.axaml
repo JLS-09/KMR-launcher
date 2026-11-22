@@ -34,9 +34,9 @@
                     <RadioButton Classes="dot card" GroupName="installTarget" IsChecked="{Binding IsSelected}">
                         <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
                             <StackPanel Spacing="2" VerticalAlignment="Center">
-                                <TextBlock FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                <TextBlock Classes="size14 semibold" TextTrimming="CharacterEllipsis"
                                            Text="{Binding Name}" />
-                                <TextBlock Classes="mono" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                                <TextBlock Classes="mono size12 muted"
                                            Text="{Binding KspText}" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
@@ -49,11 +49,11 @@
                                                      Foreground="{DynamicResource StatusWarning}"
                                                      IsVisible="{Binding IsWarning}" />
                                 <Panel VerticalAlignment="Center">
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource StatusFits}"
+                                    <TextBlock Classes="size12 fitsText"
                                                Text="{Binding FitText}" IsVisible="{Binding Fits}" />
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondary}"
+                                    <TextBlock Classes="size12 secondary"
                                                Text="{Binding FitText}" IsVisible="{Binding IsInstalled}" />
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource StatusWarning}"
+                                    <TextBlock Classes="size12 warningText"
                                                Text="{Binding FitText}" IsVisible="{Binding IsWarning}" />
                                 </Panel>
                             </StackPanel>
@@ -64,7 +64,7 @@
         </ItemsControl>
 
         <!-- No instances yet -->
-        <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"
+        <TextBlock Classes="size13 secondary" TextWrapping="Wrap"
                    IsVisible="{Binding HasNoInstances}"
                    Text="There are no instances yet. Create one with New instance to install into it." />
 
@@ -98,7 +98,7 @@
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <controls:StrokeIcon Data="{StaticResource IconClock}" Size="14" VerticalAlignment="Center"
                                          Foreground="{DynamicResource StatusWarning}" />
-                    <TextBlock FontSize="12" Foreground="{DynamicResource StatusWarning}" TextWrapping="Wrap"
+                    <TextBlock Classes="size12 warningText" TextWrapping="Wrap"
                                Text="{Binding ChoicesHint}" />
                 </StackPanel>
             </Border>
@@ -118,7 +118,7 @@
                         <Grid ColumnDefinitions="Auto, *" ColumnSpacing="10">
                             <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="14" VerticalAlignment="Top"
                                                  Margin="0 2 0 0" Foreground="{DynamicResource StatusError}" />
-                            <TextBlock Grid.Column="1" FontSize="13" TextWrapping="Wrap" Text="{Binding Message}" />
+                            <TextBlock Classes="size13" Grid.Column="1" TextWrapping="Wrap" Text="{Binding Message}" />
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

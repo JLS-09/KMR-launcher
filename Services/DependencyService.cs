@@ -45,7 +45,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
         {
             dependencyResolutionState.Resolved.Add(requested);
 
-            if (!CompatibilityService.IsCompatible(requested.Version, dependencyResolutionState.Criteria))
+            if (!KspCompatibility.IsCompatible(requested.Version, dependencyResolutionState.Criteria))
             {
                 dependencyResolutionState.Problems.Add(new ResolutionProblem
                 {
@@ -166,7 +166,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
     private void ResolveDependency(Relationship dependency, string reason,
         DependencyResolutionState dependencyResolutionState)
     {
-        if (InstalledMods.NamesIn(dependency).Any(dependencyResolutionState.Dlls.ContainsKey)) return;
+        if (Relationships.NamesIn(dependency).Any(dependencyResolutionState.Dlls.ContainsKey)) return;
 
         if (dependency.AnyOf is not null || !compatibilityService.ModExists(dependency.Name))
         {
@@ -335,13 +335,7 @@ public class DependencyService(ModListService modListService, CompatibilityServi
     }
 
     private static bool SuppressesFor(ModVersion requirer, ModVersion mod) =>
-        requirer.Depends?.Any(d => d.SuppressRecommendations == true &&
-                                   (d.AnyOf is { Count: > 0 } anyOf
-                                       ? anyOf.Any(e => Names(mod, e.Name))
-                                       : Names(mod, d.Name))) == true;
-
-    private static bool Names(ModVersion mod, string? name) =>
-        name is not null && (mod.Identifier == name || mod.Provides?.Contains(name) == true);
+        requirer.Depends?.Any(d => d.SuppressRecommendations == true && Relationships.Names(d, mod)) == true;
 
     public static List<ModVersion> RemainingInstalled(Instance? instance, IEnumerable<PlannedModVersion> toInstall,
         IEnumerable<PlannedModVersion> toRemove)

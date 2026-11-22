@@ -64,10 +64,7 @@ public class InstanceCreator(ZipService zips, Action<AppSettings, Instance> save
             {
                 CompatibleKspVersions = [.. request.Compatible]
             };
-            progress?.Report(new CreateProgress(CreateStep.Save));
-            Add(settings, instance, request.IsPrimary);
-            progress?.Report(new CreateProgress(CreateStep.Done));
-            return instance;
+            return Finish(settings, instance, request.IsPrimary, progress);
         }
         catch
         {
@@ -129,16 +126,21 @@ public class InstanceCreator(ZipService zips, Action<AppSettings, Instance> save
                 };
             }
 
-            progress?.Report(new CreateProgress(CreateStep.Save));
-            Add(settings, instance, request.IsPrimary);
-            progress?.Report(new CreateProgress(CreateStep.Done));
-            return instance;
+            return Finish(settings, instance, request.IsPrimary, progress);
         }
         catch
         {
             if (request.Mode == ImportMode.Copy) CleanUp(folder, created);
             throw;
         }
+    }
+
+    private Instance Finish(AppSettings settings, Instance instance, bool isPrimary, IProgress<CreateProgress>? progress)
+    {
+        progress?.Report(new CreateProgress(CreateStep.Save));
+        Add(settings, instance, isPrimary);
+        progress?.Report(new CreateProgress(CreateStep.Done));
+        return instance;
     }
 
     private void Add(AppSettings settings, Instance instance, bool isPrimary)

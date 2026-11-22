@@ -9,9 +9,6 @@
              x:DataType="vm:InstallDialogViewModel"
              KeyboardNavigation.TabNavigation="Cycle"
              Foreground="{DynamicResource TextPrimary}" FontSize="14">
-    <Design.DataContext>
-        <vm:InstallDialogViewModel />
-    </Design.DataContext>
 
     <!-- The install flow as a dialog in the main window (Phase 9 task 8), from the mockups Wiz1Instance …
          Wiz7Failed. The step views (InstallMods*StepView) sit in the body and use the styles below. -->
@@ -26,7 +23,7 @@
         <Style Selector="TextBlock.label">
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
-        <!-- Rows split by 1 px lines -->
+        <!-- Rows split by lines -->
         <Style Selector="Border.row">
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
             <Setter Property="BorderThickness" Value="0 1 0 0" />
@@ -50,8 +47,8 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
-        <!-- Stepper: 22 px accent disc for the current step, 20 px outlined circle for later steps, a soft accent
-             disc with a check for done steps; lines 1 px, accent after a done step -->
+        <!-- Stepper: an accent disc for the current step, an outlined circle for later steps, a check for done
+             steps; the line after a done step is accent -->
         <Style Selector="Border.stepDot">
             <Setter Property="Width" Value="20" />
             <Setter Property="Height" Value="20" />
@@ -105,19 +102,7 @@
         <Style Selector="Border.stepLine.reached">
             <Setter Property="Background" Value="{DynamicResource Accent}" />
         </Style>
-        <!-- Side panel rows: "New  3" -->
-        <Style Selector="Grid.panelRow TextBlock">
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
-        </Style>
-        <Style Selector="Grid.panelRow TextBlock.value">
-            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-        <!-- Stat tiles: strip of cells split by lines (Review and Done) -->
+        <!-- Stat tiles (Review and Done) -->
         <Style Selector="Border.tile">
             <Setter Property="Padding" Value="16 12" />
             <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
@@ -128,7 +113,7 @@
             <Setter Property="FontSize" Value="20" />
             <Setter Property="FontWeight" Value="Medium" />
         </Style>
-        <!-- Progress bars: 6 px rows, coloured by state -->
+        <!-- Progress bars, coloured by state -->
         <Style Selector="ProgressBar.row">
             <Setter Property="Height" Value="6" />
             <Setter Property="MinHeight" Value="6" />
@@ -191,9 +176,9 @@
             <!-- Header: title, subtitle, close -->
             <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="12" Margin="24 20 24 16">
                 <StackPanel>
-                    <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="20" FontWeight="SemiBold"
+                    <TextBlock Classes="semibold" FontFamily="{DynamicResource SpaceGrotesk}" FontSize="20"
                                Text="{Binding Title}" />
-                    <TextBlock FontSize="13" Foreground="{DynamicResource TextMuted}" Text="{Binding Subtitle}" />
+                    <TextBlock Classes="size13 muted" Text="{Binding Subtitle}" />
                 </StackPanel>
                 <Button Grid.Column="1" Classes="ghost icon small" Width="32" Height="32" VerticalAlignment="Top"
                         ToolTip.Tip="Close" IsVisible="{Binding ShowClose}" Command="{Binding CloseCommand}">
@@ -217,10 +202,10 @@
                         <StackPanel Margin="24 22" Spacing="18" DataContext="{Binding Progress}">
                             <StackPanel Spacing="10" x:DataType="vm:InstallProgressViewModel">
                                 <WrapPanel ItemSpacing="16">
-                                    <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="22"
-                                               FontWeight="SemiBold" Text="{Binding TitleText}" />
-                                    <TextBlock Classes="mono" FontSize="13" VerticalAlignment="Bottom" Margin="0 0 0 3"
-                                               Foreground="{DynamicResource TextSecondary}" Text="{Binding PercentText}" />
+                                    <TextBlock Classes="semibold" FontFamily="{DynamicResource SpaceGrotesk}"
+                                               FontSize="22" Text="{Binding TitleText}" />
+                                    <TextBlock Classes="mono size13 secondary" VerticalAlignment="Bottom"
+                                               Margin="0 0 0 3" Text="{Binding PercentText}" />
                                 </WrapPanel>
                                 <ProgressBar Height="10" MinHeight="10" CornerRadius="5" Minimum="0" Maximum="1"
                                              Background="{DynamicResource Off}" Foreground="{DynamicResource StatusFits}"
@@ -258,8 +243,9 @@
                                                                  Classes.downloading="{Binding IsToneDownloading}"
                                                                  Classes.installing="{Binding IsToneInstalling}"
                                                                  Classes.failed="{Binding IsToneFailed}" />
-                                                    <TextBlock Grid.Column="3" Classes="version" TextAlignment="Right"
+                                                    <TextBlock Grid.Column="3" Classes="version"
                                                                Foreground="{DynamicResource TextMuted}"
+                                                               TextAlignment="Right"
                                                                Text="{Binding DetailText}" />
                                                 </Grid>
                                             </Border>
@@ -271,8 +257,7 @@
                             <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
                                 <controls:StrokeIcon Data="{StaticResource IconBackup}" Size="14" VerticalAlignment="Top"
                                                      Margin="0 2 0 0" Foreground="{DynamicResource TextMuted}" />
-                                <TextBlock Grid.Column="1" FontSize="12" LineHeight="18" TextWrapping="Wrap"
-                                           Foreground="{DynamicResource TextMuted}"
+                                <TextBlock Classes="size12 muted" Grid.Column="1" LineHeight="18" TextWrapping="Wrap"
                                            Text="Nothing in the instance changes until every mod is in place; Cancel puts everything back." />
                             </Grid>
                         </StackPanel>
@@ -288,14 +273,14 @@
                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <StackPanel Spacing="6" HorizontalAlignment="Center">
-                                <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="24" FontWeight="SemiBold"
-                                           TextAlignment="Center" TextWrapping="Wrap" Text="{Binding DoneTitle}" />
-                                <TextBlock FontSize="14" TextAlignment="Center" Foreground="{DynamicResource TextSecondary}"
-                                           Text="{Binding DoneSummary}" />
+                                <TextBlock Classes="semibold" FontFamily="{DynamicResource SpaceGrotesk}" FontSize="24"
+                                           TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Outcome.DoneTitle}" />
+                                <TextBlock Classes="size14 secondary" TextAlignment="Center"
+                                           Text="{Binding Outcome.DoneSummary}" />
                             </StackPanel>
                             <Border Width="560" BorderBrush="{DynamicResource Line}" BorderThickness="0 1"
                                     ClipToBounds="True">
-                                <ItemsControl ItemsSource="{Binding DoneTiles}" Margin="-1 0 0 0">
+                                <ItemsControl ItemsSource="{Binding Outcome.DoneTiles}" Margin="-1 0 0 0">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <UniformGrid Rows="1" />
@@ -318,7 +303,7 @@
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <controls:StrokeIcon Data="{StaticResource IconPlay}" IsFilled="True" Size="16"
                                                              VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding LaunchText}" MaxWidth="260"
+                                        <TextBlock Text="{Binding Outcome.LaunchText}" MaxWidth="260"
                                                    TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
@@ -330,9 +315,9 @@
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
-                            <TextBlock FontSize="12" HorizontalAlignment="Center" Foreground="{DynamicResource TextMuted}"
-                                       Text="{Binding SelectionNote}"
-                                       IsVisible="{Binding SelectionNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                            <TextBlock Classes="size12 muted" HorizontalAlignment="Center"
+                                       Text="{Binding Outcome.SelectionNote}"
+                                       IsVisible="{Binding Outcome.SelectionNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                         </StackPanel>
                     </ScrollViewer>
 
@@ -347,19 +332,19 @@
                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
                                 <StackPanel Grid.Column="1" Spacing="4">
-                                    <TextBlock FontFamily="{DynamicResource SpaceGrotesk}" FontSize="22"
-                                               FontWeight="SemiBold" Text="{Binding FailedTitle}" />
-                                    <TextBlock FontSize="14" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondary}"
-                                               Text="{Binding FailedSummary}" />
+                                    <TextBlock Classes="semibold" FontFamily="{DynamicResource SpaceGrotesk}"
+                                               FontSize="22" Text="{Binding Outcome.FailedTitle}" />
+                                    <TextBlock Classes="size14 secondary" TextWrapping="Wrap"
+                                               Text="{Binding Outcome.FailedSummary}" />
                                 </StackPanel>
                             </Grid>
-                            <StackPanel Spacing="8" IsVisible="{Binding ShowError}">
+                            <StackPanel Spacing="8" IsVisible="{Binding Outcome.ShowError}">
                                 <TextBlock Classes="label" Text="WHAT WENT WRONG" />
                                 <Border Padding="16 14" CornerRadius="9" Background="{DynamicResource ErrorBox}"
                                         BorderBrush="{DynamicResource ErrorBoxLine}" BorderThickness="1">
                                     <SelectableTextBlock FontFamily="{DynamicResource Mono}" FontSize="12" LineHeight="19" TextWrapping="Wrap"
                                                          Foreground="{DynamicResource ErrorBoxText}"
-                                                         Text="{Binding ErrorText}" />
+                                                         Text="{Binding Outcome.ErrorText}" />
                                 </Border>
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Button Classes="secondary small" Content="Copy error" Click="CopyError_OnClick" />
@@ -378,9 +363,9 @@
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 0 0 6">
                                     <TextBlock Classes="label" Text="WHERE EACH MOD GOT TO" />
-                                    <TextBlock Classes="count" Text="{Binding FailedRowsCount}" />
+                                    <TextBlock Classes="count" Text="{Binding Outcome.FailedRowsCount}" />
                                 </StackPanel>
-                                <ItemsControl ItemsSource="{Binding FailedRows}">
+                                <ItemsControl ItemsSource="{Binding Outcome.FailedRows}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vm:FailedRow">
                                             <Border Classes="row" Padding="4 9">
@@ -390,25 +375,26 @@
                                                                Classes.failed="{Binding IsFailed}" />
                                                     <ProgressBar Grid.Column="2" Classes="row" Value="{Binding Progress}"
                                                                  Classes.failed="{Binding IsFailed}" />
-                                                    <TextBlock Grid.Column="3" Classes="version" TextAlignment="Right"
+                                                    <TextBlock Grid.Column="3" Classes="version"
                                                                Foreground="{DynamicResource TextMuted}"
+                                                               TextAlignment="Right"
                                                                Text="{Binding Detail}" />
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <Border Classes="row" Padding="4 9" IsVisible="{Binding HasMoreFailed}">
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}"
-                                               Text="{Binding MoreFailedText}" />
+                                <Border Classes="row" Padding="4 9" IsVisible="{Binding Outcome.HasMoreFailed}">
+                                    <TextBlock Classes="size12 muted"
+                                               Text="{Binding Outcome.MoreFailedText}" />
                                 </Border>
                             </StackPanel>
                             <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8"
-                                  IsVisible="{Binding CacheHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                                  IsVisible="{Binding Outcome.CacheHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                                 <controls:StrokeIcon Data="{StaticResource IconDownload}" Size="14" VerticalAlignment="Top"
                                                      Margin="0 2 0 0" Foreground="{DynamicResource TextSecondary}" />
-                                <TextBlock Grid.Column="1" FontSize="13" LineHeight="20" TextWrapping="Wrap"
-                                           Foreground="{DynamicResource TextSecondary}" Text="{Binding CacheHint}" />
+                                <TextBlock Classes="size13 secondary" Grid.Column="1" LineHeight="20"
+                                           TextWrapping="Wrap" Text="{Binding Outcome.CacheHint}" />
                             </Grid>
                         </StackPanel>
                     </ScrollViewer>
@@ -421,53 +407,53 @@
                             <StackPanel Spacing="16" Margin="20">
                                 <TextBlock Classes="label" Text="THIS CHANGE" />
                                 <StackPanel Spacing="2">
-                                    <TextBlock FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
-                                               Text="{Binding PanelInstanceName}" />
-                                    <TextBlock Classes="mono" FontSize="12" Foreground="{DynamicResource TextMuted}"
-                                               TextTrimming="CharacterEllipsis" Text="{Binding PanelKspText}" />
+                                    <TextBlock Classes="size14 semibold" TextTrimming="CharacterEllipsis"
+                                               Text="{Binding Panel.InstanceName}" />
+                                    <TextBlock Classes="mono size12 muted"
+                                               TextTrimming="CharacterEllipsis" Text="{Binding Panel.KspText}" />
                                 </StackPanel>
                                 <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 0">
                                     <StackPanel Spacing="8">
                                         <Grid Classes="panelRow" ColumnDefinitions="*, Auto">
                                             <TextBlock Text="New" />
-                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding NewCount}" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding Panel.NewCount}" />
                                         </Grid>
                                         <Grid Classes="panelRow" ColumnDefinitions="*, Auto">
                                             <TextBlock Text="Updates" />
-                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding UpdatesCount}" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding Panel.UpdatesCount}" />
                                         </Grid>
-                                        <Grid Classes="panelRow" ColumnDefinitions="*, Auto" IsVisible="{Binding HasRemoved}">
+                                        <Grid Classes="panelRow" ColumnDefinitions="*, Auto" IsVisible="{Binding Panel.HasRemoved}">
                                             <TextBlock Text="Removed" />
-                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding RemovedCount}" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding Panel.RemovedCount}" />
                                         </Grid>
                                         <Grid Classes="panelRow" ColumnDefinitions="*, Auto">
                                             <TextBlock Text="Download" />
-                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding DownloadText}" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding Panel.DownloadText}" />
                                         </Grid>
-                                        <Grid Classes="panelRow" ColumnDefinitions="*, Auto" IsVisible="{Binding HasCached}">
+                                        <Grid Classes="panelRow" ColumnDefinitions="*, Auto" IsVisible="{Binding Panel.HasCached}">
                                             <TextBlock Text="Already cached" />
-                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding CachedText}" />
+                                            <TextBlock Grid.Column="1" Classes="value" Text="{Binding Panel.CachedText}" />
                                         </Grid>
                                     </StackPanel>
                                 </Border>
                                 <WrapPanel ItemSpacing="12" LineSpacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding !HasProblems}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding !Panel.HasProblems}">
                                         <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="12"
                                                              Foreground="{DynamicResource StatusFits}" VerticalAlignment="Center" />
-                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusFits}"
-                                                   Text="{Binding ProblemsText}" />
+                                        <TextBlock Classes="size12 fitsText"
+                                                   Text="{Binding Panel.ProblemsText}" />
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding HasProblems}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding Panel.HasProblems}">
                                         <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="12"
                                                              Foreground="{DynamicResource StatusError}" VerticalAlignment="Center" />
-                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}"
-                                                   Text="{Binding ProblemsText}" />
+                                        <TextBlock Classes="size12 errorText"
+                                                   Text="{Binding Panel.ProblemsText}" />
                                     </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding HasChoicesLeft}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding Panel.HasChoicesLeft}">
                                         <controls:StrokeIcon Data="{StaticResource IconClock}" Size="12"
                                                              Foreground="{DynamicResource StatusWarning}" VerticalAlignment="Center" />
-                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusWarning}"
-                                                   Text="{Binding ChoicesLeftText}" />
+                                        <TextBlock Classes="size12 warningText"
+                                                   Text="{Binding Panel.ChoicesLeftText}" />
                                     </StackPanel>
                                 </WrapPanel>
                                 <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 0"
@@ -484,10 +470,9 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="vm:PickedRow">
                                                     <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
-                                                        <TextBlock FontSize="12" TextTrimming="CharacterEllipsis"
+                                                        <TextBlock Classes="size12" TextTrimming="CharacterEllipsis"
                                                                    Text="{Binding Name}" />
-                                                        <TextBlock Grid.Column="1" Classes="mono" FontSize="12"
-                                                                   Foreground="{DynamicResource TextMuted}"
+                                                        <TextBlock Grid.Column="1" Classes="mono size12 muted"
                                                                    Text="{Binding Version}" />
                                                     </Grid>
                                                 </DataTemplate>
@@ -514,7 +499,7 @@
                                     ToolTip.Tip="Backups come in Phase 8" IsVisible="{Binding IsReviewStep}">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <ToggleButton Classes="switch" VerticalAlignment="Center" />
-                                    <TextBlock FontSize="13" Foreground="{DynamicResource TextSecondary}"
+                                    <TextBlock Classes="size13 secondary"
                                                VerticalAlignment="Center" Text="Back up saves first" />
                                 </StackPanel>
                             </Border>
@@ -549,7 +534,7 @@
                                 <TextBlock Text="Cancel and undo" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <TextBlock Grid.Column="2" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                        <TextBlock Classes="size12 muted" Grid.Column="2"
                                    VerticalAlignment="Center" Text="You can keep using the launcher once this finishes" />
                     </Grid>
 

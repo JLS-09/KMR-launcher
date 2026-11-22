@@ -5,20 +5,14 @@ using KMRLauncherMvvm.ViewModels.NewInstance;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class NewInstanceTests : IDisposable
+public class NewInstanceTests : TempFolderTest
 {
-    private readonly string _root = Path.Combine(Path.GetTempPath(), "kmr-new-" + Guid.NewGuid().ToString("N"));
     private readonly List<Instance> _saved = [];
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_root)) Directory.Delete(_root, true);
-    }
 
     private string MakeZip(string name, string folderInZip = "KSP_linux", string buildId = "03190", int files = 3)
     {
-        Directory.CreateDirectory(_root);
-        var path = Path.Combine(_root, name);
+        Directory.CreateDirectory(Temp);
+        var path = Path.Combine(Temp, name);
         using var archive = ZipFile.Open(path, ZipArchiveMode.Create);
         var prefix = folderInZip.Length == 0 ? "" : folderInZip + "/";
         using (var writer = new StreamWriter(archive.CreateEntry(prefix + "buildID64.txt").Open()))
@@ -49,7 +43,7 @@ public class NewInstanceTests : IDisposable
     [Fact]
     public void FreeFolderSkipsTakenFoldersAndInstances()
     {
-        var parent = Path.Combine(_root, "instances");
+        var parent = Path.Combine(Temp, "instances");
         var existing = new HashSet<string> { Path.Combine(parent, "career") };
         var instances = new[] { new Instance("Other", Path.Combine(parent, "career-2"), "1.12.5") };
 
@@ -86,7 +80,7 @@ public class NewInstanceTests : IDisposable
     {
         var settings = new AppSettings();
         var zip = new ZipService().GetVersionFromKspZip(MakeZip("ksp.zip", folderInZip));
-        var folder = Path.Combine(_root, "instances", "career");
+        var folder = Path.Combine(Temp, "instances", "career");
         var steps = new List<CreateStep>();
 
         var instance = await Creator().CreateFromZipAsync(settings, Request(zip, folder, primary: true),
@@ -99,7 +93,7 @@ public class NewInstanceTests : IDisposable
         Assert.Equal(KspVersions.DefaultCompatibleVersions("1.12.5"), instance.CompatibleKspVersions);
         Assert.Same(instance, Assert.Single(settings.Instances));
         Assert.Same(instance, Assert.Single(_saved));
-        Assert.Equal(Path.Combine(_root, "instances"), settings.InstanceParentFolder);
+        Assert.Equal(Path.Combine(Temp, "instances"), settings.InstanceParentFolder);
         Assert.Equal([CreateStep.Check, CreateStep.Files, CreateStep.Prefix, CreateStep.Save, CreateStep.Done],
             steps.Distinct());
     }
@@ -107,11 +101,11 @@ public class NewInstanceTests : IDisposable
     [Fact]
     public async Task NewPrimaryTakesOverTheFlag()
     {
-        var old = new Instance("Old", Path.Combine(_root, "old"), "1.12.5") { IsPrimary = true };
+        var old = new Instance("Old", Path.Combine(Temp, "old"), "1.12.5") { IsPrimary = true };
         var settings = new AppSettings { Instances = [old] };
         var zip = new ZipService().GetVersionFromKspZip(MakeZip("ksp.zip"));
 
-        await Creator().CreateFromZipAsync(settings, Request(zip, Path.Combine(_root, "new"), primary: true));
+        await Creator().CreateFromZipAsync(settings, Request(zip, Path.Combine(Temp, "new"), primary: true));
 
         Assert.False(old.IsPrimary);
     }
@@ -121,7 +115,7 @@ public class NewInstanceTests : IDisposable
     {
         var settings = new AppSettings();
         var zip = new ZipService().GetVersionFromKspZip(MakeZip("ksp.zip", files: 200));
-        var folder = Path.Combine(_root, "instances", "career");
+        var folder = Path.Combine(Temp, "instances", "career");
         using var cancel = new CancellationTokenSource();
         var progress = new SyncProgress<CreateProgress>(p =>
         {
@@ -139,10 +133,10 @@ public class NewInstanceTests : IDisposable
     [Fact]
     public async Task FailedSaveUndoesEverything()
     {
-        var old = new Instance("Old", Path.Combine(_root, "old"), "1.12.5") { IsPrimary = true };
+        var old = new Instance("Old", Path.Combine(Temp, "old"), "1.12.5") { IsPrimary = true };
         var settings = new AppSettings { Instances = [old] };
         var zip = new ZipService().GetVersionFromKspZip(MakeZip("ksp.zip"));
-        var folder = Path.Combine(_root, "instances", "career");
+        var folder = Path.Combine(Temp, "instances", "career");
 
         await Assert.ThrowsAsync<IOException>(() => Creator((_, _) => throw new IOException("disk full"))
             .CreateFromZipAsync(settings, Request(zip, folder, primary: true)));
@@ -157,7 +151,7 @@ public class NewInstanceTests : IDisposable
     public async Task NonEmptyFolderIsRefusedAndLeftAlone()
     {
         var zip = new ZipService().GetVersionFromKspZip(MakeZip("ksp.zip"));
-        var folder = Path.Combine(_root, "taken");
+        var folder = Path.Combine(Temp, "taken");
         Directory.CreateDirectory(folder);
         File.WriteAllText(Path.Combine(folder, "mine.txt"), "keep");
 
@@ -172,7 +166,7 @@ public class NewInstanceTests : IDisposable
     {
         var path = MakeZip("ksp.zip", buildId: "02694");
         var zip = new KspZip(path, "KSP_linux", "1.12.5");
-        var folder = Path.Combine(_root, "career");
+        var folder = Path.Combine(Temp, "career");
 
         var error = await Assert.ThrowsAsync<InvalidDataException>(() =>
             Creator().CreateFromZipAsync(new AppSettings(), Request(zip, folder)));
@@ -188,19 +182,19 @@ public class NewInstanceTests : IDisposable
         using (var archive = ZipFile.Open(path, ZipArchiveMode.Update))
             archive.CreateEntry("KSP_linux/../../escaped.txt");
         var zip = new ZipService().GetVersionFromKspZip(path);
-        var folder = Path.Combine(_root, "deep", "career");
+        var folder = Path.Combine(Temp, "deep", "career");
 
         await Assert.ThrowsAsync<InvalidDataException>(() =>
             Creator().CreateFromZipAsync(new AppSettings(), Request(zip, folder)));
 
-        Assert.False(File.Exists(Path.Combine(_root, "escaped.txt")));
+        Assert.False(File.Exists(Path.Combine(Temp, "escaped.txt")));
         Assert.False(Directory.Exists(folder));
     }
 
     [Fact]
     public void DialogFillsNameFolderAndVersions()
     {
-        var settings = new AppSettings { InstanceParentFolder = Path.Combine(_root, "instances") };
+        var settings = new AppSettings { InstanceParentFolder = Path.Combine(Temp, "instances") };
         settings.KspZips.Add(new ZipService().GetVersionFromKspZip(MakeZip("ksp.zip")));
         var vm = new NewInstanceDialogViewModel(settings, new ZipService(), Creator(), _ => { });
 
@@ -212,7 +206,7 @@ public class NewInstanceTests : IDisposable
         Assert.True(vm.CreateCommand.CanExecute(null));
 
         vm.Name = "Career 1.12.5";
-        Assert.Equal(Path.Combine(_root, "instances", "career-1.12.5"), vm.FolderPath);
+        Assert.Equal(Path.Combine(Temp, "instances", "career-1.12.5"), vm.FolderPath);
 
         vm.Name = " ";
         Assert.NotNull(vm.NameError);
@@ -246,7 +240,7 @@ public class NewInstanceTests : IDisposable
     [Fact]
     public async Task DialogCreatesAndFinishesWithTheInstance()
     {
-        var settings = new AppSettings { InstanceParentFolder = Path.Combine(_root, "instances") };
+        var settings = new AppSettings { InstanceParentFolder = Path.Combine(Temp, "instances") };
         settings.KspZips.Add(new ZipService().GetVersionFromKspZip(MakeZip("ksp.zip")));
         Instance? finished = null;
         var vm = new NewInstanceDialogViewModel(settings, new ZipService(), Creator(), i => finished = i);
@@ -255,11 +249,6 @@ public class NewInstanceTests : IDisposable
 
         Assert.NotNull(finished);
         Assert.Equal("KSP 1.12.5", finished.Name);
-        Assert.True(Directory.Exists(Path.Combine(_root, "instances", "ksp-1.12.5", "GameData")));
-    }
-
-    private sealed class SyncProgress<T>(Action<T> report) : IProgress<T>
-    {
-        public void Report(T value) => report(value);
+        Assert.True(Directory.Exists(Path.Combine(Temp, "instances", "ksp-1.12.5", "GameData")));
     }
 }

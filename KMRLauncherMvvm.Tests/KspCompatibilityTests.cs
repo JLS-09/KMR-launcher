@@ -10,7 +10,7 @@ public class KspCompatibilityTests
     private static readonly GameVersionCriteria OnlyInstance = new("1.12.5", []);
 
     private static bool Compatible(ModVersion version, GameVersionCriteria criteria) =>
-        CompatibilityService.IsCompatible(version, criteria);
+        KspCompatibility.IsCompatible(version, criteria);
 
     [Theory]
     [InlineData(null, null, null, true)] // missing = any
@@ -79,7 +79,7 @@ public class KspCompatibilityTests
     [Fact]
     public void No_criteria_means_no_filter()
     {
-        Assert.True(CompatibilityService.IsCompatible(Version("A", "1.0", "0.90"), null));
+        Assert.True(KspCompatibility.IsCompatible(Version("A", "1.0", "0.90"), null));
     }
 
     [Fact]

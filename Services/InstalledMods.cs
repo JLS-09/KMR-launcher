@@ -19,26 +19,19 @@ public static class InstalledMods
     public static bool IsUserRequested(Instance instance, string identifier) =>
         !instance.ModRecords.TryGetValue(identifier, out var record) || record.IsUserRequested;
 
-    public static IEnumerable<string> NamesOf(ModVersion mod) => [mod.Identifier, .. mod.Provides ?? []];
-
-    public static IEnumerable<string> NamesIn(Relationship relationship) =>
-        relationship.AnyOf?.Select(e => e.Name).OfType<string>() ??
-        (relationship.Name is null ? [] : [relationship.Name]);
-
     public static bool IsSatisfied(Relationship relationship, IEnumerable<ModVersion> mods,
         IReadOnlyDictionary<string, string>? dlls = null)
     {
-        var names = NamesIn(relationship).ToHashSet();
-        return dlls?.Keys.Any(names.Contains) == true || mods.Any(m => NamesOf(m).Any(names.Contains));
+        return dlls is not null && Relationships.NamesIn(relationship).Any(dlls.ContainsKey) ||
+               mods.Any(m => Relationships.Names(relationship, m));
     }
 
     public static List<ModVersion> Dependents(ModVersion mod, IEnumerable<ModVersion> installed)
     {
-        var names = NamesOf(mod).ToHashSet();
         return
         [
             .. installed.Where(m => m.Identifier != mod.Identifier &&
-                                    (m.Depends ?? []).Any(r => NamesIn(r).Any(names.Contains)))
+                                    (m.Depends ?? []).Any(r => Relationships.Names(r, mod)))
         ];
     }
 
@@ -145,7 +138,7 @@ public static class InstalledMods
         if (!mods.TryGetValue(name, out var replacement)) return null;
 
         return replacement.Versions
-            .Where(v => CompatibilityService.IsCompatible(v, criteria))
+            .Where(v => KspCompatibility.IsCompatible(v, criteria))
             .Where(v => replacedBy.Version is null || CkanVersion.Compare(v.Version, replacedBy.Version) == 0)
             .Where(v => replacedBy.MinVersion is null || CkanVersion.Compare(v.Version, replacedBy.MinVersion) >= 0)
             .OrderByDescending(v => v.Version, Comparer<string>.Create(CkanVersion.Compare))

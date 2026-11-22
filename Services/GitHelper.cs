@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -140,7 +141,7 @@ public class GitHelper(ModListService modList)
 
     public async Task PopulateMods(string gitCacheFolder, IProgress<ModFetchProgress>? progress)
     {
-        modList.Mods = [];
+        ObservableCollection<Mod> mods = [];
 
         var totalCount = Directory.EnumerateFiles(gitCacheFolder, "*.ckan", SearchOption.AllDirectories).Count();
         var counter = 0;
@@ -183,7 +184,9 @@ public class GitHelper(ModListService modList)
                 Path.Combine(modDir, modVersions[0].Id + ".ckan"));
             var mod = JsonHelper.ParseMod(latestJson, modVersions);
             if (mod is not null)
-                modList.Mods.Add(mod);
+                mods.Add(mod);
         }
+
+        modList.Mods = mods;
     }
 }

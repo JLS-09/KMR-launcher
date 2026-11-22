@@ -8,24 +8,18 @@ using static KMRLauncherMvvm.Tests.TestData;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class InstallServiceTests : IDisposable
+public class InstallServiceTests : TempFolderTest
 {
-    private readonly string _temp = Path.Combine(Path.GetTempPath(), "kmr-install-" + Guid.NewGuid());
     private readonly string _root;
     private readonly FakeDownloader _downloader;
     private int _saves;
 
     public InstallServiceTests()
     {
-        _root = Path.Combine(_temp, "instance");
+        _root = Path.Combine(Temp, "instance");
         Directory.CreateDirectory(Path.Combine(_root, "GameData"));
         Directory.CreateDirectory(Path.Combine(_root, "Ships", "VAB"));
-        _downloader = new FakeDownloader(Path.Combine(_temp, "downloads"));
-    }
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_temp)) Directory.Delete(_temp, true);
+        _downloader = new FakeDownloader(Path.Combine(Temp, "downloads"));
     }
 
     // Serves zips built from a list of paths; a mod can be cached, slow (gate) or failing
@@ -156,7 +150,6 @@ public class InstallServiceTests : IDisposable
         Assert.All(run.Jobs, j => Assert.Equal(ModInstallState.Done, j.State));
         Assert.Equal(1, _saves);
         Assert.False(Directory.Exists(Path.Combine(_root, ".kmr", "staging")));
-        Assert.False(Directory.Exists(Path.Combine(_root, ".kmr-staging")));
     }
 
     [Fact]

@@ -72,6 +72,7 @@ public partial class NewInstanceDialogViewModel : ViewModelBase, IDialogSize
     private readonly InstanceCreator _creator;
     private readonly Action<Instance?> _finish;
     private readonly Func<IEnumerable<Mod>?> _knownMods;
+    private readonly Action _saveSettings;
     private readonly AppSettings _settings;
     private string _parent;
     private bool _nameEdited;
@@ -143,9 +144,10 @@ public partial class NewInstanceDialogViewModel : ViewModelBase, IDialogSize
     public double DialogHeight => IsCreating || IsFolderTab ? 860 : 1100;
 
     public NewInstanceDialogViewModel(AppSettings settings, ZipService zips, InstanceCreator creator,
-        Action<Instance?> finish, Func<IEnumerable<Mod>?>? knownMods = null)
+        Action<Instance?> finish, Func<IEnumerable<Mod>?>? knownMods = null, Action? saveSettings = null)
     {
         _settings = settings;
+        _saveSettings = saveSettings ?? (() => { });
         _zips = zips;
         _creator = creator;
         _finish = finish;
@@ -279,7 +281,10 @@ public partial class NewInstanceDialogViewModel : ViewModelBase, IDialogSize
     {
         var (zip, error) = _zips.AddToSettings(_settings, path);
         AddZipError = error;
-        if (zip is not null) LoadZips(zip);
+        if (zip is null) return;
+
+        _saveSettings();
+        LoadZips(zip);
     }
 
     partial void OnFolderInputChanged(string value) => _ = ScanAsync(value);

@@ -3,9 +3,8 @@ using KMRLauncherMvvm.Services;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class DownloadCacheTests : IDisposable
+public class DownloadCacheTests : TempFolderTest
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "kmr-cache-" + Guid.NewGuid().ToString("N"));
     private readonly ModDownloader _downloader;
     private readonly DownloadCache _cache;
 
@@ -14,13 +13,8 @@ public class DownloadCacheTests : IDisposable
 
     public DownloadCacheTests()
     {
-        _downloader = new ModDownloader(new HttpClient(), _folder);
-        _cache = new DownloadCache(_folder, _downloader.CachePath);
-    }
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_folder)) Directory.Delete(_folder, true);
+        _downloader = new ModDownloader(new HttpClient(), Temp);
+        _cache = new DownloadCache(Temp, _downloader.CachePath);
     }
 
     private static ModVersion WithHash(ModVersion version, string sha256)
@@ -33,7 +27,7 @@ public class DownloadCacheTests : IDisposable
 
     private void WriteFile(string path, int bytes)
     {
-        Directory.CreateDirectory(_folder);
+        Directory.CreateDirectory(Temp);
         File.WriteAllBytes(path, new byte[bytes]);
     }
 
@@ -55,7 +49,7 @@ public class DownloadCacheTests : IDisposable
     {
         Cache(_installed, 300);
         Cache(_other, 100);
-        WriteFile(Path.Combine(_folder, "leftover.zip.part"), 50);
+        WriteFile(Path.Combine(Temp, "leftover.zip.part"), 50);
 
         var usage = _cache.Measure([InstanceWith(_installed)]);
 
@@ -99,6 +93,6 @@ public class DownloadCacheTests : IDisposable
         var result = _cache.ClearAll();
 
         Assert.Equal(new CacheCleanup(2, 400, 0), result);
-        Assert.Empty(Directory.GetFiles(_folder));
+        Assert.Empty(Directory.GetFiles(Temp));
     }
 }

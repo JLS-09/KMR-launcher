@@ -32,7 +32,7 @@ public class Mod
     
     [JsonPropertyName("versions")] public List<ModVersion> Versions { get; set; } = [];
 
-    public ModVersion? LatestVersion => Versions.FirstOrDefault();
+    [JsonIgnore] public ModVersion? LatestVersion => Versions.FirstOrDefault();
 
     public override string ToString()
     {

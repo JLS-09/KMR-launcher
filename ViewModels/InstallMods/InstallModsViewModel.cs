@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using KMRLauncherMvvm.Models;
@@ -34,23 +33,20 @@ public partial class InstallModsViewModel : ViewModelBase
     public event Action? Cancelled;
 
     public InstallModsViewModel(List<PlannedModVersion> mods, ModListService modListService,
-        DependencyService dependencyService, CompatibilityService compatibilityService, Instance? target = null)
+        DependencyService dependencyService, CompatibilityService compatibilityService,
+        Func<IEnumerable<Instance>> usableInstances, Instance? target = null)
     {
         InstallModsData.RequestedModVersions = new ObservableCollection<PlannedModVersion>(mods);
 
         _steps =
         [
-            new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService, target),
+            new InstallModsSelectInstanceStepViewModel(InstallModsData, dependencyService, usableInstances, target),
             new InstallModsRecommendsStepViewModel(InstallModsData, modListService, compatibilityService,
                 dependencyService),
             new InstallModsModulesStepViewModel(InstallModsData, compatibilityService, dependencyService),
             new InstallModsSummaryStepViewModel(InstallModsData)
         ];
         ShowStep(0, forward: true);
-    }
-
-    public InstallModsViewModel()
-    {
     }
 
     partial void OnCurrentStepChanged(InstallModsStepViewModel? oldValue, InstallModsStepViewModel newValue)

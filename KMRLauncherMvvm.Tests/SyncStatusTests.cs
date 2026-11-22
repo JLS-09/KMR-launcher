@@ -3,17 +3,11 @@ using KMRLauncherMvvm.ViewModels;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class SyncStatusTests : IDisposable
+public class SyncStatusTests : TempFolderTest
 {
-    private readonly string _folder = Path.Combine(Path.GetTempPath(), "kmr-sync-" + Guid.NewGuid().ToString("N"));
-    private string File => Path.Combine(_folder, "sync.json");
+    private string File => Path.Combine(Temp, "sync.json");
 
     private static readonly DateTimeOffset Now = new(2026, 11, 21, 20, 0, 0, TimeSpan.FromHours(1));
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_folder)) Directory.Delete(_folder, true);
-    }
 
     [Fact]
     public void NothingSavedMeansNeverFetched()
@@ -68,7 +62,7 @@ public class SyncStatusTests : IDisposable
     [Fact]
     public void BrokenFileIsIgnored()
     {
-        Directory.CreateDirectory(_folder);
+        Directory.CreateDirectory(Temp);
         System.IO.File.WriteAllText(File, "{ not json");
 
         Assert.Null(new SyncStatusService(File).Status.LastFetch);

@@ -59,7 +59,7 @@ public partial class InstalledModRowViewModel : ObservableObject
         }
 
         NextText = NextVersion is null ? "" : InstalledMods.ShortNextVersion(version.Version, NextVersion.Version);
-        IsNotListed = version.Kind is null or "package" && !CompatibilityService.IsCompatible(version, criteria);
+        IsNotListed = version.Kind is null or "package" && !KspCompatibility.IsCompatible(version, criteria);
         NotListedText = $"Not listed for {instance.Version}";
     }
 
@@ -110,4 +110,15 @@ public static class InstanceTexts
         var separator = summary.IndexOf(" · ", StringComparison.Ordinal);
         return separator < 0 ? $"Compatible: {instance.Version} only" : $"Compatible: {summary[(separator + 3)..]}";
     }
+}
+public sealed class InstanceSummary(Instance instance)
+{
+    public string Name { get; } = instance.Name;
+    public bool IsPrimary { get; } = instance.IsPrimary;
+    public string KspText { get; } = $"KSP {instance.Version}";
+    public string CompatibleText { get; } = InstanceTexts.Compatible(instance);
+    public string PathText { get; } = InstanceTexts.ShortPath(instance.RootPath);
+    public string PlayTime { get; } = InstanceTexts.PlayTime(instance);
+    public string LastPlayed { get; } = InstanceTexts.LastPlayed(instance);
+    public string LastPlayedDetail { get; } = InstanceTexts.LastPlayedDetail(instance);
 }

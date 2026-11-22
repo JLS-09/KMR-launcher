@@ -1,0 +1,79 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:KMRLauncherMvvm.Controls">
+    <!-- Settings pages (launcher Settings and the instance Settings tab): sections and rows -->
+    <Style Selector="StackPanel.settingsSection">
+        <Setter Property="Margin" Value="0 22 0 8" />
+    </Style>
+    <Style Selector="StackPanel.settingsSection.first">
+        <Setter Property="Margin" Value="0 22 0 8" />
+    </Style>
+    <Style Selector="Border.sectionLine">
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource Line}" />
+    </Style>
+    <Style Selector="TextBlock.sectionTitle">
+        <Setter Property="Margin" Value="0 0 0 12" />
+    </Style>
+    <Style Selector="Border.settingsRow">
+        <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+        <Setter Property="BorderThickness" Value="0 1 0 0" />
+        <Setter Property="Padding" Value="0 14" />
+    </Style>
+    <Style Selector="StackPanel.rowLabel">
+        <Setter Property="Spacing" Value="2" />
+        <Setter Property="Margin" Value="0 7 0 0" />
+    </Style>
+    <Style Selector="TextBlock.rowTitle">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="TextBlock.rowHint">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="LineHeight" Value="17.4" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+    </Style>
+    <Style Selector="StackPanel.rowControls">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Spacing" Value="8" />
+        <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <!-- A switch without a label: no gap in front of it -->
+    <Style Selector="Border.settingsRow ToggleButton.switch /template/ Grid">
+        <Setter Property="ColumnSpacing" Value="0" />
+    </Style>
+    <Style Selector="StackPanel.rowControls > ToggleButton.switch">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <!-- Stacked page (narrow window): each settings row puts its control under its label -->
+    <Style Selector=":is(Control).rowValue">
+        <Setter Property="Grid.Column" Value="1" />
+    </Style>
+    <Style Selector=":is(UserControl).stacked Grid.settingsGrid">
+        <Setter Property="RowSpacing" Value="8" />
+    </Style>
+    <Style Selector=":is(UserControl).stacked StackPanel.rowLabel">
+        <Setter Property="Grid.ColumnSpan" Value="2" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector=":is(UserControl).stacked :is(Control).rowValue">
+        <Setter Property="Grid.Column" Value="0" />
+        <Setter Property="Grid.Row" Value="1" />
+        <Setter Property="Grid.ColumnSpan" Value="2" />
+    </Style>
+
+    <!-- Dialog side panel rows (install flow, New instance): "New  3", "KSP  1.12.5" -->
+    <Style Selector="Grid.panelRow TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+    </Style>
+    <Style Selector="Grid.panelRow TextBlock.value">
+        <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+</Styles>

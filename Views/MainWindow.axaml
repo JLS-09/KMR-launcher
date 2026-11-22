@@ -15,10 +15,6 @@
         FontFamily="{DynamicResource Inter}"
         FontSize="14">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel />
-    </Design.DataContext>
-
     <Window.Styles>
         <Style Selector="StackPanel.status > TextBlock">
             <Setter Property="FontSize" Value="12" />
@@ -33,16 +29,21 @@
             <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+        <!-- A page built in idle time after startup: laid out once, never seen or clicked -->
+        <Style Selector="ContentControl.warming">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
     </Window.Styles>
 
     <Grid RowDefinitions="*, Auto">
         <Grid Grid.Row="0" ColumnDefinitions="216, *">
 
-            <!-- Sidebar: 216 px, padding 16 12, items 4 px apart -->
+            <!-- Sidebar -->
             <Border Grid.Column="0" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Line}"
                     BorderThickness="0 0 1 0" Padding="12 16">
                 <DockPanel>
-                    <!-- Logo lockup, 160 × 64 (the mockup's SVG); the flame follows the accent -->
+                    <!-- Logo lockup; the flame follows the accent -->
                     <Viewbox DockPanel.Dock="Top" Width="160" Height="64" HorizontalAlignment="Left"
                              Margin="10 6 10 26" Stretch="Fill">
                         <Canvas Width="502" Height="200">
@@ -67,8 +68,7 @@
                         </Canvas>
                     </Viewbox>
 
-                    <!-- Bottom: the primary instance, or the game that is running.
-                         Border-top, padding 14 4 2; 12 px + the two 4 px gaps above it -->
+                    <!-- Bottom: the primary instance, or the game that is running -->
                     <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0"
                             Padding="4 14 4 2">
                         <StackPanel Spacing="8">
@@ -77,13 +77,13 @@
                                     <Grid ColumnDefinitions="Auto, Auto, *">
                                         <Ellipse Grid.Column="0" Width="8" Height="8" Fill="{DynamicResource StatusFits}"
                                                  VerticalAlignment="Center" Margin="0 0 8 0" />
-                                        <TextBlock Grid.Column="1" Classes="label" Text="RUNNING" LineHeight="16"
-                                                   Foreground="{DynamicResource StatusFits}" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="2" Classes="mono secondary" FontSize="12" LineHeight="17.4"
+                                        <TextBlock Grid.Column="1" Classes="label fitsText" Text="RUNNING"
+                                                   LineHeight="16" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Classes="mono secondary size12" LineHeight="17.4"
                                                    Text="{Binding RunningTime}" HorizontalAlignment="Right"
                                                    VerticalAlignment="Center" />
                                     </Grid>
-                                    <TextBlock Text="{Binding RunningInstanceName}" FontSize="13" FontWeight="Medium"
+                                    <TextBlock Classes="size13 medium" Text="{Binding RunningInstanceName}"
                                                LineHeight="18.85" TextTrimming="CharacterEllipsis" />
                                     <Grid ColumnDefinitions="*, 6, *">
                                         <Border Grid.Column="0" Background="Transparent"
@@ -107,10 +107,9 @@
                                             <Button.Flyout>
                                                 <Flyout Placement="TopEdgeAlignedLeft">
                                                     <StackPanel Width="260" Spacing="12">
-                                                        <TextBlock FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"
+                                                        <TextBlock Classes="size14 semibold" TextWrapping="Wrap"
                                                                    Text="{Binding RunningInstanceName, StringFormat='Stop {0}?'}" />
-                                                        <TextBlock FontSize="12" TextWrapping="Wrap"
-                                                                   Foreground="{DynamicResource TextSecondary}"
+                                                        <TextBlock Classes="size12 secondary" TextWrapping="Wrap"
                                                                    Text="KSP is closed right away. Anything you haven't saved in the game is lost." />
                                                         <StackPanel Orientation="Horizontal" Spacing="8"
                                                                     HorizontalAlignment="Right">
@@ -126,14 +125,15 @@
                                     </Grid>
                                 </StackPanel>
 
-                                <!-- Idle: primary instance on the left, a 36 × 36 Launch button on the right -->
+                                <!-- Idle: primary instance on the left, a Launch button on the right -->
                                 <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10" IsVisible="{Binding !IsRunning}">
                                     <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center"
                                                 IsVisible="{Binding HasPrimaryInstance}">
                                         <TextBlock Classes="label" Text="PRIMARY" LineHeight="16" />
-                                        <TextBlock Text="{Binding PrimaryInstance.Name, FallbackValue=''}" FontSize="13"
-                                                   FontWeight="Medium" LineHeight="18.85" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Classes="mono muted" FontSize="11" LineHeight="16"
+                                        <TextBlock Classes="size13 medium"
+                                                   Text="{Binding PrimaryInstance.Name, FallbackValue=''}"
+                                                   LineHeight="18.85" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Classes="mono muted size11" LineHeight="16"
                                                    Text="{Binding PrimaryInstance.Version, StringFormat='KSP {0}', FallbackValue=''}" />
                                     </StackPanel>
                                     <Button Grid.Column="1" Classes="accent icon" BorderThickness="0" CornerRadius="8"
@@ -147,15 +147,14 @@
                                     <!-- No instances (not in the mockups) -->
                                     <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Spacing="8"
                                                 IsVisible="{Binding !HasPrimaryInstance}">
-                                        <TextBlock Classes="muted" FontSize="13" Text="No instances yet" />
+                                        <TextBlock Classes="muted size13" Text="No instances yet" />
                                         <Button Classes="secondary small" HorizontalAlignment="Stretch"
                                                 Command="{Binding GoToInstancesCommand}" Content="Go to Instances" />
                                     </StackPanel>
                                 </Grid>
                             </Panel>
                             <!-- Only when launching failed (not in the mockups) -->
-                            <TextBlock Text="{Binding LaunchError}" FontSize="12" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource StatusError}"
+                            <TextBlock Classes="size12 errorText" Text="{Binding LaunchError}" TextWrapping="Wrap"
                                        IsVisible="{Binding LaunchError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                         </StackPanel>
                     </Border>
@@ -189,7 +188,7 @@
                                 <controls:StrokeIcon Grid.Column="0" Data="{StaticResource IconInstances}"
                                                      VerticalAlignment="Center" Margin="0 0 12 0" />
                                 <TextBlock Grid.Column="1" Text="Instances" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2" Classes="mono muted" FontSize="11"
+                                <TextBlock Grid.Column="2" Classes="mono muted size11"
                                            Text="{Binding InstanceCount}" VerticalAlignment="Center" />
                             </Grid>
                         </Button>
@@ -197,7 +196,7 @@
                 </DockPanel>
             </Border>
 
-            <!-- Top bar (padding 16 28, gap 16) + page -->
+            <!-- Top bar and page -->
             <Grid Grid.Column="1" RowDefinitions="Auto, Auto, *">
                 <Border Grid.Row="0" BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1" Padding="28 16">
                     <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="16">
@@ -228,7 +227,7 @@
                     <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
                         <controls:StrokeIcon Grid.Column="0" Data="{StaticResource IconWarning}" Size="16"
                                              Foreground="{DynamicResource StatusError}" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="1" Text="{Binding SettingsProblem}" FontSize="13" LineHeight="19"
+                        <TextBlock Classes="size13" Grid.Column="1" Text="{Binding SettingsProblem}" LineHeight="19"
                                    TextWrapping="Wrap" Foreground="{DynamicResource ErrorBoxText}"
                                    VerticalAlignment="Center" />
                         <Button Grid.Column="2" Classes="ghost icon small" VerticalAlignment="Center"
@@ -237,7 +236,21 @@
                         </Button>
                     </Grid>
                 </Border>
-                <ContentControl Grid.Row="2" Content="{Binding CurrentPage}" />
+                <!-- Visited pages stay built; only the active one is shown, so switching pages is instant.
+                     Discover and Instances are built in idle time after startup (WarmUpAsync). -->
+                <ItemsControl Grid.Row="2" ItemsSource="{Binding Pages}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Panel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PageViewModel">
+                            <ContentControl Content="{Binding}" IsVisible="{Binding IsShown}"
+                                            Classes.warming="{Binding IsWarming}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Grid>
         </Grid>
 
@@ -267,8 +280,7 @@
         </Border>
 
         <!-- Dialogs over the whole window (install flow, new instance), each over the one before it: scrim, then
-             the dialog at most its own size (DialogHost: 1080 × 860 by default), 64 px from the top and at least
-             24 px from the edges; it shrinks with the window -->
+             the dialog at most its own size (DialogHost); it shrinks with the window -->
         <ItemsControl Grid.Row="0" Grid.RowSpan="2" ItemsSource="{Binding Dialogs}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>

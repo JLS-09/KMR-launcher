@@ -11,10 +11,6 @@
              x:Class="KMRLauncherMvvm.Views.SettingsPageView"
              Foreground="{DynamicResource TextPrimary}">
 
-    <Design.DataContext>
-        <vm:SettingsPageViewModel />
-    </Design.DataContext>
-
     <UserControl.Styles>
         <Style Selector="Button.sectionNav">
             <Setter Property="Height" Value="34" />
@@ -155,7 +151,7 @@
                 <StackPanel Margin="28 8 28 32">
                     <StackPanel Name="KspSection" Classes="settingsSection first">
                         <TextBlock Classes="h2 sectionTitle" Text="KSP versions" />
-                        <TextBlock Classes="secondary" FontSize="13" LineHeight="20.15" TextWrapping="Wrap"
+                        <TextBlock Classes="secondary size13" LineHeight="20.15" TextWrapping="Wrap"
                                    Margin="0 0 0 12"
                                    Text="New instances are created from these zips. The version is read from the build ID inside the zip." />
                         <ItemsControl ItemsSource="{Binding KspZips}">
@@ -163,9 +159,9 @@
                                 <DataTemplate x:DataType="settings:KspZipRow">
                                     <Border Classes="zipRow">
                                         <Grid ColumnDefinitions="72, *, 72, 32" ColumnSpacing="12">
-                                            <TextBlock Grid.Column="0" Classes="mono" FontSize="13" FontWeight="Medium"
+                                            <TextBlock Grid.Column="0" Classes="mono size13 medium"
                                                        VerticalAlignment="Center" Text="{Binding Version}" />
-                                            <TextBlock Grid.Column="1" Classes="mono secondary" FontSize="12"
+                                            <TextBlock Grid.Column="1" Classes="mono secondary size12"
                                                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                                        Text="{Binding PathText}" ToolTip.Tip="{Binding Path}" />
                                             <TextBlock Grid.Column="2" Classes="mono muted" FontSize="12"
@@ -186,7 +182,7 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                         <Border Classes="zipRow" IsVisible="{Binding HasNoZips}">
-                            <TextBlock Classes="muted" FontSize="13" VerticalAlignment="Center"
+                            <TextBlock Classes="muted size13" VerticalAlignment="Center"
                                        Text="No KSP zips yet. Add one to create instances from it." />
                         </Border>
                         <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 12 0 14">
@@ -198,7 +194,7 @@
                                         <TextBlock Text="Add KSP zip" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
-                                <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}" TextWrapping="Wrap"
+                                <TextBlock Classes="size12 errorText" TextWrapping="Wrap"
                                            Text="{Binding AddZipError}"
                                            IsVisible="{Binding AddZipError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                             </StackPanel>
@@ -211,7 +207,7 @@
                         <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="0 16">
                             <StackPanel Spacing="14">
                                 <Grid ColumnDefinitions="Auto, Auto, Auto, *, Auto, Auto" ColumnSpacing="10">
-                                    <TextBlock Grid.Column="0" FontSize="14" FontWeight="SemiBold"
+                                    <TextBlock Classes="size14 semibold" Grid.Column="0"
                                                VerticalAlignment="Center" Text="CKAN-meta" />
                                     <Border Grid.Column="1" Classes="chip plain" VerticalAlignment="Center"
                                             ToolTip.Tip="Priorities matter once more repositories can be added (Phase 8)">
@@ -223,7 +219,7 @@
                                                 Classes.failed="{Binding IsFetchFailed}"
                                                 ToolTip.Tip="{Binding RepoStateHint}">
                                         <Ellipse Width="7" Height="7" VerticalAlignment="Center" />
-                                        <TextBlock FontSize="12" VerticalAlignment="Center"
+                                        <TextBlock Classes="size12" VerticalAlignment="Center"
                                                    Text="{Binding RepoStateText}" />
                                     </StackPanel>
                                     <Button Grid.Column="4" Classes="secondary small"
@@ -260,10 +256,10 @@
                                                    ToolTip.Tip="{Binding LocalCopyText}" />
                                     </StackPanel>
                                 </UniformGrid>
-                                <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}" TextWrapping="Wrap"
+                                <TextBlock Classes="size12 errorText" TextWrapping="Wrap"
                                            Text="{Binding FetchError}"
                                            IsVisible="{Binding FetchError, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                                <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}" TextWrapping="Wrap"
+                                <TextBlock Classes="size12 errorText" TextWrapping="Wrap"
                                            Text="{Binding OpenError}"
                                            IsVisible="{Binding OpenError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                             </StackPanel>
@@ -290,7 +286,7 @@
                                 <Border Classes="rowValue soon" ToolTip.Tip="Offline handling comes in Phase 7 (task 4)">
                                     <StackPanel Classes="rowControls">
                                         <ToggleButton Classes="switch" IsChecked="True" />
-                                        <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center"
+                                        <TextBlock Classes="muted size12" VerticalAlignment="Center"
                                                    Text="Use the cached list when a fetch fails" />
                                     </StackPanel>
                                 </Border>
@@ -330,7 +326,7 @@
                                     <TextBox Classes="field mono" Width="80" FontSize="13"
                                              AutomationProperties.Name="Parallel downloads"
                                              Text="{Binding ParallelDownloads, UpdateSourceTrigger=LostFocus}" />
-                                    <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Classes="muted size12" VerticalAlignment="Center"
                                                Text="1 to 16" />
                                 </StackPanel>
                             </Grid>
@@ -345,7 +341,7 @@
                                 </StackPanel>
                                 <StackPanel Classes="rowValue" Spacing="6">
                                     <StackPanel Classes="rowControls">
-                                        <TextBlock Classes="mono secondary" FontSize="12" VerticalAlignment="Center"
+                                        <TextBlock Classes="mono secondary size12" VerticalAlignment="Center"
                                                    TextTrimming="CharacterEllipsis" Text="{Binding CacheFolderText}" />
                                         <Button Classes="secondary small" Command="{Binding OpenCacheFolderCommand}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
@@ -384,16 +380,16 @@
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <Border Width="8" Height="8" CornerRadius="2" VerticalAlignment="Center"
                                                         Background="{DynamicResource TextSecondary}" />
-                                                <TextBlock Classes="secondary" FontSize="12" Text="In use" />
-                                                <TextBlock Classes="mono secondary" FontSize="12" Text="{Binding InUseText}" />
+                                                <TextBlock Classes="secondary size12" Text="In use" />
+                                                <TextBlock Classes="mono secondary size12" Text="{Binding InUseText}" />
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" Spacing="6">
                                                 <Border Width="8" Height="8" CornerRadius="2" VerticalAlignment="Center"
                                                         Background="{DynamicResource StatusWarning}" />
-                                                <TextBlock Classes="secondary" FontSize="12" Text="Not used by any instance" />
-                                                <TextBlock Classes="mono secondary" FontSize="12" Text="{Binding UnusedText}" />
+                                                <TextBlock Classes="secondary size12" Text="Not used by any instance" />
+                                                <TextBlock Classes="mono secondary size12" Text="{Binding UnusedText}" />
                                             </StackPanel>
-                                            <TextBlock Classes="mono muted" FontSize="12" Text="{Binding ArchivesText}" />
+                                            <TextBlock Classes="mono muted size12" Text="{Binding ArchivesText}" />
                                         </WrapPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <Button Name="RemoveUnusedButton" Classes="secondary small"
@@ -401,9 +397,9 @@
                                                 <Button.Flyout>
                                                     <Flyout Placement="TopEdgeAlignedLeft">
                                                         <StackPanel Width="300" Spacing="12">
-                                                            <TextBlock FontSize="14" FontWeight="SemiBold"
+                                                            <TextBlock Classes="size14 semibold"
                                                                        Text="Remove unused downloads?" />
-                                                            <TextBlock Classes="secondary" FontSize="12" TextWrapping="Wrap"
+                                                            <TextBlock Classes="secondary size12" TextWrapping="Wrap"
                                                                        Text="{Binding RemoveUnusedText}" />
                                                             <StackPanel Orientation="Horizontal" Spacing="8"
                                                                         HorizontalAlignment="Right">
@@ -421,9 +417,9 @@
                                                 <Button.Flyout>
                                                     <Flyout Placement="TopEdgeAlignedLeft">
                                                         <StackPanel Width="300" Spacing="12">
-                                                            <TextBlock FontSize="14" FontWeight="SemiBold"
+                                                            <TextBlock Classes="size14 semibold"
                                                                        Text="Clear the download cache?" />
-                                                            <TextBlock Classes="secondary" FontSize="12" TextWrapping="Wrap"
+                                                            <TextBlock Classes="secondary size12" TextWrapping="Wrap"
                                                                        Text="{Binding ClearAllText}" />
                                                             <StackPanel Orientation="Horizontal" Spacing="8"
                                                                         HorizontalAlignment="Right">
@@ -437,7 +433,7 @@
                                                 </Button.Flyout>
                                             </Button>
                                         </StackPanel>
-                                        <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}"
+                                        <TextBlock Classes="size12 errorText"
                                                    TextWrapping="Wrap" Text="{Binding CacheError}"
                                                    IsVisible="{Binding CacheError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                                     </StackPanel>
@@ -477,15 +473,14 @@
                                     <TextBlock Classes="rowTitle" Text="Wine" />
                                 </StackPanel>
                                 <StackPanel Classes="rowValue rowControls">
-                                    <TextBlock Classes="mono secondary" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Classes="mono secondary size12" VerticalAlignment="Center"
                                                Text="{Binding WinePathText}" IsVisible="{Binding WineFound}" />
                                     <StackPanel Classes="found" IsVisible="{Binding WineFound}">
                                         <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="13"
                                                              VerticalAlignment="Center" />
-                                        <TextBlock FontSize="12" VerticalAlignment="Center" Text="found" />
+                                        <TextBlock Classes="size12" VerticalAlignment="Center" Text="found" />
                                     </StackPanel>
-                                    <TextBlock FontSize="12" VerticalAlignment="Center"
-                                               Foreground="{DynamicResource StatusError}"
+                                    <TextBlock Classes="size12 errorText" VerticalAlignment="Center"
                                                IsVisible="{Binding !WineFound}"
                                                Text="wine wasn't found on your PATH. Install Wine to launch KSP." />
                                 </StackPanel>
@@ -498,14 +493,14 @@
                                     <TextBlock Classes="rowTitle" Text="umu-run" />
                                 </StackPanel>
                                 <StackPanel Classes="rowValue rowControls">
-                                    <TextBlock Classes="mono secondary" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Classes="mono secondary size12" VerticalAlignment="Center"
                                                Text="{Binding UmuPathText}" IsVisible="{Binding UmuFound}" />
                                     <StackPanel Classes="found" IsVisible="{Binding UmuFound}">
                                         <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="13"
                                                              VerticalAlignment="Center" />
-                                        <TextBlock FontSize="12" VerticalAlignment="Center" Text="found" />
+                                        <TextBlock Classes="size12" VerticalAlignment="Center" Text="found" />
                                     </StackPanel>
-                                    <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Classes="muted size12" VerticalAlignment="Center"
                                                IsVisible="{Binding !UmuFound}"
                                                Text="not found · only needed for Proton (Phase 8)" />
                                 </StackPanel>
@@ -593,7 +588,7 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-                                    <TextBlock Classes="muted" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Classes="muted size12" VerticalAlignment="Center"
                                                Text="{Binding AccentName}" />
                                 </StackPanel>
                             </Grid>
@@ -631,7 +626,7 @@
                                     <TextBlock Classes="rowTitle" Text="Version" />
                                 </StackPanel>
                                 <StackPanel Classes="rowValue rowControls">
-                                    <TextBlock Classes="mono" FontSize="12" VerticalAlignment="Center"
+                                    <TextBlock Classes="mono size12" VerticalAlignment="Center"
                                                Text="{Binding VersionText}" />
                                 </StackPanel>
                             </Grid>
@@ -662,7 +657,7 @@
                                 </StackPanel>
                                 <StackPanel Classes="rowValue" Spacing="6">
                                     <StackPanel Classes="rowControls">
-                                        <TextBlock Classes="mono secondary" FontSize="12" VerticalAlignment="Center"
+                                        <TextBlock Classes="mono secondary size12" VerticalAlignment="Center"
                                                    Text="{Binding DataFolderText}" />
                                         <Button Classes="secondary small" Command="{Binding OpenDataFolderCommand}">
                                             <StackPanel Orientation="Horizontal" Spacing="6">
@@ -672,7 +667,7 @@
                                             </StackPanel>
                                         </Button>
                                     </StackPanel>
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource StatusError}"
+                                    <TextBlock Classes="size12 errorText"
                                                TextWrapping="Wrap" Text="{Binding AboutError}"
                                                IsVisible="{Binding AboutError, Converter={x:Static ObjectConverters.IsNotNull}}" />
                                 </StackPanel>

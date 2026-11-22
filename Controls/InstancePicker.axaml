@@ -4,9 +4,9 @@
              xmlns:models="using:KMRLauncherMvvm.Models"
              x:Class="KMRLauncherMvvm.Controls.InstancePicker"
              x:DataType="controls:InstancePicker">
-    <!-- A button that shows the picked instance and opens a list of instances.
-         Default: 40 px with name + "1.12.5 · 1.12.x" (Discover's "Check against");
-         IsCompact: a 36 px secondary button with the name only (the selection tray's "Install to"). -->
+    <!-- A button that shows the picked instance and opens a list of instances. Default: the name and "1.12.5 ·
+         1.12.x" (Discover's "Check against"); IsCompact: a smaller secondary button with the name only (the
+         selection tray's "Install to"). -->
     <UserControl.Styles>
         <Style Selector="Button.picker">
             <Setter Property="Height" Value="40" />
@@ -51,9 +51,10 @@
             HorizontalAlignment="Stretch">
         <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
             <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                <TextBlock Text="{Binding SelectedInstance.Name, FallbackValue='No instance'}" FontSize="13"
-                           FontWeight="Medium" LineHeight="15.6" TextTrimming="CharacterEllipsis" />
-                <TextBlock Classes="mono muted" FontSize="11" LineHeight="13.2" IsVisible="{Binding !IsCompact}"
+                <TextBlock Classes="size13 medium"
+                           Text="{Binding SelectedInstance.Name, FallbackValue='No instance'}" LineHeight="15.6"
+                           TextTrimming="CharacterEllipsis" />
+                <TextBlock Classes="mono muted size11" LineHeight="13.2" IsVisible="{Binding !IsCompact}"
                            Text="{Binding SelectedInstance.CompatibleSummary, FallbackValue=''}"
                            TextTrimming="CharacterEllipsis" />
             </StackPanel>
@@ -69,8 +70,8 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="models:Instance">
                             <StackPanel Spacing="1">
-                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium" />
-                                <TextBlock Classes="mono muted" FontSize="11" Text="{Binding CompatibleSummary}" />
+                                <TextBlock Classes="size13 medium" Text="{Binding Name}" />
+                                <TextBlock Classes="mono muted size11" Text="{Binding CompatibleSummary}" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,15 +11,18 @@ using KMRLauncherMvvm.Factories;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.Services.Api;
+using KMRLauncherMvvm.ViewModels.InstallMods;
 
 namespace KMRLauncherMvvm.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private readonly PageFactory? _pageFactory;
-    private readonly IModApiService? _api;
-    private readonly GameSessionService? _session;
-    private readonly DispatcherTimer? _runningTimer;
+    private readonly PageFactory _pageFactory;
+    private readonly InstallFlow _installFlow;
+    private readonly IModApiService _api;
+    private readonly GameSessionService _session;
+    private readonly InstanceService _instances;
+    private readonly DispatcherTimer _runningTimer;
     private DateTime _runningSince;
 
     [ObservableProperty]
@@ -91,10 +95,12 @@ public partial class MainWindowViewModel : ViewModelBase
     public StatusBarViewModel StatusBar { get; }
 
     public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar, IModApiService api,
-        GameSessionService session, NavigationService navigation, DialogService dialogs)
+        GameSessionService session, NavigationService navigation, DialogService dialogs, InstanceService instances,
+        InstallFlow installFlow)
     {
         dialogs.Changed += () => SyncDialogs(dialogs);
         _pageFactory = pageFactory;
+        _installFlow = installFlow;
         _api = api;
         _session = session;
         session.Changed += OnSessionChanged;
@@ -108,26 +114,22 @@ public partial class MainWindowViewModel : ViewModelBase
         _runningTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _runningTimer.Tick += (_, _) => RunningTime = (DateTime.Now - _runningSince).ToString(@"hh\:mm\:ss");
 
-        LoadInstances(App.Settings);
-        SettingsService.SettingsChanged += (_, settings) => LoadInstances(settings);
+        _instances = instances;
+        LoadInstances();
+        instances.Changed += LoadInstances;
 
         GoToHome();
-    }
-
-    public MainWindowViewModel()
-    {
-        StatusBar = new StatusBarViewModel();
     }
 
     partial void OnCurrentPageChanged(PageViewModel? value) => SearchText = "";
 
     partial void OnSearchTextChanged(string value) => (CurrentPage as ISearchablePage)?.ApplySearch(value);
 
-    private void LoadInstances(AppSettings settings)
+    private void LoadInstances()
     {
+        var settings = _instances.Settings;
         InstanceCount = settings.Instances.Count;
-        PrimaryInstance = settings.UsableInstances.FirstOrDefault(i => i.IsPrimary) ??
-                          settings.UsableInstances.FirstOrDefault();
+        PrimaryInstance = _instances.Primary;
         if (settings.LoadProblem != _dismissedSettingsProblem) SettingsProblem = settings.LoadProblem;
     }
 
@@ -150,22 +152,55 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void GoToSettings() => ShowPage(ApplicationPageNames.Settings);
 
+    public ObservableCollection<PageViewModel> Pages { get; } = [];
+
+    public async Task WarmUpAsync()
+    {
+        List<PageViewModel> warming = [];
+        foreach (var name in (ApplicationPageNames[])
+                 [ApplicationPageNames.Discover, ApplicationPageNames.Instances, ApplicationPageNames.Settings])
+        {
+            await Idle();
+            if (Pages.Any(p => p.PageName == name)) continue;
+
+            var page = _pageFactory.GetPageViewModel(name);
+            page.IsWarming = true;
+            Pages.Add(page);
+            warming.Add(page);
+        }
+
+        foreach (var page in warming)
+        {
+            while (page is ILoadingPage { IsLoading: true }) await Task.Delay(100);
+            await Idle();
+            page.IsWarming = false;
+        }
+
+        await Task.Run(_installFlow.WarmUp);
+    }
+
+    private static async Task Idle() => await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+
     private void ShowPage(ApplicationPageNames name)
     {
-        if (_pageFactory is null) return;
-        CurrentPage = _pageFactory.GetPageViewModel(name);
+        var page = Pages.FirstOrDefault(p => p.PageName == name);
+        if (page is null) Pages.Add(page = _pageFactory.GetPageViewModel(name));
+        if (CurrentPage is { } previous) previous.IsActive = false;
+        page.IsWarming = false;
+        page.IsActive = true;
+        CurrentPage = page;
         _ = StatusBar.RefreshAsync();
     }
 
     private bool CanLaunchPrimary() => PrimaryInstance is not null && !IsRunning;
 
     [RelayCommand]
-    private void StopGame() => _session?.Stop();
+    private void StopGame() => _session.Stop();
 
     [RelayCommand(CanExecute = nameof(CanLaunchPrimary))]
     private async Task LaunchPrimary()
     {
-        if (PrimaryInstance is not { } instance || _session is null) return;
+        if (PrimaryInstance is not { } instance) return;
 
         LaunchError = null;
         try
@@ -180,17 +215,17 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnSessionChanged()
     {
-        IsRunning = _session?.IsRunning ?? false;
-        if (_session?.Running is { } running)
+        IsRunning = _session.IsRunning;
+        if (_session.Running is { } running)
         {
             RunningInstanceName = running.Name;
             RunningTime = "00:00:00";
             _runningSince = _session.StartedAt;
-            _runningTimer?.Start();
+            _runningTimer.Start();
         }
         else
         {
-            _runningTimer?.Stop();
+            _runningTimer.Stop();
         }
     }
 
@@ -204,7 +239,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             if (CurrentPage is DiscoverPageViewModel discover)
                 await discover.FetchModsCommand.ExecuteAsync(true);
-            else if (_api is not null)
+            else
                 await Task.Run(() => _api.GetAllModsAsync(null, true));
         }
         catch (Exception)

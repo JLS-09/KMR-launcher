@@ -150,7 +150,7 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
             if (IsPlannedOrInstalled(mod.Id)) continue;
 
             var versions = mod.Versions
-                .Where(v => Supports(v, supportedMod) && CompatibilityService.IsCompatible(v, criteria))
+                .Where(v => Supports(v, supportedMod) && KspCompatibility.IsCompatible(v, criteria))
                 .ToList();
             if (versions.Count == 0) continue;
 
@@ -204,12 +204,6 @@ public partial class InstallModsRecommendsStepViewModel : InstallModsStepViewMod
 
     private static Dictionary<string, RowState> RowStates(List<VersionListItemViewModel> items) =>
         items.ToDictionary(i => i.Identifier, i => new RowState(i.IsSelected, i.SelectedVersion?.Id));
-
-    [RelayCommand]
-    private void ToggleRecommendation(VersionListItemViewModel item)
-    {
-        item.IsSelected = !item.IsSelected;
-    }
 
     [RelayCommand]
     private void SelectAll(List<VersionListItemViewModel> versions)

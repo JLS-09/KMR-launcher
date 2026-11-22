@@ -33,6 +33,7 @@ public class DialogService
     {
         if (!_open.Remove(dialog)) return;
 
+        (dialog as IDisposable)?.Dispose();
         Changed?.Invoke();
     }
 }

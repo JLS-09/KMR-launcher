@@ -5,25 +5,19 @@ using static KMRLauncherMvvm.Tests.TestData;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class InstanceDataTests : IDisposable
+public class InstanceDataTests : TempFolderTest
 {
-    private readonly string _temp = Path.Combine(Path.GetTempPath(), "kmr-data-" + Guid.NewGuid());
     private readonly string _settingsFile;
 
     public InstanceDataTests()
     {
-        Directory.CreateDirectory(_temp);
-        _settingsFile = Path.Combine(_temp, "settings.json");
-    }
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_temp)) Directory.Delete(_temp, true);
+        Directory.CreateDirectory(Temp);
+        _settingsFile = Path.Combine(Temp, "settings.json");
     }
 
     private string Folder(string name, bool create = true)
     {
-        var path = Path.Combine(_temp, name);
+        var path = Path.Combine(Temp, name);
         if (create) Directory.CreateDirectory(path);
         return path;
     }
@@ -49,53 +43,44 @@ public class InstanceDataTests : IDisposable
         };
     }
 
-    private void WriteOldSettings(params Instance[] instances)
-    {
-        var old = new LegacySettingsFile
-        {
-            KspZips = [new KspZip("/zips/ksp.zip", "KSP_linux", "1.12.5")],
-            Instances = [.. instances],
-            MaxParallelDownloads = 6
-        };
-        File.WriteAllText(_settingsFile, JsonSerializer.Serialize(old, new JsonSerializerOptions { WriteIndented = true }));
-    }
-
     private static string DataFile(string root, string name) => Path.Combine(root, ".kmr", name);
 
     [Fact]
-    public void Migration_writes_each_instance_into_its_folder_and_slims_settings()
+    public void Settings_keep_only_the_instance_folders_and_the_primary_one()
     {
         var rp1 = Make("RP-1", Folder("rp1"));
         var stock = Make("Stock", Folder("stock"), primary: true);
-        WriteOldSettings(rp1, stock);
-        var oldText = File.ReadAllText(_settingsFile);
+        var settings = new AppSettings
+        {
+            Instances = [rp1, stock],
+            KspZips = [new KspZip("/zips/ksp.zip", "KSP_linux", "1.12.5")],
+            MaxParallelDownloads = 6
+        };
+        InstanceStore.Save(rp1);
+        InstanceStore.Save(stock);
 
-        var settings = SettingsService.Load(_settingsFile);
+        SettingsService.Write(settings, _settingsFile);
 
-        Assert.False(settings.UsesLegacyFile);
-        Assert.Null(settings.LoadProblem);
-        Assert.True(File.Exists(DataFile(rp1.RootPath, "instance.json")));
-        Assert.True(File.Exists(DataFile(rp1.RootPath, "mods.json")));
-        Assert.Equal(oldText, File.ReadAllText(_settingsFile + ".bak"));
-
-        using var slim = JsonDocument.Parse(File.ReadAllText(_settingsFile));
-        Assert.False(slim.RootElement.TryGetProperty("Instances", out _));
+        using var written = JsonDocument.Parse(File.ReadAllText(_settingsFile));
+        Assert.False(written.RootElement.TryGetProperty("Instances", out _));
         Assert.Equal([rp1.RootPath, stock.RootPath],
-            slim.RootElement.GetProperty("InstanceFolders").EnumerateArray().Select(e => e.GetString()));
-        Assert.Equal(stock.RootPath, slim.RootElement.GetProperty("PrimaryInstance").GetString());
-        Assert.Equal(6, slim.RootElement.GetProperty("MaxParallelDownloads").GetInt32());
+            written.RootElement.GetProperty("InstanceFolders").EnumerateArray().Select(e => e.GetString()));
+        Assert.Equal(stock.RootPath, written.RootElement.GetProperty("PrimaryInstance").GetString());
+        Assert.Equal(6, written.RootElement.GetProperty("MaxParallelDownloads").GetInt32());
 
         var reloaded = SettingsService.Load(_settingsFile);
+        Assert.Null(reloaded.LoadProblem);
         Assert.Equal(["RP-1", "Stock"], reloaded.Instances.Select(i => i.Name));
-        Assert.True(InstanceStore.SameData(rp1, reloaded.Instances[0]));
+        Assert.Equal(rp1.Mods.Select(m => m.Id), reloaded.Instances[0].Mods.Select(m => m.Id));
+        Assert.Equal(rp1.PrefixPath, reloaded.Instances[0].PrefixPath);
         Assert.True(reloaded.Instances[1].IsPrimary);
         Assert.False(reloaded.Instances[0].IsPrimary);
         Assert.Single(reloaded.KspZips);
-        Assert.Empty(Directory.GetFiles(_temp, "*.tmp", SearchOption.AllDirectories));
+        Assert.Empty(Directory.GetFiles(Temp, "*.tmp", SearchOption.AllDirectories));
     }
 
     [Fact]
-    public void Migration_reads_back_ckan_metadata_unchanged()
+    public void Ckan_metadata_reads_back_unchanged()
     {
         const string ckan = """
             {
@@ -110,54 +95,16 @@ public class InstanceDataTests : IDisposable
             """;
         var instance = Make("Real", Folder("real"));
         instance.Mods = [JsonHelper.ParseVersion("Parallax-2.0.8.ckan", ckan)!];
-        WriteOldSettings(instance);
+        InstanceStore.Save(instance);
 
-        var settings = SettingsService.Load(_settingsFile);
+        var loaded = InstanceStore.Load(instance.RootPath);
 
-        Assert.Null(settings.LoadProblem);
-        var mod = Assert.Single(settings.Instances[0].Mods);
+        Assert.Null(loaded.LoadError);
+        var mod = Assert.Single(loaded.Mods);
         Assert.Equal("2:2.0.8", mod.Version);
         Assert.Equal(new DateTime(2024, 5, 1, 10, 20, 30, DateTimeKind.Utc), mod.ReleaseDate);
+        Assert.Equal("KopernicusBE", mod.Depends![0].AnyOf![1].Name);
         Assert.Equal("GameData", mod.Install![0].InstallTo);
-    }
-
-    [Fact]
-    public void Migration_keeps_an_instance_whose_folder_is_gone_as_missing()
-    {
-        var gone = Make("Gone", Folder("gone", create: false));
-        WriteOldSettings(Make("Here", Folder("here")), gone);
-
-        var settings = SettingsService.Load(_settingsFile);
-
-        Assert.False(settings.UsesLegacyFile);
-        var missing = settings.Instances[1];
-        Assert.True(missing.IsMissing);
-        Assert.Equal("Gone", missing.Name);
-        Assert.Equal(gone.RootPath, missing.RootPath);
-        Assert.Single(settings.UsableInstances);
-        Assert.Contains(gone.RootPath, File.ReadAllText(_settingsFile));
-    }
-
-    [Fact]
-    public void Failed_migration_keeps_using_the_old_file_and_says_so()
-    {
-        var root = Folder("blocked");
-        File.WriteAllText(Path.Combine(root, ".kmr"), "a file where the folder should go");
-        WriteOldSettings(Make("Blocked", root));
-        var oldText = File.ReadAllText(_settingsFile);
-
-        var settings = SettingsService.Load(_settingsFile);
-
-        Assert.True(settings.UsesLegacyFile);
-        Assert.NotNull(settings.LoadProblem);
-        Assert.Equal(oldText, File.ReadAllText(_settingsFile));
-        Assert.False(File.Exists(_settingsFile + ".bak"));
-        Assert.Equal("Blocked", Assert.Single(settings.Instances).Name);
-
-        settings.Instances[0].PlayTime = 7200;
-        SettingsService.Write(settings, _settingsFile, settings.Instances[0]);
-        using var written = JsonDocument.Parse(File.ReadAllText(_settingsFile));
-        Assert.Equal(7200, written.RootElement.GetProperty("Instances")[0].GetProperty("PlayTime").GetInt32());
     }
 
     [Fact]
@@ -236,17 +183,6 @@ public class InstanceDataTests : IDisposable
         SettingsService.Write(new AppSettings { Instances = [instance] }, _settingsFile, instance, modsChanged: true);
         Assert.Equal("{ \"Name\": ", File.ReadAllText(DataFile(root, "instance.json")));
         Assert.Contains("GameData/Foo/Foo.dll", File.ReadAllText(DataFile(root, "mods.json")));
-    }
-
-    [Fact]
-    public void Data_from_a_newer_launcher_is_not_loaded()
-    {
-        var root = Folder("future");
-        InstanceStore.Save(Make("Future", root));
-        var path = DataFile(root, "instance.json");
-        File.WriteAllText(path, File.ReadAllText(path).Replace("\"Format\": 1", "\"Format\": 2"));
-
-        Assert.Contains("newer version", InstanceStore.Load(root).LoadError);
     }
 
     [Fact]

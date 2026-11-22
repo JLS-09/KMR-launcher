@@ -18,7 +18,7 @@ public class CompatibilityService(ModListService modListService)
             throw new InvalidRelationshipException(relationship);
 
         return dependencyMod.Versions.FirstOrDefault(v =>
-                   SatisfiesVersionLimits(v.Version, relationship) && IsCompatible(v, criteria))
+                   SatisfiesVersionLimits(v.Version, relationship) && KspCompatibility.IsCompatible(v, criteria))
                ?? throw new NoCompatibleVersionFoundException(relationship);
     }
 
@@ -57,7 +57,7 @@ public class CompatibilityService(ModListService modListService)
         if (mod is null) return [];
 
         return mod.Versions
-            .Where(v => SatisfiesVersionLimits(v.Version, exact, min, max) && IsCompatible(v, criteria))
+            .Where(v => SatisfiesVersionLimits(v.Version, exact, min, max) && KspCompatibility.IsCompatible(v, criteria))
             .ToList();
     }
 
@@ -67,7 +67,7 @@ public class CompatibilityService(ModListService modListService)
         if (mod is null) return [];
 
         return mod.Versions
-            .Where(v => v.Provides?.Contains(module) == true && IsCompatible(v, criteria))
+            .Where(v => v.Provides?.Contains(module) == true && KspCompatibility.IsCompatible(v, criteria))
             .ToList();
     }
 
@@ -77,7 +77,7 @@ public class CompatibilityService(ModListService modListService)
 
         return modListService.Mods
             .Select(m => m.Versions.FirstOrDefault(v =>
-                v.Provides?.Contains(module) == true && IsCompatible(v, criteria)))
+                v.Provides?.Contains(module) == true && KspCompatibility.IsCompatible(v, criteria)))
             .OfType<ModVersion>()
             .ToList();
     }
@@ -89,7 +89,7 @@ public class CompatibilityService(ModListService modListService)
         HashSet<string> reported = [];
 
         foreach (var mod in toInstall)
-        foreach (var name in (mod.Conflicts ?? []).SelectMany(InstalledMods.NamesIn).Distinct())
+        foreach (var name in (mod.Conflicts ?? []).SelectMany(Relationships.NamesIn).Distinct())
         {
             if (dlls?.TryGetValue(name, out var path) != true || !reported.Add($"{mod.Identifier}|{name}")) continue;
 
@@ -138,7 +138,8 @@ public class CompatibilityService(ModListService modListService)
         IReadOnlyList<ModVersion> remainingInstalled, IReadOnlyList<ModVersion> installedBefore,
         IReadOnlyDictionary<string, string>? dlls = null)
     {
-        List<ModVersion> after = [.. toInstall, .. remainingInstalled];
+        var after = Relationships.ByName([.. toInstall, .. remainingInstalled]);
+        var before = Relationships.ByName(installedBefore);
         List<ResolutionProblem> problems = [];
 
         foreach (var mod in remainingInstalled)
@@ -146,8 +147,8 @@ public class CompatibilityService(ModListService modListService)
             foreach (var dependency in mod.Depends ?? [])
             {
                 if (dependency.AnyOf is null && HasInvalidVersionFields(dependency)) continue;
-                if (dlls is not null && InstalledMods.NamesIn(dependency).Any(dlls.ContainsKey)) continue;
-                if (IsMet(dependency, after, mod) || !IsMet(dependency, installedBefore, mod)) continue;
+                if (dlls is not null && Relationships.NamesIn(dependency).Any(dlls.ContainsKey)) continue;
+                if (IsMet(dependency, after, mod) || !IsMet(dependency, before, mod)) continue;
 
                 problems.Add(new ResolutionProblem
                 {
@@ -161,18 +162,14 @@ public class CompatibilityService(ModListService modListService)
         return problems;
     }
 
-    private static bool IsMet(Relationship dependency, IEnumerable<ModVersion> mods, ModVersion owner) =>
-        dependency.AnyOf is { Count: > 0 } anyOf
-            ? anyOf.Any(e => mods.Any(m => m.Identifier != owner.Identifier &&
-                                           MatchesModule(m, e.Name, e.Version, e.MinVersion, e.MaxVersion)))
-            : mods.Any(m => m.Identifier != owner.Identifier &&
-                            MatchesModule(m, dependency.Name, dependency.Version, dependency.MinVersion,
-                                dependency.MaxVersion));
+    private static bool IsMet(Relationship dependency, ILookup<string, ModVersion> mods, ModVersion owner) =>
+        Relationships.Candidates(dependency, mods)
+            .Any(m => m.Identifier != owner.Identifier && Relationships.Matches(dependency, m));
 
     private static string DescribeBrokenDepend(ModVersion mod, Relationship dependency,
         IReadOnlyList<ModVersion> toInstall)
     {
-        var names = InstalledMods.NamesIn(dependency).ToHashSet();
+        var names = Relationships.NamesIn(dependency).ToHashSet();
         var hasLimits = dependency.Version is not null || dependency.MinVersion is not null ||
                         dependency.MaxVersion is not null;
         var needs = dependency.AnyOf is { Count: > 0 }
@@ -180,7 +177,7 @@ public class CompatibilityService(ModListService modListService)
             : hasLimits
                 ? $"{dependency.Name} {DependencyService.DescribeLimits(dependency)}"
                 : dependency.Name;
-        var replacement = toInstall.FirstOrDefault(m => InstalledMods.NamesOf(m).Any(names.Contains));
+        var replacement = toInstall.FirstOrDefault(m => Relationships.NamesOf(m).Any(names.Contains));
 
         return replacement is not null
             ? $"{mod.Identifier} {mod.Version} is installed and needs {needs}, but this change installs " +
@@ -190,155 +187,7 @@ public class CompatibilityService(ModListService modListService)
     }
 
     private static bool ConflictsWith(ModVersion mod, ModVersion other) =>
-        mod.Conflicts?.Any(conflict => conflict.AnyOf is { Count: > 0 } anyOf
-            ? anyOf.Any(e => MatchesModule(other, e.Name, e.Version, e.MinVersion, e.MaxVersion))
-            : MatchesModule(other, conflict.Name, conflict.Version, conflict.MinVersion, conflict.MaxVersion)) == true;
-
-    private static bool MatchesModule(ModVersion mod, string? name, string? exact, string? min, string? max) =>
-        name is not null &&
-        ((mod.Identifier == name && SatisfiesVersionLimits(mod.Version, exact, min, max)) ||
-         mod.Provides?.Contains(name) == true);
-
-    private static readonly (int, int, int) LowestKsp = (0, 0, 0);
-    private static readonly (int, int, int) HighestKsp = (int.MaxValue, int.MaxValue, int.MaxValue);
-
-    public static bool IsCompatible(ModVersion version, GameVersionCriteria? criteria)
-    {
-        if (criteria is null) return true;
-
-        var (modMin, modMax) = GetKspRange(version);
-
-        foreach (var exact in criteria.ExactVersions)
-        {
-            var point = LowerBound(exact);
-            if (point.CompareTo(modMin) >= 0 && point.CompareTo(modMax) <= 0) return true;
-        }
-
-        if (version.KspVersionStrict) return false;
-
-        foreach (var prefix in criteria.MinorPrefixes)
-        {
-            if (LowerBound(prefix).CompareTo(modMax) <= 0 && UpperBound(prefix).CompareTo(modMin) >= 0) return true;
-        }
-
-        return false;
-    }
-
-    public static bool CoversMinor(ModVersion version, string minorPrefix)
-    {
-        var (modMin, modMax) = GetKspRange(version);
-        return LowerBound(minorPrefix).CompareTo(modMax) <= 0 && UpperBound(minorPrefix).CompareTo(modMin) >= 0;
-    }
-
-    public static string DescribeKspRange(ModVersion version)
-    {
-        var strict = version.KspVersionStrict;
-        string range;
-
-        if (version.KspVersion is not null)
-        {
-            range = IsAny(version.KspVersion) ? "any" : ShortKsp(version.KspVersion, strict);
-        }
-        else
-        {
-            var min = version.KspVersionMin is null || IsAny(version.KspVersionMin)
-                ? null
-                : ShortKsp(version.KspVersionMin, strict);
-            var max = version.KspVersionMax is null || IsAny(version.KspVersionMax)
-                ? null
-                : ShortKsp(version.KspVersionMax, strict);
-
-            range = (min, max) switch
-            {
-                (null, null) => "any",
-                (_, null) => $"{min}+",
-                (null, _) => $"≤ {max}",
-                _ when min == max => min!,
-                _ => $"{min}–{max}"
-            };
-        }
-
-        return strict ? $"{range} strict" : range;
-    }
-
-    public static string DescribeKspRangeExact(ModVersion version)
-    {
-        if (version.KspVersion is not null) return IsAny(version.KspVersion) ? "any" : version.KspVersion;
-
-        var min = version.KspVersionMin is null || IsAny(version.KspVersionMin) ? null : version.KspVersionMin;
-        var max = version.KspVersionMax is null || IsAny(version.KspVersionMax) ? null : version.KspVersionMax;
-
-        return (min, max) switch
-        {
-            (null, null) => "any",
-            (_, null) => $"{min}+",
-            (null, _) => $"≤ {max}",
-            _ when min == max => min!,
-            _ => $"{min}–{max}"
-        };
-    }
-
-    public static bool CoversVersion(ModVersion version, string kspVersion)
-    {
-        var (modMin, modMax) = GetKspRange(version);
-        var point = LowerBound(kspVersion);
-        return point.CompareTo(modMin) >= 0 && point.CompareTo(modMax) <= 0;
-    }
-
-    private static string ShortKsp(string kspVersion, bool strict) =>
-        strict ? kspVersion : KspVersions.ToMinorPrefix(kspVersion);
-
-    private static ((int, int, int) min, (int, int, int) max) GetKspRange(ModVersion version)
-    {
-        if (version.KspVersion is not null)
-        {
-            return IsAny(version.KspVersion)
-                ? (LowestKsp, HighestKsp)
-                : (LowerBound(version.KspVersion), UpperBound(version.KspVersion));
-        }
-
-        var min = version.KspVersionMin is null || IsAny(version.KspVersionMin)
-            ? LowestKsp
-            : LowerBound(version.KspVersionMin);
-        var max = version.KspVersionMax is null || IsAny(version.KspVersionMax)
-            ? HighestKsp
-            : UpperBound(version.KspVersionMax);
-
-        return (min, max);
-    }
-
-    private static bool IsAny(string kspVersion) => kspVersion.Equals("any", StringComparison.OrdinalIgnoreCase);
-
-    private static (int, int, int) LowerBound(string kspVersion)
-    {
-        var parts = ParseKspVersion(kspVersion);
-        if (parts is null) return LowestKsp;
-
-        return (Part(parts, 0, 0), Part(parts, 1, 0), Part(parts, 2, 0));
-    }
-
-    private static (int, int, int) UpperBound(string kspVersion)
-    {
-        var parts = ParseKspVersion(kspVersion);
-        if (parts is null) return HighestKsp;
-
-        return (Part(parts, 0, int.MaxValue), Part(parts, 1, int.MaxValue), Part(parts, 2, int.MaxValue));
-    }
-
-    private static int Part(List<int> parts, int index, int missing) => index < parts.Count ? parts[index] : missing;
-
-    private static List<int>? ParseKspVersion(string kspVersion)
-    {
-        List<int> parts = [];
-
-        foreach (var part in kspVersion.Trim().Split('.').Take(3))
-        {
-            if (!int.TryParse(part, out var number)) return null;
-            parts.Add(number);
-        }
-
-        return parts.Count > 0 ? parts : null;
-    }
+        mod.Conflicts?.Any(conflict => Relationships.Matches(conflict, other)) == true;
 
     public Relationship CombineRelationships(Relationship first, Relationship second)
     {

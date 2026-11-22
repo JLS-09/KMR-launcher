@@ -16,7 +16,6 @@ public class AppSettings
     [JsonIgnore] public ObservableCollection<Instance> Instances { get; set; } = [];
     [JsonIgnore] public IEnumerable<Instance> UsableInstances => Instances.Where(i => !i.IsMissing);
 
-    [JsonIgnore] public bool UsesLegacyFile { get; set; }
     [JsonIgnore] public string? LoadProblem { get; set; }
 
     public int MaxParallelDownloads { get; set; } = DefaultParallelDownloads;
@@ -37,22 +36,6 @@ public enum WineDebugLevel
     Off,
     ErrorsOnly,
     WineDefault
-}
-
-public class LegacySettingsFile
-{
-    public ObservableCollection<KspZip> KspZips { get; set; } = [];
-    public List<Instance> Instances { get; set; } = [];
-    public int MaxParallelDownloads { get; set; } = AppSettings.DefaultParallelDownloads;
-    public string AccentColor { get; set; } = "#DF0105";
-
-    public static LegacySettingsFile From(AppSettings settings) => new()
-    {
-        KspZips = settings.KspZips,
-        Instances = [.. settings.Instances],
-        MaxParallelDownloads = settings.MaxParallelDownloads,
-        AccentColor = settings.AccentColor
-    };
 }
 
 public class KspZip

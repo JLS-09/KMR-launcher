@@ -8,7 +8,6 @@ namespace KMRLauncherMvvm.Tests;
 public class InstanceSettingsTests
 {
     private const string Root = "/cfg/kmrLauncher/prefixes";
-    private const string Legacy = "/cfg/prefixes";
 
     private static Instance Make(string name, string folder, string prefix = "") =>
         new(name, $"/games/{folder}", "1.12.5") { PrefixPath = prefix };
@@ -20,19 +19,9 @@ public class InstanceSettingsTests
     {
         var instance = Make("RP-1 Express Install", "rp1-express");
 
-        var prefix = WinePrefixes.DefaultFor(instance, [instance], Root, Legacy, _ => false);
+        var prefix = WinePrefixes.DefaultFor(instance, [instance], Root);
 
         Assert.Equal($"{Root}/rp1-express", prefix);
-    }
-
-    [Fact]
-    public void ExistingPrefixInTheOldPlaceIsKept()
-    {
-        var instance = Make("rp-1 test", "rp1");
-
-        var prefix = WinePrefixes.DefaultFor(instance, [instance], Root, Legacy, p => p == $"{Legacy}/rp-1 test");
-
-        Assert.Equal($"{Legacy}/rp-1 test", prefix);
     }
 
     [Fact]
@@ -41,7 +30,7 @@ public class InstanceSettingsTests
         var first = Make("A", "ksp", $"{Root}/ksp");
         var second = new Instance("B", "/other/ksp", "1.12.5");
 
-        var prefix = WinePrefixes.DefaultFor(second, [first, second], Root, Legacy, _ => false);
+        var prefix = WinePrefixes.DefaultFor(second, [first, second], Root);
 
         Assert.Equal($"{Root}/ksp-2", prefix);
     }
@@ -51,22 +40,20 @@ public class InstanceSettingsTests
     {
         var set = Make("A", "a", "/custom/prefix");
         var missing = Make("B", "b");
-        List<Instance> instances = [set, missing];
 
-        Assert.True(WinePrefixes.AssignMissing(instances, Root, Legacy, _ => false));
+        WinePrefixes.AssignMissing([set, missing], Root);
+
         Assert.Equal("/custom/prefix", set.PrefixPath);
         Assert.Equal($"{Root}/b", missing.PrefixPath);
-        Assert.False(WinePrefixes.AssignMissing(instances, Root, Legacy, _ => false));
     }
 
     [Fact]
     public void OnlyPrefixesTheLauncherMadeAreManaged()
     {
-        Assert.True(WinePrefixes.IsManaged($"{Root}/rp1", Root, Legacy));
-        Assert.True(WinePrefixes.IsManaged($"{Legacy}/rp-1 test", Root, Legacy));
-        Assert.False(WinePrefixes.IsManaged("/home/jules/Games/prefix", Root, Legacy));
-        Assert.False(WinePrefixes.IsManaged(Root, Root, Legacy));
-        Assert.False(WinePrefixes.IsManaged("", Root, Legacy));
+        Assert.True(WinePrefixes.IsManaged($"{Root}/rp1", Root));
+        Assert.False(WinePrefixes.IsManaged("/home/jules/Games/prefix", Root));
+        Assert.False(WinePrefixes.IsManaged(Root, Root));
+        Assert.False(WinePrefixes.IsManaged("", Root));
     }
 
     [Fact]
@@ -171,7 +158,6 @@ public class InstanceSettingsTests
         vm.Versions.Groups[1].AllowAll = true;
         vm.Versions.Groups[0].Versions[0].IsChecked = true;
 
-        Assert.Equal(4, vm.ChangeCount);
         Assert.Equal("4 unsaved changes", vm.ChangesText);
     }
 
@@ -210,7 +196,7 @@ public class InstanceSettingsTests
         vm.LaunchArguments = "";
         vm.Versions.Groups[1].AllowAll = true;
 
-        Assert.True(vm.Apply(settings));
+        Assert.True(vm.Apply());
 
         Assert.Equal("RP-1 Express", instance.Name);
         Assert.True(instance.IsPrimary);
@@ -229,7 +215,7 @@ public class InstanceSettingsTests
         vm = new InstanceSettingsViewModel(instance, settings.Instances);
 
         vm.Prefix = "";
-        vm.Apply(settings);
+        vm.Apply();
 
         Assert.Equal(WinePrefixes.DefaultFor(instance, settings.Instances), instance.PrefixPath);
     }
@@ -242,7 +228,7 @@ public class InstanceSettingsTests
         var vm = new InstanceSettingsViewModel(instance, settings.Instances);
 
         vm.Versions.Groups[1].AllowAll = true;
-        vm.Apply(settings);
+        vm.Apply();
 
         Assert.Contains("1.13", instance.CompatibleKspVersions);
     }

@@ -14,26 +14,31 @@ using KMRLauncherMvvm.ViewModels.InstallMods;
 
 namespace KMRLauncherMvvm.ViewModels;
 
-public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INavigationTarget
+public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INavigationTarget, ILoadingPage
 {
     private const int TagsShownCollapsed = 11;
 
-    private readonly IModApiService? _api;
-    private readonly InstallFlow? _installFlow;
-    private readonly ModListService? _modListService;
+    private readonly IModApiService _api;
+    private readonly InstallFlow _installFlow;
+    private readonly ModListService _modListService;
+    private readonly InstanceService _instances;
 
     private List<ModListItemViewModel> _allRows = [];
     private Dictionary<string, int> _neededBy = [];
     private GameVersionCriteria? _criteria;
     private string _search = "";
     private bool _applyingFilters;
+    private bool _loadingInstances;
+    private int _loads;
+    private int _rowsJob;
+    private int _fitsJob;
 
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private ModFetchProgress _loadProgress = new() { TotalMods = 1 };
 
     // The list
     [ObservableProperty] private ObservableCollection<ModListItemViewModel> _rows = [];
-    [ObservableProperty] private string _shownCount = "0";
+    [ObservableProperty] private string _shownCount = "–";
     [ObservableProperty] private bool _hasNoRows;
 
     // Filters column
@@ -59,21 +64,8 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     [ObservableProperty] private bool _hasSelectedMods;
     [ObservableProperty] private Instance? _installTarget;
 
-    public DiscoverPageViewModel(IModApiService api, ModListService modListService, InstallFlow installFlow)
-        : this()
-    {
-        _api = api;
-        _modListService = modListService;
-        _installFlow = installFlow;
-
-        LoadInstances(App.Settings);
-        SettingsService.SettingsChanged += (_, settings) => LoadInstances(settings);
-
-        if (modListService.Mods is null) _ = FetchMods();
-        else LoadRows(modListService.Mods);
-    }
-
-    public DiscoverPageViewModel()
+    public DiscoverPageViewModel(IModApiService api, ModListService modListService, InstallFlow installFlow,
+        InstanceService instances)
     {
         PageName = ApplicationPageNames.Discover;
         SelectedMods.CollectionChanged += (_, _) => HasSelectedMods = SelectedMods.Count > 0;
@@ -82,6 +74,16 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
             new FilterOptionViewModel(DiscoverFilter.PackageKind, 0, ApplyFilters),
             new FilterOptionViewModel(DiscoverFilter.MetapackageKind, 0, ApplyFilters)
         ];
+        _api = api;
+        _modListService = modListService;
+        _installFlow = installFlow;
+        _instances = instances;
+
+        LoadInstances();
+        instances.Changed += LoadInstances;
+
+        if (modListService.Mods is null) _ = FetchMods();
+        else _ = ShowMods(modListService.Mods);
     }
 
     public void ApplySearch(string text)
@@ -93,64 +95,107 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     [RelayCommand]
     private async Task FetchMods(bool isRefresh = false)
     {
-        if (_api is null || _modListService is null) return;
-
         LoadProgress = new ModFetchProgress { ModsReceived = 0, TotalMods = 1 };
-        IsLoading = true;
+        BeginLoading();
         try
         {
             var progress = new Progress<ModFetchProgress>(p => LoadProgress = p);
-            var cacheOnly = !isRefresh && App.Settings is { FetchOnStartup: false };
+            var cacheOnly = !isRefresh && !_instances.Settings.FetchOnStartup;
             await Task.Run(() => _api.GetAllModsAsync(progress, isRefresh, cacheOnly));
-            LoadRows(_modListService.Mods ?? []);
+            await LoadRows(_modListService.Mods ?? []);
         }
         finally
         {
-            IsLoading = false;
+            EndLoading();
         }
     }
 
-    private void LoadInstances(AppSettings settings)
+    private async Task ShowMods(IEnumerable<Mod> mods)
+    {
+        BeginLoading();
+        try
+        {
+            await LoadRows(mods);
+        }
+        finally
+        {
+            EndLoading();
+        }
+    }
+
+    private void BeginLoading() => IsLoading = ++_loads > 0;
+    private void EndLoading() => IsLoading = --_loads > 0;
+    partial void OnIsLoadingChanged(bool value) => HasNoRows = Rows.Count == 0 && !value;
+
+    private void LoadInstances()
     {
         var checkPath = CheckAgainst?.RootPath;
         var targetPath = InstallTarget?.RootPath;
 
-        Instances.Clear();
-        foreach (var instance in settings.UsableInstances) Instances.Add(instance);
+        _loadingInstances = true;
+        try
+        {
+            Instances.Clear();
+            foreach (var instance in _instances.Usable) Instances.Add(instance);
 
-        var primary = Instances.FirstOrDefault(i => i.IsPrimary) ?? Instances.FirstOrDefault();
-        CheckAgainst = Instances.FirstOrDefault(i => i.RootPath == checkPath) ?? primary;
-        InstallTarget = Instances.FirstOrDefault(i => i.RootPath == targetPath) ?? CheckAgainst;
+            var primary = _instances.Primary;
+            CheckAgainst = Instances.FirstOrDefault(i => i.RootPath == checkPath) ?? primary;
+            InstallTarget = Instances.FirstOrDefault(i => i.RootPath == targetPath) ?? CheckAgainst;
+        }
+        finally
+        {
+            _loadingInstances = false;
+        }
 
-        RefreshFits();
+        _ = RefreshFits();
     }
 
-    private void LoadRows(IEnumerable<Mod> mods)
+    private async Task LoadRows(IEnumerable<Mod> mods)
+    {
+        var job = ++_rowsJob;
+        var fitsJob = _fitsJob;
+        var selected = SelectedMods.ToDictionary(r => r.Mod.Id);
+        var (criteria, fitFor) = FitCheck();
+
+        var built = await Task.Run(() => BuildRows(mods, selected, fitFor));
+        if (job != _rowsJob) return;
+
+        foreach (var row in built.Rows)
+            if (!selected.TryGetValue(row.Mod.Id, out var kept) || kept != row)
+                row.SelectionChanged += OnRowSelectionChanged;
+
+        _allRows = built.Rows;
+        _neededBy = built.NeededBy;
+        _ = LoadDownloadCounts();
+
+        Tags = [.. built.Tags.Select(t => new FilterOptionViewModel(t.Name, t.Count, ApplyFilters))];
+        UpdateVisibleTags();
+
+        ApplyFits(built.Fits, criteria);
+        if (fitsJob != _fitsJob) _ = RefreshFits();
+    }
+
+    private static (List<ModListItemViewModel> Rows, ModFit[] Fits, Dictionary<string, int> NeededBy,
+        List<(string Name, int Count)> Tags) BuildRows(IEnumerable<Mod> mods,
+            Dictionary<string, ModListItemViewModel> selected, Func<Mod, ModFit> fitFor)
     {
         var modList = mods.Where(m => m.Versions.Count > 0).ToList();
-        var selected = SelectedMods.ToDictionary(r => r.Mod.Id);
-
-        _allRows =
+        List<ModListItemViewModel> rows =
         [
             .. modList
                 .OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase)
-                .Select(m => selected.GetValueOrDefault(m.Id) ?? CreateRow(m))
+                .Select(m => selected.GetValueOrDefault(m.Id) ?? new ModListItemViewModel(m))
         ];
-        _neededBy = DiscoverFilter.CountNeededBy(modList);
-        _ = LoadDownloadCounts();
-
-        Tags =
+        List<(string, int)> tags =
         [
             .. modList
                 .SelectMany(m => m.Tags ?? [])
                 .GroupBy(t => t)
                 .OrderByDescending(g => g.Count())
                 .ThenBy(g => g.Key)
-                .Select(g => new FilterOptionViewModel(g.Key, g.Count(), ApplyFilters))
+                .Select(g => (g.Key, g.Count()))
         ];
-        UpdateVisibleTags();
-
-        RefreshFits();
+        return (rows, [.. rows.Select(r => fitFor(r.Mod))], DiscoverFilter.CountNeededBy(modList), tags);
     }
 
     private async Task LoadDownloadCounts()
@@ -160,28 +205,41 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
             row.Downloads = DiscoverFilter.FormatDownloads(counts.TryGetValue(row.Mod.Id, out var c) ? c : null);
     }
 
-    private ModListItemViewModel CreateRow(Mod mod)
-    {
-        var row = new ModListItemViewModel(mod);
-        row.SelectionChanged += OnRowSelectionChanged;
-        return row;
-    }
-
     private void OnRowSelectionChanged(ModListItemViewModel row)
     {
         if (row.IsSelected && !SelectedMods.Contains(row)) SelectedMods.Add(row);
         else if (!row.IsSelected) SelectedMods.Remove(row);
     }
 
-    partial void OnCheckAgainstChanged(Instance? value) => RefreshFits();
+    partial void OnCheckAgainstChanged(Instance? value)
+    {
+        if (!_loadingInstances) _ = RefreshFits();
+    }
     partial void OnOnlyCompatibleChanged(bool value) => ApplyFilters();
     partial void OnHideInstalledChanged(bool value) => ApplyFilters();
     partial void OnShowAllTagsChanged(bool value) => UpdateVisibleTags();
 
-    private void RefreshFits()
+    private (GameVersionCriteria? Criteria, Func<Mod, ModFit> For) FitCheck()
     {
-        _criteria = CheckAgainst is null ? null : GameVersionCriteria.FromInstance(CheckAgainst);
-        foreach (var row in _allRows) row.Fit = ModFit.For(row.Mod, CheckAgainst, _criteria);
+        var criteria = CheckAgainst is null ? null : GameVersionCriteria.FromInstance(CheckAgainst);
+        return (criteria, ModFit.Checker(CheckAgainst, criteria));
+    }
+
+    private async Task RefreshFits()
+    {
+        var job = ++_fitsJob;
+        var rows = _allRows;
+        var (criteria, fitFor) = FitCheck();
+
+        var fits = rows.Count == 0 ? [] : await Task.Run(() => rows.Select(r => fitFor(r.Mod)).ToArray());
+        if (job != _fitsJob || rows != _allRows) return;
+        ApplyFits(fits, criteria);
+    }
+
+    private void ApplyFits(ModFit[] fits, GameVersionCriteria? criteria)
+    {
+        _criteria = criteria;
+        for (var i = 0; i < _allRows.Count; i++) _allRows[i].Fit = fits[i];
 
         ApplyFilters();
         ShowDetails(FocusedRow);
@@ -254,8 +312,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     [RelayCommand]
     private async Task ApplyChanges()
     {
-        if (_installFlow is null) return;
-
         var installed = await _installFlow.InstallAsync(
             [
                 .. SelectedMods.Select(m => new PlannedModVersion

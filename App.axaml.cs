@@ -1,8 +1,6 @@
 using System;
-using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using System.Net.Http;
 using Avalonia.Markup.Xaml;
 using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Factories;
@@ -19,9 +17,7 @@ namespace KMRLauncherMvvm;
 
 public class App : Application
 {
-    
-    public static AppSettings Settings { get; set; }
-    
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -31,8 +27,8 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        InitializeSettings();
-        ThemeService.ApplyAccent(Settings.AccentColor);
+        var instances = new InstanceService(SettingsService.DefaultFile);
+        ThemeService.ApplyAccent(instances.Settings.AccentColor);
         
         var modListService = new ModListService();
         var jsonHelper = new GitHelper(modListService);
@@ -40,6 +36,7 @@ public class App : Application
         var dependencyService = new DependencyService(modListService, compatibilityService);
         
         var collection = new ServiceCollection();
+        collection.AddSingleton(instances);
         collection.AddSingleton<SyncStatusService>();
         collection.AddSingleton<StatusBarViewModel>();
         collection.AddSingleton<GameSessionService>();
@@ -49,7 +46,7 @@ public class App : Application
         collection.AddSingleton<IModApiService, ModGitService>();
         collection.AddSingleton<ZipService>();
         collection.AddSingleton(sp => new InstanceCreator(sp.GetRequiredService<ZipService>(),
-            (settings, instance) => SettingsService.Save(settings, instance, modsChanged: true)));
+            (_, instance) => instances.Save(instance, modsChanged: true)));
         collection.AddSingleton<NewInstanceFlow>();
         collection.AddSingleton(modListService);
         collection.AddSingleton(jsonHelper);
@@ -58,7 +55,7 @@ public class App : Application
         var downloader = new ModDownloader(ModDownloader.CreateHttpClient(), ModDownloader.DefaultCacheFolder);
         collection.AddSingleton<IModDownloader>(downloader);
         collection.AddSingleton(new DownloadCache(ModDownloader.DefaultCacheFolder, downloader.CachePath));
-        collection.AddSingleton(new InstallService(downloader, instance => SettingsService.Save(App.Settings, instance, modsChanged: true)));
+        collection.AddSingleton(new InstallService(downloader, instance => instances.Save(instance, modsChanged: true)));
         
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<HomePageViewModel>();
@@ -89,21 +86,5 @@ public class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    public static void InitializeSettings()
-    {
-        var basePath = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") 
-                       ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
-        var appFolder = Path.Combine(basePath, "kmrLauncher");
-
-        Directory.CreateDirectory(appFolder);
-        
-        var settingsFile = Path.Combine(appFolder, "settings.json");
-        
-        if (!File.Exists(settingsFile))
-            SettingsService.Write(new AppSettings(), settingsFile);
-        
-        Settings = SettingsService.Load();
     }
 }

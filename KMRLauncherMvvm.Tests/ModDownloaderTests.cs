@@ -7,18 +7,11 @@ using static KMRLauncherMvvm.Tests.TestData;
 
 namespace KMRLauncherMvvm.Tests;
 
-public class ModDownloaderTests : IDisposable
+public class ModDownloaderTests : TempFolderTest
 {
     private static readonly byte[] Content = "fake zip content"u8.ToArray();
     private static readonly string Sha256 = Convert.ToHexString(SHA256.HashData(Content));
     private static readonly string Sha1 = Convert.ToHexString(SHA1.HashData(Content));
-
-    private readonly string _cache = Path.Combine(Path.GetTempPath(), "kmr-downloader-" + Guid.NewGuid());
-
-    public void Dispose()
-    {
-        if (Directory.Exists(_cache)) Directory.Delete(_cache, true);
-    }
 
     // Answers per URL: a status code, or the content with 200
     private class FakeHandler(Dictionary<string, Func<HttpResponseMessage>> answers) : HttpMessageHandler
@@ -42,7 +35,7 @@ public class ModDownloaderTests : IDisposable
     private (ModDownloader Downloader, FakeHandler Handler) Create(Dictionary<string, Func<HttpResponseMessage>> answers)
     {
         var handler = new FakeHandler(answers);
-        return (new ModDownloader(new HttpClient(handler), _cache), handler);
+        return (new ModDownloader(new HttpClient(handler), Temp), handler);
     }
 
     private static ModVersion Downloadable(string version = "1.0", string? sha256 = null, string? sha1 = null,
@@ -68,7 +61,7 @@ public class ModDownloaderTests : IDisposable
         Assert.Equal(path, downloader.FindCached(mod));
         Assert.StartsWith(Sha256[..8] + "-Foo-1.0", Path.GetFileName(path));
         Assert.Equal((Content.Length, (long?)Content.Length), reports[^1]);
-        Assert.Empty(Directory.GetFiles(_cache, "*.part"));
+        Assert.Empty(Directory.GetFiles(Temp, "*.part"));
     }
 
     [Fact]
@@ -103,7 +96,7 @@ public class ModDownloaderTests : IDisposable
         Assert.Contains("  missing.test  server answered 404 NotFound", error.Message);
         Assert.Contains("  wrong.test    the downloaded file doesn't match its download_hash", error.Message);
         Assert.Null(downloader.FindCached(mod));
-        Assert.Empty(Directory.GetFiles(_cache));
+        Assert.Empty(Directory.GetFiles(Temp));
     }
 
     [Fact]
@@ -138,7 +131,7 @@ public class ModDownloaderTests : IDisposable
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             downloader.DownloadAsync(Downloadable(urls: "https://a.test/foo.zip"), null, cancel.Token));
-        Assert.Empty(Directory.GetFiles(_cache));
+        Assert.Empty(Directory.GetFiles(Temp));
     }
 
     [Fact]

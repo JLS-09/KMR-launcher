@@ -11,8 +11,8 @@ namespace KMRLauncherMvvm.ViewModels;
 
 public partial class StatusBarViewModel : ObservableObject
 {
-    private readonly ModListService? _modListService;
-    private readonly SyncStatusService? _syncStatus;
+    private readonly ModListService _modListService;
+    private readonly SyncStatusService _syncStatus;
 
     [ObservableProperty] private string _repoText = "not cloned yet";
     [ObservableProperty] private string _versionsText = "mod list not loaded";
@@ -30,10 +30,6 @@ public partial class StatusBarViewModel : ObservableObject
         _ = RefreshAsync();
     }
 
-    public StatusBarViewModel()
-    {
-    }
-
     public async Task RefreshAsync()
     {
         var (sha, cacheBytes) = await Task.Run(() =>
@@ -42,10 +38,10 @@ public partial class StatusBarViewModel : ObservableObject
         RepoText = sha is null ? "not cloned yet" : $"{GitHelper.CkanMetaBranch} @ {sha[..7]}";
         CacheText = cacheBytes is { } bytes ? $"Cache {Helpers.BytesToString(bytes)}" : "Cache empty";
 
-        var mods = _modListService?.Mods;
+        var mods = _modListService.Mods;
         VersionsText = mods is null ? "mod list not loaded" : $"{mods.Sum(m => m.Versions.Count):N0} versions";
 
-        if (_syncStatus is not null) (SyncText, SyncHint) = SyncTexts(_syncStatus, DateTimeOffset.Now);
+        (SyncText, SyncHint) = SyncTexts(_syncStatus, DateTimeOffset.Now);
     }
 
     public static (string Text, string Hint) SyncTexts(SyncStatusService sync, DateTimeOffset now)

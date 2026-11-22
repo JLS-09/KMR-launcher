@@ -7,10 +7,6 @@
              x:DataType="vm:HomePageViewModel"
              x:Class="KMRLauncherMvvm.Views.HomePageView">
 
-    <Design.DataContext>
-        <vm:HomePageViewModel />
-    </Design.DataContext>
-
     <!-- Placeholder: Home is built in Phase 6 -->
     <ScrollViewer>
         <StackPanel Margin="28" Spacing="12" MaxWidth="720" HorizontalAlignment="Left">

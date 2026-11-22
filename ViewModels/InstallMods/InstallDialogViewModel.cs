@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,7 +36,6 @@ public sealed record StepperItem(int Number, string Label, StepState State, bool
 {
     public bool IsDone => State == StepState.Done;
     public bool IsCurrent => State == StepState.Current;
-    public bool IsUpcoming => State == StepState.Upcoming;
     public bool LineReached => IsDone;
 }
 
@@ -47,11 +45,10 @@ public sealed record StatTile(string Label, string Value);
 
 public sealed record FailedRow(string Name, string StateText, double Progress, string Detail, bool IsFailed);
 
-public partial class InstallDialogViewModel : ViewModelBase
+public partial class InstallDialogViewModel : ViewModelBase, IDisposable
 {
     private const int ExtrasStep = 1;
     private const int ChoicesStep = 2;
-    private const int FailedRowsShown = 5;
 
     private readonly CompatibilityService _compatibilityService;
     private readonly DependencyService _dependencyService;
@@ -60,6 +57,7 @@ public partial class InstallDialogViewModel : ViewModelBase
     private readonly GameSessionService _session;
     private readonly NavigationService _navigation;
     private readonly DialogService _dialogs;
+    private readonly InstanceService _instances;
     private readonly InstallSource _source;
     private readonly InstallModsData _data;
     private readonly TaskCompletionSource<bool> _result = new();
@@ -90,19 +88,8 @@ public partial class InstallDialogViewModel : ViewModelBase
     [ObservableProperty] private string _subtitle = "";
     [ObservableProperty] private IReadOnlyList<StepperItem> _steps = [];
 
-    [ObservableProperty] private string _panelInstanceName = "";
-    [ObservableProperty] private string _panelKspText = "";
-    [ObservableProperty] private string _newCount = "0";
-    [ObservableProperty] private string _updatesCount = "0";
-    [ObservableProperty] private string _removedCount = "0";
-    [ObservableProperty] private bool _hasRemoved;
-    [ObservableProperty] private string _downloadText = "0 MB";
-    [ObservableProperty] private string _cachedText = "";
-    [ObservableProperty] private bool _hasCached;
-    [ObservableProperty] private string _problemsText = "No problems";
-    [ObservableProperty] private bool _hasProblems;
-    [ObservableProperty] private string _choicesLeftText = "";
-    [ObservableProperty] private bool _hasChoicesLeft;
+    public ChangePanelViewModel Panel { get; } = new();
+    public InstallResultViewModel Outcome { get; }
     public string PickedTitle { get; }
     public IReadOnlyList<PickedRow> Picked { get; }
     public bool HasPicked => Picked.Count > 0;
@@ -112,32 +99,18 @@ public partial class InstallDialogViewModel : ViewModelBase
     [ObservableProperty] private bool _canGoBack;
 
     [ObservableProperty] private InstallProgressViewModel? _progress;
-    [ObservableProperty] private string _doneTitle = "";
-    [ObservableProperty] private string _doneSummary = "";
-    [ObservableProperty] private IReadOnlyList<StatTile> _doneTiles = [];
-    [ObservableProperty] private string _launchText = "";
-    [ObservableProperty] private string _selectionNote = "";
-    [ObservableProperty] private string _failedTitle = "";
-    [ObservableProperty] private string _failedSummary = "";
-    [ObservableProperty] private string _errorText = "";
-    [ObservableProperty] private bool _showError;
-    [ObservableProperty] private IReadOnlyList<FailedRow> _failedRows = [];
-    [ObservableProperty] private string _failedRowsCount = "";
-    [ObservableProperty] private string _moreFailedText = "";
-    [ObservableProperty] private bool _hasMoreFailed;
-    [ObservableProperty] private string _cacheHint = "";
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand))]
     private bool _isGameRunning;
 
-    public Instance? Instance => Progress?.Run?.Instance ?? _data.SelectedInstance;
+    public Instance? Instance => Progress?.Run.Instance ?? _data.SelectedInstance;
 
     public InstallDialogViewModel(IReadOnlyList<PlannedModVersion> requested, Instance? target, InstallSource source,
         ModListService modListService, DependencyService dependencyService, CompatibilityService compatibilityService,
         InstallService installService, GameSessionService session, NavigationService navigation,
-        DialogService dialogs, IReadOnlyList<ModVersion>? replaced = null)
+        DialogService dialogs, InstanceService instances, IReadOnlyList<ModVersion>? replaced = null)
         : this(modListService, dependencyService, compatibilityService, installService, session, navigation, dialogs,
-            source)
+            instances, source)
     {
         Title = "Install mods";
         Subtitle = source == InstallSource.Updates
@@ -151,7 +124,7 @@ public partial class InstallDialogViewModel : ViewModelBase
         ];
 
         Wizard = new InstallModsViewModel([.. requested], modListService, dependencyService, compatibilityService,
-            target);
+            () => instances.Usable, target);
         _data = Wizard.InstallModsData;
         if (replaced is { Count: > 0 } && Wizard.Steps[0] is InstallModsSelectInstanceStepViewModel first)
         {
@@ -187,9 +160,9 @@ public partial class InstallDialogViewModel : ViewModelBase
     public InstallDialogViewModel(Instance instance, IReadOnlyList<ModVersion> removals,
         ModListService modListService, DependencyService dependencyService, CompatibilityService compatibilityService,
         InstallService installService, GameSessionService session, NavigationService navigation,
-        DialogService dialogs)
+        DialogService dialogs, InstanceService instances)
         : this(modListService, dependencyService, compatibilityService, installService, session, navigation, dialogs,
-            InstallSource.Updates)
+            instances, InstallSource.Updates)
     {
         Title = "Remove mods";
         PickedTitle = "";
@@ -204,8 +177,10 @@ public partial class InstallDialogViewModel : ViewModelBase
 
     private InstallDialogViewModel(ModListService modListService, DependencyService dependencyService,
         CompatibilityService compatibilityService, InstallService installService, GameSessionService session,
-        NavigationService navigation, DialogService dialogs, InstallSource source)
+        NavigationService navigation, DialogService dialogs, InstanceService instances, InstallSource source)
     {
+        _instances = instances;
+        Outcome = new InstallResultViewModel(v => installService.FindCached(v) is not null);
         _modListService = modListService;
         _dependencyService = dependencyService;
         _compatibilityService = compatibilityService;
@@ -220,24 +195,12 @@ public partial class InstallDialogViewModel : ViewModelBase
         Picked = [];
 
         IsGameRunning = session.IsRunning;
-        session.Changed += () => IsGameRunning = session.IsRunning;
+        session.Changed += OnSessionChanged;
     }
 
-    // Design-time
-    public InstallDialogViewModel()
-    {
-        _modListService = null!;
-        _dependencyService = null!;
-        _compatibilityService = null!;
-        _installService = null!;
-        _session = null!;
-        _navigation = null!;
-        _dialogs = null!;
-        _data = new InstallModsData();
-        Title = "Install mods";
-        PickedTitle = "Picked in Discover";
-        Picked = [];
-    }
+    public void Dispose() => _session.Changed -= OnSessionChanged;
+
+    private void OnSessionChanged() => IsGameRunning = _session.IsRunning;
 
     private bool IsCached(ModVersion version) =>
         InstallChanges.NeedsDownload(version) && _installService.FindCached(version) is not null;
@@ -372,30 +335,11 @@ public partial class InstallDialogViewModel : ViewModelBase
 
     private void UpdatePanel()
     {
-        var instance = _data.SelectedInstance;
-        PanelInstanceName = instance?.Name ?? "No instance";
-        PanelKspText = instance is null ? "" : $"KSP {instance.CompatibleSummary}";
-
-        var rows = InstallChanges.Rows(_data, IsCached);
-        var counts = InstallChanges.Count(rows);
-        NewCount = counts.New.ToString();
-        UpdatesCount = counts.Updates.ToString();
-        RemovedCount = counts.Removed.ToString();
-        HasRemoved = counts.Removed > 0;
-        DownloadText = InstalledMods.FormatSize(counts.DownloadBytes);
-        HasCached = counts.CachedBytes > 0;
-        CachedText = InstalledMods.FormatSize(counts.CachedBytes);
-
-        var problems = _data.Problems.Count;
-        HasProblems = problems > 0;
-        ProblemsText = problems == 0 ? "No problems" : InstallChanges.Plural(problems, "problem");
-
         var choicesLeft = Wizard is null ? 0
             : Wizard.CurrentStep is InstallModsModulesStepViewModel modules ? modules.ChoicesLeft
             : Wizard.CurrentIndex < ChoicesStep ? _choicesPreview.Count
             : 0;
-        HasChoicesLeft = choicesLeft > 0;
-        ChoicesLeftText = choicesLeft == 1 ? "1 choice left" : $"{choicesLeft} choices left";
+        Panel.Update(_data, IsCached, choicesLeft);
     }
 
     [RelayCommand]
@@ -414,7 +358,7 @@ public partial class InstallDialogViewModel : ViewModelBase
         _installedBefore = [.. instance.Mods.Select(m => m.Identifier)];
         _runCounts = InstallChanges.Count(InstallChanges.Rows(_data, IsCached));
         var run = InstallRun.Create(instance, _data);
-        Progress = new InstallProgressViewModel(_installService, run, App.Settings.MaxParallelDownloads);
+        Progress = new InstallProgressViewModel(_installService, run, _instances.Settings.MaxParallelDownloads);
 
         var installs = _runCounts.New + _runCounts.Updates;
         Subtitle = installs > 0
@@ -425,145 +369,19 @@ public partial class InstallDialogViewModel : ViewModelBase
 
         if (await Progress.RunAsync())
         {
-            ShowDone(instance, Progress);
+            Outcome.ShowDone(instance, Progress, _runCounts, Wizard is not null && _source == InstallSource.Discover
+                ? "Your selection in Discover was cleared."
+                : "");
+            Phase = InstallDialogPhase.Done;
+            UpdateStepper();
             _result.TrySetResult(true);
         }
         else
         {
-            ShowFailed(instance, Progress);
+            Outcome.ShowFailed(instance, Progress, _installedBefore);
+            Phase = InstallDialogPhase.Failed;
+            UpdateStepper();
         }
-    }
-
-    private void ShowDone(Instance instance, InstallProgressViewModel progress)
-    {
-        var jobs = progress.Run?.Jobs ?? [];
-        var installs = _runCounts.New + _runCounts.Updates;
-        var took = $"took {InstallChanges.Duration(progress.Elapsed)}";
-
-        if (installs > 0)
-        {
-            DoneTitle = $"Installed into {instance.Name}";
-            List<string> parts = [];
-            if (_runCounts.New > 0) parts.Add($"{_runCounts.New} new");
-            if (_runCounts.Updates > 0) parts.Add($"{_runCounts.Updates} updated");
-            if (_runCounts.Removed > 0) parts.Add($"{_runCounts.Removed} removed");
-            DoneSummary = $"{InstallChanges.Plural(installs, "mod")} · {string.Join(", ", parts)} · {took}";
-
-            var downloaded = jobs.Where(j => j.NeedsDownload && !j.IsCached).Sum(j => j.BytesTotal ?? 0);
-            DoneTiles =
-            [
-                new StatTile("DOWNLOADED", InstalledMods.FormatSize(downloaded)),
-                new StatTile("FILES", ModProgressRowViewModel.Count(jobs.Sum(j => (long)j.FilesTotal))),
-                new StatTile("MODS NOW", instance.Mods.Count.ToString())
-            ];
-        }
-        else
-        {
-            DoneTitle = $"Removed from {instance.Name}";
-            DoneSummary = $"{InstallChanges.Plural(_runCounts.Removed, "mod")} removed · {took}";
-            DoneTiles =
-            [
-                new StatTile("REMOVED", _runCounts.Removed.ToString()),
-                new StatTile("MODS NOW", instance.Mods.Count.ToString())
-            ];
-        }
-
-        LaunchText = $"Launch {instance.Name}";
-        SelectionNote = Wizard is not null && _source == InstallSource.Discover
-            ? "Your selection in Discover was cleared."
-            : "";
-        Phase = InstallDialogPhase.Done;
-        UpdateStepper();
-    }
-
-    private void ShowFailed(Instance instance, InstallProgressViewModel progress)
-    {
-        var jobs = progress.Run?.Jobs ?? [];
-        var removing = jobs.Count == 0;
-        var notUndone = progress.ErrorMessage.Contains("couldn't be undone");
-
-        FailedTitle = (removing ? "Removing" : "Install") + (progress.WasCancelled ? " cancelled" : " failed");
-
-        var updated = jobs.Where(j => j.State == ModInstallState.Done)
-            .Select(j => j.Version.Identifier).Where(_installedBefore.Contains).ToList();
-        FailedSummary = notUndone
-            ? $"Some changes in {instance.Name} couldn't be undone; see below."
-            : $"Nothing was changed in {instance.Name}." + updated.Count switch
-            {
-                0 => "",
-                1 => $" {updated[0]} is back on its old version.",
-                _ => $" {InstallChanges.JoinAll(updated)} are back on their old versions."
-            };
-
-        ErrorText = progress.ErrorMessage;
-        ShowError = !progress.WasCancelled || notUndone;
-
-        var rows = jobs.Select(FailedRowFor).OrderBy(r => r.Order).ToList();
-        FailedRows = [.. rows.Take(FailedRowsShown).Select(r => r.Row)];
-        FailedRowsCount = rows.Count.ToString();
-        var more = rows.Skip(FailedRowsShown).ToList();
-        HasMoreFailed = more.Count > 0;
-        MoreFailedText = more.Count == 0 ? ""
-            : $"and {more.Count} more" + (more.All(r => r.Cached) ? ", all kept in the cache" : "");
-
-        CacheHint = CacheHintFor(jobs);
-        Phase = InstallDialogPhase.Failed;
-        UpdateStepper();
-    }
-
-    private (int Order, FailedRow Row, bool Cached) FailedRowFor(ModInstallJob job)
-    {
-        var cached = job.NeedsDownload && _installService.FindCached(job.Version) is not null;
-        var keptText = cached ? "Kept in cache" : job.NeedsDownload ? "" : "Nothing to download";
-        var downloaded = job.BytesTotal is > 0 ? Math.Min(1, (double)job.BytesDone / job.BytesTotal.Value) : 0;
-
-        return job.State switch
-        {
-            ModInstallState.Failed => (0,
-                new FailedRow(job.Version.Identifier, "Failed", Math.Max(downloaded, 0.05),
-                    ShortError(job.Error), true), cached),
-            ModInstallState.Done => (1, new FailedRow(job.Version.Identifier, "Rolled back", 1, keptText, false),
-                cached),
-            _ when cached => (2, new FailedRow(job.Version.Identifier, "Cancelled", 1, keptText, false), true),
-            _ when job.BytesDone > 0 => (2,
-                new FailedRow(job.Version.Identifier, "Cancelled", downloaded, "Partial download deleted", false),
-                false),
-            _ => (3, new FailedRow(job.Version.Identifier, "Not started", 0, "", false), !job.NeedsDownload)
-        };
-    }
-
-    public static string ShortError(string? error)
-    {
-        if (error is null) return "";
-
-        var lines = error.Split('\n');
-        if (!lines[0].EndsWith("could not be downloaded.") || lines.Length < 2)
-            return ModProgressRowViewModel.FirstLine(error);
-
-        return lines.Length > 2
-            ? "All mirrors failed"
-            : string.Join(" ", lines[1].Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries).Skip(1)).Trim();
-    }
-
-    private string CacheHintFor(IReadOnlyList<ModInstallJob> jobs)
-    {
-        var downloads = jobs.Where(j => j.NeedsDownload).ToList();
-        if (downloads.Count == 0) return "";
-
-        var missing = downloads.Where(j => _installService.FindCached(j.Version) is null).ToList();
-        if (missing.Count == 0) return "All downloads are cached, so a retry doesn't download anything.";
-
-        var names = missing.Select(j => j.Version.Identifier).ToList();
-        var size = missing.Sum(j => j.Version.DownloadSize ?? 0);
-        var list = names.Count <= 3
-            ? names.Count == 1 ? names[0] : $"{string.Join(", ", names.Take(names.Count - 1))} and {names[^1]}"
-            : $"{string.Join(", ", names.Take(2))} and {names.Count - 2} more";
-        var sizeText = size > 0 ? $" ({InstalledMods.FormatSize(size)})" : "";
-
-        return missing.Count == downloads.Count
-            ? $"Nothing was downloaded yet; a retry downloads {list}{sizeText}."
-            : $"{downloads.Count - missing.Count} of {downloads.Count} downloads are cached, so a retry only " +
-              $"downloads {list}{sizeText}.";
     }
 
     [RelayCommand]

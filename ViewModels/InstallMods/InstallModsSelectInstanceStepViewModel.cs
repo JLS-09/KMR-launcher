@@ -40,6 +40,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
     [ObservableProperty] private string? _choicesHint;
 
     private readonly DependencyService _dependencyService;
+    private readonly Func<IEnumerable<Instance>> _usableInstances;
     private bool _syncingCards;
     private readonly HashSet<Instance> _scanned = [];
 
@@ -48,11 +49,12 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
     public string InstancesCountText => InstallChanges.Plural(Instances.Count, "instance");
 
     public InstallModsSelectInstanceStepViewModel(InstallModsData installModsData, DependencyService dependencyService,
-        Instance? target = null)
+        Func<IEnumerable<Instance>> usableInstances, Instance? target = null)
         :
         base(installModsData)
     {
         _dependencyService = dependencyService;
+        _usableInstances = usableInstances;
 
         InstallModsData.PropertyChanged += (_, e) =>
         {
@@ -61,7 +63,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
             Resolve();
         };
 
-        _instances = new ObservableCollection<Instance>(App.Settings.UsableInstances);
+        _instances = new ObservableCollection<Instance>(usableInstances());
         BuildCards();
         InstallModsData.SelectedInstance =
             Instances.FirstOrDefault(i => i.RootPath == target?.RootPath) ?? Instances.FirstOrDefault();
@@ -119,7 +121,7 @@ public partial class InstallModsSelectInstanceStepViewModel : InstallModsStepVie
     {
         if (CreateInstance is null || await CreateInstance() is not { } created) return;
 
-        Instances = new ObservableCollection<Instance>(App.Settings.UsableInstances);
+        Instances = new ObservableCollection<Instance>(_usableInstances());
         BuildCards();
         OnPropertyChanged(nameof(HasNoInstances));
         OnPropertyChanged(nameof(InstancesCountText));
