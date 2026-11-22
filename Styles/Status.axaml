@@ -138,4 +138,25 @@
         <Setter Property="IsHitTestVisible" Value="False" />
         <Setter Property="Focusable" Value="False" />
     </Style>
+
+    <!-- Loading (not in the mockups): grey bars where the content goes; a SkeletonList.skeleton pulses only while shown -->
+    <Style Selector="Border.bone">
+        <Setter Property="Background" Value="{DynamicResource Off}" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Height" Value="10" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="ItemsControl.skeleton[IsVisible=True]">
+        <Style.Animations>
+            <Animation Duration="0:0:0.9" IterationCount="Infinite" PlaybackDirection="Alternate">
+                <KeyFrame Cue="0%">
+                    <Setter Property="Opacity" Value="1" />
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="Opacity" Value="0.45" />
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
 </Styles>

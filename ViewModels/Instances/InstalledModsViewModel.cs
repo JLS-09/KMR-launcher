@@ -15,6 +15,10 @@ public partial class InstalledModsViewModel(ModListService modListService, Insta
 {
     private Instance? _instance;
     private List<InstalledModRowViewModel> _allRows = [];
+    private Dictionary<string, string>? _sizes;
+    private int _job;
+
+    [ObservableProperty] private bool _isLoading;
 
     [ObservableProperty] private ObservableCollection<InstalledModRowViewModel> _rows = [];
     [ObservableProperty] private string _modFilterText = "";
@@ -33,26 +37,58 @@ public partial class InstalledModsViewModel(ModListService modListService, Insta
     [ObservableProperty] private string _removalNote = "";
     [ObservableProperty] private bool _selectionHasUpdates;
 
-    public void Show(Instance instance)
+    public async Task Show(Instance instance)
     {
-        _instance = instance;
+        var job = ++_job;
+        if (!ReferenceEquals(instance, _instance))
+        {
+            _instance = instance;
+            _sizes = null;
+            SetRows([]);
+            AllCount = PickedCount = DependenciesCount = UpdatesCount = IssuesCount = "–";
+            Detail = "";
+            ShownText = "";
+            IsLoading = true;
+        }
+
+        var modList = modListService.Mods;
+        List<InstalledModRowViewModel> rows;
+        try
+        {
+            rows = await Task.Run(() => BuildRows(instance, modList));
+        }
+        catch (Exception) when (job != _job)
+        {
+            return;
+        }
+
+        if (job != _job) return;
+        SetRows(rows);
+        IsLoading = false;
+    }
+
+    private static List<InstalledModRowViewModel> BuildRows(Instance instance, IEnumerable<Mod>? modList)
+    {
         UnmanagedDlls.Refresh(instance);
-
         var criteria = GameVersionCriteria.FromInstance(instance);
-        var mods = modListService.Mods?.ToDictionary(m => m.Id) ?? [];
-        var sizes = _allRows.ToDictionary(r => r.Version.Identifier, r => r.SizeText);
+        var mods = modList?.ToDictionary(m => m.Id) ?? [];
 
-        foreach (var row in _allRows) row.SelectionChanged -= OnRowSelectionChanged;
-        _allRows =
+        return
         [
             .. instance.Mods
                 .Select(v => new InstalledModRowViewModel(instance, v, mods.GetValueOrDefault(v.Identifier), criteria,
                     InstalledMods.FindReplacement(instance, v, mods, criteria)))
                 .OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
         ];
+    }
+
+    private void SetRows(List<InstalledModRowViewModel> rows)
+    {
+        foreach (var row in _allRows) row.SelectionChanged -= OnRowSelectionChanged;
+        _allRows = rows;
         foreach (var row in _allRows)
         {
-            row.SizeText = sizes.GetValueOrDefault(row.Version.Identifier, "");
+            row.SizeText = _sizes is null ? "" : _sizes.GetValueOrDefault(row.Version.Identifier, "–");
             row.SelectionChanged += OnRowSelectionChanged;
         }
 
@@ -72,10 +108,8 @@ public partial class InstalledModsViewModel(ModListService modListService, Insta
 
     public void ShowSizes(IReadOnlyDictionary<string, long> modSizes)
     {
-        foreach (var row in _allRows)
-            row.SizeText = modSizes.TryGetValue(row.Version.Identifier, out var size) && size > 0
-                ? InstalledMods.FormatSize(size)
-                : "–";
+        _sizes = modSizes.Where(p => p.Value > 0).ToDictionary(p => p.Key, p => InstalledMods.FormatSize(p.Value));
+        foreach (var row in _allRows) row.SizeText = _sizes.GetValueOrDefault(row.Version.Identifier, "–");
     }
 
     partial void OnModFilterTextChanged(string value) => ApplyModFilter();

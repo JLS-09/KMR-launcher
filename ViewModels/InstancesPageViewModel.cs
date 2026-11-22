@@ -32,7 +32,7 @@ public enum ModsFilter
     Issues
 }
 
-public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, INavigationTarget
+public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, INavigationTarget, ILoadingPage
 {
     private readonly NewInstanceFlow _newInstanceFlow;
     private readonly ModListService _modListService;
@@ -97,12 +97,14 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
         LoadInstances();
     }
 
+    public bool IsLoading => Mods.IsLoading;
+
     public void ApplySearch(string text) => Mods.ModFilterText = text;
 
     private void OnSessionChanged() => IsGameRunning = _session.IsRunning;
     private void OnModsChanged() => Dispatcher.UIThread.Post(() =>
     {
-        if (Selected is { } selected) Mods.Show(selected);
+        if (Selected is { } selected) _ = Mods.Show(selected);
     });
 
     private void LoadInstances()
@@ -168,7 +170,7 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
     private void ShowDetails(Instance value)
     {
         Summary = new InstanceSummary(value);
-        Mods.Show(value);
+        _ = Mods.Show(value);
 
         if (!_settingsByPath.TryGetValue(value.RootPath, out var settings) || !settings.HasChanges)
         {

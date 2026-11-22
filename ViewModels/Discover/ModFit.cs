@@ -11,11 +11,23 @@ public record ModFit(ModStatusKind? Kind, string Text, ModVersion? NewestFit, Mo
 {
     public static readonly ModFit None = new(null, "", null, null);
 
-    public static ModFit For(Mod mod, Instance? instance, GameVersionCriteria? criteria)
-    {
-        if (instance is null || criteria is null) return None;
+    public static ModFit For(Mod mod, Instance? instance, GameVersionCriteria? criteria) =>
+        instance is null || criteria is null
+            ? None
+            : For(mod, instance.Mods.FirstOrDefault(v => v.Identifier == mod.Id), instance.Version, criteria);
 
-        var installed = instance.Mods.FirstOrDefault(v => v.Identifier == mod.Id);
+    public static Func<Mod, ModFit> Checker(Instance? instance, GameVersionCriteria? criteria)
+    {
+        if (instance is null || criteria is null) return _ => None;
+
+        var installed = new Dictionary<string, ModVersion>();
+        foreach (var version in instance.Mods) installed.TryAdd(version.Identifier, version);
+        var instanceVersion = instance.Version;
+        return mod => For(mod, installed.GetValueOrDefault(mod.Id), instanceVersion, criteria);
+    }
+
+    private static ModFit For(Mod mod, ModVersion? installed, string instanceVersion, GameVersionCriteria criteria)
+    {
         var newestFit = mod.Versions.FirstOrDefault(v => KspCompatibility.IsCompatible(v, criteria));
 
         if (installed is not null)
@@ -27,7 +39,7 @@ public record ModFit(ModStatusKind? Kind, string Text, ModVersion? NewestFit, Mo
 
         return newestFit is not null
             ? new ModFit(ModStatusKind.Fits, "Fits", newestFit, null)
-            : new ModFit(ModStatusKind.Warning, $"Not {instance.Version}", null, null);
+            : new ModFit(ModStatusKind.Warning, $"Not {instanceVersion}", null, null);
     }
 
     public bool IsCompatible => NewestFit is not null;

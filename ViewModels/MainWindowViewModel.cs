@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -149,11 +150,36 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<PageViewModel> Pages { get; } = [];
 
+    public async Task WarmUpPagesAsync()
+    {
+        List<PageViewModel> warming = [];
+        foreach (var name in (ApplicationPageNames[])[ApplicationPageNames.Discover, ApplicationPageNames.Instances])
+        {
+            await Idle();
+            if (Pages.Any(p => p.PageName == name)) continue;
+
+            var page = _pageFactory.GetPageViewModel(name);
+            page.IsWarming = true;
+            Pages.Add(page);
+            warming.Add(page);
+        }
+
+        foreach (var page in warming)
+        {
+            while (page is ILoadingPage { IsLoading: true }) await Task.Delay(100);
+            await Idle();
+            page.IsWarming = false;
+        }
+    }
+
+    private static async Task Idle() => await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+
     private void ShowPage(ApplicationPageNames name)
     {
         var page = Pages.FirstOrDefault(p => p.PageName == name);
         if (page is null) Pages.Add(page = _pageFactory.GetPageViewModel(name));
         if (CurrentPage is { } previous) previous.IsActive = false;
+        page.IsWarming = false;
         page.IsActive = true;
         CurrentPage = page;
         _ = StatusBar.RefreshAsync();

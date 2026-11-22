@@ -29,6 +29,11 @@
             <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+        <!-- A page built in idle time after startup: laid out once, never seen or clicked -->
+        <Style Selector="ContentControl.warming">
+            <Setter Property="Opacity" Value="0" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
     </Window.Styles>
 
     <Grid RowDefinitions="*, Auto">
@@ -231,7 +236,8 @@
                         </Button>
                     </Grid>
                 </Border>
-                <!-- Visited pages stay built; only the active one is shown, so switching pages is instant -->
+                <!-- Visited pages stay built; only the active one is shown, so switching pages is instant.
+                     Discover and Instances are built in idle time after startup (WarmUpPagesAsync). -->
                 <ItemsControl Grid.Row="2" ItemsSource="{Binding Pages}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -240,7 +246,8 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:PageViewModel">
-                            <ContentControl Content="{Binding}" IsVisible="{Binding IsActive}" />
+                            <ContentControl Content="{Binding}" IsVisible="{Binding IsShown}"
+                                            Classes.warming="{Binding IsWarming}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

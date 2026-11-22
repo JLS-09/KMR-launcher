@@ -126,29 +126,41 @@
                     <Border Classes="block">
                         <StackPanel Spacing="4">
                             <TextBlock Classes="label" Text="TAGS" Margin="0 0 0 6" />
-                            <ItemsControl ItemsSource="{Binding VisibleTags}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Spacing="4" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
+                            <controls:SkeletonList Classes="skeleton" Count="8" IsVisible="{Binding IsLoading}">
                                 <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="discover:FilterOptionViewModel">
-                                        <CheckBox Classes="box filterRow" IsChecked="{Binding IsChecked}">
-                                            <Grid ColumnDefinitions="*, Auto">
-                                                <TextBlock Grid.Column="0" Text="{Binding Name}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="1" Classes="mono muted size11"
-                                                           Text="{Binding CountText}" VerticalAlignment="Center" />
-                                            </Grid>
-                                        </CheckBox>
+                                    <DataTemplate x:DataType="controls:SkeletonRow">
+                                        <Grid ColumnDefinitions="*, Auto" Height="30">
+                                            <Border Grid.Column="0" Classes="bone" Width="{Binding Narrow}" />
+                                            <Border Grid.Column="1" Classes="bone" Width="18" Height="8" />
+                                        </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <Button Classes="ghost small" Height="30" Padding="8 0" FontSize="12"
-                                    HorizontalAlignment="Left" CornerRadius="6"
-                                    IsVisible="{Binding HasMoreTags}" Content="{Binding MoreTagsText}"
-                                    Command="{Binding ToggleMoreTagsCommand}" />
+                            </controls:SkeletonList>
+                            <StackPanel Spacing="4" IsVisible="{Binding !IsLoading}">
+                                <ItemsControl ItemsSource="{Binding VisibleTags}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="discover:FilterOptionViewModel">
+                                            <CheckBox Classes="box filterRow" IsChecked="{Binding IsChecked}">
+                                                <Grid ColumnDefinitions="*, Auto">
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Grid.Column="1" Classes="mono muted size11"
+                                                               Text="{Binding CountText}" VerticalAlignment="Center" />
+                                                </Grid>
+                                            </CheckBox>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Button Classes="ghost small" Height="30" Padding="8 0" FontSize="12"
+                                        HorizontalAlignment="Left" CornerRadius="6"
+                                        IsVisible="{Binding HasMoreTags}" Content="{Binding MoreTagsText}"
+                                        Command="{Binding ToggleMoreTagsCommand}" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 
@@ -268,19 +280,42 @@
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            IsVisible="{Binding HasNoRows}" />
 
-                <!-- While CKAN-meta is fetched and read (not in the mockups) -->
-                <Border Background="{DynamicResource Background}" IsVisible="{Binding IsLoading}">
-                    <StackPanel Width="360" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Classes="label" Text="LOADING THE MOD LIST" />
+                <!-- While CKAN-meta is fetched, read and turned into rows (not in the mockups) -->
+                <Grid RowDefinitions="Auto, *" Background="{DynamicResource Background}" ClipToBounds="True"
+                      IsVisible="{Binding IsLoading}">
+                    <StackPanel Grid.Row="0" Spacing="8" Margin="20 14">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="12">
+                            <TextBlock Classes="label" Text="LOADING THE MOD LIST" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Classes="mono muted size12" VerticalAlignment="Center"
+                                       Text="{Binding LoadProgress.CurrentModName}" TextTrimming="CharacterEllipsis" />
+                        </Grid>
                         <ProgressBar Height="4" MinHeight="4" CornerRadius="2"
                                      Foreground="{DynamicResource Accent}" Background="{DynamicResource Off}"
                                      Value="{Binding LoadProgress.ModsReceived}"
                                      Maximum="{Binding LoadProgress.TotalMods}"
                                      IsIndeterminate="{Binding LoadProgress.IsCache}" />
-                        <TextBlock Classes="mono muted size12" Text="{Binding LoadProgress.CurrentModName}"
-                                   TextTrimming="CharacterEllipsis" />
                     </StackPanel>
-                </Border>
+                    <controls:SkeletonList Grid.Row="1" Classes="skeleton" Count="16"
+                                           IsVisible="{Binding IsLoading}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="controls:SkeletonRow">
+                                <Border MinHeight="52" Padding="20 6" BorderBrush="{DynamicResource Line}"
+                                        BorderThickness="0 0 0 1">
+                                    <Grid ColumnDefinitions="28, *, 104, 76, 100" ColumnSpacing="12">
+                                        <Border Grid.Column="0" Classes="bone" Width="16" Height="16" />
+                                        <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+                                            <Border Classes="bone" Width="{Binding Wide}" />
+                                            <Border Classes="bone" Width="{Binding Narrow}" Height="8" />
+                                        </StackPanel>
+                                        <Border Grid.Column="2" Classes="bone" Width="96" Height="8" />
+                                        <Border Grid.Column="3" Classes="bone" Width="32" HorizontalAlignment="Right" />
+                                        <Border Grid.Column="4" Classes="bone" Width="56" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </controls:SkeletonList>
+                </Grid>
             </Panel>
 
             <!-- Selection tray -->
