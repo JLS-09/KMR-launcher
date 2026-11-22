@@ -19,7 +19,7 @@ A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalon
   - name, primary instance, and the Wine prefix folder (a separate prefix per instance)
   - launch arguments (e.g. `-force-glcore`)
   - which KSP versions count as compatible (like CKAN), including "all 1.12.x"; the game's own version is always included
-  - forget the instance (it's taken off the list and nothing on disk changes; add it again with Import), or delete it together with its prefix
+  - forget the instance (it's taken off the list and nothing on disk changes; add it again with the folder button next to New instance), or delete it together with its prefix
 
 ### Finding mods (Discover)
 - Mod list built from [CKAN-meta](https://github.com/KSP-CKAN/CKAN-meta), cloned and cached locally with git, with a refresh on demand
@@ -69,7 +69,7 @@ The full plan is split into milestones:
 | **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | ✅ Done |
 | **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | ✅ Done |
 | **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | ✅ Done |
-| **M5** | First public release, in a new design:<br>• ✅ new design for Discover, Instances and the install flow<br>• ✅ remove and update mods, `replaced_by`<br>• ✅ currently-playing card<br>• ✅ launcher Settings page<br>• ✅ new instance dialog, also from inside the install flow<br>• ✅ import an existing KSP install (with CKAN registry)<br>• code clean-up | 🚧 In progress |
+| **M5** | First public release, in a new design:<br>• ✅ new design for Discover, Instances and the install flow<br>• ✅ remove and update mods, `replaced_by`<br>• ✅ currently-playing card<br>• ✅ launcher Settings page<br>• ✅ new instance dialog, also from inside the install flow<br>• ✅ import an existing KSP install (with CKAN registry)<br>• ✅ code clean-up and faster pages | 🚧 In progress |
 | **M6** | Home page, startup window and offline mode | ⏳ Planned |
 | **M7** | Extras:<br>• sorting the mod list<br>• instance export/import (`.ckan` metapackage)<br>• backup & restore<br>• extra metadata repos<br>• launching through Proton<br>• Windows and macOS support | ⏳ Planned |
 
@@ -77,7 +77,7 @@ The full plan is split into milestones:
 
 **Requirements**
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- Linux, with Wine at `/usr/bin/wine` (needed to launch instances; Stop also uses `/usr/bin/wineserver`)
+- Linux, with Wine on your `PATH` (needed to launch instances; Stop also uses `wineserver`)
 - A KSP 1 zip to create an instance from
 
 ```bash
@@ -86,7 +86,7 @@ cd KMR-launcher
 dotnet run
 ```
 
-On first start, the launcher clones CKAN-meta. This can take a few minutes.
+On first start, the launcher clones CKAN-meta in the background. This can take some time depending on your internet speed; Discover shows the progress.
 
 If a heavily modded instance (such as RP-1) crashes while loading under Wine, add `-force-glcore` to its launch arguments (the instance's Settings tab on the Instances page). It makes KSP use OpenGL directly instead of Wine's Direct3D 11 layer.
 
