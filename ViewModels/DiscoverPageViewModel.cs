@@ -82,8 +82,6 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
         else LoadRows(modListService.Mods);
     }
 
-    public override void Dispose() => _instances.Changed -= LoadInstances;
-
     public void ApplySearch(string text)
     {
         _search = text.Trim();

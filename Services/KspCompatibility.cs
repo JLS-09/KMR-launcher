@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using KMRLauncherMvvm.Models;
@@ -92,7 +93,16 @@ public static class KspCompatibility
 
     private static bool IsAny(string kspVersion) => kspVersion.Equals("any", StringComparison.OrdinalIgnoreCase);
 
-    private static (int, int, int) LowerBound(string kspVersion)
+    private static readonly ConcurrentDictionary<string, (int, int, int)> LowerBounds = new();
+    private static readonly ConcurrentDictionary<string, (int, int, int)> UpperBounds = new();
+
+    private static (int, int, int) LowerBound(string kspVersion) =>
+        LowerBounds.GetOrAdd(kspVersion, ParseLowerBound);
+
+    private static (int, int, int) UpperBound(string kspVersion) =>
+        UpperBounds.GetOrAdd(kspVersion, ParseUpperBound);
+
+    private static (int, int, int) ParseLowerBound(string kspVersion)
     {
         var parts = ParseKspVersion(kspVersion);
         if (parts is null) return LowestKsp;
@@ -100,7 +110,7 @@ public static class KspCompatibility
         return (Part(parts, 0, 0), Part(parts, 1, 0), Part(parts, 2, 0));
     }
 
-    private static (int, int, int) UpperBound(string kspVersion)
+    private static (int, int, int) ParseUpperBound(string kspVersion)
     {
         var parts = ParseKspVersion(kspVersion);
         if (parts is null) return HighestKsp;

@@ -13,7 +13,8 @@ public static class Relationships
         (relationship.Name is null ? [] : [relationship.Name]);
 
     public static bool Names(Relationship relationship, ModVersion mod) =>
-        Options(relationship).Any(o => o.Name is not null && NamesOf(mod).Contains(o.Name));
+        Options(relationship).Any(o => o.Name is not null &&
+                                       (mod.Identifier == o.Name || mod.Provides?.Contains(o.Name) == true));
 
     public static bool Matches(Relationship relationship, ModVersion mod) =>
         Options(relationship).Any(o => o.Name is not null &&

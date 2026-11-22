@@ -75,7 +75,8 @@ public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStat
 
         await gitHelper.PopulateMods(gitCacheFolder, progress);
         var cache = new ModsCache { Mods = [..modList.Mods!], CurrentCommitHash = latestCommitHash };
-        await File.WriteAllTextAsync(ModsCacheFile, JsonSerializer.Serialize(cache, Options));
+        await using (var stream = File.Create(ModsCacheFile))
+            await JsonSerializer.SerializeAsync(stream, cache, Options);
     }
 
     private async Task<bool> TryLoadCache(IProgress<ModFetchProgress>? progress)
@@ -90,8 +91,9 @@ public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStat
             IsCache = true
         });
 
-        var json = await File.ReadAllTextAsync(ModsCacheFile);
-        var modsCache = JsonSerializer.Deserialize<ModsCache>(json, Options);
+        ModsCache? modsCache;
+        await using (var stream = File.OpenRead(ModsCacheFile))
+            modsCache = await JsonSerializer.DeserializeAsync<ModsCache>(stream, Options);
         if (modsCache is null) return false;
 
         modList.Mods = new ObservableCollection<Mod>(modsCache.Mods);

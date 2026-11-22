@@ -147,10 +147,15 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void GoToSettings() => ShowPage(ApplicationPageNames.Settings);
 
+    public ObservableCollection<PageViewModel> Pages { get; } = [];
+
     private void ShowPage(ApplicationPageNames name)
     {
-        CurrentPage?.Dispose();
-        CurrentPage = _pageFactory.GetPageViewModel(name);
+        var page = Pages.FirstOrDefault(p => p.PageName == name);
+        if (page is null) Pages.Add(page = _pageFactory.GetPageViewModel(name));
+        if (CurrentPage is { } previous) previous.IsActive = false;
+        page.IsActive = true;
+        CurrentPage = page;
         _ = StatusBar.RefreshAsync();
     }
 

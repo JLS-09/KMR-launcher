@@ -104,8 +104,6 @@ public partial class SettingsPageViewModel : PageViewModel
         ShowAccent(settings.AccentColor);
     }
 
-    public override void Dispose() => _syncStatus.Changed -= OnSyncChanged;
-
     private void OnSyncChanged() => Dispatcher.UIThread.Post(LoadRepoState);
 
     public void AddKspZip(string path)

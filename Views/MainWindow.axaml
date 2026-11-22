@@ -231,7 +231,19 @@
                         </Button>
                     </Grid>
                 </Border>
-                <ContentControl Grid.Row="2" Content="{Binding CurrentPage}" />
+                <!-- Visited pages stay built; only the active one is shown, so switching pages is instant -->
+                <ItemsControl Grid.Row="2" ItemsSource="{Binding Pages}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Panel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PageViewModel">
+                            <ContentControl Content="{Binding}" IsVisible="{Binding IsActive}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Grid>
         </Grid>
 

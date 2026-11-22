@@ -99,13 +99,6 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
     public void ApplySearch(string text) => Mods.ModFilterText = text;
 
-    public override void Dispose()
-    {
-        _session.Changed -= OnSessionChanged;
-        _instanceService.Changed -= LoadInstances;
-        _modListService.ModsChanged -= OnModsChanged;
-    }
-
     private void OnSessionChanged() => IsGameRunning = _session.IsRunning;
     private void OnModsChanged() => Dispatcher.UIThread.Post(() =>
     {
