@@ -23,6 +23,12 @@ public static class Relationships
                                              o.MinVersion, o.MaxVersion)) ||
                                         mod.Provides?.Contains(o.Name) == true));
 
+    public static ILookup<string, ModVersion> ByName(IEnumerable<ModVersion> mods) =>
+        mods.SelectMany(m => NamesOf(m).Select(name => (name, m))).ToLookup(p => p.name, p => p.m);
+
+    public static IEnumerable<ModVersion> Candidates(Relationship relationship, ILookup<string, ModVersion> byName) =>
+        Options(relationship).Select(o => o.Name).OfType<string>().SelectMany(name => byName[name]);
+
     private static IEnumerable<(string? Name, string? Version, string? MinVersion, string? MaxVersion)> Options(
         Relationship relationship) =>
         relationship.AnyOf is { Count: > 0 } anyOf

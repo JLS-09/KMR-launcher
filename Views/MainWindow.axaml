@@ -237,7 +237,7 @@
                     </Grid>
                 </Border>
                 <!-- Visited pages stay built; only the active one is shown, so switching pages is instant.
-                     Discover and Instances are built in idle time after startup (WarmUpPagesAsync). -->
+                     Discover and Instances are built in idle time after startup (WarmUpAsync). -->
                 <ItemsControl Grid.Row="2" ItemsSource="{Binding Pages}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>

@@ -11,12 +11,14 @@ using KMRLauncherMvvm.Factories;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.Services.Api;
+using KMRLauncherMvvm.ViewModels.InstallMods;
 
 namespace KMRLauncherMvvm.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly PageFactory _pageFactory;
+    private readonly InstallFlow _installFlow;
     private readonly IModApiService _api;
     private readonly GameSessionService _session;
     private readonly InstanceService _instances;
@@ -93,10 +95,12 @@ public partial class MainWindowViewModel : ViewModelBase
     public StatusBarViewModel StatusBar { get; }
 
     public MainWindowViewModel(PageFactory pageFactory, StatusBarViewModel statusBar, IModApiService api,
-        GameSessionService session, NavigationService navigation, DialogService dialogs, InstanceService instances)
+        GameSessionService session, NavigationService navigation, DialogService dialogs, InstanceService instances,
+        InstallFlow installFlow)
     {
         dialogs.Changed += () => SyncDialogs(dialogs);
         _pageFactory = pageFactory;
+        _installFlow = installFlow;
         _api = api;
         _session = session;
         session.Changed += OnSessionChanged;
@@ -150,10 +154,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<PageViewModel> Pages { get; } = [];
 
-    public async Task WarmUpPagesAsync()
+    public async Task WarmUpAsync()
     {
         List<PageViewModel> warming = [];
-        foreach (var name in (ApplicationPageNames[])[ApplicationPageNames.Discover, ApplicationPageNames.Instances])
+        foreach (var name in (ApplicationPageNames[])
+                 [ApplicationPageNames.Discover, ApplicationPageNames.Instances, ApplicationPageNames.Settings])
         {
             await Idle();
             if (Pages.Any(p => p.PageName == name)) continue;
@@ -170,6 +175,8 @@ public partial class MainWindowViewModel : ViewModelBase
             await Idle();
             page.IsWarming = false;
         }
+
+        await Task.Run(_installFlow.WarmUp);
     }
 
     private static async Task Idle() => await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);

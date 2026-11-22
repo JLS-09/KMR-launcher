@@ -138,7 +138,8 @@ public class CompatibilityService(ModListService modListService)
         IReadOnlyList<ModVersion> remainingInstalled, IReadOnlyList<ModVersion> installedBefore,
         IReadOnlyDictionary<string, string>? dlls = null)
     {
-        List<ModVersion> after = [.. toInstall, .. remainingInstalled];
+        var after = Relationships.ByName([.. toInstall, .. remainingInstalled]);
+        var before = Relationships.ByName(installedBefore);
         List<ResolutionProblem> problems = [];
 
         foreach (var mod in remainingInstalled)
@@ -147,7 +148,7 @@ public class CompatibilityService(ModListService modListService)
             {
                 if (dependency.AnyOf is null && HasInvalidVersionFields(dependency)) continue;
                 if (dlls is not null && Relationships.NamesIn(dependency).Any(dlls.ContainsKey)) continue;
-                if (IsMet(dependency, after, mod) || !IsMet(dependency, installedBefore, mod)) continue;
+                if (IsMet(dependency, after, mod) || !IsMet(dependency, before, mod)) continue;
 
                 problems.Add(new ResolutionProblem
                 {
@@ -161,8 +162,9 @@ public class CompatibilityService(ModListService modListService)
         return problems;
     }
 
-    private static bool IsMet(Relationship dependency, IEnumerable<ModVersion> mods, ModVersion owner) =>
-        mods.Any(m => m.Identifier != owner.Identifier && Relationships.Matches(dependency, m));
+    private static bool IsMet(Relationship dependency, ILookup<string, ModVersion> mods, ModVersion owner) =>
+        Relationships.Candidates(dependency, mods)
+            .Any(m => m.Identifier != owner.Identifier && Relationships.Matches(dependency, m));
 
     private static string DescribeBrokenDepend(ModVersion mod, Relationship dependency,
         IReadOnlyList<ModVersion> toInstall)

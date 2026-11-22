@@ -23,6 +23,14 @@ public class InstallFlow(ModListService modListService, DependencyService depend
         return dialog.Result;
     }
 
+    public void WarmUp()
+    {
+        if (instances.Primary is not { } instance || modListService.Mods is null) return;
+
+        using var dialog = new InstallDialogViewModel([], instance, InstallSource.Discover, modListService,
+            dependencyService, compatibilityService, installService, session, navigation, dialogs, instances);
+    }
+
     public Task<bool> RemoveAsync(Instance instance, IEnumerable<ModVersion> mods)
     {
         if (dialogs.IsOpen) return Task.FromResult(false);
