@@ -53,3 +53,7 @@ wwwroot/lib/
 
 # Dotnet global tools cache
 .dotnet/
+
+# Release builds
+publish/
+*.tar.gz
