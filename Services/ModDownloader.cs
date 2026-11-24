@@ -29,7 +29,8 @@ public class ModDownloader(HttpClient http, string cacheFolder) : IModDownloader
     public static HttpClient CreateHttpClient()
     {
         var client = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("KMRLauncher/1.0");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(
+            $"KMRLauncher/{typeof(ModDownloader).Assembly.GetName().Version?.ToString(3) ?? "dev"} (+{AppInfo.SourceUrl})");
         return client;
     }
 

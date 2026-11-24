@@ -17,24 +17,25 @@ namespace KMRLauncherMvvm;
 
 public class App : Application
 {
-
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        
+
+#if DEBUG
         this.AttachDeveloperTools();
+#endif
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
         var instances = new InstanceService(SettingsService.DefaultFile);
         ThemeService.ApplyAccent(instances.Settings.AccentColor);
-        
+
         var modListService = new ModListService();
         var jsonHelper = new GitHelper(modListService);
         var compatibilityService = new CompatibilityService(modListService);
         var dependencyService = new DependencyService(modListService, compatibilityService);
-        
+
         var collection = new ServiceCollection();
         collection.AddSingleton(instances);
         collection.AddSingleton<SyncStatusService>();
@@ -55,8 +56,9 @@ public class App : Application
         var downloader = new ModDownloader(ModDownloader.CreateHttpClient(), ModDownloader.DefaultCacheFolder);
         collection.AddSingleton<IModDownloader>(downloader);
         collection.AddSingleton(new DownloadCache(ModDownloader.DefaultCacheFolder, downloader.CachePath));
-        collection.AddSingleton(new InstallService(downloader, instance => instances.Save(instance, modsChanged: true)));
-        
+        collection.AddSingleton(new InstallService(downloader,
+            instance => instances.Save(instance, modsChanged: true)));
+
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<HomePageViewModel>();
         collection.AddTransient<DiscoverPageViewModel>();
@@ -71,11 +73,11 @@ public class App : Application
             ApplicationPageNames.Settings => x.GetRequiredService<SettingsPageViewModel>(),
             _ => throw new InvalidOperationException()
         });
-        
+
         collection.AddSingleton<PageFactory>();
-        
+
         var services = collection.BuildServiceProvider();
-        
+
         var vm = services.GetRequiredService<MainWindowViewModel>();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

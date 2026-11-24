@@ -96,11 +96,11 @@ The full plan is split into milestones:
 - Wine on your `PATH` (needed to launch instances; Stop also uses `wineserver`)
 - A KSP 1 zip, or a KSP folder you already have (for example Steam's)
 
-Download `KMR Launcher-<version>-linux-x64.tar.gz` from the [latest release](https://github.com/JLS-09/KMR-launcher/releases/latest), then:
+Download `KMR-launcher-<version>-linux-x64.tar.gz` from the [latest release](https://github.com/JLS-09/KMR-launcher/releases/latest), then:
 
 ```bash
-tar -xzf KMR Launcher-*-linux-x64.tar.gz
-cd KMR Launcher
+tar -xzf KMR-launcher-*-linux-x64.tar.gz
+cd KMR-launcher
 ./KMRLauncherMvvm
 ```
 
@@ -127,8 +127,8 @@ KMR launcher is not CKAN. If a mod doesn't install or behave correctly when inst
 - A KSP 1 zip to create an instance from
 
 ```bash
-git clone https://github.com/JLS-09/KMR Launcher.git
-cd KMR Launcher
+git clone https://github.com/JLS-09/KMR-launcher.git
+cd KMR-launcher
 dotnet run
 ```
 
