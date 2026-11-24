@@ -1,0 +1,118 @@
+name: Bug report
+description: Something in KMR Launcher doesn't work, or a mod doesn't install correctly with it.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! KMR Launcher isn't affiliated with CKAN, so please report problems with mods installed by KMR **here**, not to the mod's author or the CKAN team.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What went wrong, and what did you expect to happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What did you do, step by step? If it doesn't happen every time, say so.
+      placeholder: |
+        1. Open Discover and select ...
+        2. Click Install and pick ...
+        3. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where in the launcher?
+      options:
+        - Discover (finding mods)
+        - Installing, updating or removing mods
+        - Instances page
+        - Creating or importing an instance
+        - Launching or stopping KSP
+        - Launcher settings
+        - Fetching CKAN-meta
+        - Somewhere else
+    validations:
+      required: true
+
+  - type: input
+    id: kmr-version
+    attributes:
+      label: KMR Launcher version
+      description: Shown under Settings → About, for example "0.1.0 · 3139daf".
+      placeholder: 0.1.0 · 3139daf
+    validations:
+      required: true
+
+  - type: input
+    id: ksp-version
+    attributes:
+      label: KSP version of the instance
+      placeholder: 1.12.5
+    validations:
+      required: false
+
+  - type: dropdown
+    id: instance-origin
+    attributes:
+      label: How was the instance created?
+      options:
+        - From a KSP zip
+        - From a KSP folder, copied into KMR
+        - From a KSP folder, used in place
+        - Not sure / not relevant
+    validations:
+      required: false
+
+  - type: textarea
+    id: mods
+    attributes:
+      label: Mods involved
+      description: The mods you were installing, updating or removing, and any others you think matter. For bigger instances, a screenshot of the instance's Mods tab also helps.
+    validations:
+      required: false
+
+  - type: input
+    id: distro
+    attributes:
+      label: Linux distribution
+      placeholder: Fedora 43, Ubuntu 26.04, CachyOS, ...
+    validations:
+      required: true
+
+  - type: input
+    id: wine-version
+    attributes:
+      label: Wine version
+      description: Only needed for problems with launching KSP. Run `wine --version` in a terminal.
+      placeholder: wine-10.0
+    validations:
+      required: false
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Launcher output
+      description: Start KMR Launcher from a terminal (`./KMRLauncherMvvm`), reproduce the problem and paste what it prints around it. This is pasted as code automatically, so no backticks are needed.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched the existing issues and didn't find this problem.
+          required: true
+        - label: I'm reporting this here and not to the mod's author or the CKAN team.
+          required: true

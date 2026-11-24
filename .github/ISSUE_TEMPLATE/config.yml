@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: A problem with a mod itself (not with installing it)
+    url: https://forum.kerbalspaceprogram.com/
+    about: If a mod misbehaves the same way when it's installed by hand or with CKAN, report it in that mod's forum thread or repository.

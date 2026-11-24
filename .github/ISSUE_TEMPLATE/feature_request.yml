@@ -1,0 +1,33 @@
+name: Feature request
+description: An idea for something KMR Launcher could do, or do better.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Please check the [roadmap](https://github.com/JLS-09/KMR-launcher#roadmap) first: Home, offline mode, backups, Proton and Windows/macOS support are already planned.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like to do?
+      description: What are you trying to do, and what's in the way right now?
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: How could KMR Launcher help?
+      description: How you imagine it working. Screenshots or examples from other launchers are welcome.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: How do you do it now?
+      description: Any workaround you use today, for example doing it by hand or with CKAN.
+    validations:
+      required: false
