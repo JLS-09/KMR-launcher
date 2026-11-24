@@ -9,7 +9,7 @@
 |---|---|
 -->
 
-**[Download the latest release](https://github.com/JLS-09/KMR Launcher/releases/latest)** · [Features](#features) · [Roadmap](#roadmap) · [Reporting problems](#reporting-problems)
+**[Download the latest release](https://github.com/JLS-09/KMR-launcher/releases/latest)** · [Features](#features) · [Roadmap](#roadmap) · [Reporting problems](#reporting-problems)
 
 ### Try it with your current CKAN install
 
@@ -96,7 +96,7 @@ The full plan is split into milestones:
 - Wine on your `PATH` (needed to launch instances; Stop also uses `wineserver`)
 - A KSP 1 zip, or a KSP folder you already have (for example Steam's)
 
-Download `KMR Launcher-<version>-linux-x64.tar.gz` from the [latest release](https://github.com/JLS-09/KMR Launcher/releases/latest), then:
+Download `KMR Launcher-<version>-linux-x64.tar.gz` from the [latest release](https://github.com/JLS-09/KMR-launcher/releases/latest), then:
 
 ```bash
 tar -xzf KMR Launcher-*-linux-x64.tar.gz
@@ -112,7 +112,7 @@ If a heavily modded instance (such as RP-1) crashes while loading under Wine, ad
 
 ## Reporting problems
 
-Please [open an issue](https://github.com/JLS-09/KMR Launcher/issues/new) and include:
+Please [open an issue](https://github.com/JLS-09/KMR-launcher/issues/new) and include:
 - what you did and what happened
 - the KSP version of the instance and the mods involved (the instance's Mods tab)
 - the launcher's output: start it from a terminal (`./KMRLauncherMvvm`) and copy what it prints around the problem
