@@ -1,9 +1,25 @@
-# KMR-launcher
+# KMR Launcher
 
-A Kerbal Space Program (KSP 1) launcher and mod manager built with C# and Avalonia. It manages separate KSP instances and installs mods from the official [CKAN](https://github.com/KSP-CKAN/CKAN) metadata, following the [CKAN spec](https://github.com/KSP-CKAN/CKAN/blob/master/Spec.md).
+**A KSP 1 launcher and mod manager for Linux.** Keep separate KSP installs side by side, each with its own mods, Wine prefix and launch options, and install mods from the same metadata [CKAN](https://github.com/KSP-CKAN/CKAN) uses, with dependencies resolved according to the [CKAN spec](https://github.com/KSP-CKAN/CKAN/blob/master/Spec.md).
+
+![Discover: finding mods for an instance](docs/screenshots/discover.png)
+
+<!-- Optional second row: the install dialog and the Instances page
+| ![Install dialog](docs/screenshots/install.png) | ![Instances page](docs/screenshots/instances.png) |
+|---|---|
+-->
+
+**[Download the latest release](https://github.com/JLS-09/KMR Launcher/releases/latest)** · [Features](#features) · [Roadmap](#roadmap) · [Reporting problems](#reporting-problems)
+
+### Try it with your current CKAN install
+
+Already using CKAN? Choose **New instance → From a KSP folder → Copy into KMR** and point it at your KSP folder. KMR makes its own copy and reads CKAN's registry, so your mods come along as picked mods and dependencies, ready to update or remove. **Your original folder isn't changed**, and CKAN keeps working with it.
 
 > [!WARNING]
-> **Early development.** KMR-launcher is developed by one person (JLS-09) on Linux. Mods can be installed, updated and removed per instance, but the Home page and offline mode aren't there yet, and Windows and macOS are not supported for now. See the [roadmap](#roadmap) below.
+> **Version 0.1: early release.** KMR Launcher is made by one person (JLS-09) on Linux.
+> - **Linux only.** KSP runs through Wine. Windows and macOS aren't supported yet.
+> - **Not there yet:** the Home page, offline mode, backups and launching through Proton. See the [roadmap](#roadmap).
+> - **Not affiliated with CKAN.** If a mod installed by KMR misbehaves, please [report it here](#reporting-problems), not to the mod's author or to CKAN.
 
 ## Features
 
@@ -69,9 +85,39 @@ The full plan is split into milestones:
 | **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | ✅ Done |
 | **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | ✅ Done |
 | **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | ✅ Done |
-| **M5** | First public release, in a new design:<br>• ✅ new design for Discover, Instances and the install flow<br>• ✅ remove and update mods, `replaced_by`<br>• ✅ currently-playing card<br>• ✅ launcher Settings page<br>• ✅ new instance dialog, also from inside the install flow<br>• ✅ import an existing KSP install (with CKAN registry)<br>• ✅ code clean-up and faster pages | 🚧 In progress |
+| **M5** | First public release, in a new design:<br>• ✅ new design for Discover, Instances and the install flow<br>• ✅ remove and update mods, `replaced_by`<br>• ✅ currently-playing card<br>• ✅ launcher Settings page<br>• ✅ new instance dialog, also from inside the install flow<br>• ✅ import an existing KSP install (with CKAN registry)<br>• ✅ code clean-up and faster pages | ✅ Done (v0.1.0) |
 | **M6** | Home page, startup window and offline mode | ⏳ Planned |
 | **M7** | Extras:<br>• sorting the mod list<br>• instance export/import (`.ckan` metapackage)<br>• backup & restore<br>• extra metadata repos<br>• launching through Proton<br>• Windows and macOS support | ⏳ Planned |
+
+## Installing
+
+**Requirements**
+- Linux (x64)
+- Wine on your `PATH` (needed to launch instances; Stop also uses `wineserver`)
+- A KSP 1 zip, or a KSP folder you already have (for example Steam's)
+
+Download `KMR Launcher-<version>-linux-x64.tar.gz` from the [latest release](https://github.com/JLS-09/KMR Launcher/releases/latest), then:
+
+```bash
+tar -xzf KMR Launcher-*-linux-x64.tar.gz
+cd KMR Launcher
+./KMRLauncherMvvm
+```
+
+The build is self-contained: you don't need to install .NET.
+
+On first start, the launcher clones CKAN-meta in the background. This can take some time depending on your internet speed; Discover shows the progress.
+
+If a heavily modded instance (such as RP-1) crashes while loading under Wine, add `-force-glcore` to its launch arguments (the instance's Settings tab on the Instances page). It makes KSP use OpenGL directly instead of Wine's Direct3D 11 layer.
+
+## Reporting problems
+
+Please [open an issue](https://github.com/JLS-09/KMR Launcher/issues/new) and include:
+- what you did and what happened
+- the KSP version of the instance and the mods involved (the instance's Mods tab)
+- the launcher's output: start it from a terminal (`./KMRLauncherMvvm`) and copy what it prints around the problem
+
+KMR launcher is not CKAN. If a mod doesn't install or behave correctly when installed by KMR, report it here first, not to the mod's author or the CKAN team.
 
 ## Building from source
 
@@ -81,14 +127,10 @@ The full plan is split into milestones:
 - A KSP 1 zip to create an instance from
 
 ```bash
-git clone https://github.com/JLS-09/KMR-launcher.git
-cd KMR-launcher
+git clone https://github.com/JLS-09/KMR Launcher.git
+cd KMR Launcher
 dotnet run
 ```
-
-On first start, the launcher clones CKAN-meta in the background. This can take some time depending on your internet speed; Discover shows the progress.
-
-If a heavily modded instance (such as RP-1) crashes while loading under Wine, add `-force-glcore` to its launch arguments (the instance's Settings tab on the Instances page). It makes KSP use OpenGL directly instead of Wine's Direct3D 11 layer.
 
 If the app still shows an old screen after pulling changes, run `dotnet clean` and build again: Avalonia can keep old compiled XAML around.
 
@@ -131,4 +173,8 @@ During an install, files of mods that are being removed or replaced are kept in 
 
 ## Acknowledgements
 
-Mod metadata comes from the [CKAN](https://github.com/KSP-CKAN) project and its contributors. KMR-launcher is not affiliated with CKAN or with Squad / Private Division.
+Mod metadata comes from the [CKAN](https://github.com/KSP-CKAN) project and its contributors. KMR Launcher is not affiliated with CKAN or with Squad / Private Division.
+
+## License
+
+KMR Launcher is released under the [MIT License](LICENSE).
