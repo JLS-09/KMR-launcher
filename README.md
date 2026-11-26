@@ -4,7 +4,7 @@
 
 ![Discover: finding mods for an instance](docs/screenshots/discover.png)
 
-**[Download the latest release](https://github.com/JLS-09/KMR-launcher/releases/latest)** · [Features](#features) · [Roadmap](#roadmap) · [Reporting problems](#reporting-problems)
+**[Download the latest release](https://github.com/JLS-09/KMR-launcher/releases/latest)** | [Features](#features) | [Roadmap](#roadmap) | [Installing](#installing) | [Reporting problems](#reporting-problems)
 
 > [!WARNING]
 > **Version 0.1: early release.** KMR Launcher is made by one person (JLS-09) on Linux.
