@@ -4,16 +4,7 @@
 
 ![Discover: finding mods for an instance](docs/screenshots/discover.png)
 
-<!-- Optional second row: the install dialog and the Instances page
-| ![Install dialog](docs/screenshots/install.png) | ![Instances page](docs/screenshots/instances.png) |
-|---|---|
--->
-
 **[Download the latest release](https://github.com/JLS-09/KMR-launcher/releases/latest)** · [Features](#features) · [Roadmap](#roadmap) · [Reporting problems](#reporting-problems)
-
-### Try it with your current CKAN install
-
-Already using CKAN? Choose **New instance → From a KSP folder → Copy into KMR** and point it at your KSP folder. KMR makes its own copy and reads CKAN's registry, so your mods come along as picked mods and dependencies, ready to update or remove. **Your original folder isn't changed**, and CKAN keeps working with it.
 
 > [!WARNING]
 > **Version 0.1: early release.** KMR Launcher is made by one person (JLS-09) on Linux.
@@ -21,79 +12,36 @@ Already using CKAN? Choose **New instance → From a KSP folder → Copy into KM
 > - **Not there yet:** the Home page, offline mode, backups and launching through Proton. See the [roadmap](#roadmap).
 > - **Not affiliated with CKAN.** If a mod installed by KMR misbehaves, please [report it here](#reporting-problems), not to the mod's author or to CKAN.
 
+### Try it with your current CKAN install
+
+Already using CKAN? Choose **New instance → From a KSP folder → Copy into KMR** and point it at your KSP folder. KMR makes its own copy and reads CKAN's registry, so your mods come along as picked mods and dependencies, ready to update or remove. **Your original folder isn't changed**, and CKAN keeps working with it.
+
 ## Features
 
-### Instances
-- New instance dialog (also from inside the install flow when you have no instance yet):
-  - from a KSP zip: name, KSP version (with the version detected from the build), primary instance and compatible KSP versions; the zip is unpacked into `~/.local/share/KMR/instances/<name>` (or a folder you pick, which is remembered), with progress, and Cancel removes the half-made folder
-  - from a KSP folder you already have (for example Steam's): copy it into KMR or use it in place. Mods installed by CKAN are read from its registry (picked mods and dependencies, the files each one owns) and CKAN's compatible KSP versions are taken over, so they can be updated and removed like any other mod. Folders in GameData that no mod owns are left alone and never overwritten. A folder that was already a KMR instance comes back with its own data.
-- Instances page: every instance with its KSP version, mod count and when it was last played; sort by last played or name
-- Instance stats: mods (picked / dependencies), playtime, last played and install size
-- Launch an instance through Wine (Linux only), from the Instances page or the primary instance in the sidebar
-- While KSP runs, the sidebar shows which instance is running and for how long, with a Stop button
-- Settings per instance:
-  - name, primary instance, and the Wine prefix folder (a separate prefix per instance)
-  - launch arguments (e.g. `-force-glcore`)
-  - which KSP versions count as compatible (like CKAN), including "all 1.12.x"; the game's own version is always included
-  - forget the instance (it's taken off the list and nothing on disk changes; add it again with the folder button next to New instance), or delete it together with its prefix
-
-### Finding mods (Discover)
-- Mod list built from [CKAN-meta](https://github.com/KSP-CKAN/CKAN-meta), cloned and cached locally with git, with a refresh on demand
-- Search by name, identifier and author; filter by tag and kind, "only compatible" and "hide installed"
-- Every mod is marked against an instance of your choice: fits, installed, update available, or not for that KSP version
-- Details panel: description, authors, license, tags, links, KSP compatibility, dependencies, how many mods need it, download counts, and every version with the ones that fit the instance highlighted
-- Pick several mods (and a version per mod) and install them together
-
-### Installing, updating and removing mods
-- Install dialog inside the main window: instance → extras → choices → review → install, with a side panel that shows what the change does (new, updated and removed mods, download size, what's already cached, problems)
-- Dependency resolution following the CKAN spec:
-  - version ranges (`version`, `min_version`, `max_version`) with CKAN's version ordering
-  - KSP compatibility (`ksp_version`, `ksp_version_min`/`max`, `ksp_version_strict`) against the instance's compatible versions
-  - conflicts with new and installed mods, `provides` and `suppress_recommendations`
-  - installed mods keep their own dependencies: an update that would break one is flagged
-  - mods installed by hand count as installed, like in CKAN: a `.dll` in GameData that no mod owns (outside `Squad`) stands for the mod it's named after (`ModuleManager.4.2.3.dll` → `ModuleManager`), at any version. It isn't installed again as a dependency, it can be a conflict, and a mod you pick yourself is installed over it
-  - problems are shown in the dialog and block the next step, instead of crashing
-- Recommendations (ticked by default), suggestions and supported mods, each with a version picker; choices between alternatives (`any_of` and virtual modules); steps with nothing to show are skipped
-- Installing works like CKAN:
-  - several downloads at the same time (a setting, 4 by default), and each mod is installed as soon as its download is done
-  - download mirrors are tried in order, every download is checked against its `download_hash`, and downloads are cached so reinstalls and other instances don't download again
-  - CKAN install directives (`file`, `find`, `find_regexp`, `install_to`, `as`, filters and `include_only`), matched the way CKAN does
-  - metapackages are supported; DLC can't be installed but is detected
-  - the files of every installed mod are recorded, and a mod that would overwrite a file it doesn't own stops the install
-  - if anything fails, or you cancel, everything is rolled back and the instance is left unchanged; the failure screen shows what went wrong, where each mod got to, and lets you retry (cached downloads aren't downloaded again)
-- Mods tab of an instance: every installed mod with why it's there (picked by you, recommended by…, dependency of…), its version, KSP compatibility and size
-  - mods that don't fit the instance's KSP versions are flagged
-  - update one mod, a selection or everything that has a newer fitting version
-  - mods that CKAN marks as replaced (`replaced_by`) can be replaced in one step
-  - removing a mod also removes the mods that need it and dependencies nothing uses anymore, and says so first
-
-### Launcher settings
-- KSP zips that new instances are created from, with their version and size
-- CKAN-meta: when it was last fetched and at which commit, fetch now, and whether to fetch when the launcher starts (with it off, the cached mod list is used)
-- Downloads: how many run at the same time, and the download cache with how much of it installed mods use; remove unused downloads or clear the cache
-- Launching: where `wine` (and `umu-run`) were found, and how much Wine prints (`WINEDEBUG`: off, errors only, or Wine's default)
-- Accent colour (red, orange, green or blue), applied right away
-- Version and commit of the build
+- **Instances:** create one from a KSP zip, or from a KSP folder you already have (copied into KMR or used in place, with CKAN-installed mods imported). Each instance has its own mods, Wine prefix, launch arguments and compatible KSP versions.
+- **Discover:** search and filter every mod in [CKAN-meta](https://github.com/KSP-CKAN/CKAN-meta), with each mod and version marked against your instance: fits, installed, update available, or not for this KSP version.
+- **Dependencies like CKAN:** version ranges, KSP compatibility, conflicts, `provides`, recommendations and suggestions, and choices between alternatives. Problems are shown before anything is installed.
+- **Safe installs:** parallel downloads with mirrors, hash checks and a shared cache, CKAN install directives, and a full rollback if something fails or you cancel.
+- **Installed mods:** see why each mod is there, update one or all, replace mods that were renamed (`replaced_by`), and remove mods together with dependencies nothing needs anymore.
+- **Launching:** start and stop KSP through Wine, with playtime per instance.
 
 ## Roadmap
 
-The full plan is split into milestones:
+The plan for the next versions. The order can still change.
 
-| Milestone | Goal | Status |
+| Version | Focus | What's coming |
 |---|---|---|
-| **M1** | Choose between alternative dependencies (`any_of` / virtual modules) in the install wizard | ✅ Done |
-| **M2** | Correct dependency resolution:<br>• version ranges<br>• per-instance compatible KSP versions (like CKAN)<br>• `ksp_version_strict`<br>• conflicts and `provides`<br>• error handling and unit tests | ✅ Done |
-| **M3** | Finished install wizard:<br>• recommendations with version choice<br>• skip empty steps<br>• summary / confirm step | ✅ Done |
-| **M4** | Mod installation pipeline:<br>• download with mirrors and cache<br>• hash check<br>• CKAN install directives<br>• rollback on failure | ✅ Done |
-| **M5** | First public release, in a new design:<br>• ✅ new design for Discover, Instances and the install flow<br>• ✅ remove and update mods, `replaced_by`<br>• ✅ currently-playing card<br>• ✅ launcher Settings page<br>• ✅ new instance dialog, also from inside the install flow<br>• ✅ import an existing KSP install (with CKAN registry)<br>• ✅ code clean-up and faster pages | ✅ Done (v0.1.0) |
-| **M6** | Home page, startup window and offline mode | ⏳ Planned |
-| **M7** | Extras:<br>• sorting the mod list<br>• instance export/import (`.ckan` metapackage)<br>• backup & restore<br>• extra metadata repos<br>• launching through Proton<br>• Windows and macOS support | ⏳ Planned |
+| **0.2** | Home and offline | • **Home page:** your last-played instance, updates and other things that need attention, what's new on CKAN, popular mods<br>• **Startup window:** fetches CKAN-meta and checks your instances before the main window opens<br>• **Offline mode:** use the last synced mod list and install mods that are already downloaded |
+| **0.3** | Launching and logs | • **Proton:** launch through Proton (via `umu-run`) instead of Wine, per instance<br>• **Logs:** KSP's and Wine's output saved per instance, with a log viewer<br>• **Sorting** the mod list by name, downloads, last updated or author |
+| **0.4** | Sharing and backups | • **Export and import** instances as a `.ckan` modpack, compatible with CKAN<br>• **Backup and restore** an instance's mods and saves<br>• **KSP zips from an instance:** a modded instance as a starting point for new ones |
+| **0.5** | More mod sources | • **Extra metadata repositories** next to CKAN-meta<br>• **Compact layout** and quick search across mods, instances and actions |
+| Later | Other platforms | • **Windows and macOS** support |
 
 ## Installing
 
 **Requirements**
 - Linux (x64)
-- Wine on your `PATH` (needed to launch instances; Stop also uses `wineserver`)
+- Wine on your `PATH`
 - A KSP 1 zip, or a KSP folder you already have (for example Steam's)
 
 Download `KMR-launcher-<version>-linux-x64.tar.gz` from the [latest release](https://github.com/JLS-09/KMR-launcher/releases/latest), then:
@@ -108,6 +56,8 @@ The build is self-contained: you don't need to install .NET.
 
 On first start, the launcher clones CKAN-meta in the background. This can take some time depending on your internet speed; Discover shows the progress.
 
+To uninstall, delete the `KMR-launcher` folder, `~/.local/share/kmrLauncher` (mod list and download cache) and `~/.config/kmrLauncher` (settings and the Wine prefixes). Your instances are in `~/.local/share/KMR/instances/` (or the folder you picked) and stay until you delete them.
+
 If a heavily modded instance (such as RP-1) crashes while loading under Wine, add `-force-glcore` to its launch arguments (the instance's Settings tab on the Instances page). It makes KSP use OpenGL directly instead of Wine's Direct3D 11 layer.
 
 ## Reporting problems
@@ -117,14 +67,11 @@ Please [open an issue](https://github.com/JLS-09/KMR-launcher/issues/new) and in
 - the KSP version of the instance and the mods involved (the instance's Mods tab)
 - the launcher's output: start it from a terminal (`./KMRLauncherMvvm`) and copy what it prints around the problem
 
-KMR launcher is not CKAN. If a mod doesn't install or behave correctly when installed by KMR, report it here first, not to the mod's author or the CKAN team.
+KMR Launcher is not CKAN. If a mod doesn't install or behave correctly when installed by KMR, report it here first, not to the mod's author or the CKAN team.
 
 ## Building from source
 
-**Requirements**
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- Linux, with Wine on your `PATH` (needed to launch instances; Stop also uses `wineserver`)
-- A KSP 1 zip to create an instance from
+Besides the requirements above, you need the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 
 ```bash
 git clone https://github.com/JLS-09/KMR-launcher.git
@@ -136,7 +83,7 @@ If the app still shows an old screen after pulling changes, run `dotnet clean` a
 
 **Running the tests**
 
-The resolver logic (version ordering, KSP compatibility, conflicts, `provides`, `suppress_recommendations`, `replaced_by`), the install flow (recommendations, choices, review, progress and failure texts), the install pipeline (install directives, downloads with mirrors and hash checks, installing and rollback) and instance management (new instances from a zip, importing a folder with a CKAN registry, removal plans, updates, settings, Wine prefixes) are covered by xUnit tests in `KMRLauncherMvvm.Tests`:
+The xUnit tests in `KMRLauncherMvvm.Tests` cover the dependency resolver, the install flow and pipeline, and instance management:
 
 ```bash
 dotnet test
@@ -144,7 +91,8 @@ dotnet test
 
 ## Where data is stored
 
-On Linux:
+<details>
+<summary>Files and folders KMR Launcher uses on Linux</summary>
 
 | Path | Contents |
 |---|---|
@@ -161,6 +109,8 @@ On Linux:
 An instance folder carries its own mod information, so it can be moved, copied or backed up with its mods. If a folder is moved or deleted, the instance shows as missing on the Instances page, where you can locate the folder or remove the instance from the list. Don't edit `.kmr/` by hand.
 
 During an install, files of mods that are being removed or replaced are kept in `.kmr/staging/` inside the instance folder until the install has finished.
+
+</details>
 
 ## Built with
 
