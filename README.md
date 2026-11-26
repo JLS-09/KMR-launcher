@@ -1,13 +1,34 @@
-# KMR Launcher
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo/logo-dark.svg">
+    <img src="docs/logo/logo-light.svg" alt="KMR Launcher" width="420">
+  </picture>
+</p>
 
-**A KSP 1 launcher and mod manager for Linux.** Keep separate KSP installs side by side, each with its own mods, Wine prefix and launch options, and install mods from the same metadata [CKAN](https://github.com/KSP-CKAN/CKAN) uses, with dependencies resolved according to the [CKAN spec](https://github.com/KSP-CKAN/CKAN/blob/master/Spec.md).
+<p align="center">
+  <strong>A KSP 1 launcher and mod manager for Linux</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/JLS-09/KMR-launcher/releases/latest"><img src="https://img.shields.io/github/v/release/JLS-09/KMR-launcher?label=release" alt="Latest release"></a>
+  <img src="https://img.shields.io/badge/platform-Linux-informational" alt="Platform: Linux">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/JLS-09/KMR-launcher" alt="License: MIT"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/JLS-09/KMR-launcher/releases/latest"><strong>Download</strong></a> |
+  <a href="#features">Features</a> |
+  <a href="#roadmap">Roadmap</a> |
+  <a href="#installing">Installing</a> |
+  <a href="#reporting-problems">Reporting problems</a>
+</p>
+
+Keep separate KSP installs side by side, each with its own mods, Wine prefix and launch options, and install mods from the same metadata [CKAN](https://github.com/KSP-CKAN/CKAN) uses, with dependencies resolved according to the [CKAN spec](https://github.com/KSP-CKAN/CKAN/blob/master/Spec.md).
 
 ![Discover: finding mods for an instance](docs/screenshots/discover.png)
 
-**[Download the latest release](https://github.com/JLS-09/KMR-launcher/releases/latest)** | [Features](#features) | [Roadmap](#roadmap) | [Installing](#installing) | [Reporting problems](#reporting-problems)
-
 > [!WARNING]
-> **Version 0.1: early release.** KMR Launcher is made by one person (JLS-09) on Linux.
+> **Version 0.1.1: early release.** KMR Launcher is made by one person (JLS-09) on Linux.
 > - **Linux only.** KSP runs through Wine. Windows and macOS aren't supported yet.
 > - **Not there yet:** the Home page, offline mode, backups and launching through Proton. See the [roadmap](#roadmap).
 > - **Not affiliated with CKAN.** If a mod installed by KMR misbehaves, please [report it here](#reporting-problems), not to the mod's author or to CKAN.
