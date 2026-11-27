@@ -70,14 +70,12 @@ public partial class InstalledModsViewModel(ModListService modListService, Insta
     private static List<InstalledModRowViewModel> BuildRows(Instance instance, IEnumerable<Mod>? modList)
     {
         UnmanagedDlls.Refresh(instance);
-        var criteria = GameVersionCriteria.FromInstance(instance);
         var mods = modList?.ToDictionary(m => m.Id) ?? [];
 
         return
         [
-            .. instance.Mods
-                .Select(v => new InstalledModRowViewModel(instance, v, mods.GetValueOrDefault(v.Identifier), criteria,
-                    InstalledMods.FindReplacement(instance, v, mods, criteria)))
+            .. InstanceChecks.CheckAll(instance, mods)
+                .Select(check => new InstalledModRowViewModel(instance, check))
                 .OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
         ];
     }

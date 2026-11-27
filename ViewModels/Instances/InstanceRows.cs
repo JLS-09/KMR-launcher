@@ -43,23 +43,16 @@ public partial class InstalledModRowViewModel : ObservableObject
 
     public event Action? SelectionChanged;
 
-    public InstalledModRowViewModel(Instance instance, ModVersion version, Mod? mod, GameVersionCriteria criteria,
-        ModVersion? replacement = null)
+    public InstalledModRowViewModel(Instance instance, ModCheck check)
     {
-        Replacement = replacement;
-        Version = version;
-        Name = mod?.Name ?? version.Identifier;
-        Reason = InstalledMods.ReasonText(instance, version);
-        IsDependency = !InstalledMods.IsUserRequested(instance, version.Identifier);
-
-        if (mod is not null && replacement is null)
-        {
-            var fit = Discover.ModFit.For(mod, instance, criteria);
-            if (fit.Kind == Controls.ModStatusKind.Update) NextVersion = fit.NewestFit;
-        }
-
-        NextText = NextVersion is null ? "" : InstalledMods.ShortNextVersion(version.Version, NextVersion.Version);
-        IsNotListed = version.Kind is null or "package" && !KspCompatibility.IsCompatible(version, criteria);
+        Replacement = check.Replacement;
+        Version = check.Installed;
+        Name = check.Mod?.Name ?? Version.Identifier;
+        Reason = InstalledMods.ReasonText(instance, Version);
+        IsDependency = !InstalledMods.IsUserRequested(instance, Version.Identifier);
+        NextVersion = check.Update;
+        NextText = NextVersion is null ? "" : InstalledMods.ShortNextVersion(Version.Version, NextVersion.Version);
+        IsNotListed = check.IsNotListed;
         NotListedText = $"Not listed for {instance.Version}";
     }
 

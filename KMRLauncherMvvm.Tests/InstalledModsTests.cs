@@ -151,8 +151,10 @@ public class InstalledModsTests
         var instance = With([installed, old], []);
         var criteria = GameVersionCriteria.FromInstance(instance);
 
-        var row = new InstalledModRowViewModel(instance, installed, Mod(newer, installed), criteria);
-        var issue = new InstalledModRowViewModel(instance, old, Mod(old), criteria);
+        var mods = new[] { Mod(newer, installed), Mod(old) }.ToDictionary(m => m.Id);
+
+        var row = new InstalledModRowViewModel(instance, InstanceChecks.Check(instance, installed, mods, criteria));
+        var issue = new InstalledModRowViewModel(instance, InstanceChecks.Check(instance, old, mods, criteria));
 
         Assert.True(row.HasUpdate);
         Assert.Equal("1.1", row.NextText);
