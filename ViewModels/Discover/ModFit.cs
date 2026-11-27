@@ -28,7 +28,7 @@ public record ModFit(ModStatusKind? Kind, string Text, ModVersion? NewestFit, Mo
 
     private static ModFit For(Mod mod, ModVersion? installed, string instanceVersion, GameVersionCriteria criteria)
     {
-        var newestFit = mod.Versions.FirstOrDefault(v => KspCompatibility.IsCompatible(v, criteria));
+        var newestFit = InstanceChecks.NewestFit(mod, criteria);
 
         if (installed is not null)
         {

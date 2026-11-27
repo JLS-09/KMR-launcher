@@ -1,5 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using KMRLauncherMvvm.Data;
@@ -10,6 +12,7 @@ using KMRLauncherMvvm.ViewModels.NewInstance;
 using KMRLauncherMvvm.Services.Api;
 using KMRLauncherMvvm.ViewModels;
 using KMRLauncherMvvm.ViewModels.InstallMods;
+using KMRLauncherMvvm.ViewModels.Startup;
 using KMRLauncherMvvm.Views;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -39,6 +42,7 @@ public class App : Application
         var collection = new ServiceCollection();
         collection.AddSingleton(instances);
         collection.AddSingleton<SyncStatusService>();
+        collection.AddSingleton<HomeDataService>();
         collection.AddSingleton<StatusBarViewModel>();
         collection.AddSingleton<GameSessionService>();
         collection.AddSingleton<NavigationService>();
@@ -59,6 +63,7 @@ public class App : Application
         collection.AddSingleton(new InstallService(downloader,
             instance => instances.Save(instance, modsChanged: true)));
 
+        collection.AddTransient<StartupViewModel>();
         collection.AddTransient<MainWindowViewModel>();
         collection.AddTransient<HomePageViewModel>();
         collection.AddTransient<DiscoverPageViewModel>();
@@ -78,15 +83,37 @@ public class App : Application
 
         var services = collection.BuildServiceProvider();
 
-        var vm = services.GetRequiredService<MainWindowViewModel>();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = vm
-            };
+            var startup = services.GetRequiredService<StartupViewModel>();
+            var window = new StartupWindow { DataContext = startup };
+            desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+            desktop.MainWindow = window;
+            window.Opened += async (_, _) => await OpenMainWindowAsync(desktop, window, startup, services);
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private static async Task OpenMainWindowAsync(IClassicDesktopStyleApplicationLifetime desktop,
+        StartupWindow window, StartupViewModel startup, IServiceProvider services)
+    {
+        var closed = false;
+        window.Closed += (_, _) => closed = true;
+
+        try
+        {
+            await startup.RunAsync();
+        }
+        catch (Exception)
+        {
+        }
+
+        if (closed) return;
+
+        var main = new MainWindow { DataContext = services.GetRequiredService<MainWindowViewModel>() };
+        desktop.MainWindow = main;
+        main.Show();
+        window.Close();
     }
 }

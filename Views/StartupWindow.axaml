@@ -1,0 +1,97 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:KMRLauncherMvvm.ViewModels.Startup"
+        xmlns:controls="using:KMRLauncherMvvm.Controls"
+        x:Class="KMRLauncherMvvm.Views.StartupWindow"
+        x:DataType="vm:StartupViewModel"
+        Width="520" Height="360" CanResize="False"
+        WindowDecorations="None" WindowStartupLocation="CenterScreen"
+        Background="Transparent" TransparencyLevelHint="Transparent"
+        Icon="/Assets/Images/icon.png"
+        Title="KMR Launcher"
+        Foreground="{DynamicResource TextPrimary}"
+        FontFamily="{DynamicResource Inter}"
+        FontSize="14">
+
+    <Window.Styles>
+        <Style Selector="Grid.step">
+            <Setter Property="Height" Value="26" />
+        </Style>
+        <Style Selector="Grid.step TextBlock.stepTitle">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="Grid.step.current TextBlock.stepTitle">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="Grid.step.done TextBlock.stepTitle, Grid.step.skipped TextBlock.stepTitle, Grid.step.failed TextBlock.stepTitle">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="Grid.step TextBlock.stepDetail">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="Grid.step.failed TextBlock.stepDetail">
+            <Setter Property="Foreground" Value="{DynamicResource StatusError}" />
+        </Style>
+    </Window.Styles>
+
+    <Border Background="{DynamicResource Bar}" BorderBrush="{DynamicResource LineStrong}" BorderThickness="1"
+            CornerRadius="12" ClipToBounds="True" PointerPressed="DragWindow">
+        <DockPanel>
+            <Border DockPanel.Dock="Bottom" Background="{DynamicResource DialogAside}"
+                    BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0" Padding="24 10 16 10">
+                <Grid ColumnDefinitions="*, Auto" MinHeight="30">
+                    <TextBlock Grid.Column="0" Classes="mono muted size11" VerticalAlignment="Center"
+                               Text="{Binding VersionText}" />
+                    <Button Grid.Column="1" Classes="ghost small" Content="Skip, use cached list"
+                            Command="{Binding SkipCommand}" IsVisible="{Binding CanSkip}" />
+                </Grid>
+            </Border>
+
+            <DockPanel Margin="24 24 24 18">
+                <controls:LogoLockup DockPanel.Dock="Top" Width="150" Height="60" HorizontalAlignment="Left" />
+
+                <StackPanel DockPanel.Dock="Bottom" Spacing="6">
+                    <ProgressBar Height="4" MinHeight="4" CornerRadius="2" Minimum="0" Maximum="1"
+                                 Background="{DynamicResource Off}" Foreground="{DynamicResource StatusFits}"
+                                 Value="{Binding Progress}" />
+                    <TextBlock Classes="mono muted size11" Text="{Binding SourceText}" />
+                </StackPanel>
+
+                <ItemsControl Margin="0 18 0 0" ItemsSource="{Binding Steps}" VerticalAlignment="Top">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:StartupStepViewModel">
+                            <Grid Classes="step" ColumnDefinitions="15, 10, *, Auto"
+                                  Classes.current="{Binding IsCurrent}" Classes.done="{Binding IsDone}"
+                                  Classes.skipped="{Binding IsSkipped}" Classes.failed="{Binding IsFailed}">
+                                <Panel Grid.Column="0" Width="15" Height="15" VerticalAlignment="Center">
+                                    <Border Width="5" Height="5" CornerRadius="3" Background="{DynamicResource ToggleOff}"
+                                            IsVisible="{Binding IsPending}" />
+                                    <controls:StrokeIcon Data="{StaticResource IconRefresh}" Size="15"
+                                                         Foreground="{DynamicResource AccentText}"
+                                                         IsVisible="{Binding IsCurrent}" />
+                                    <controls:StrokeIcon Data="{StaticResource IconCheck}" Size="15"
+                                                         Foreground="{DynamicResource StatusFits}"
+                                                         IsVisible="{Binding IsDone}" />
+                                    <Border Width="8" Height="1.5" CornerRadius="1" Background="{DynamicResource TextMuted}"
+                                            IsVisible="{Binding IsSkipped}" />
+                                    <controls:StrokeIcon Data="{StaticResource IconWarning}" Size="15"
+                                                         Foreground="{DynamicResource StatusError}"
+                                                         IsVisible="{Binding IsFailed}" />
+                                </Panel>
+                                <TextBlock Grid.Column="2" Classes="stepTitle" Text="{Binding Title}"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="3" Classes="stepDetail" Margin="10 0 0 0"
+                                           Text="{Binding Detail}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </DockPanel>
+        </DockPanel>
+    </Border>
+</Window>

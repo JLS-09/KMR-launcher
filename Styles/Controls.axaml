@@ -218,6 +218,22 @@
         <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
     </Style>
 
+    <!-- Text link (Review, Manage, Open on GitHub) -->
+    <Style Selector="Button.link">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Content="{TemplateBinding Content}" Background="Transparent"
+                                  Foreground="{TemplateBinding Foreground}" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.link:pointerover TextBlock">
+        <Setter Property="TextDecorations" Value="Underline" />
+    </Style>
+
     <!-- Danger ("Remove") and accent outline ("Add mods", "Update all") -->
     <Style Selector="Button.danger">
         <Setter Property="Background" Value="Transparent" />

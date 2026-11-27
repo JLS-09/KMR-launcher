@@ -43,30 +43,8 @@
             <Border Grid.Column="0" Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Line}"
                     BorderThickness="0 0 1 0" Padding="12 16">
                 <DockPanel>
-                    <!-- Logo lockup; the flame follows the accent -->
-                    <Viewbox DockPanel.Dock="Top" Width="160" Height="64" HorizontalAlignment="Left"
-                             Margin="10 6 10 26" Stretch="Fill">
-                        <Canvas Width="502" Height="200">
-                            <Canvas RenderTransformOrigin="0,0">
-                                <Canvas.RenderTransform>
-                                    <TranslateTransform X="12" Y="-18" />
-                                </Canvas.RenderTransform>
-                                <Canvas RenderTransformOrigin="0,0">
-                                    <Canvas.RenderTransform>
-                                        <TransformGroup>
-                                            <ScaleTransform ScaleX="1.91" ScaleY="1.91" />
-                                            <TranslateTransform X="-53.5" Y="16.72" />
-                                        </TransformGroup>
-                                    </Canvas.RenderTransform>
-                                    <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketBody}" />
-                                    <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketWindow}" />
-                                    <Path Fill="{DynamicResource Accent}" Data="{StaticResource LogoFlame}" />
-                                </Canvas>
-                                <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoKmr}" />
-                                <Path Fill="{DynamicResource TextSecondary}" Data="{StaticResource LogoLauncher}" />
-                            </Canvas>
-                        </Canvas>
-                    </Viewbox>
+                    <controls:LogoLockup DockPanel.Dock="Top" Width="160" Height="64" HorizontalAlignment="Left"
+                                         Margin="10 6 10 26" />
 
                     <!-- Bottom: the primary instance, or the game that is running -->
                     <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0"

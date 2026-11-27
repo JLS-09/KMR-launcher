@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using KMRLauncherMvvm.Models;
 using LibGit2Sharp;
@@ -34,7 +35,8 @@ public class GitHelper(ModListService modList)
         }
     }
 
-    public static void CloneCkanMetaRepo(string gitCacheFolder, IProgress<ModFetchProgress>? progress)
+    public static void CloneCkanMetaRepo(string gitCacheFolder, IProgress<ModFetchProgress>? progress,
+        CancellationToken cancel = default)
     {
         Directory.CreateDirectory(gitCacheFolder);
 
@@ -46,7 +48,8 @@ public class GitHelper(ModListService modList)
                 {
                     TotalMods = totalSteps,
                     ModsReceived = completedSteps,
-                    CurrentModName = $"3/3: Checkout {path}"
+                    CurrentModName = $"3/3: Checkout {path}",
+                    Phase = FetchPhase.CheckingOut
                 });
             },
             FetchOptions =
@@ -59,6 +62,8 @@ public class GitHelper(ModListService modList)
                         {
                             TotalMods = cloneProgress.TotalObjects,
                             ModsReceived = cloneProgress.ReceivedObjects,
+                            ReceivedBytes = cloneProgress.ReceivedBytes,
+                            Phase = FetchPhase.Receiving,
                             CurrentModName = "1/3: Cloning CKAN repo"
                         });
                     }
@@ -68,11 +73,13 @@ public class GitHelper(ModListService modList)
                         {
                             TotalMods = cloneProgress.TotalObjects,
                             ModsReceived = cloneProgress.IndexedObjects,
+                            ReceivedBytes = cloneProgress.ReceivedBytes,
+                            Phase = FetchPhase.Indexing,
                             CurrentModName = "2/3: Indexing, please wait..."
                         });
                     }
 
-                    return true;
+                    return !cancel.IsCancellationRequested;
                 }
             }
         };
@@ -80,7 +87,8 @@ public class GitHelper(ModListService modList)
         Repository.Clone(CkanMetaUrl, gitCacheFolder, cloneOptions);
     }
 
-    public static void PullCkanMetaRepo(string gitCacheFolder, IProgress<ModFetchProgress>? progress)
+    public static void PullCkanMetaRepo(string gitCacheFolder, IProgress<ModFetchProgress>? progress,
+        CancellationToken cancel = default)
     {
         using var repo = new Repository(gitCacheFolder);
 
@@ -102,6 +110,8 @@ public class GitHelper(ModListService modList)
                         {
                             TotalMods = transferProgress.TotalObjects,
                             ModsReceived = transferProgress.ReceivedObjects,
+                            ReceivedBytes = transferProgress.ReceivedBytes,
+                            Phase = FetchPhase.Receiving,
                             CurrentModName = "1/2: Cloning CKAN repo"
                         });
                     }
@@ -111,11 +121,13 @@ public class GitHelper(ModListService modList)
                         {
                             TotalMods = transferProgress.TotalObjects,
                             ModsReceived = transferProgress.IndexedObjects,
+                            ReceivedBytes = transferProgress.ReceivedBytes,
+                            Phase = FetchPhase.Indexing,
                             CurrentModName = "2/2: Indexing, please wait..."
                         });
                     }
 
-                    return true;
+                    return !cancel.IsCancellationRequested;
                 }
             }
         };
@@ -124,6 +136,31 @@ public class GitHelper(ModListService modList)
             new Identity("USERNAME", "PASSWORD"), DateTimeOffset.Now);
 
         Commands.Pull(repo, signature, options);
+    }
+
+    public static (List<CkanFile> NewVersions, List<CkanFile> NewMods)? DiffCkanMeta(string gitCacheFolder,
+        string fromCommit, string toCommit)
+    {
+        using var repo = new Repository(gitCacheFolder);
+        if (repo.Lookup<Commit>(fromCommit) is not { } from || repo.Lookup<Commit>(toCommit) is not { } to) return null;
+
+        List<CkanFile> newVersions = [];
+        List<CkanFile> newMods = [];
+        Dictionary<string, bool> existed = [];
+        foreach (var change in repo.Diff.Compare<TreeChanges>(from.Tree, to.Tree).Added)
+        {
+            var parts = change.Path.Split('/');
+            if (parts.Length != 2 || !parts[1].EndsWith(".ckan", StringComparison.Ordinal)) continue;
+
+            var identifier = parts[0];
+            if (!existed.TryGetValue(identifier, out var hadVersions))
+                existed[identifier] = hadVersions = from.Tree[identifier]?.Target is Tree folder &&
+                                                    folder.Any(e => e.Name.EndsWith(".ckan", StringComparison.Ordinal));
+
+            (hadVersions ? newVersions : newMods).Add(new CkanFile(identifier, parts[1][..^".ckan".Length]));
+        }
+
+        return (newVersions, newMods);
     }
 
     public static Dictionary<string, long> ReadDownloadCounts(string gitCacheFolder)

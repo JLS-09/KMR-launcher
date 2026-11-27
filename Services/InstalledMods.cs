@@ -127,6 +127,16 @@ public static class InstalledMods
         _ => $"{mods[0].Identifier}, {mods[1].Identifier} and {mods.Count - 2} more"
     };
 
+    public static PlannedModVersion PlanUpdate(Instance instance, ModVersion installed, ModVersion target,
+        bool replaces = false) => new()
+    {
+        Version = target,
+        IsUserRequested = IsUserRequested(instance, installed.Identifier),
+        IsVersionPickedByUser = true,
+        OptionalReason = instance.ModRecords.GetValueOrDefault(installed.Identifier)?.Reason,
+        Replaces = replaces ? installed.Identifier : null
+    };
+
     public static ModVersion? FindReplacement(Instance instance, ModVersion installed,
         IReadOnlyDictionary<string, Mod> mods, GameVersionCriteria criteria)
     {
