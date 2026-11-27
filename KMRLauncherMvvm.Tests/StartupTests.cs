@@ -174,4 +174,17 @@ public class StartupTests : TempFolderTest
         Assert.Equal(1, changed);
         Assert.Equal(0, HomeData.Recheck().UnusedDownloads);
     }
+
+    [Fact]
+    public void The_ckan_diff_is_kept_by_rechecks_and_saved()
+    {
+        var (_, _) = Startup();
+        HomeData.SaveCkanChanges(new CkanChanges { FromCommit = "a", ToCommit = "b", NewMods = [new("N", "N-1.0")] });
+
+        HomeData.Recheck();
+        var reloaded = new HomeDataService(HomeFile, Instances, _modList, Sync, Cache);
+
+        Assert.Equal("b", HomeData.Data.CkanChanges?.ToCommit);
+        Assert.Equal([new CkanFile("N", "N-1.0")], reloaded.Data.CkanChanges?.NewMods);
+    }
 }

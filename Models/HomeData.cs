@@ -10,7 +10,20 @@ public class HomeData
     public List<InstanceCheckResult> Instances { get; set; } = [];
     public int UnusedDownloads { get; set; }
     public long UnusedDownloadBytes { get; set; }
+    public CkanChanges? CkanChanges { get; set; }
 }
+
+public class CkanChanges
+{
+    public string FromCommit { get; set; } = "";
+    public string ToCommit { get; set; } = "";
+    public DateTimeOffset? FromSync { get; set; }
+    public DateTimeOffset ToSync { get; set; }
+    public List<CkanFile> NewVersions { get; set; } = [];
+    public List<CkanFile> NewMods { get; set; } = [];
+}
+
+public record CkanFile(string Identifier, string Id);
 
 public class InstanceCheckResult
 {

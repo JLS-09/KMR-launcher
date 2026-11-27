@@ -61,6 +61,7 @@ public class HomeDataService
                     Instances = [.. _instances.Usable.Select(i => Check(i, mods))]
                 };
 
+            data.CkanChanges = Data.CkanChanges;
             var usage = MeasureCache();
             data.UnusedDownloads = usage.UnusedCount;
             data.UnusedDownloadBytes = usage.UnusedBytes;
@@ -70,6 +71,15 @@ public class HomeDataService
 
         Changed?.Invoke();
         return Data;
+    }
+
+    public void SaveCkanChanges(CkanChanges changes)
+    {
+        lock (_lock)
+        {
+            Data.CkanChanges = changes;
+            Save();
+        }
     }
 
     private CacheUsage MeasureCache()

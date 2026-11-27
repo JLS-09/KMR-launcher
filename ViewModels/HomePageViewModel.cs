@@ -10,6 +10,7 @@ using KMRLauncherMvvm.Data;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.ViewModels.Home;
+using KMRLauncherMvvm.ViewModels.InstallMods;
 using KMRLauncherMvvm.ViewModels.NewInstance;
 
 namespace KMRLauncherMvvm.ViewModels;
@@ -23,6 +24,9 @@ public partial class HomePageViewModel : PageViewModel
     private readonly NewInstanceFlow _newInstanceFlow;
     private readonly DownloadCache _cache;
     private readonly StatusBarViewModel _statusBar;
+    private readonly ModListService _modList;
+    private readonly InstallFlow _installFlow;
+    private const int FeedRowsCollapsed = 8;
     private int _sizesJob;
     private Dictionary<string, (long Total, long GameData)> _sizes = [];
 
@@ -41,6 +45,16 @@ public partial class HomePageViewModel : PageViewModel
     [ObservableProperty] private string _attentionCount = "0";
     [ObservableProperty] private string? _attentionError;
 
+    [ObservableProperty] private HomeCkanFeed _feed = HomeCkanFeed.Empty;
+    [ObservableProperty] private FeedTab _feedTab = FeedTab.YourMods;
+    [ObservableProperty] private bool _showAllFeedRows;
+    [ObservableProperty] private IReadOnlyList<FeedRow> _feedRows = [];
+    [ObservableProperty] private string _feedEmptyText = "";
+    [ObservableProperty] private string _showAllFeedText = "";
+    [ObservableProperty] private bool _canShowAllFeedRows;
+    [ObservableProperty] private string _updateAllText = "";
+    [ObservableProperty] private bool _canUpdateAll;
+
     [ObservableProperty] private string _installSize = "–";
     [ObservableProperty] private string _gameDataSize = "";
     [ObservableProperty] private string? _actionError;
@@ -50,7 +64,7 @@ public partial class HomePageViewModel : PageViewModel
 
     public HomePageViewModel(InstanceService instances, HomeDataService homeData, GameSessionService session,
         NavigationService navigation, NewInstanceFlow newInstanceFlow, DownloadCache cache,
-        StatusBarViewModel statusBar)
+        StatusBarViewModel statusBar, ModListService modList, InstallFlow installFlow)
     {
         PageName = ApplicationPageNames.Home;
         _instances = instances;
@@ -60,6 +74,8 @@ public partial class HomePageViewModel : PageViewModel
         _newInstanceFlow = newInstanceFlow;
         _cache = cache;
         _statusBar = statusBar;
+        _modList = modList;
+        _installFlow = installFlow;
 
         IsGameRunning = session.IsRunning;
         session.Changed += () => IsGameRunning = _session.IsRunning;
@@ -77,6 +93,10 @@ public partial class HomePageViewModel : PageViewModel
         InstanceCount = Cards.Count.ToString();
         Attention = HomeAttention.Rows([.. Cards.Select(c => c.Instance)], _homeData.Data);
         AttentionCount = Attention.Count.ToString();
+        var mods = _modList.Mods?.ToDictionary(m => m.Id) ?? [];
+        Feed = HomeCkanFeed.Build(_homeData.Data.CkanChanges, mods, [.. Cards.Select(c => c.Instance)],
+            _homeData.Data, DateTimeOffset.Now);
+        ShowFeedRows();
         if (instance?.RootPath != previous) ActionError = null;
 
         ShowSizes();
@@ -179,6 +199,56 @@ public partial class HomePageViewModel : PageViewModel
         if (result.Failed > 0)
             AttentionError = $"{result.Failed} {(result.Failed == 1 ? "archive" : "archives")} couldn't be deleted.";
         await _statusBar.RefreshAsync();
+    }
+
+    partial void OnFeedTabChanged(FeedTab value)
+    {
+        ShowAllFeedRows = false;
+        ShowFeedRows();
+    }
+
+    private void ShowFeedRows()
+    {
+        var rows = Feed.Rows(FeedTab);
+        FeedRows = ShowAllFeedRows ? rows : [.. rows.Take(FeedRowsCollapsed)];
+        CanShowAllFeedRows = !ShowAllFeedRows && rows.Count > FeedRowsCollapsed;
+        ShowAllFeedText = $"Show all {rows.Count}";
+        FeedEmptyText = FeedTab switch
+        {
+            FeedTab.YourMods => "No new versions of your mods in this sync",
+            FeedTab.AllUpdates => "No new versions in this sync",
+            _ => "No new mods in this sync"
+        };
+
+        var updates = Feed.YourMods.SelectMany(r => r.Updates).ToList();
+        var instances = updates.Select(u => u.Instance).Distinct().Count();
+        CanUpdateAll = FeedTab == FeedTab.YourMods && updates.Count > 0;
+        UpdateAllText = $"Update all {Feed.YourMods.Count} in {instances} {(instances == 1 ? "instance" : "instances")}";
+    }
+
+    [RelayCommand]
+    private void SelectFeedTab(FeedTab tab) => FeedTab = tab;
+
+    [RelayCommand]
+    private void ShowAllFeed()
+    {
+        ShowAllFeedRows = true;
+        ShowFeedRows();
+    }
+
+    [RelayCommand]
+    private Task UpdateFeedRow(FeedRow row) => RunUpdates(row.Updates);
+
+    [RelayCommand]
+    private Task UpdateAllFeed() => RunUpdates([.. Feed.YourMods.SelectMany(r => r.Updates)]);
+
+    private async Task RunUpdates(IReadOnlyList<FeedUpdate> updates)
+    {
+        foreach (var group in updates.GroupBy(u => u.Instance))
+        {
+            var requested = group.Select(u => InstalledMods.PlanUpdate(u.Instance, u.Installed, u.Target)).ToList();
+            if (!await _installFlow.InstallAsync(requested, group.Key, InstallSource.Updates)) break;
+        }
     }
 
     private void OpenInstance(InstanceTab tab, ModsFilter? filter)

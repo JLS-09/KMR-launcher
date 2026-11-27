@@ -138,6 +138,31 @@ public class GitHelper(ModListService modList)
         Commands.Pull(repo, signature, options);
     }
 
+    public static (List<CkanFile> NewVersions, List<CkanFile> NewMods)? DiffCkanMeta(string gitCacheFolder,
+        string fromCommit, string toCommit)
+    {
+        using var repo = new Repository(gitCacheFolder);
+        if (repo.Lookup<Commit>(fromCommit) is not { } from || repo.Lookup<Commit>(toCommit) is not { } to) return null;
+
+        List<CkanFile> newVersions = [];
+        List<CkanFile> newMods = [];
+        Dictionary<string, bool> existed = [];
+        foreach (var change in repo.Diff.Compare<TreeChanges>(from.Tree, to.Tree).Added)
+        {
+            var parts = change.Path.Split('/');
+            if (parts.Length != 2 || !parts[1].EndsWith(".ckan", StringComparison.Ordinal)) continue;
+
+            var identifier = parts[0];
+            if (!existed.TryGetValue(identifier, out var hadVersions))
+                existed[identifier] = hadVersions = from.Tree[identifier]?.Target is Tree folder &&
+                                                    folder.Any(e => e.Name.EndsWith(".ckan", StringComparison.Ordinal));
+
+            (hadVersions ? newVersions : newMods).Add(new CkanFile(identifier, parts[1][..^".ckan".Length]));
+        }
+
+        return (newVersions, newMods);
+    }
+
     public static Dictionary<string, long> ReadDownloadCounts(string gitCacheFolder)
     {
         try

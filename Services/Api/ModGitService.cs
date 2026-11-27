@@ -11,7 +11,8 @@ using LibGit2Sharp;
 
 namespace KMRLauncherMvvm.Services.Api;
 
-public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStatusService syncStatus) : IModApiService
+public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStatusService syncStatus,
+    HomeDataService homeData) : IModApiService
 {
     private static readonly JsonSerializerOptions Options = new()
     {
@@ -71,17 +72,22 @@ public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStat
         cancel.ThrowIfCancellationRequested();
 
         var upToDate = false;
+        string? before = null;
         if (!Directory.Exists(gitCacheFolder))
         {
             GitHelper.CloneCkanMetaRepo(gitCacheFolder, progress, cancel);
         }
         else
         {
-            upToDate = CurrentCommit(gitCacheFolder) == latestCommitHash;
+            before = CurrentCommit(gitCacheFolder);
+            upToDate = before == latestCommitHash;
             if (!upToDate || isRefresh) GitHelper.PullCkanMetaRepo(gitCacheFolder, progress, cancel);
         }
 
-        syncStatus.RecordSuccess(CurrentCommit(gitCacheFolder));
+        var after = CurrentCommit(gitCacheFolder);
+        var lastSync = syncStatus.Status.LastFetch;
+        syncStatus.RecordSuccess(after);
+        if (before is not null && before != after) SaveChanges(gitCacheFolder, before, after, lastSync);
 
         if (upToDate && !isRefresh && await TryLoadCache(progress)) return;
 
@@ -89,6 +95,27 @@ public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStat
         var cache = new ModsCache { Mods = [..modList.Mods!], CurrentCommitHash = latestCommitHash };
         await using (var stream = File.Create(ModsCacheFile))
             await JsonSerializer.SerializeAsync(stream, cache, Options);
+    }
+
+    private void SaveChanges(string gitCacheFolder, string before, string after, DateTimeOffset? lastSync)
+    {
+        try
+        {
+            if (GitHelper.DiffCkanMeta(gitCacheFolder, before, after) is not { } diff) return;
+
+            homeData.SaveCkanChanges(new CkanChanges
+            {
+                FromCommit = before,
+                ToCommit = after,
+                FromSync = lastSync,
+                ToSync = DateTimeOffset.Now,
+                NewVersions = diff.NewVersions,
+                NewMods = diff.NewMods
+            });
+        }
+        catch (LibGit2SharpException)
+        {
+        }
     }
 
     private async Task<bool> TryLoadCache(IProgress<ModFetchProgress>? progress)

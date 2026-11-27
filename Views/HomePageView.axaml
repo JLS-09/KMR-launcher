@@ -92,6 +92,23 @@
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+        <Style Selector="Border.feedRow">
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="0 1 0 0" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="8 9" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.feedRow:pointerover">
+            <Setter Property="Background" Value="{DynamicResource RowHover}" />
+        </Style>
+        <Style Selector="Border.instanceTag">
+            <Setter Property="Padding" Value="6 2" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource LineStrong}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
     </UserControl.Styles>
 
     <Panel>
@@ -350,6 +367,140 @@
                                     <TextBlock Classes="size12 errorText" Margin="0 0 0 12" TextWrapping="Wrap"
                                                Text="{Binding AttentionError}"
                                                IsVisible="{Binding AttentionError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="3*, 16, 2*">
+                            <!-- New on CKAN since your last sync -->
+                            <Border Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource Surface}"
+                                    BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="12"
+                                    Padding="20" VerticalAlignment="Top">
+                                <StackPanel Spacing="14">
+                                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="12">
+                                        <StackPanel Spacing="4" VerticalAlignment="Bottom">
+                                            <TextBlock Classes="h2" Text="New on CKAN since your last sync" />
+                                            <TextBlock Classes="muted size12" TextTrimming="CharacterEllipsis"
+                                                       IsVisible="{Binding Feed.HasChanges}">
+                                                <Run FontFamily="{DynamicResource Mono}" Text="{Binding Feed.CommitsText}" /><Run Text="{Binding Feed.TimesText}" />
+                                            </TextBlock>
+                                            <!-- Nothing compared yet (not in the mockups) -->
+                                            <TextBlock Classes="muted size12" TextWrapping="Wrap"
+                                                       IsVisible="{Binding !Feed.HasChanges}"
+                                                       Text="New versions show up here after the next fetch that brings changes." />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Classes="segmented raised" VerticalAlignment="Bottom"
+                                                IsVisible="{Binding Feed.HasChanges}">
+                                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                                <RadioButton Classes="segment" GroupName="feedTab"
+                                                             IsChecked="{Binding FeedTab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static home:FeedTab.YourMods}}"
+                                                             Command="{Binding SelectFeedTabCommand}"
+                                                             CommandParameter="{x:Static home:FeedTab.YourMods}">
+                                                    <TextBlock>
+                                                        <Run Text="Your mods " /><Run FontFamily="{DynamicResource Mono}" Foreground="{DynamicResource TextSecondary}"
+                                                             Text="{Binding Feed.YourMods.Count}" />
+                                                    </TextBlock>
+                                                </RadioButton>
+                                                <RadioButton Classes="segment" GroupName="feedTab"
+                                                             IsChecked="{Binding FeedTab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static home:FeedTab.AllUpdates}}"
+                                                             Command="{Binding SelectFeedTabCommand}"
+                                                             CommandParameter="{x:Static home:FeedTab.AllUpdates}">
+                                                    <TextBlock>
+                                                        <Run Text="All updates " /><Run FontFamily="{DynamicResource Mono}" Foreground="{DynamicResource TextSecondary}"
+                                                             Text="{Binding Feed.AllUpdates.Count}" />
+                                                    </TextBlock>
+                                                </RadioButton>
+                                                <RadioButton Classes="segment" GroupName="feedTab"
+                                                             IsChecked="{Binding FeedTab, Mode=OneWay, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static home:FeedTab.NewMods}}"
+                                                             Command="{Binding SelectFeedTabCommand}"
+                                                             CommandParameter="{x:Static home:FeedTab.NewMods}">
+                                                    <TextBlock>
+                                                        <Run Text="New mods " /><Run FontFamily="{DynamicResource Mono}" Foreground="{DynamicResource TextSecondary}"
+                                                             Text="{Binding Feed.NewMods.Count}" />
+                                                    </TextBlock>
+                                                </RadioButton>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+
+                                    <StackPanel IsVisible="{Binding Feed.HasChanges}">
+                                        <ItemsControl ItemsSource="{Binding FeedRows}" Grid.IsSharedSizeScope="True">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="home:FeedRow">
+                                                    <Border Classes="feedRow">
+                                                        <Grid ColumnSpacing="12">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="1.3*" />
+                                                                <ColumnDefinition Width="1.5*" />
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" SharedSizeGroup="feedButton" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                <TextBlock Classes="size14 medium" Text="{Binding Name}"
+                                                                           TextTrimming="CharacterEllipsis" />
+                                                                <TextBlock Classes="muted size12" Text="{Binding When}" />
+                                                            </StackPanel>
+                                                            <Grid Grid.Column="1" ColumnDefinitions="Auto, Auto, *" ColumnSpacing="6"
+                                                                  VerticalAlignment="Center">
+                                                                <TextBlock Grid.Column="0" Classes="mono muted size12"
+                                                                           Text="{Binding From}" MaxWidth="140"
+                                                                           TextTrimming="CharacterEllipsis"
+                                                                           IsVisible="{Binding HasFrom}" />
+                                                                <controls:StrokeIcon Grid.Column="1" Data="{StaticResource IconArrowRight}"
+                                                                                     Size="12" VerticalAlignment="Center"
+                                                                                     Foreground="{DynamicResource TextMuted}"
+                                                                                     IsVisible="{Binding HasFrom}" />
+                                                                <TextBlock Grid.Column="2" Classes="mono size12" Text="{Binding To}"
+                                                                           TextTrimming="CharacterEllipsis" />
+                                                            </Grid>
+                                                            <ItemsControl Grid.Column="2" ItemsSource="{Binding Instances}"
+                                                                          VerticalAlignment="Center" IsVisible="{Binding !IsNewMod}">
+                                                                <ItemsControl.ItemsPanel>
+                                                                    <ItemsPanelTemplate>
+                                                                        <WrapPanel ItemSpacing="4" LineSpacing="4" />
+                                                                    </ItemsPanelTemplate>
+                                                                </ItemsControl.ItemsPanel>
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate x:DataType="x:String">
+                                                                        <Border Classes="instanceTag">
+                                                                            <TextBlock Classes="secondary size11" Text="{Binding}" />
+                                                                        </Border>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                            <TextBlock Grid.Column="2" Grid.ColumnSpan="2" Classes="muted size12"
+                                                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                                       Text="{Binding Abstract}" IsVisible="{Binding IsNewMod}" />
+                                                            <Button Grid.Column="3" Classes="secondary small" Content="Update"
+                                                                    VerticalAlignment="Center" IsVisible="{Binding CanUpdate}"
+                                                                    Command="{Binding $parent[UserControl].((vm:HomePageViewModel)DataContext).UpdateFeedRowCommand}"
+                                                                    CommandParameter="{Binding}" />
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <!-- Empty tab (not in the mockups) -->
+                                        <Border Classes="feedRow" IsVisible="{Binding !FeedRows.Count}">
+                                            <TextBlock Classes="muted size13" Text="{Binding FeedEmptyText}" />
+                                        </Border>
+                                    </StackPanel>
+
+                                    <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding Feed.HasChanges}">
+                                        <Button Grid.Column="0" Classes="link" FontWeight="Medium" HorizontalAlignment="Left"
+                                                VerticalAlignment="Center" Content="{Binding ShowAllFeedText}"
+                                                Command="{Binding ShowAllFeedCommand}"
+                                                IsVisible="{Binding CanShowAllFeedRows}" />
+                                        <Button Grid.Column="1" Classes="accentOutline" Command="{Binding UpdateAllFeedCommand}"
+                                                IsVisible="{Binding CanUpdateAll}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <controls:StrokeIcon Data="{StaticResource IconArrowUp}" Size="16"
+                                                                     Foreground="{DynamicResource AccentText}"
+                                                                     VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding UpdateAllText}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
                                 </StackPanel>
                             </Border>
                         </Grid>

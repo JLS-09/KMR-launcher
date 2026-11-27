@@ -178,14 +178,9 @@ public partial class InstalledModsViewModel(ModListService modListService, Insta
     {
         if (_instance is not { } instance || rows.Count == 0) return;
 
-        var requested = rows.Select(r => new PlannedModVersion
-        {
-            Version = r.Replacement ?? r.NextVersion!,
-            IsUserRequested = InstalledMods.IsUserRequested(instance, r.Version.Identifier),
-            IsVersionPickedByUser = true,
-            OptionalReason = instance.ModRecords.GetValueOrDefault(r.Version.Identifier)?.Reason,
-            Replaces = r.HasReplacement ? r.Version.Identifier : null
-        }).ToList();
+        var requested = rows
+            .Select(r => InstalledMods.PlanUpdate(instance, r.Version, r.Replacement ?? r.NextVersion!, r.HasReplacement))
+            .ToList();
         List<ModVersion> replaced = [.. rows.Where(r => r.HasReplacement).Select(r => r.Version)];
 
         if (await installFlow.InstallAsync(requested, instance, InstallSource.Updates, replaced)) ClearSelection();
