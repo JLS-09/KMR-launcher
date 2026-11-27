@@ -66,6 +66,23 @@
         <Style Selector="StackPanel.instancesSection">
             <Setter Property="Grid.ColumnSpan" Value="1" />
         </Style>
+        <Style Selector="Border.popularCard">
+            <Setter Property="Grid.Row" Value="0" />
+            <Setter Property="Grid.Column" Value="2" />
+            <Setter Property="Margin" Value="0" />
+        </Style>
+        <Style Selector="Border.feedCard">
+            <Setter Property="Grid.ColumnSpan" Value="1" />
+        </Style>
+        <Style Selector=":is(UserControl).narrowRow Border.popularCard">
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Grid.ColumnSpan" Value="3" />
+            <Setter Property="Margin" Value="0 16 0 0" />
+        </Style>
+        <Style Selector=":is(UserControl).narrowRow Border.feedCard">
+            <Setter Property="Grid.ColumnSpan" Value="3" />
+        </Style>
         <Style Selector=":is(UserControl).narrowRow Border.attentionCard">
             <Setter Property="Grid.Row" Value="1" />
             <Setter Property="Grid.Column" Value="0" />
@@ -233,7 +250,7 @@
 
                 <Grid Margin="28 24 28 32">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" MaxWidth="1304" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Spacing="24">
                         <Grid ColumnDefinitions="3*, 16, 2*" RowDefinitions="Auto, Auto">
@@ -371,9 +388,9 @@
                             </Border>
                         </Grid>
 
-                        <Grid ColumnDefinitions="3*, 16, 2*">
+                        <Grid ColumnDefinitions="3*, 16, 2*" RowDefinitions="Auto, Auto">
                             <!-- New on CKAN since your last sync -->
-                            <Border Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource Surface}"
+                            <Border Classes="feedCard" Grid.Row="0" Grid.Column="0" Background="{DynamicResource Surface}"
                                     BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="12"
                                     Padding="20" VerticalAlignment="Top">
                                 <StackPanel Spacing="14">
@@ -501,6 +518,67 @@
                                             </StackPanel>
                                         </Button>
                                     </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Popular for KSP x.y.z -->
+                            <Border Classes="popularCard" Background="{DynamicResource Surface}"
+                                    BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="12"
+                                    Padding="20" VerticalAlignment="Top">
+                                <StackPanel Spacing="14">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Classes="h2" Text="{Binding PopularTitle}" />
+                                        <TextBlock Classes="muted size12" Text="{Binding PopularSubtitle}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <ItemsControl ItemsSource="{Binding Popular}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="home:PopularRow">
+                                                    <Border Classes="feedRow">
+                                                        <Grid ColumnDefinitions="18, *, Auto, Auto" ColumnSpacing="12">
+                                                            <TextBlock Grid.Column="0" Classes="mono muted size12"
+                                                                       VerticalAlignment="Center" Text="{Binding Rank}" />
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                <TextBlock Classes="size14 medium" Text="{Binding Name}"
+                                                                           TextTrimming="CharacterEllipsis" />
+                                                                <TextBlock Classes="muted size12" Text="{Binding Abstract}"
+                                                                           TextTrimming="CharacterEllipsis" />
+                                                            </StackPanel>
+                                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4"
+                                                                        VerticalAlignment="Center">
+                                                                <controls:StrokeIcon Data="{StaticResource IconDownload}" Size="12"
+                                                                                     VerticalAlignment="Center"
+                                                                                     Foreground="{DynamicResource TextMuted}" />
+                                                                <TextBlock Classes="mono secondary size12"
+                                                                           VerticalAlignment="Center" Text="{Binding Downloads}" />
+                                                            </StackPanel>
+                                                            <Button Grid.Column="3" Classes="secondary icon small"
+                                                                    VerticalAlignment="Center" ToolTip.Tip="{Binding AddTip}"
+                                                                    Command="{Binding $parent[UserControl].((vm:HomePageViewModel)DataContext).AddPopularCommand}"
+                                                                    CommandParameter="{Binding}">
+                                                                <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="14" />
+                                                            </Button>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <!-- Nothing to suggest (not in the mockups) -->
+                                        <Border Classes="feedRow" IsVisible="{Binding HasNoPopular}">
+                                            <TextBlock Classes="muted size13" TextWrapping="Wrap"
+                                                       Text="Download counts come with the mod list; nothing to suggest yet." />
+                                        </Border>
+                                    </StackPanel>
+                                    <Button Classes="link" FontWeight="Medium" HorizontalAlignment="Left"
+                                            Command="{Binding BrowseModsCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="Browse all mods" VerticalAlignment="Center" />
+                                            <controls:StrokeIcon Data="{StaticResource IconArrowRight}" Size="14"
+                                                                 Foreground="{DynamicResource AccentText}"
+                                                                 VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
                                 </StackPanel>
                             </Border>
                         </Grid>

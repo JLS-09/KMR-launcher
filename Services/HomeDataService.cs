@@ -20,13 +20,19 @@ public class HomeDataService
     private readonly SyncStatusService _syncStatus;
     private readonly DownloadCache _cache;
     private readonly object _lock = new();
+    private readonly Func<IReadOnlyDictionary<string, long>> _readDownloadCounts;
+    private IReadOnlyDictionary<string, long> _downloadCounts = new Dictionary<string, long>();
+    private string? _downloadCountsCommit;
+
+    public const int PopularCount = 6;
 
     public HomeData Data { get; private set; }
 
     public event Action? Changed;
 
     public HomeDataService(InstanceService instances, ModListService modList, SyncStatusService syncStatus,
-        DownloadCache cache) : this(DefaultFile, instances, modList, syncStatus, cache)
+        DownloadCache cache) : this(DefaultFile, instances, modList, syncStatus, cache,
+        () => GitHelper.ReadDownloadCounts(GitHelper.DefaultCkanMetaFolder))
     {
         instances.Changed += () => Recheck();
         modList.ModsChanged += () => Dispatcher.UIThread.Post(() => Recheck());
@@ -34,8 +40,9 @@ public class HomeDataService
     }
 
     public HomeDataService(string file, InstanceService instances, ModListService modList,
-        SyncStatusService syncStatus, DownloadCache cache)
+        SyncStatusService syncStatus, DownloadCache cache, Func<IReadOnlyDictionary<string, long>> readDownloadCounts)
     {
+        _readDownloadCounts = readDownloadCounts;
         _file = file;
         _instances = instances;
         _modList = modList;
@@ -62,6 +69,9 @@ public class HomeDataService
                 };
 
             data.CkanChanges = Data.CkanChanges;
+            (data.PopularFor, data.Popular) = mods is null
+                ? (Data.PopularFor, Data.Popular)
+                : (_instances.Primary?.RootPath, FindPopular(_instances.Primary, mods));
             var usage = MeasureCache();
             data.UnusedDownloads = usage.UnusedCount;
             data.UnusedDownloadBytes = usage.UnusedBytes;
@@ -80,6 +90,30 @@ public class HomeDataService
             Data.CkanChanges = changes;
             Save();
         }
+    }
+
+    private List<PopularMod> FindPopular(Instance? primary, Dictionary<string, Mod> mods)
+    {
+        if (primary is null) return [];
+
+        if (_downloadCountsCommit != _syncStatus.Status.LastCommit || _downloadCounts.Count == 0)
+        {
+            _downloadCounts = _readDownloadCounts();
+            _downloadCountsCommit = _syncStatus.Status.LastCommit;
+        }
+
+        var criteria = GameVersionCriteria.FromInstance(primary);
+        HashSet<string> installed = [.. primary.Mods.Select(m => m.Identifier)];
+        return
+        [
+            .. _downloadCounts
+                .OrderByDescending(c => c.Value)
+                .Where(c => !installed.Contains(c.Key) && mods.TryGetValue(c.Key, out var mod) &&
+                            mod.Versions.Count > 0 && mod.Versions[0].Kind is null or "package" &&
+                            InstanceChecks.NewestFit(mod, criteria) is not null)
+                .Take(PopularCount)
+                .Select(c => new PopularMod(c.Key, c.Value))
+        ];
     }
 
     private CacheUsage MeasureCache()

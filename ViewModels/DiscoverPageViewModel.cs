@@ -32,6 +32,7 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
     private int _loads;
     private int _rowsJob;
     private int _fitsJob;
+    private string? _pendingSelection;
 
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private ModFetchProgress _loadProgress = new() { TotalMods = 1 };
@@ -165,6 +166,7 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
                 row.SelectionChanged += OnRowSelectionChanged;
 
         _allRows = built.Rows;
+        SelectPending();
         _neededBy = built.NeededBy;
         _ = LoadDownloadCounts();
 
@@ -196,6 +198,16 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
                 .Select(g => (g.Key, g.Count()))
         ];
         return (rows, [.. rows.Select(r => fitFor(r.Mod))], DiscoverFilter.CountNeededBy(modList), tags);
+    }
+
+    private void SelectPending()
+    {
+        if (_pendingSelection is null || _allRows.FirstOrDefault(r => r.Mod.Id == _pendingSelection) is not { } row)
+            return;
+
+        _pendingSelection = null;
+        row.IsSelected = true;
+        FocusedRow = row;
     }
 
     private async Task LoadDownloadCounts()
@@ -323,6 +335,13 @@ public partial class DiscoverPageViewModel : PageViewModel, ISearchablePage, INa
 
     public void OnNavigatedTo(object? parameter)
     {
+        if (parameter is Mod mod)
+        {
+            _pendingSelection = mod.Id;
+            SelectPending();
+            return;
+        }
+
         if (parameter is not Instance instance) return;
 
         var match = Instances.FirstOrDefault(i => i.RootPath == instance.RootPath);

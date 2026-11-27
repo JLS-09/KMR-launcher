@@ -55,6 +55,13 @@ public partial class HomePageViewModel : PageViewModel
     [ObservableProperty] private string _updateAllText = "";
     [ObservableProperty] private bool _canUpdateAll;
 
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(HasNoPopular))]
+    private IReadOnlyList<PopularRow> _popular = [];
+
+    public bool HasNoPopular => Popular.Count == 0;
+    [ObservableProperty] private string _popularTitle = "";
+    [ObservableProperty] private string _popularSubtitle = "";
+
     [ObservableProperty] private string _installSize = "–";
     [ObservableProperty] private string _gameDataSize = "";
     [ObservableProperty] private string? _actionError;
@@ -97,6 +104,10 @@ public partial class HomePageViewModel : PageViewModel
         Feed = HomeCkanFeed.Build(_homeData.Data.CkanChanges, mods, [.. Cards.Select(c => c.Instance)],
             _homeData.Data, DateTimeOffset.Now);
         ShowFeedRows();
+        var primary = _instances.Primary;
+        Popular = PopularRow.For(primary, _homeData.Data, mods);
+        PopularTitle = primary is null ? "Popular" : $"Popular for KSP {primary.Version}";
+        PopularSubtitle = primary is null ? "" : $"CKAN download counts · not in {primary.Name} yet";
         if (instance?.RootPath != previous) ActionError = null;
 
         ShowSizes();
@@ -250,6 +261,12 @@ public partial class HomePageViewModel : PageViewModel
             if (!await _installFlow.InstallAsync(requested, group.Key, InstallSource.Updates)) break;
         }
     }
+
+    [RelayCommand]
+    private void AddPopular(PopularRow row) => _navigation.NavigateTo(ApplicationPageNames.Discover, row.Mod);
+
+    [RelayCommand]
+    private void BrowseMods() => _navigation.NavigateTo(ApplicationPageNames.Discover);
 
     private void OpenInstance(InstanceTab tab, ModsFilter? filter)
     {

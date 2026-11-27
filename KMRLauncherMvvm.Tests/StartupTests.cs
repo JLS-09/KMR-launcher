@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using KMRLauncherMvvm.Models;
 using KMRLauncherMvvm.Services;
 using KMRLauncherMvvm.Services.Api;
+using KMRLauncherMvvm.ViewModels.Home;
 using KMRLauncherMvvm.ViewModels.Startup;
 using static KMRLauncherMvvm.Tests.TestData;
 
@@ -31,6 +32,7 @@ public class StartupTests : TempFolderTest
     private InstanceService Instances { get; }
     private SyncStatusService Sync { get; }
     private HomeDataService HomeData { get; }
+    private Dictionary<string, long> Counts { get; } = [];
     private DownloadCache Cache => new(Path.Combine(Temp, "cache"), v => Path.Combine(Temp, "cache", v.Id + ".zip"));
     private string HomeFile => Path.Combine(Temp, "home.json");
 
@@ -39,7 +41,7 @@ public class StartupTests : TempFolderTest
         Directory.CreateDirectory(Temp);
         Instances = new InstanceService(Path.Combine(Temp, "settings.json"));
         Sync = new SyncStatusService(Path.Combine(Temp, "sync.json"));
-        HomeData = new HomeDataService(HomeFile, Instances, _modList, Sync, Cache);
+        HomeData = new HomeDataService(HomeFile, Instances, _modList, Sync, Cache, () => Counts);
     }
 
     private (StartupViewModel Startup, FakeApi Api) Startup()
@@ -66,7 +68,7 @@ public class StartupTests : TempFolderTest
         Assert.Equal("1 update", startup.Check.Detail);
         Assert.Equal(1, startup.Progress);
 
-        var saved = new HomeDataService(HomeFile, Instances, _modList, Sync, Cache).Data.Instances.Single();
+        var saved = new HomeDataService(HomeFile, Instances, _modList, Sync, Cache, () => Counts).Data.Instances.Single();
         Assert.Equal("/tmp/test", saved.Folder);
         Assert.Equal(new ModUpdateResult("A", "1.0", "1.1"), saved.Updates.Single());
         Assert.Equal(["B"], saved.NotListed);
@@ -182,9 +184,33 @@ public class StartupTests : TempFolderTest
         HomeData.SaveCkanChanges(new CkanChanges { FromCommit = "a", ToCommit = "b", NewMods = [new("N", "N-1.0")] });
 
         HomeData.Recheck();
-        var reloaded = new HomeDataService(HomeFile, Instances, _modList, Sync, Cache);
+        var reloaded = new HomeDataService(HomeFile, Instances, _modList, Sync, Cache, () => Counts);
 
         Assert.Equal("b", HomeData.Data.CkanChanges?.ToCommit);
         Assert.Equal([new CkanFile("N", "N-1.0")], reloaded.Data.CkanChanges?.NewMods);
+    }
+
+    [Fact]
+    public void Popular_lists_the_most_downloaded_mods_that_fit_the_primary_and_arent_installed()
+    {
+        var (_, _) = Startup();
+        var meta = Version("Meta", "1.0");
+        meta.Kind = "metapackage";
+        _modList.Mods =
+        [
+            Mod(Version("A", "1.1"), Version("A", "1.0")), Mod(Version("Old", "1.0", ksp: "1.3")), Mod(meta),
+            Mod(Version("Fits", "1.0")), Mod(Version("Also", "2.0"))
+        ];
+        foreach (var (id, count) in new[] { ("A", 900L), ("Old", 800L), ("Meta", 700L), ("Fits", 600L), ("Gone", 550L), ("Also", 500L) })
+            Counts[id] = count;
+        Instances.Instances.Single().IsPrimary = true;
+
+        var data = HomeData.Recheck();
+
+        Assert.Equal("/tmp/test", data.PopularFor);
+        Assert.Equal([new PopularMod("Fits", 600), new PopularMod("Also", 500)], data.Popular);
+        var rows = PopularRow.For(Instances.Primary, data, _modList.Mods.ToDictionary(m => m.Id));
+        Assert.Equal([(1, "Fits", "600"), (2, "Also", "500")], rows.Select(r => (r.Rank, r.Name, r.Downloads)));
+        Assert.Equal("Add Fits to selection", rows[0].AddTip);
     }
 }

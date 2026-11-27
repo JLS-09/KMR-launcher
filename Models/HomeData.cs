@@ -11,7 +11,11 @@ public class HomeData
     public int UnusedDownloads { get; set; }
     public long UnusedDownloadBytes { get; set; }
     public CkanChanges? CkanChanges { get; set; }
+    public string? PopularFor { get; set; }
+    public List<PopularMod> Popular { get; set; } = [];
 }
+
+public record PopularMod(string Identifier, long Downloads);
 
 public class CkanChanges
 {
