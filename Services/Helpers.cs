@@ -7,6 +7,9 @@ namespace KMRLauncherMvvm.Services;
 
 public static class Helpers
 {
+    public static long FolderSize(string folderPath) =>
+        Directory.Exists(folderPath) ? GetDirectorySize(folderPath) : 0;
+
     public static long GetDirectorySize(string folderPath)
     {
         if (!Directory.Exists(folderPath))

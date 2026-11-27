@@ -4,24 +4,182 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="700"
              xmlns:vm="clr-namespace:KMRLauncherMvvm.ViewModels"
+             xmlns:controls="using:KMRLauncherMvvm.Controls"
              x:DataType="vm:HomePageViewModel"
              x:Class="KMRLauncherMvvm.Views.HomePageView">
 
-    <!-- Placeholder: Home is built in Phase 6 -->
-    <ScrollViewer>
-        <StackPanel Margin="28" Spacing="12" MaxWidth="720" HorizontalAlignment="Left">
-            <Border Classes="placeholder">
-                <StackPanel Spacing="6">
-                    <TextBlock Classes="label" Text="NOT BUILT YET · PHASE 6" />
-                    <TextBlock Classes="h2" Text="Home" />
-                    <TextBlock Text="Home needs the data from Phase 5 (updates, incompatible mods, replaced mods) and the startup work from Phase 6, so it stays empty until then. It will show:" />
-                    <TextBlock Text="• Continue: the last-played instance with its stats, a pre-flight line and Launch" />
-                    <TextBlock Text="• Needs attention: updates, incompatible and replaced mods, unused downloads" />
-                    <TextBlock Text="• Instances, each with a quick Launch button" />
-                    <TextBlock Text="• New on CKAN since your last sync, and Popular for your KSP version" />
-                    <TextBlock Text="For now, launch the primary instance from the sidebar or use the Instances page." />
-                </StackPanel>
-            </Border>
+    <UserControl.Styles>
+        <Style Selector="StackPanel.continueActions">
+            <Setter Property="Grid.Row" Value="0" />
+            <Setter Property="Grid.Column" Value="1" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
+        <Style Selector=":is(UserControl).stacked StackPanel.continueActions">
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Margin" Value="0 20 0 0" />
+        </Style>
+        <Style Selector="Border.homeStat">
+            <Setter Property="Padding" Value="28 14" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="1 0 0 0" />
+        </Style>
+        <Style Selector="TextBlock.homeStatValue">
+            <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="LineHeight" Value="29" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+        <Style Selector="TextBlock.homeStatDetail">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style Selector="StackPanel.preflightItem">
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Setter Property="Spacing" Value="6" />
+        </Style>
+        <Style Selector="StackPanel.preflightItem > TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="StackPanel.preflightItem > controls|StrokeIcon">
+            <Setter Property="Size" Value="15" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Styles>
+
+    <Panel>
+        <ScrollViewer IsVisible="{Binding HasContinue}">
+            <StackPanel>
+                <!-- Continue where you left off -->
+                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1" Padding="28 24">
+                    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto" ColumnSpacing="32">
+                        <StackPanel Grid.Row="0" Grid.Column="0" Spacing="10">
+                            <TextBlock Classes="label" Text="CONTINUE WHERE YOU LEFT OFF" />
+                            <TextBlock Classes="semibold" FontFamily="{DynamicResource SpaceGrotesk}" FontSize="32"
+                                       LineHeight="35.2" TextTrimming="CharacterEllipsis"
+                                       Text="{Binding Continue.Name, FallbackValue=''}" />
+                            <WrapPanel ItemSpacing="6" LineSpacing="6">
+                                <Border Classes="chip plain">
+                                    <TextBlock Classes="mono" Text="{Binding Continue.KspText, FallbackValue=''}" />
+                                </Border>
+                                <!-- Wine is the only runner until the Proton work (Phase 8) -->
+                                <Border Classes="chip plain">
+                                    <TextBlock Text="Wine" />
+                                </Border>
+                                <Border Classes="chip accent" IsVisible="{Binding Continue.IsPrimary, FallbackValue=False}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <controls:StrokeIcon Data="{StaticResource IconStar}" Size="13" IsFilled="True"
+                                                             VerticalAlignment="Center" />
+                                        <TextBlock Text="Primary" />
+                                    </StackPanel>
+                                </Border>
+                            </WrapPanel>
+                            <TextBlock Classes="size12 errorText" Text="{Binding ActionError}" TextWrapping="Wrap"
+                                       IsVisible="{Binding ActionError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        </StackPanel>
+                        <StackPanel Classes="continueActions" Orientation="Horizontal" Spacing="10">
+                            <Button Classes="ghost large" Command="{Binding OpenFolderCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <controls:StrokeIcon Data="{StaticResource IconFolder}" Size="18"
+                                                         VerticalAlignment="Center" />
+                                    <TextBlock Text="Open folder" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Classes="secondary large" Command="{Binding ManageModsCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <controls:StrokeIcon Data="{StaticResource IconPackage}" Size="18"
+                                                         VerticalAlignment="Center" />
+                                    <TextBlock Text="Manage mods" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <controls:LaunchButton MinWidth="191" Command="{Binding LaunchCommand}">
+                                <controls:LaunchButton.Menu>
+                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                        <MenuItem Header="Launch arguments…" Command="{Binding LaunchArgumentsCommand}" />
+                                    </MenuFlyout>
+                                </controls:LaunchButton.Menu>
+                            </controls:LaunchButton>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Stats strip -->
+                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 0 0 1" ClipToBounds="True">
+                    <UniformGrid Rows="1">
+                        <Border Classes="homeStat" Margin="-1 0 0 0">
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="label" Text="LAST PLAYED" />
+                                <TextBlock Classes="homeStatValue" Text="{Binding Continue.LastPlayed, FallbackValue=''}" />
+                                <TextBlock Classes="homeStatDetail"
+                                           Text="{Binding Continue.LastPlayedDetail, FallbackValue=''}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="homeStat">
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="label" Text="PLAYTIME" />
+                                <TextBlock Classes="homeStatValue" Text="{Binding Continue.PlayTime, FallbackValue=''}" />
+                                <TextBlock Classes="homeStatDetail" Text="in total" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="homeStat">
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="label" Text="MODS" />
+                                <TextBlock Classes="homeStatValue" Text="{Binding Continue.ModsCount, FallbackValue=''}" />
+                                <TextBlock Classes="homeStatDetail" Text="{Binding Continue.ModsDetail, FallbackValue=''}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="homeStat">
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="label" Text="INSTALL SIZE" />
+                                <TextBlock Classes="homeStatValue" Text="{Binding InstallSize}" />
+                                <TextBlock Classes="homeStatDetail" Text="{Binding GameDataSize}" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                </Border>
+
+                <!-- Pre-flight -->
+                <Border Background="{DynamicResource Bar}" BorderBrush="{DynamicResource Line}"
+                        BorderThickness="0 0 0 1" Padding="28 12">
+                    <Grid ColumnDefinitions="*, Auto" ColumnSpacing="20">
+                        <WrapPanel ItemSpacing="20" LineSpacing="8">
+                            <TextBlock Classes="label" Text="PRE-FLIGHT" VerticalAlignment="Center" />
+                            <StackPanel Classes="preflightItem">
+                                <controls:StrokeIcon Data="{StaticResource IconCheck}"
+                                                     Foreground="{DynamicResource StatusFits}" />
+                                <TextBlock Text="{Binding Continue.ReadyText, FallbackValue=''}" />
+                            </StackPanel>
+                            <StackPanel Classes="preflightItem"
+                                        IsVisible="{Binding Continue.HasUpdates, FallbackValue=False}">
+                                <controls:StrokeIcon Data="{StaticResource IconArrowUp}"
+                                                     Foreground="{DynamicResource StatusUpdate}" />
+                                <TextBlock Text="{Binding Continue.UpdatesText, FallbackValue=''}" />
+                            </StackPanel>
+                            <StackPanel Classes="preflightItem"
+                                        IsVisible="{Binding Continue.HasNotListed, FallbackValue=False}">
+                                <controls:StrokeIcon Data="{StaticResource IconWarning}"
+                                                     Foreground="{DynamicResource StatusWarning}" />
+                                <TextBlock Text="{Binding Continue.NotListedText, FallbackValue=''}" />
+                            </StackPanel>
+                        </WrapPanel>
+                        <Button Grid.Column="1" Classes="link" FontWeight="Medium" VerticalAlignment="Center"
+                                Content="Review" Command="{Binding ReviewCommand}" />
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- No instances (not in the mockups) -->
+        <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center"
+                    IsVisible="{Binding !HasContinue}">
+            <TextBlock Classes="h2" Text="No instances yet" HorizontalAlignment="Center" />
+            <TextBlock Classes="muted size13" HorizontalAlignment="Center"
+                       Text="Create one from a KSP zip or an existing KSP folder to start installing mods." />
+            <Button Classes="accent" HorizontalAlignment="Center" Content="New instance"
+                    Command="{Binding NewInstanceCommand}" />
         </StackPanel>
-    </ScrollViewer>
+    </Panel>
 </UserControl>

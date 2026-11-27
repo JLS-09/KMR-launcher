@@ -105,20 +105,6 @@
         <Style Selector="RadioButton.swatch:checked /template/ Border#Ring">
             <Setter Property="BorderBrush" Value="{DynamicResource TextPrimary}" />
         </Style>
-        <Style Selector="Button.link">
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="{DynamicResource AccentText}" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Template">
-                <ControlTemplate>
-                    <ContentPresenter Content="{TemplateBinding Content}" Background="Transparent"
-                                      Foreground="{TemplateBinding Foreground}" />
-                </ControlTemplate>
-            </Setter>
-        </Style>
-        <Style Selector="Button.link:pointerover TextBlock">
-            <Setter Property="TextDecorations" Value="Underline" />
-        </Style>
         <Style Selector="TextBlock.missing">
             <Setter Property="Foreground" Value="{DynamicResource StatusWarning}" />
         </Style>

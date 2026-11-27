@@ -32,6 +32,9 @@ public enum ModsFilter
     Issues
 }
 
+public record InstanceNavigation(Instance Instance, InstanceTab Tab = InstanceTab.Mods,
+    ModsFilter? Filter = null);
+
 public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, INavigationTarget, ILoadingPage
 {
     private readonly NewInstanceFlow _newInstanceFlow;
@@ -138,11 +141,18 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
     public void OnNavigatedTo(object? parameter)
     {
-        if (parameter is not Instance instance) return;
+        var target = parameter switch
+        {
+            Instance instance => new InstanceNavigation(instance),
+            InstanceNavigation navigation => navigation,
+            _ => null
+        };
+        if (target is null) return;
 
-        var item = Instances.FirstOrDefault(i => i.Instance.RootPath == instance.RootPath);
+        var item = Instances.FirstOrDefault(i => i.Instance.RootPath == target.Instance.RootPath);
         if (item is not null) SelectedItem = item;
-        Tab = InstanceTab.Mods;
+        Tab = target.Tab;
+        if (target.Filter is { } filter) Mods.Filter = filter;
     }
 
     partial void OnSelectedItemChanged(InstanceListItemViewModel? value)
@@ -200,13 +210,13 @@ public partial class InstancesPageViewModel : PageViewModel, ISearchablePage, IN
 
         var (total, gameData, modSizes) = await Task.Run(() =>
         {
-            long Folder(string path) => Directory.Exists(path) ? Helpers.GetDirectorySize(path) : 0;
             var sizes = instance.ModRecords.ToDictionary(r => r.Key, r => r.Value.Files.Sum(f =>
             {
                 var file = new FileInfo(Path.Combine(instance.RootPath, f));
                 return file.Exists ? file.Length : 0;
             }));
-            return (Folder(instance.RootPath), Folder(Path.Combine(instance.RootPath, "GameData")), sizes);
+            return (Helpers.FolderSize(instance.RootPath), Helpers.FolderSize(Path.Combine(instance.RootPath, "GameData")),
+                sizes);
         });
 
         if (Selected != instance) return;
