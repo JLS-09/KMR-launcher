@@ -24,7 +24,10 @@ public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStat
 
     private readonly SemaphoreSlim _lock = new(1, 1);
 
-    public async Task GetAllModsAsync(IProgress<ModFetchProgress>? progress, bool isRefresh, bool cacheOnly = false)
+    public bool HasCache => Repository.IsValid(GitHelper.DefaultCkanMetaFolder) && File.Exists(ModsCacheFile);
+
+    public async Task GetAllModsAsync(IProgress<ModFetchProgress>? progress, bool isRefresh, bool cacheOnly = false,
+        CancellationToken cancel = default)
     {
         await _lock.WaitAsync();
         try
@@ -32,10 +35,15 @@ public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStat
             var gitCacheFolder = GitHelper.DefaultCkanMetaFolder;
             if (cacheOnly && Repository.IsValid(gitCacheFolder) && await TryLoadCache(progress)) return;
 
+            var cancelled = false;
             syncStatus.SetFetching(true);
             try
             {
-                await FetchAndLoad(gitCacheFolder, progress, isRefresh);
+                await FetchAndLoad(gitCacheFolder, progress, isRefresh, cancel);
+            }
+            catch (Exception) when (cancel.IsCancellationRequested && Repository.IsValid(gitCacheFolder))
+            {
+                cancelled = true;
             }
             catch (Exception e)
             {
@@ -46,6 +54,8 @@ public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStat
             {
                 syncStatus.SetFetching(false);
             }
+
+            if (cancelled && !await TryLoadCache(progress)) await gitHelper.PopulateMods(gitCacheFolder, progress);
         }
         finally
         {
@@ -53,20 +63,22 @@ public class ModGitService(GitHelper gitHelper, ModListService modList, SyncStat
         }
     }
 
-    private async Task FetchAndLoad(string gitCacheFolder, IProgress<ModFetchProgress>? progress, bool isRefresh)
+    private async Task FetchAndLoad(string gitCacheFolder, IProgress<ModFetchProgress>? progress, bool isRefresh,
+        CancellationToken cancel)
     {
         var latestCommitHash = Repository.ListRemoteReferences(GitHelper.CkanMetaUrl)
             .First(r => r.CanonicalName == $"refs/heads/{GitHelper.CkanMetaBranch}").TargetIdentifier;
+        cancel.ThrowIfCancellationRequested();
 
         var upToDate = false;
         if (!Directory.Exists(gitCacheFolder))
         {
-            GitHelper.CloneCkanMetaRepo(gitCacheFolder, progress);
+            GitHelper.CloneCkanMetaRepo(gitCacheFolder, progress, cancel);
         }
         else
         {
             upToDate = CurrentCommit(gitCacheFolder) == latestCommitHash;
-            if (!upToDate || isRefresh) GitHelper.PullCkanMetaRepo(gitCacheFolder, progress);
+            if (!upToDate || isRefresh) GitHelper.PullCkanMetaRepo(gitCacheFolder, progress, cancel);
         }
 
         syncStatus.RecordSuccess(CurrentCommit(gitCacheFolder));

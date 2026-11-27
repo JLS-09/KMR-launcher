@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="KMRLauncherMvvm.Controls.LogoLockup">
+    <!-- The flame follows the accent -->
+    <Viewbox Stretch="Fill">
+        <Canvas Width="502" Height="200">
+            <Canvas RenderTransformOrigin="0,0">
+                <Canvas.RenderTransform>
+                    <TranslateTransform X="12" Y="-18" />
+                </Canvas.RenderTransform>
+                <Canvas RenderTransformOrigin="0,0">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="1.91" ScaleY="1.91" />
+                            <TranslateTransform X="-53.5" Y="16.72" />
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketBody}" />
+                    <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoRocketWindow}" />
+                    <Path Fill="{DynamicResource Accent}" Data="{StaticResource LogoFlame}" />
+                </Canvas>
+                <Path Fill="{DynamicResource TextPrimary}" Data="{StaticResource LogoKmr}" />
+                <Path Fill="{DynamicResource TextSecondary}" Data="{StaticResource LogoLauncher}" />
+            </Canvas>
+        </Canvas>
+    </Viewbox>
+</UserControl>
