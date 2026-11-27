@@ -8,6 +8,8 @@ public partial class HomePageView : UserControl
 {
     private const double ContinueOneRowWidth = 1000;
 
+    private const double AttentionBesideWidth = 972;
+
     private const double CardMinWidth = 250;
 
     private const double CardSpacing = 12;
@@ -32,5 +34,6 @@ public partial class HomePageView : UserControl
     {
         base.OnSizeChanged(e);
         Classes.Set("stacked", e.NewSize.Width < ContinueOneRowWidth);
+        Classes.Set("narrowRow", e.NewSize.Width < AttentionBesideWidth);
     }
 }

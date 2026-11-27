@@ -18,26 +18,29 @@ public class HomeDataService
     private readonly InstanceService _instances;
     private readonly ModListService _modList;
     private readonly SyncStatusService _syncStatus;
+    private readonly DownloadCache _cache;
     private readonly object _lock = new();
 
     public HomeData Data { get; private set; }
 
     public event Action? Changed;
 
-    public HomeDataService(InstanceService instances, ModListService modList, SyncStatusService syncStatus)
-        : this(DefaultFile, instances, modList, syncStatus)
+    public HomeDataService(InstanceService instances, ModListService modList, SyncStatusService syncStatus,
+        DownloadCache cache) : this(DefaultFile, instances, modList, syncStatus, cache)
     {
         instances.Changed += () => Recheck();
         modList.ModsChanged += () => Dispatcher.UIThread.Post(() => Recheck());
+        cache.Changed += () => Dispatcher.UIThread.Post(() => Recheck());
     }
 
     public HomeDataService(string file, InstanceService instances, ModListService modList,
-        SyncStatusService syncStatus)
+        SyncStatusService syncStatus, DownloadCache cache)
     {
         _file = file;
         _instances = instances;
         _modList = modList;
         _syncStatus = syncStatus;
+        _cache = cache;
         Data = Load(file);
     }
 
@@ -48,21 +51,37 @@ public class HomeDataService
     {
         lock (_lock)
         {
-            if (_modList.Mods is { } modList)
-            {
-                var mods = modList.ToDictionary(m => m.Id);
-                Data = new HomeData
+            var mods = _modList.Mods?.ToDictionary(m => m.Id);
+            var data = mods is null
+                ? new HomeData { Commit = Data.Commit, CheckedAt = Data.CheckedAt, Instances = Data.Instances }
+                : new HomeData
                 {
                     Commit = _syncStatus.Status.LastCommit,
                     CheckedAt = DateTimeOffset.Now,
                     Instances = [.. _instances.Usable.Select(i => Check(i, mods))]
                 };
-                Save();
-            }
+
+            var usage = MeasureCache();
+            data.UnusedDownloads = usage.UnusedCount;
+            data.UnusedDownloadBytes = usage.UnusedBytes;
+            Data = data;
+            Save();
         }
 
         Changed?.Invoke();
         return Data;
+    }
+
+    private CacheUsage MeasureCache()
+    {
+        try
+        {
+            return _cache.Measure(_instances.Instances.ToList());
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return new CacheUsage(0, 0, 0, 0);
+        }
     }
 
     private static InstanceCheckResult Check(Instance instance, Dictionary<string, Mod> mods)

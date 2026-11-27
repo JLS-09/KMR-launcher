@@ -57,6 +57,41 @@
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="14 14 14 12" />
         </Style>
+        <Style Selector="Border.attentionCard">
+            <Setter Property="Grid.Row" Value="0" />
+            <Setter Property="Grid.Column" Value="2" />
+            <Setter Property="Grid.ColumnSpan" Value="1" />
+            <Setter Property="Margin" Value="0" />
+        </Style>
+        <Style Selector="StackPanel.instancesSection">
+            <Setter Property="Grid.ColumnSpan" Value="1" />
+        </Style>
+        <Style Selector=":is(UserControl).narrowRow Border.attentionCard">
+            <Setter Property="Grid.Row" Value="1" />
+            <Setter Property="Grid.Column" Value="0" />
+            <Setter Property="Grid.ColumnSpan" Value="3" />
+            <Setter Property="Margin" Value="0 16 0 0" />
+        </Style>
+        <Style Selector=":is(UserControl).narrowRow StackPanel.instancesSection">
+            <Setter Property="Grid.ColumnSpan" Value="3" />
+        </Style>
+        <Style Selector="Border.attentionRow">
+            <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+            <Setter Property="BorderThickness" Value="0 1 0 0" />
+            <Setter Property="Padding" Value="0 12" />
+        </Style>
+        <Style Selector="Border.attentionIcon">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceRaised}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.attentionIcon controls|StrokeIcon">
+            <Setter Property="Size" Value="17" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
     </UserControl.Styles>
 
     <Panel>
@@ -184,71 +219,140 @@
                         <ColumnDefinition Width="*" MaxWidth="1304" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Spacing="24">
-                        <!-- Instances -->
-                        <StackPanel Spacing="12">
-                            <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" ColumnSpacing="12">
-                                <TextBlock Grid.Column="0" Classes="h2" Text="Instances" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Classes="mono muted size12" Text="{Binding InstanceCount}"
-                                           VerticalAlignment="Center" />
-                                <Button Grid.Column="3" Classes="link" FontWeight="Medium" VerticalAlignment="Center"
-                                        Foreground="{DynamicResource TextSecondary}" Content="Manage"
-                                        Command="{Binding ManageInstancesCommand}" />
-                                <Button Grid.Column="4" Classes="secondary small" Command="{Binding NewInstanceCommand}">
-                                    <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="14"
-                                                             VerticalAlignment="Center" />
-                                        <TextBlock Text="New instance" VerticalAlignment="Center" />
-                                    </StackPanel>
-                                </Button>
-                            </Grid>
-                            <ItemsControl x:Name="InstanceCards" ItemsSource="{Binding Cards}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Columns="{Binding $parent[views:HomePageView].CardColumns}"
-                                                     ColumnSpacing="12" RowSpacing="12" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="home:HomeInstanceCard">
-                                        <Border Classes="instanceCard">
-                                            <StackPanel Spacing="10">
-                                                <TextBlock Classes="size14 semibold" TextTrimming="CharacterEllipsis">
-                                                    <Run Text="{Binding Name}" />
-                                                    <InlineUIContainer BaselineAlignment="Center">
-                                                        <controls:StrokeIcon Data="{StaticResource IconStar}" Size="13"
-                                                                             IsFilled="True" Margin="8 0 0 0"
-                                                                             Foreground="{DynamicResource AccentText}"
-                                                                             IsVisible="{Binding IsPrimary}" />
-                                                    </InlineUIContainer>
-                                                </TextBlock>
-                                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                                    <TextBlock Classes="mono muted size12" Text="{Binding Version}" />
-                                                    <TextBlock Classes="muted size12" Text="{Binding ModsText}" />
-                                                    <TextBlock Classes="muted size12" Text="{Binding SizeText}" />
+                        <Grid ColumnDefinitions="3*, 16, 2*" RowDefinitions="Auto, Auto">
+                            <!-- Instances -->
+                            <StackPanel Classes="instancesSection" Grid.Row="0" Grid.Column="0" Spacing="12"
+                                        VerticalAlignment="Top">
+                                <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" ColumnSpacing="12">
+                                    <TextBlock Grid.Column="0" Classes="h2" Text="Instances" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Classes="mono muted size12" Text="{Binding InstanceCount}"
+                                               VerticalAlignment="Center" />
+                                    <Button Grid.Column="3" Classes="link" FontWeight="Medium" VerticalAlignment="Center"
+                                            Foreground="{DynamicResource TextSecondary}" Content="Manage"
+                                            Command="{Binding ManageInstancesCommand}" />
+                                    <Button Grid.Column="4" Classes="secondary small" Command="{Binding NewInstanceCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <controls:StrokeIcon Data="{StaticResource IconPlus}" Size="14"
+                                                                 VerticalAlignment="Center" />
+                                            <TextBlock Text="New instance" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                                <ItemsControl x:Name="InstanceCards" ItemsSource="{Binding Cards}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="{Binding $parent[views:HomePageView].CardColumns}"
+                                                         ColumnSpacing="12" RowSpacing="12" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="home:HomeInstanceCard">
+                                            <Border Classes="instanceCard">
+                                                <StackPanel Spacing="10">
+                                                    <TextBlock Classes="size14 semibold" TextTrimming="CharacterEllipsis">
+                                                        <Run Text="{Binding Name}" />
+                                                        <InlineUIContainer BaselineAlignment="Center">
+                                                            <controls:StrokeIcon Data="{StaticResource IconStar}" Size="13"
+                                                                                 IsFilled="True" Margin="8 0 0 0"
+                                                                                 Foreground="{DynamicResource AccentText}"
+                                                                                 IsVisible="{Binding IsPrimary}" />
+                                                        </InlineUIContainer>
+                                                    </TextBlock>
+                                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                                        <TextBlock Classes="mono muted size12" Text="{Binding Version}" />
+                                                        <TextBlock Classes="muted size12" Text="{Binding ModsText}" />
+                                                        <TextBlock Classes="muted size12" Text="{Binding SizeText}" />
+                                                    </StackPanel>
+                                                    <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0"
+                                                            Padding="0 8 0 0">
+                                                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8">
+                                                            <controls:StrokeIcon Grid.Column="0" Data="{StaticResource IconClock}"
+                                                                                 Size="13" VerticalAlignment="Center"
+                                                                                 Foreground="{DynamicResource TextMuted}" />
+                                                            <TextBlock Grid.Column="1" Classes="secondary size12"
+                                                                       VerticalAlignment="Center" Text="{Binding LastPlayedText}" />
+                                                            <Button Grid.Column="2" Classes="secondary icon small" Width="32"
+                                                                    Height="32" CornerRadius="7" ToolTip.Tip="{Binding LaunchTip}"
+                                                                    Command="{Binding $parent[UserControl].((vm:HomePageViewModel)DataContext).LaunchInstanceCommand}"
+                                                                    CommandParameter="{Binding Instance}">
+                                                                <controls:StrokeIcon Data="{StaticResource IconPlay}" Size="14"
+                                                                                     IsFilled="True" />
+                                                            </Button>
+                                                        </Grid>
+                                                    </Border>
                                                 </StackPanel>
-                                                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0 1 0 0"
-                                                        Padding="0 8 0 0">
-                                                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8">
-                                                        <controls:StrokeIcon Grid.Column="0" Data="{StaticResource IconClock}"
-                                                                             Size="13" VerticalAlignment="Center"
-                                                                             Foreground="{DynamicResource TextMuted}" />
-                                                        <TextBlock Grid.Column="1" Classes="secondary size12"
-                                                                   VerticalAlignment="Center" Text="{Binding LastPlayedText}" />
-                                                        <Button Grid.Column="2" Classes="secondary icon small" Width="32"
-                                                                Height="32" CornerRadius="7" ToolTip.Tip="{Binding LaunchTip}"
-                                                                Command="{Binding $parent[UserControl].((vm:HomePageViewModel)DataContext).LaunchInstanceCommand}"
-                                                                CommandParameter="{Binding Instance}">
-                                                            <controls:StrokeIcon Data="{StaticResource IconPlay}" Size="14"
-                                                                                 IsFilled="True" />
-                                                        </Button>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <!-- Needs attention -->
+                            <Border Classes="attentionCard" Background="{DynamicResource Surface}"
+                                    BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="12"
+                                    Padding="20 20 20 8">
+                                <StackPanel>
+                                    <Grid ColumnDefinitions="*, Auto" Margin="0 0 0 12">
+                                        <TextBlock Classes="h2" Text="Needs attention" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Classes="mono muted size12"
+                                                   Text="{Binding AttentionCount}" VerticalAlignment="Center" />
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding Attention}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="home:AttentionRow">
+                                                <Border Classes="attentionRow">
+                                                    <Grid ColumnDefinitions="34, *, Auto" ColumnSpacing="12">
+                                                        <Border Classes="attentionIcon">
+                                                            <Panel>
+                                                                <controls:StrokeIcon Data="{StaticResource IconArrowUp}"
+                                                                                     Foreground="{DynamicResource StatusUpdate}"
+                                                                                     IsVisible="{Binding IsUpdates}" />
+                                                                <controls:StrokeIcon Data="{StaticResource IconWarning}"
+                                                                                     Foreground="{DynamicResource StatusWarning}"
+                                                                                     IsVisible="{Binding IsNotListed}" />
+                                                                <controls:StrokeIcon Data="{StaticResource IconPackage}"
+                                                                                     Foreground="{DynamicResource TextSecondary}"
+                                                                                     IsVisible="{Binding IsReplacements}" />
+                                                                <controls:StrokeIcon Data="{StaticResource IconDrive}"
+                                                                                     Foreground="{DynamicResource TextSecondary}"
+                                                                                     IsVisible="{Binding IsUnusedDownloads}" />
+                                                            </Panel>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Classes="size14 medium" Text="{Binding Title}"
+                                                                       TextWrapping="Wrap" />
+                                                            <TextBlock Classes="muted size12" Text="{Binding Detail}"
+                                                                       TextWrapping="Wrap" />
+                                                        </StackPanel>
+                                                        <Button Grid.Column="2" Classes="secondary small"
+                                                                VerticalAlignment="Center" Content="{Binding ButtonText}"
+                                                                Command="{Binding $parent[UserControl].((vm:HomePageViewModel)DataContext).AttentionActionCommand}"
+                                                                CommandParameter="{Binding}" />
                                                     </Grid>
                                                 </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <!-- Nothing to show (not in the mockups) -->
+                                    <Border Classes="attentionRow" IsVisible="{Binding HasNoAttention}">
+                                        <Grid ColumnDefinitions="34, *" ColumnSpacing="12">
+                                            <Border Classes="attentionIcon">
+                                                <controls:StrokeIcon Data="{StaticResource IconCheck}"
+                                                                     Foreground="{DynamicResource StatusFits}" />
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Classes="size14 medium" Text="Nothing needs attention" />
+                                                <TextBlock Classes="muted size12" TextWrapping="Wrap"
+                                                           Text="No updates, issues or unused downloads" />
                                             </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    <TextBlock Classes="size12 errorText" Margin="0 0 0 12" TextWrapping="Wrap"
+                                               Text="{Binding AttentionError}"
+                                               IsVisible="{Binding AttentionError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </StackPanel>
                 </Grid>
             </StackPanel>

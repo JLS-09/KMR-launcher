@@ -8,6 +8,8 @@ public class HomeData
     public string? Commit { get; set; }
     public DateTimeOffset? CheckedAt { get; set; }
     public List<InstanceCheckResult> Instances { get; set; } = [];
+    public int UnusedDownloads { get; set; }
+    public long UnusedDownloadBytes { get; set; }
 }
 
 public class InstanceCheckResult

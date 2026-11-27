@@ -93,6 +93,7 @@ public partial class SettingsPageViewModel : PageViewModel
         _cache = cache;
         _statusBar = statusBar;
         _ = MeasureCacheAsync();
+        cache.Changed += () => Dispatcher.UIThread.Post(() => _ = MeasureCacheAsync());
         _syncStatus.Changed += OnSyncChanged;
 
         LoadZips();

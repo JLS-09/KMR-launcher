@@ -83,4 +83,66 @@ public class HomeTests
         Assert.Equal("Launch Vanilla", cards[2].LaunchTip);
         Assert.Equal("–", cards[2].SizeText);
     }
+
+    [Fact]
+    public void Needs_attention_sums_the_checks_across_instances()
+    {
+        var rp1 = Played("RP-1", DateTime.Now.AddHours(-2));
+        var visual = Played("Visual", DateTime.Now.AddDays(-1));
+        var old = new Instance("Old", "/tmp/Old", "1.8.1");
+        var data = new HomeData
+        {
+            Instances =
+            [
+                new InstanceCheckResult
+                {
+                    Folder = rp1.RootPath, Updates = [new("A", "1", "2"), new("B", "1", "2")], NotListed = ["KJR"],
+                    Replacements = [new("C", "1", "D", "1")]
+                },
+                new InstanceCheckResult { Folder = visual.RootPath, Updates = [new("A", "1", "2")] },
+                new InstanceCheckResult { Folder = "/tmp/forgotten", Updates = [new("Z", "1", "2")] }
+            ],
+            UnusedDownloads = 41,
+            UnusedDownloadBytes = 1_181_116_006
+        };
+
+        var rows = HomeAttention.Rows([rp1, visual, old], data);
+
+        Assert.Equal([AttentionKind.Updates, AttentionKind.NotListed, AttentionKind.Replacements,
+            AttentionKind.UnusedDownloads], rows.Select(r => r.Kind));
+        Assert.Equal(("3 mod updates", "In RP-1 and Visual"), (rows[0].Title, rows[0].Detail));
+        Assert.Same(rp1, rows[0].Target);
+        Assert.Equal(ModsFilter.Updates, rows[0].Filter);
+        Assert.Equal(("1 mod not listed for KSP 1.12.5", "KJR in RP-1"), (rows[1].Title, rows[1].Detail));
+        Assert.Equal(ModsFilter.Issues, rows[1].Filter);
+        Assert.Equal("1 mod has a replacement", rows[2].Title);
+        Assert.Equal(("1.1 GB of unused downloads", "41 cached archives no instance uses", "Clean up"),
+            (rows[3].Title, rows[3].Detail, rows[3].ButtonText));
+        Assert.Null(rows[3].Target);
+    }
+
+    [Fact]
+    public void Not_listed_mods_in_several_instances_name_the_instances()
+    {
+        var a = Played("A", DateTime.Now.AddHours(-1));
+        var b = new Instance("B", "/tmp/B", "1.12.3");
+        var c = new Instance("C", "/tmp/C", "1.12.5");
+        var d = new Instance("D", "/tmp/D", "1.12.5");
+        HomeData Data(params Instance[] instances) => new()
+        {
+            Instances = [.. instances.Select(i => new InstanceCheckResult { Folder = i.RootPath, NotListed = ["X", "Y", "Z"] })]
+        };
+
+        var two = HomeAttention.Rows([a, b], Data(a, b)).Single();
+        var four = HomeAttention.Rows([a, b, c, d], Data(a, b, c, d)).Single();
+        var one = HomeAttention.Rows([a], Data(a)).Single();
+
+        Assert.Equal(("6 mods not listed for their KSP versions", "In A and B"), (two.Title, two.Detail));
+        Assert.Equal("In A, B and 2 more", four.Detail);
+        Assert.Equal("X and 2 more in A", one.Detail);
+    }
+
+    [Fact]
+    public void Nothing_needs_attention_without_checks_or_unused_downloads() =>
+        Assert.Empty(HomeAttention.Rows([Played("A", DateTime.Now)], new HomeData()));
 }

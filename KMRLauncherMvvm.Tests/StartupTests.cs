@@ -31,6 +31,7 @@ public class StartupTests : TempFolderTest
     private InstanceService Instances { get; }
     private SyncStatusService Sync { get; }
     private HomeDataService HomeData { get; }
+    private DownloadCache Cache => new(Path.Combine(Temp, "cache"), v => Path.Combine(Temp, "cache", v.Id + ".zip"));
     private string HomeFile => Path.Combine(Temp, "home.json");
 
     public StartupTests()
@@ -38,7 +39,7 @@ public class StartupTests : TempFolderTest
         Directory.CreateDirectory(Temp);
         Instances = new InstanceService(Path.Combine(Temp, "settings.json"));
         Sync = new SyncStatusService(Path.Combine(Temp, "sync.json"));
-        HomeData = new HomeDataService(HomeFile, Instances, _modList, Sync);
+        HomeData = new HomeDataService(HomeFile, Instances, _modList, Sync, Cache);
     }
 
     private (StartupViewModel Startup, FakeApi Api) Startup()
@@ -65,7 +66,7 @@ public class StartupTests : TempFolderTest
         Assert.Equal("1 update", startup.Check.Detail);
         Assert.Equal(1, startup.Progress);
 
-        var saved = new HomeDataService(HomeFile, Instances, _modList, Sync).Data.Instances.Single();
+        var saved = new HomeDataService(HomeFile, Instances, _modList, Sync, Cache).Data.Instances.Single();
         Assert.Equal("/tmp/test", saved.Folder);
         Assert.Equal(new ModUpdateResult("A", "1.0", "1.1"), saved.Updates.Single());
         Assert.Equal(["B"], saved.NotListed);
@@ -153,5 +154,24 @@ public class StartupTests : TempFolderTest
 
         Assert.Equal(1, changed);
         Assert.Empty(HomeData.Data.Instances);
+    }
+
+    [Fact]
+    public void Unused_downloads_are_measured_and_cleaning_up_raises_changed()
+    {
+        var (_, _) = Startup();
+        var cache = Cache;
+        Directory.CreateDirectory(cache.Folder);
+        File.WriteAllBytes(Path.Combine(cache.Folder, "A-1.0.zip"), new byte[10]);
+        File.WriteAllBytes(Path.Combine(cache.Folder, "old.zip"), new byte[2048]);
+        var changed = 0;
+        cache.Changed += () => changed++;
+
+        var data = HomeData.Recheck();
+        cache.RemoveUnused(Instances.Instances);
+
+        Assert.Equal((1, 2048L), (data.UnusedDownloads, data.UnusedDownloadBytes));
+        Assert.Equal(1, changed);
+        Assert.Equal(0, HomeData.Recheck().UnusedDownloads);
     }
 }

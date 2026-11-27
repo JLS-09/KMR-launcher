@@ -14,6 +14,8 @@ public class DownloadCache(string folder, Func<ModVersion, string> cachePath)
 {
     public string Folder => folder;
 
+    public event Action? Changed;
+
     public CacheUsage Measure(IEnumerable<Instance> instances)
     {
         var (used, unused) = Split(instances);
@@ -44,7 +46,7 @@ public class DownloadCache(string folder, Func<ModVersion, string> cachePath)
         return directory.Exists ? [.. directory.EnumerateFiles()] : [];
     }
 
-    private static CacheCleanup Delete(List<FileInfo> files)
+    private CacheCleanup Delete(List<FileInfo> files)
     {
         var removed = 0;
         var failed = 0;
@@ -64,6 +66,7 @@ public class DownloadCache(string folder, Func<ModVersion, string> cachePath)
             }
         }
 
+        Changed?.Invoke();
         return new CacheCleanup(removed, freed, failed);
     }
 }
