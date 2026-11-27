@@ -48,16 +48,17 @@ public class HomeDataService
     {
         lock (_lock)
         {
-            if (_modList.Mods is not { } modList) return Data;
-
-            var mods = modList.ToDictionary(m => m.Id);
-            Data = new HomeData
+            if (_modList.Mods is { } modList)
             {
-                Commit = _syncStatus.Status.LastCommit,
-                CheckedAt = DateTimeOffset.Now,
-                Instances = [.. _instances.Usable.Select(i => Check(i, mods))]
-            };
-            Save();
+                var mods = modList.ToDictionary(m => m.Id);
+                Data = new HomeData
+                {
+                    Commit = _syncStatus.Status.LastCommit,
+                    CheckedAt = DateTimeOffset.Now,
+                    Instances = [.. _instances.Usable.Select(i => Check(i, mods))]
+                };
+                Save();
+            }
         }
 
         Changed?.Invoke();

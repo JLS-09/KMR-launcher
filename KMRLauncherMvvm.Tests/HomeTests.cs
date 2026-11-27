@@ -65,4 +65,22 @@ public class HomeTests
         Assert.Equal("0 mods ready", home.ReadyText);
         Assert.Equal(ModsFilter.Issues, home.ReviewFilter);
     }
+
+    [Fact]
+    public void Instance_cards_are_ordered_by_last_played()
+    {
+        var never = new Instance("Vanilla", "/tmp/v", "1.12.5");
+        var older = Played("Older", DateTime.Now.AddDays(-3), primary: true);
+        var newer = Played("Newer", DateTime.Now.AddHours(-2));
+        newer.Mods = [Version("A", "1.0"), Version("B", "1.0")];
+
+        var cards = HomeInstanceCard.For([never, older, newer]);
+
+        Assert.Equal(["Newer", "Older", "Vanilla"], cards.Select(c => c.Name));
+        Assert.Equal("2 mods", cards[0].ModsText);
+        Assert.True(cards[1].IsPrimary);
+        Assert.Equal("Never played", cards[2].LastPlayedText);
+        Assert.Equal("Launch Vanilla", cards[2].LaunchTip);
+        Assert.Equal("–", cards[2].SizeText);
+    }
 }

@@ -142,4 +142,16 @@ public class StartupTests : TempFolderTest
         Assert.NotNull(HomeData.For(Instances.Instances.Single()));
         Assert.Null(HomeData.For(new Instance("Other", "/tmp/other", "1.12.5")));
     }
+
+    [Fact]
+    public void Changed_is_raised_even_without_a_mod_list()
+    {
+        var changed = 0;
+        HomeData.Changed += () => changed++;
+
+        HomeData.Recheck();
+
+        Assert.Equal(1, changed);
+        Assert.Empty(HomeData.Data.Instances);
+    }
 }

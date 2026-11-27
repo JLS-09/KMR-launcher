@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -20,18 +22,21 @@ public partial class HomePageViewModel : PageViewModel
     private readonly NavigationService _navigation;
     private readonly NewInstanceFlow _newInstanceFlow;
     private int _sizesJob;
-    private string? _sizesFolder;
+    private Dictionary<string, (long Total, long GameData)> _sizes = [];
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(HasContinue))]
     private HomeContinue? _continue;
 
     public bool HasContinue => Continue is not null;
 
+    [ObservableProperty] private IReadOnlyList<HomeInstanceCard> _cards = [];
+    [ObservableProperty] private string _instanceCount = "0";
+
     [ObservableProperty] private string _installSize = "–";
     [ObservableProperty] private string _gameDataSize = "";
     [ObservableProperty] private string? _actionError;
 
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand))]
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(LaunchCommand), nameof(LaunchInstanceCommand))]
     private bool _isGameRunning;
 
     public HomePageViewModel(InstanceService instances, HomeDataService homeData, GameSessionService session,
@@ -46,7 +51,6 @@ public partial class HomePageViewModel : PageViewModel
 
         IsGameRunning = session.IsRunning;
         session.Changed += () => IsGameRunning = _session.IsRunning;
-        instances.Changed += Refresh;
         homeData.Changed += () => Dispatcher.UIThread.Post(Refresh);
         Refresh();
     }
@@ -54,39 +58,56 @@ public partial class HomePageViewModel : PageViewModel
     private void Refresh()
     {
         var previous = Continue?.Instance.RootPath;
-        var instance = HomeContinue.Pick(_instances.Usable, _instances.Primary);
+        var usable = _instances.Usable.ToList();
+        var instance = HomeContinue.Pick(usable, _instances.Primary);
         Continue = instance is null ? null : new HomeContinue(instance, _homeData.For(instance));
-        if (instance is null) return;
+        Cards = HomeInstanceCard.For(usable);
+        InstanceCount = Cards.Count.ToString();
+        if (instance?.RootPath != previous) ActionError = null;
 
-        if (instance.RootPath != previous) ActionError = null;
-        _ = LoadSizes(instance);
+        ShowSizes();
+        _ = LoadSizes(usable);
     }
 
-    private async Task LoadSizes(Instance instance)
+    private async Task LoadSizes(List<Instance> instances)
     {
         var job = ++_sizesJob;
-        if (instance.RootPath != _sizesFolder)
+        var measured = await Task.Run(() => instances.ToDictionary(i => i.RootPath,
+            i => (Helpers.FolderSize(i.RootPath), Helpers.FolderSize(Path.Combine(i.RootPath, "GameData")))));
+        if (job != _sizesJob) return;
+
+        _sizes = measured;
+        ShowSizes();
+    }
+
+    private void ShowSizes()
+    {
+        foreach (var card in Cards)
+            if (_sizes.TryGetValue(card.Instance.RootPath, out var size))
+                card.SizeText = InstalledMods.FormatSize(size.Total);
+
+        if (Continue is not null && _sizes.TryGetValue(Continue.Instance.RootPath, out var sizes))
+        {
+            InstallSize = InstalledMods.FormatSize(sizes.Total);
+            GameDataSize = $"GameData {InstalledMods.FormatSize(sizes.GameData)}";
+        }
+        else
         {
             InstallSize = "–";
             GameDataSize = "";
         }
-
-        var (total, gameData) = await Task.Run(() => (Helpers.FolderSize(instance.RootPath),
-            Helpers.FolderSize(Path.Combine(instance.RootPath, "GameData"))));
-        if (job != _sizesJob) return;
-
-        _sizesFolder = instance.RootPath;
-        InstallSize = InstalledMods.FormatSize(total);
-        GameDataSize = $"GameData {InstalledMods.FormatSize(gameData)}";
     }
 
     private bool CanLaunch() => !IsGameRunning;
 
     [RelayCommand(CanExecute = nameof(CanLaunch))]
-    private async Task Launch()
-    {
-        if (Continue?.Instance is not { } instance) return;
+    private Task Launch() => Continue?.Instance is { } instance ? LaunchAsync(instance) : Task.CompletedTask;
 
+    [RelayCommand(CanExecute = nameof(CanLaunch))]
+    private Task LaunchInstance(Instance instance) => LaunchAsync(instance);
+
+    private async Task LaunchAsync(Instance instance)
+    {
         ActionError = null;
         try
         {
@@ -124,6 +145,9 @@ public partial class HomePageViewModel : PageViewModel
 
     [RelayCommand]
     private Task NewInstance() => _newInstanceFlow.CreateAsync();
+
+    [RelayCommand]
+    private void ManageInstances() => _navigation.NavigateTo(ApplicationPageNames.Instances);
 
     private void OpenInstance(InstanceTab tab, ModsFilter? filter)
     {
